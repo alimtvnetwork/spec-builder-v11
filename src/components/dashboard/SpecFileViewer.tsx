@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { splitHighlightedCode } from "@/utils/highlight-lines";
+import { augmentSpecFolders } from "@/utils/spec-index";
 
 // Load all spec .md files as raw text at build time
 const specModules = import.meta.glob('/spec/**/*.md', { query: '?raw', import: 'default' }) as Record<string, () => Promise<string>>;
@@ -358,7 +359,11 @@ const specFolders: SpecFolder[] = [
   ]},
 ];
 
-const totalFiles = specFolders.reduce((sum, f) => sum + f.files.length, 0);
+// Auto-merge any spec files discovered on disk (e.g. nested folders like
+// spec/09-code-block-system) into the curated list so they remain searchable.
+const augmentedSpecFolders: SpecFolder[] = augmentSpecFolders(specFolders, { includeNumberPrefix: true });
+
+const totalFiles = augmentedSpecFolders.reduce((sum, f) => sum + f.files.length, 0);
 
 export interface SpecFileViewerHandle {
   filterByCategory: (category: SpecFolder["category"]) => void;
