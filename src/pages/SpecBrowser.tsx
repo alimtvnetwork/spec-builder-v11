@@ -1169,18 +1169,18 @@ const SpecBrowser = () => {
                                   </div>
                                   <button onClick={handleCodeCopy} className="px-2 py-[1px] flex items-center gap-1 rounded border hover:bg-white/[0.06] transition-colors" style={{ borderColor: "hsl(220 13% 28%)", background: "hsl(220 14% 13%)" }} title="Copy">
                                     {codeCopied ? <Check className="h-2.5 w-2.5" style={{ color: "hsl(152 70% 50%)" }} /> : <Copy className="h-2.5 w-2.5" style={{ color: "hsl(220 10% 70%)" }} />}
-                                    <span className="text-[10px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>Copy</span>
+                                    <span className="text-[10px] font-medium hidden sm:inline" style={{ color: "hsl(220 10% 75%)" }}>Copy</span>
                                   </button>
                                   <button onClick={handleCodeDownload} className="px-2 py-[1px] flex items-center gap-1 rounded border hover:bg-white/[0.06] transition-colors" style={{ borderColor: "hsl(220 13% 28%)", background: "hsl(220 14% 13%)" }} title="Download">
                                     <Download className="h-2.5 w-2.5" style={{ color: "hsl(220 10% 70%)" }} />
-                                    <span className="text-[10px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>Download</span>
+                                    <span className="text-[10px] font-medium hidden sm:inline" style={{ color: "hsl(220 10% 75%)" }}>Download</span>
                                   </button>
                                   <button onClick={() => {
                                     const all = new Set(Array.from({ length: lineCount }, (_, i) => i + 1));
                                     setSelectedLines(prev => prev.size === lineCount ? new Set() : all);
                                   }} className="px-2 py-[1px] flex items-center gap-1 rounded border hover:bg-white/[0.06] transition-colors" style={{ borderColor: "hsl(220 13% 28%)", background: "hsl(220 14% 13%)" }} title="Select all lines">
                                     <ListChecks className="h-2.5 w-2.5" style={{ color: "hsl(220 10% 70%)" }} />
-                                    <span className="text-[10px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>{selectedLines.size === lineCount ? "Deselect" : "Select all"}</span>
+                                    <span className="text-[10px] font-medium hidden sm:inline" style={{ color: "hsl(220 10% 75%)" }}>{selectedLines.size === lineCount ? "Deselect" : "Select all"}</span>
                                   </button>
                                   <button onClick={() => {
                                     if (isCodeFullscreen && document.fullscreenElement) document.exitFullscreen();
