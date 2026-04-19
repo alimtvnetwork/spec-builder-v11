@@ -42,7 +42,7 @@ const formatFileName = (filename: string): string => {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
-const augmentedSpecFolders: SpecFolder[] = [
+const specFolders: SpecFolder[] = [
   { id: "root", label: "Root Files", path: "spec", description: "Top-level spec directory files including the master folder structure guideline and global consistency report.", category: "foundation", files: [
     { name: "00 — Overview", path: "spec/00-overview.md" },
     { name: "00 — Folder Structure Guideline", path: "spec/00-folder-structure-guideline.md" },
@@ -361,7 +361,7 @@ const augmentedSpecFolders: SpecFolder[] = [
 
 // Auto-merge any spec files discovered on disk (e.g. nested folders like
 // spec/09-code-block-system) into the curated list so they remain searchable.
-const augmentedSpecFolders: SpecFolder[] = augmentSpecFolders(augmentedSpecFolders, { includeNumberPrefix: true });
+const augmentedSpecFolders: SpecFolder[] = augmentSpecFolders(specFolders, { includeNumberPrefix: true });
 
 const totalFiles = augmentedSpecFolders.reduce((sum, f) => sum + f.files.length, 0);
 
