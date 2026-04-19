@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { splitHighlightedCode } from "@/utils/highlight-lines";
+import { augmentSpecFolders } from "@/utils/spec-index";
 
 // Load all spec .md files as raw text at build time
 const specModules = import.meta.glob('/spec/**/*.md', { query: '?raw', import: 'default' }) as Record<string, () => Promise<string>>;
@@ -358,7 +359,11 @@ const specFolders: SpecFolder[] = [
   ]},
 ];
 
-const totalFiles = specFolders.reduce((sum, f) => sum + f.files.length, 0);
+// Auto-merge any spec files discovered on disk (e.g. nested folders like
+// spec/09-code-block-system) into the curated list so they remain searchable.
+const augmentedSpecFolders: SpecFolder[] = augmentSpecFolders(specFolders, { includeNumberPrefix: true });
+
+const totalFiles = augmentedSpecFolders.reduce((sum, f) => sum + f.files.length, 0);
 
 export interface SpecFileViewerHandle {
   filterByCategory: (category: SpecFolder["category"]) => void;
@@ -562,7 +567,7 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
   };
 
   const filteredFolders = useMemo(() => {
-    let folders = specFolders;
+    let folders = augmentedSpecFolders;
     if (categoryFilter !== "all") {
       folders = folders.filter((f) => f.category === categoryFilter);
     }
@@ -650,11 +655,11 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
   useImperativeHandle(ref, () => ({
     filterByCategory: (category: SpecFolder["category"]) => {
       const colors = categoryColors[category];
-      const matchCount = specFolders.filter((f) => f.category === category).length;
+      const matchCount = augmentedSpecFolders.filter((f) => f.category === category).length;
       setCategoryFilter(category);
       setIsOpen(true);
       setCurrentFolder(null);
-      setExpandedFolders(new Set(specFolders.filter((f) => f.category === category).map((f) => f.id)));
+      setExpandedFolders(new Set(augmentedSpecFolders.filter((f) => f.category === category).map((f) => f.id)));
       toast.info(`Filtered to ${colors.label}`, {
         description: `Showing ${matchCount} module${matchCount !== 1 ? "s" : ""} in this category`,
       });
@@ -735,7 +740,7 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
           )}
           <span className="rounded-full bg-info/10 px-2 py-0.5 font-mono text-[10px] text-info">
-            {specFolders.length} modules · {totalFiles} files
+            {augmentedSpecFolders.length} modules · {totalFiles} files
           </span>
         </button>
 
@@ -1060,7 +1065,7 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
                             const partialPath = arr.slice(0, i + 1).join("/");
                             const handleBreadcrumbClick = () => {
                               if (isLast || i === 0) return;
-                              const folder = specFolders.find((f) => f.path === partialPath);
+                              const folder = augmentedSpecFolders.find((f) => f.path === partialPath);
                               if (folder) navigateIntoFolder(folder);
                             };
                             return (
