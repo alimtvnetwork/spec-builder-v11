@@ -10,6 +10,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { splitHighlightedCode } from "@/utils/highlight-lines";
+import { augmentSpecFolders } from "@/utils/spec-index";
 
 // ── Spec data & types ────────────────────────────────────────────────
 
@@ -372,7 +373,11 @@ const specFolders: SpecFolder[] = [
   ]},
 ];
 
-const totalFiles = specFolders.reduce((sum, f) => sum + f.files.length + (f.children?.reduce((s, c) => s + c.files.length, 0) || 0), 0);
+// Augment the curated list with auto-discovered spec files so nested folders
+// (e.g. spec/09-code-block-system) and any newly added docs always appear.
+const augmentedSpecFolders: SpecFolder[] = augmentSpecFolders(specFolders, { includeNumberPrefix: false });
+
+const totalFiles = augmentedSpecFolders.reduce((sum, f) => sum + f.files.length + (f.children?.reduce((s, c) => s + c.files.length, 0) || 0), 0);
 
 // ── Component ────────────────────────────────────────────────────────
 
@@ -492,7 +497,7 @@ const SpecBrowser = () => {
 
   // Search filtering
   const filteredFolders = useMemo(() => {
-    if (!searchQuery.trim()) return specFolders;
+    if (!searchQuery.trim()) return augmentedSpecFolders;
     const q = searchQuery.toLowerCase();
     const filterFolder = (folder: SpecFolder): SpecFolder | null => {
       const matchingFiles = folder.files.filter(f =>
@@ -504,7 +509,7 @@ const SpecBrowser = () => {
       }
       return null;
     };
-    return specFolders.map(filterFolder).filter(Boolean) as SpecFolder[];
+    return augmentedSpecFolders.map(filterFolder).filter(Boolean) as SpecFolder[];
   }, [searchQuery]);
 
   // Auto-expand on search
