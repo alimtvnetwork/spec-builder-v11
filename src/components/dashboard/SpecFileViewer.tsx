@@ -1481,29 +1481,29 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
                                         {/* Copy selected lines bar */}
                                         {selectedLines.size > 0 && (
                                           <div
-                                            className="flex items-center justify-between px-4 py-1.5 border-b animate-in fade-in slide-in-from-top-1 duration-200"
-                                            style={{ backgroundColor: "rgba(234, 179, 8, 0.08)", borderColor: "hsl(220 13% 20%)" }}
+                                            className="flex items-center gap-2 px-4 py-[0.35rem] border-t animate-in fade-in slide-in-from-top-1 duration-200"
+                                            style={{ backgroundColor: "hsl(var(--primary) / 0.08)", borderColor: "hsl(var(--primary) / 0.2)" }}
                                           >
-                                            <span className="text-[11px] font-mono" style={{ color: "hsl(45 93% 58%)" }}>
+                                            <span className="text-[11px] font-medium" style={{ color: "hsl(var(--primary))", letterSpacing: "0.02em" }}>
                                               {selectedLines.size} line{selectedLines.size > 1 ? "s" : ""} selected
                                             </span>
-                                            <div className="flex items-center gap-2">
-                                              <button
-                                                onClick={handleCopySelected}
-                                                className="px-2.5 py-1 rounded flex items-center gap-1.5 hover:brightness-125 transition-colors"
-                                                style={{ background: "rgba(234, 179, 8, 0.15)", border: "1px solid rgba(234, 179, 8, 0.3)" }}
-                                                title="Copy selected lines"
-                                              >
-                                                {selCopied ? <Check className="h-3 w-3" style={{ color: "hsl(152 70% 50%)" }} /> : <Copy className="h-3 w-3" style={{ color: "hsl(45 93% 58%)" }} />}
-                                                <span className="text-[11px] font-mono font-medium" style={{ color: "hsl(45 93% 58%)" }}>{selCopied ? "Copied!" : "Copy selected"}</span>
-                                              </button>
+                                            <button
+                                              onClick={handleCopySelected}
+                                              className="px-2.5 py-[3px] rounded-md border flex items-center gap-1.5 hover:brightness-125 transition-colors"
+                                              style={{ background: "hsl(var(--primary) / 0.15)", borderColor: "hsl(var(--primary) / 0.3)" }}
+                                              title="Copy selected lines"
+                                            >
+                                              {selCopied ? <Check className="h-3 w-3" style={{ color: "hsl(152 70% 50%)" }} /> : <Copy className="h-3 w-3" style={{ color: "hsl(var(--primary))" }} />}
+                                              <span className="text-[11px] font-medium" style={{ color: "hsl(var(--primary))" }}>{selCopied ? "Copied!" : "Copy selected"}</span>
+                                            </button>
+                                            <div className="ml-auto flex items-center gap-2">
                                               <button
                                                 onClick={() => setSelectedLines(new Set())}
-                                                className="px-2 py-1 rounded hover:brightness-125 transition-colors"
-                                                style={{ background: "hsl(220 13% 20%)", border: "1px solid hsl(220 13% 28%)" }}
+                                                className="px-2 py-[3px] rounded-md hover:brightness-125 transition-colors"
+                                                style={{ color: "hsl(220 10% 50%)" }}
                                                 title="Clear selection"
                                               >
-                                                <X className="h-3 w-3" style={{ color: "hsl(220 10% 60%)" }} />
+                                                <X className="h-3 w-3" />
                                               </button>
                                             </div>
                                           </div>
@@ -1511,7 +1511,7 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
 
                                         {/* Code with line numbers - row-based for hover */}
                                         <div className={`${isCodeFullscreen ? "flex-1 overflow-auto" : "overflow-x-auto"}`}>
-                                          <table className="w-full border-collapse" style={{ fontSize: `${codeFontSize}px`, lineHeight: isTreeBlock ? 1.15 : 1.4, fontFamily: "'Ubuntu Mono', 'JetBrains Mono', monospace" }}>
+                                          <table className="w-full border-collapse" style={{ fontSize: `${codeFontSize}px`, lineHeight: isTreeBlock ? 1.15 : 1.6, fontFamily: "'Ubuntu Mono', 'JetBrains Mono', monospace" }}>
                                             <tbody>
                                               {highlightedLines.slice(0, lineCount).map((hlLine, i) => {
                                                 const lineNum = i + 1;
@@ -1524,18 +1524,20 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
                                                   style={{ backgroundColor: isSelected ? "rgba(234, 179, 8, 0.15)" : "transparent" }}
                                                 >
                                                   <td
-                                                    className="select-none text-right pr-3 pl-3 border-r sticky left-0 align-top"
+                                                    className="select-none text-right px-3 border-r sticky left-0 align-top"
                                                     style={{
                                                       color: isSelected ? "hsl(45 93% 47%)" : "hsl(220 10% 35%)",
-                                                      backgroundColor: isSelected ? "hsl(220 14% 13%)" : "hsl(220 14% 9%)",
+                                                      backgroundColor: isSelected ? "hsl(var(--primary) / 0.12)" : "hsl(220 14% 9%)",
                                                       borderColor: "hsl(220 13% 18%)",
                                                       minWidth: `${Math.max(String(lineCount).length * 0.7 + 1.5, 2.5)}em`,
                                                       userSelect: "none",
+                                                      fontSize: `${Math.max(codeFontSize * 0.7, 11)}px`,
+                                                      lineHeight: 1,
                                                     }}
                                                   >
                                                     {lineNum}
                                                   </td>
-                                                  <td className="pl-4 pr-4 whitespace-pre" style={{ paddingTop: isTreeBlock ? '0px' : '2px', paddingBottom: isTreeBlock ? '0px' : '2px' }}>
+                                                  <td className="whitespace-pre px-1" style={{ paddingTop: '0px', paddingBottom: '0px', paddingRight: '1.25rem', paddingLeft: '0.5rem' }}>
                                                     {isTreeBlock ? renderTreeLine(lines[i] || "") : (hlLine.length > 0 ? hlLine : "\u00A0")}
                                                   </td>
                                                 </tr>

@@ -1083,6 +1083,20 @@ const SpecBrowser = () => {
                             );
                           };
 
+                          const defaultFontSize = 17;
+
+                          const handleCodeDownload = () => {
+                            const blob = new Blob([codeText], { type: "text/plain" });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = "code-snippet.txt";
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                          };
+
                           return (
                             <div
                               ref={codeWrapRef}
@@ -1108,80 +1122,97 @@ const SpecBrowser = () => {
                                 className="flex items-center px-4 py-2 border-b shrink-0"
                                 style={{ backgroundColor: "hsl(220 14% 14%)", borderColor: "hsl(220 13% 20%)" }}
                               >
-                                <span className="flex items-center gap-2 text-xs font-semibold tracking-wide" style={{ fontFamily: "'Ubuntu Mono', monospace", color: `hsl(${badgeColor})` }}>
-                                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: `hsl(${badgeColor})`, boxShadow: `0 0 6px hsl(${badgeColor})` }} />
+                                <span
+                                  className="flex items-center gap-2 text-xs font-semibold tracking-wide uppercase"
+                                  style={{ fontFamily: "'Poppins', system-ui, sans-serif", color: `hsl(${badgeColor})` }}
+                                >
+                                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: `hsl(${badgeColor})` }} />
                                   {langLabel}
                                 </span>
-                                <span className="ml-auto text-xs font-mono" style={{ color: "hsl(220 10% 50%)" }}>
-                                  {lineCount} Lines
-                                </span>
-                                <div className="flex items-center gap-1 ml-4">
-                                  <button onClick={() => setCodeFontSize(s => Math.max(s - 2, 10))} className="px-2.5 py-1.5 rounded hover:brightness-125 transition-colors" style={{ background: "hsl(220 13% 24%)", border: "1px solid hsl(220 13% 36%)" }} title="A-">
-                                    <span className="text-[11px] font-mono font-medium" style={{ color: "hsl(220 10% 78%)" }}>A-</span>
+                                <div className="ml-auto flex items-center gap-2">
+                                  <span
+                                    className="text-[11px]"
+                                    style={{ fontFamily: "'Poppins', system-ui, sans-serif", color: "hsl(220 10% 50%)" }}
+                                  >
+                                    {lineCount} Lines
+                                  </span>
+                                  {selectedLines.size > 0 && (
+                                    <span
+                                      className="rounded-[0.3rem] px-1.5 py-[0.15rem] text-[10px] font-semibold"
+                                      style={{ background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))", letterSpacing: "0.02em" }}
+                                    >
+                                      {selectedLines.size === 1
+                                        ? `Line ${Array.from(selectedLines)[0]}`
+                                        : `Lines ${Math.min(...Array.from(selectedLines))}-${Math.max(...Array.from(selectedLines))}`}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 ml-4" style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}>
+                                  <div
+                                    className="flex items-stretch rounded-md overflow-hidden border"
+                                    style={{ borderColor: "hsl(220 13% 28%)", background: "hsl(220 14% 13%)" }}
+                                  >
+                                    <button onClick={() => setCodeFontSize(s => Math.max(s - 2, 10))} className="px-2 py-[3px] hover:bg-white/[0.06] transition-colors" title="Decrease font size">
+                                      <span className="text-[11px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>A-</span>
+                                    </button>
+                                    <button onClick={() => setCodeFontSize(defaultFontSize)} className="px-2 py-[3px] hover:bg-white/[0.06] transition-colors border-l" style={{ borderColor: "hsl(220 13% 28%)" }} title="Reset font size">
+                                      <span className="text-[11px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>A</span>
+                                    </button>
+                                    <button onClick={() => setCodeFontSize(s => Math.min(s + 2, 32))} className="px-2 py-[3px] hover:bg-white/[0.06] transition-colors border-l" style={{ borderColor: "hsl(220 13% 28%)" }} title="Increase font size">
+                                      <span className="text-[11px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>A+</span>
+                                    </button>
+                                  </div>
+                                  <button onClick={handleCodeCopy} className="px-2.5 py-[3px] flex items-center gap-1.5 rounded-md border hover:bg-white/[0.06] transition-colors" style={{ borderColor: "hsl(220 13% 28%)", background: "hsl(220 14% 13%)" }} title="Copy">
+                                    {codeCopied ? <Check className="h-3 w-3" style={{ color: "hsl(152 70% 50%)" }} /> : <Copy className="h-3 w-3" style={{ color: "hsl(220 10% 70%)" }} />}
+                                    <span className="text-[11px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>Copy</span>
                                   </button>
-                                  <button onClick={() => setCodeFontSize(17)} className="px-2.5 py-1.5 rounded hover:brightness-125 transition-colors" style={{ background: "hsl(220 13% 24%)", border: "1px solid hsl(220 13% 36%)" }} title="Reset">
-                                    <span className="text-[11px] font-mono font-medium" style={{ color: "hsl(220 10% 78%)" }}>A</span>
-                                  </button>
-                                  <button onClick={() => setCodeFontSize(s => Math.min(s + 2, 32))} className="px-2.5 py-1.5 rounded hover:brightness-125 transition-colors" style={{ background: "hsl(220 13% 24%)", border: "1px solid hsl(220 13% 36%)" }} title="A+">
-                                    <span className="text-[11px] font-mono font-medium" style={{ color: "hsl(220 10% 78%)" }}>A+</span>
-                                  </button>
-                                  <button onClick={handleCodeCopy} className="px-2 py-1 rounded flex items-center gap-1.5" style={{ background: "hsl(220 13% 20%)", border: "1px solid hsl(220 13% 28%)" }} title="Copy">
-                                    {codeCopied ? <Check className="h-3.5 w-3.5" style={{ color: "hsl(152 70% 50%)" }} /> : <Copy className="h-3.5 w-3.5" style={{ color: "hsl(220 10% 60%)" }} />}
-                                    <span className="text-[11px] font-mono" style={{ color: "hsl(220 10% 60%)" }}>Copy</span>
+                                  <button onClick={handleCodeDownload} className="px-2.5 py-[3px] flex items-center gap-1.5 rounded-md border hover:bg-white/[0.06] transition-colors" style={{ borderColor: "hsl(220 13% 28%)", background: "hsl(220 14% 13%)" }} title="Download">
+                                    <Download className="h-3 w-3" style={{ color: "hsl(220 10% 70%)" }} />
+                                    <span className="text-[11px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>Download</span>
                                   </button>
                                   <button onClick={() => {
-                                    const text = codeText;
-                                    const blob = new Blob([text], { type: "text/plain" });
-                                    const url = URL.createObjectURL(blob);
-                                    const a = document.createElement("a"); a.href = url; a.download = "code-snippet.txt";
-                                    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-                                  }} className="px-2 py-1 rounded flex items-center gap-1.5" style={{ background: "hsl(220 13% 20%)", border: "1px solid hsl(220 13% 28%)" }} title="Download">
-                                    <Download className="h-3.5 w-3.5" style={{ color: "hsl(220 10% 60%)" }} />
-                                    <span className="text-[11px] font-mono" style={{ color: "hsl(220 10% 60%)" }}>Download</span>
-                                   </button>
-                                   <button onClick={() => {
-                                     const all = new Set(Array.from({ length: lineCount }, (_, i) => i + 1));
-                                     setSelectedLines(prev => prev.size === lineCount ? new Set() : all);
-                                   }} className="px-2 py-1 rounded flex items-center gap-1.5" style={{ background: "hsl(220 13% 20%)", border: "1px solid hsl(220 13% 28%)" }} title="Select all lines">
-                                     <ListChecks className="h-3.5 w-3.5" style={{ color: "hsl(220 10% 60%)" }} />
-                                     <span className="text-[11px] font-mono" style={{ color: "hsl(220 10% 60%)" }}>{selectedLines.size === lineCount ? "Deselect" : "Select all"}</span>
-                                   </button>
-                                   <button onClick={() => {
+                                    const all = new Set(Array.from({ length: lineCount }, (_, i) => i + 1));
+                                    setSelectedLines(prev => prev.size === lineCount ? new Set() : all);
+                                  }} className="px-2.5 py-[3px] flex items-center gap-1.5 rounded-md border hover:bg-white/[0.06] transition-colors" style={{ borderColor: "hsl(220 13% 28%)", background: "hsl(220 14% 13%)" }} title="Select all lines">
+                                    <ListChecks className="h-3 w-3" style={{ color: "hsl(220 10% 70%)" }} />
+                                    <span className="text-[11px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>{selectedLines.size === lineCount ? "Deselect" : "Select all"}</span>
+                                  </button>
+                                  <button onClick={() => {
                                     if (isCodeFullscreen && document.fullscreenElement) document.exitFullscreen();
                                     else if (isCodeFullscreen) setIsCodeFullscreen(false);
                                     else handleCodeFullscreen();
-                                  }} className="px-2 py-1 rounded" style={{ background: "hsl(220 13% 20%)", border: "1px solid hsl(220 13% 28%)" }} title={isCodeFullscreen ? "Exit fullscreen" : "Fullscreen"}>
-                                    {isCodeFullscreen ? <Minimize2 className="h-3.5 w-3.5" style={{ color: "hsl(220 10% 60%)" }} /> : <Expand className="h-3.5 w-3.5" style={{ color: "hsl(220 10% 60%)" }} />}
+                                  }} className="px-2 py-[3px] flex items-center rounded-md border hover:bg-white/[0.06] transition-colors" style={{ borderColor: "hsl(220 13% 28%)", background: "hsl(220 14% 13%)" }} title={isCodeFullscreen ? "Exit fullscreen" : "Fullscreen"}>
+                                    {isCodeFullscreen ? <Minimize2 className="h-3 w-3" style={{ color: "hsl(220 10% 70%)" }} /> : <Expand className="h-3 w-3" style={{ color: "hsl(220 10% 70%)" }} />}
                                   </button>
                                 </div>
                               </div>
 
                               {/* Copy selected lines bar */}
-                              {selectedLines.size > 0 && (
-                                 <div
-                                  className="flex items-center justify-between px-4 py-1.5 border-b animate-in fade-in slide-in-from-top-1 duration-200"
-                                  style={{ backgroundColor: "rgba(234, 179, 8, 0.08)", borderColor: "hsl(220 13% 20%)" }}
+                               {selectedLines.size > 0 && (
+                                  <div
+                                   className="flex items-center gap-2 px-4 py-[0.35rem] border-t animate-in fade-in slide-in-from-top-1 duration-200"
+                                   style={{ backgroundColor: "hsl(var(--primary) / 0.08)", borderColor: "hsl(var(--primary) / 0.2)" }}
                                 >
-                                  <span className="text-[11px] font-mono" style={{ color: "hsl(45 93% 58%)" }}>
+                                  <span className="text-[11px] font-medium" style={{ color: "hsl(var(--primary))", letterSpacing: "0.02em" }}>
                                     {selectedLines.size} line{selectedLines.size > 1 ? "s" : ""} selected
                                   </span>
-                                  <div className="flex items-center gap-2">
-                                    <button
-                                      onClick={handleCopySelected}
-                                      className="px-2.5 py-1 rounded flex items-center gap-1.5 hover:brightness-125 transition-colors"
-                                      style={{ background: "rgba(234, 179, 8, 0.15)", border: "1px solid rgba(234, 179, 8, 0.3)" }}
-                                      title="Copy selected lines"
-                                    >
-                                      {selCopied ? <Check className="h-3 w-3" style={{ color: "hsl(152 70% 50%)" }} /> : <Copy className="h-3 w-3" style={{ color: "hsl(45 93% 58%)" }} />}
-                                      <span className="text-[11px] font-mono font-medium" style={{ color: "hsl(45 93% 58%)" }}>{selCopied ? "Copied!" : "Copy selected"}</span>
-                                    </button>
+                                  <button
+                                    onClick={handleCopySelected}
+                                    className="px-2.5 py-[3px] rounded-md border flex items-center gap-1.5 hover:brightness-125 transition-colors"
+                                    style={{ background: "hsl(var(--primary) / 0.15)", borderColor: "hsl(var(--primary) / 0.3)" }}
+                                    title="Copy selected lines"
+                                  >
+                                    {selCopied ? <Check className="h-3 w-3" style={{ color: "hsl(152 70% 50%)" }} /> : <Copy className="h-3 w-3" style={{ color: "hsl(var(--primary))" }} />}
+                                    <span className="text-[11px] font-medium" style={{ color: "hsl(var(--primary))" }}>{selCopied ? "Copied!" : "Copy selected"}</span>
+                                  </button>
+                                  <div className="ml-auto flex items-center gap-2">
                                     <button
                                       onClick={() => setSelectedLines(new Set())}
-                                      className="px-2 py-1 rounded hover:brightness-125 transition-colors"
-                                      style={{ background: "hsl(220 13% 20%)", border: "1px solid hsl(220 13% 28%)" }}
+                                      className="px-2 py-[3px] rounded-md hover:brightness-125 transition-colors"
+                                      style={{ color: "hsl(220 10% 50%)" }}
                                       title="Clear selection"
                                     >
-                                      <X className="h-3 w-3" style={{ color: "hsl(220 10% 60%)" }} />
+                                      <X className="h-3 w-3" />
                                     </button>
                                   </div>
                                 </div>
@@ -1189,7 +1220,7 @@ const SpecBrowser = () => {
 
                               {/* Code with line numbers - row-based for hover */}
                               <div className={`${isCodeFullscreen ? "flex-1 overflow-auto" : "overflow-x-auto"}`}>
-                                <table className="w-full border-collapse" style={{ fontSize: `${codeFontSize}px`, lineHeight: isTreeBlock ? 1.15 : 1.4, fontFamily: "'Ubuntu Mono', 'JetBrains Mono', monospace" }}>
+                                <table className="w-full border-collapse" style={{ fontSize: `${codeFontSize}px`, lineHeight: isTreeBlock ? 1.15 : 1.6, fontFamily: "'Ubuntu Mono', 'JetBrains Mono', monospace" }}>
                                   <tbody>
                                     {highlightedLines.slice(0, lineCount).map((hlLine, i) => {
                                       const lineNum = i + 1;
@@ -1202,18 +1233,20 @@ const SpecBrowser = () => {
                                         style={{ backgroundColor: isSelected ? "rgba(234, 179, 8, 0.15)" : "transparent" }}
                                       >
                                         <td
-                                          className="select-none text-right pr-3 pl-3 border-r sticky left-0 align-top"
+                                          className="select-none text-right px-3 border-r sticky left-0 align-top"
                                           style={{
                                             color: isSelected ? "hsl(45 93% 47%)" : "hsl(220 10% 35%)",
-                                            backgroundColor: isSelected ? "hsl(220 14% 13%)" : "hsl(220 14% 9%)",
+                                            backgroundColor: isSelected ? "hsl(var(--primary) / 0.12)" : "hsl(220 14% 9%)",
                                             borderColor: "hsl(220 13% 18%)",
                                             minWidth: `${Math.max(String(lineCount).length * 0.7 + 1.5, 2.5)}em`,
                                             userSelect: "none",
+                                            fontSize: `${Math.max(codeFontSize * 0.7, 11)}px`,
+                                            lineHeight: 1,
                                           }}
                                         >
                                           {lineNum}
                                         </td>
-                                        <td className="pl-4 pr-4 whitespace-pre" style={{ paddingTop: isTreeBlock ? '0px' : '2px', paddingBottom: isTreeBlock ? '0px' : '2px' }}>
+                                        <td className="whitespace-pre px-1" style={{ paddingTop: '0px', paddingBottom: '0px', paddingRight: '1.25rem', paddingLeft: '0.5rem' }}>
                                           {isTreeBlock ? renderTreeLine(lines[i] || "") : (hlLine.length > 0 ? hlLine : "\u00A0")}
                                         </td>
                                       </tr>
