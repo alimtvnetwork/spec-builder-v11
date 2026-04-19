@@ -1,0 +1,142 @@
+{
+  "title": "WP SEO Publish CLI Error Code Index",
+  "description": "Machine-readable index of all WP SEO Publish CLI (WSP) error codes. Range: 12000-12599.",
+  "version": "1.0.0",
+  "generated": "2026-02-28",
+  "source": "spec/32-wp-seo-publish-cli/01-backend/08-error-codes.md",
+  "project": "WSP",
+  "range": { "min": 12000, "max": 12599 },
+  "categories": [
+    {
+      "name": "Connection",
+      "range": { "min": 12000, "max": 12099 },
+      "codes": [
+        { "code": 12000, "constant": "ErrConnectionFailed", "description": "WordPress connection failed", "retryable": false },
+        { "code": 12001, "constant": "ErrAuthForbidden", "description": "Access forbidden", "retryable": false },
+        { "code": 12002, "constant": "ErrAuthUnauthorized", "description": "Invalid credentials", "retryable": false },
+        { "code": 12003, "constant": "ErrSiteNotFound", "description": "WordPress site not found", "retryable": false },
+        { "code": 12004, "constant": "ErrApiVersionMismatch", "description": "Unsupported API version", "retryable": false },
+        { "code": 12005, "constant": "ErrSslError", "description": "SSL certificate error", "retryable": false },
+        { "code": 12006, "constant": "ErrTimeout", "description": "Connection timeout", "retryable": true },
+        { "code": 12007, "constant": "ErrRateLimited", "description": "Rate limit exceeded", "retryable": true },
+        { "code": 12010, "constant": "ErrWebsiteNotRegistered", "description": "Website not registered", "retryable": false },
+        { "code": 12011, "constant": "ErrCredentialDecryptFailed", "description": "Failed to decrypt credentials", "retryable": false }
+      ]
+    },
+    {
+      "name": "Publishing",
+      "range": { "min": 12100, "max": 12199 },
+      "codes": [
+        { "code": 12100, "constant": "ErrPublishFailed", "description": "Publishing failed", "retryable": false },
+        { "code": 12101, "constant": "ErrCreatePostFailed", "description": "Failed to create post", "retryable": false },
+        { "code": 12102, "constant": "ErrUpdatePostFailed", "description": "Failed to update post", "retryable": false },
+        { "code": 12103, "constant": "ErrDeletePostFailed", "description": "Failed to delete post", "retryable": false },
+        { "code": 12104, "constant": "ErrInvalidPostId", "description": "Invalid post ID", "retryable": false },
+        { "code": 12105, "constant": "ErrCreatePageFailed", "description": "Failed to create page", "retryable": false },
+        { "code": 12106, "constant": "ErrCreateCategoryFailed", "description": "Failed to create category", "retryable": false },
+        { "code": 12107, "constant": "ErrCreateTagFailed", "description": "Failed to create tag", "retryable": false },
+        { "code": 12108, "constant": "ErrMediaUploadFailed", "description": "Failed to upload media", "retryable": false },
+        { "code": 12110, "constant": "ErrInvalidContentType", "description": "Invalid content type", "retryable": false },
+        { "code": 12111, "constant": "ErrInvalidStatus", "description": "Invalid post status", "retryable": false },
+        { "code": 12112, "constant": "ErrCategoryNotFound", "description": "Category not found", "retryable": false },
+        { "code": 12113, "constant": "ErrTagNotFound", "description": "Tag not found", "retryable": false },
+        { "code": 12120, "constant": "ErrBatchPartialFailure", "description": "Some items failed", "retryable": false },
+        { "code": 12121, "constant": "ErrBatchCancelled", "description": "Batch operation cancelled", "retryable": false }
+      ]
+    },
+    {
+      "name": "AI Bridge Integration",
+      "range": { "min": 12200, "max": 12299 },
+      "codes": [
+        { "code": 12200, "constant": "ErrAiBridgeUnavailable", "description": "AI Bridge CLI not available", "retryable": false },
+        { "code": 12201, "constant": "ErrAiGenerationFailed", "description": "Content generation failed", "retryable": false },
+        { "code": 12202, "constant": "ErrAiStreamError", "description": "Streaming error", "retryable": true },
+        { "code": 12203, "constant": "ErrAiTimeout", "description": "AI request timeout", "retryable": true },
+        { "code": 12204, "constant": "ErrAiInvalidResponse", "description": "Invalid AI response", "retryable": false },
+        { "code": 12210, "constant": "ErrCategorySuggestionFailed", "description": "Failed to get category suggestions", "retryable": false },
+        { "code": 12211, "constant": "ErrTagSuggestionFailed", "description": "Failed to get tag suggestions", "retryable": false },
+        { "code": 12220, "constant": "ErrSitemapIndexFailed", "description": "Sitemap indexing failed", "retryable": false },
+        { "code": 12221, "constant": "ErrRagNotAvailable", "description": "RAG context not available", "retryable": false },
+        { "code": 12222, "constant": "ErrRewriteFailed", "description": "Content rewrite failed", "retryable": false }
+      ]
+    },
+    {
+      "name": "Variable Processing",
+      "range": { "min": 12300, "max": 12399 },
+      "codes": [
+        { "code": 12300, "constant": "ErrVariableImportFailed", "description": "Variable import failed", "retryable": false },
+        { "code": 12301, "constant": "ErrCsvParseError", "description": "CSV parsing error", "retryable": false },
+        { "code": 12302, "constant": "ErrJsonParseError", "description": "JSON parsing error", "retryable": false },
+        { "code": 12303, "constant": "ErrYamlParseError", "description": "YAML parsing error", "retryable": false },
+        { "code": 12304, "constant": "ErrVariableNotFound", "description": "Variable not found", "retryable": false },
+        { "code": 12305, "constant": "ErrInvalidScope", "description": "Invalid variable scope", "retryable": false },
+        { "code": 12306, "constant": "ErrTemplateSyntaxError", "description": "Template syntax error", "retryable": false },
+        { "code": 12307, "constant": "ErrVariableTypeMismatch", "description": "Variable type mismatch", "retryable": false },
+        { "code": 12310, "constant": "ErrSourceNotFound", "description": "Variable source not found", "retryable": false },
+        { "code": 12311, "constant": "ErrSourceEmpty", "description": "Variable source is empty", "retryable": false },
+        { "code": 12312, "constant": "ErrRowOutOfRange", "description": "Row index out of range", "retryable": false }
+      ]
+    },
+    {
+      "name": "Import/Export",
+      "range": { "min": 12400, "max": 12499 },
+      "codes": [
+        { "code": 12400, "constant": "ErrExportFailed", "description": "Export failed", "retryable": false },
+        { "code": 12401, "constant": "ErrImportFailed", "description": "Import failed", "retryable": false },
+        { "code": 12402, "constant": "ErrInvalidExportFormat", "description": "Invalid export format", "retryable": false },
+        { "code": 12403, "constant": "ErrCorruptImportFile", "description": "Corrupt import file", "retryable": false },
+        { "code": 12404, "constant": "ErrVersionMismatch", "description": "Import version mismatch", "retryable": false },
+        { "code": 12410, "constant": "ErrResetFailed", "description": "Reset operation failed", "retryable": false },
+        { "code": 12411, "constant": "ErrResetConfirmationMismatch", "description": "Reset confirmation mismatch", "retryable": false }
+      ]
+    },
+    {
+      "name": "Database",
+      "range": { "min": 12500, "max": 12519 },
+      "codes": [
+        { "code": 12500, "constant": "ErrDbOpenFailed", "description": "Failed to open database", "retryable": false },
+        { "code": 12501, "constant": "ErrDbQueryFailed", "description": "Database query failed", "retryable": false },
+        { "code": 12502, "constant": "ErrDbWriteFailed", "description": "Failed to write to database", "retryable": false },
+        { "code": 12503, "constant": "ErrDbSchemaError", "description": "Schema migration error", "retryable": false },
+        { "code": 12504, "constant": "ErrDbCorruption", "description": "Database corruption detected", "retryable": false },
+        { "code": 12510, "constant": "ErrWebsiteDbNotFound", "description": "Website database not found", "retryable": false },
+        { "code": 12511, "constant": "ErrPublicationDbError", "description": "Publication database error", "retryable": false }
+      ]
+    },
+    {
+      "name": "Settings",
+      "range": { "min": 12520, "max": 12527 },
+      "source": "spec/32-wp-seo-publish-cli/01-backend/10-settings-service.md",
+      "codes": [
+        { "code": 12520, "constant": "ErrSettingsNotFound", "description": "Setting key not found", "retryable": false },
+        { "code": 12521, "constant": "ErrSeedCategoryNotFound", "description": "Category does not exist", "retryable": false },
+        { "code": 12522, "constant": "ErrTypeMismatch", "description": "Value type mismatch", "retryable": false },
+        { "code": 12523, "constant": "ErrSeedParseError", "description": "Failed to parse seed file", "retryable": false },
+        { "code": 12524, "constant": "ErrSeedVersionError", "description": "Seed version comparison failed", "retryable": false },
+        { "code": 12525, "constant": "ErrCacheError", "description": "Cache invalidation failed", "retryable": false },
+        { "code": 12526, "constant": "ErrValidationError", "description": "Value failed validation", "retryable": false },
+        { "code": 12527, "constant": "ErrDatabaseError", "description": "Database operation failed", "retryable": false }
+      ]
+    },
+    {
+      "name": "Reset API",
+      "range": { "min": 12550, "max": 12556 },
+      "source": "spec/32-wp-seo-publish-cli/01-backend/13-reset-api.md",
+      "codes": [
+        { "code": 12550, "constant": "ErrResetInvalidScope", "http": 400, "description": "Invalid reset scope", "retryable": false },
+        { "code": 12551, "constant": "ErrResetInvalidFilter", "http": 400, "description": "Invalid filter criteria", "retryable": false },
+        { "code": 12552, "constant": "ErrResetNotFound", "http": 404, "description": "Reset request not found", "retryable": false },
+        { "code": 12553, "constant": "ErrResetExpired", "http": 410, "description": "Reset request expired", "retryable": false },
+        { "code": 12554, "constant": "ErrResetAlreadyConfirmed", "http": 409, "description": "Reset already confirmed", "retryable": false },
+        { "code": 12555, "constant": "ErrResetAlreadyCancelled", "http": 409, "description": "Reset already cancelled", "retryable": false },
+        { "code": 12556, "constant": "ErrResetExecutionFailed", "http": 500, "description": "Reset execution failed", "retryable": false }
+      ]
+    }
+  ],
+  "stats": {
+    "totalCodes": 75,
+    "totalCategories": 8,
+    "retryableCodes": 4,
+    "rangeUtilization": "75/600 (12.5%)"
+  }
+}

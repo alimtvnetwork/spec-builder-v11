@@ -1,0 +1,53 @@
+graph TD
+    INPUT["Markdown Text after Placeholder Extraction"] --> TABLES
+
+    subgraph PHASE1["Phase 1: Tables - Multi-line Regex"]
+        style PHASE1 fill:#1e3a5f,stroke:#4a90d9,color:#fff
+        TABLES["Detect Pipe-Delimited Patterns"] --> TABLE_CONVERT["Convert to HTML table"]
+        TABLE_CONVERT --> TABLE_DONE["Tables resolved before headings break rows"]
+    end
+
+    TABLE_DONE --> HEADINGS
+
+    subgraph PHASE2["Phase 2: Headings - Most Specific First"]
+        style PHASE2 fill:#2d1b4e,stroke:#9b59b6,color:#fff
+        HEADINGS["Scan for # Prefixes"] --> H4["#### mapped to h4 spec-h4"]
+        H4 --> H3["### mapped to h3 spec-h3"]
+        H3 --> H2["## mapped to h2 spec-h2"]
+        H2 --> H1["# mapped to h1 spec-h1"]
+    end
+
+    H1 --> BOLD
+
+    subgraph PHASE3["Phase 3: Bold then Italic"]
+        style PHASE3 fill:#1b3d2e,stroke:#27ae60,color:#fff
+        BOLD["**text** mapped to strong"] --> ITALIC["*text* mapped to em"]
+        ITALIC --> WHY["Bold first: ** must not be consumed as double *"]
+    end
+
+    WHY --> LINKS
+
+    subgraph PHASE4["Phase 4: Links, Quotes, Rules"]
+        style PHASE4 fill:#4a3520,stroke:#e67e22,color:#fff
+        LINKS["[text](url) mapped to a spec-link"] --> BLOCKQUOTES["> quote mapped to blockquote"]
+        BLOCKQUOTES --> HR["--- mapped to hr"]
+    end
+
+    HR --> LISTS
+
+    subgraph PHASE5["Phase 5: Lists"]
+        style PHASE5 fill:#1a3a3a,stroke:#16a085,color:#fff
+        LISTS["Detect - item and N. item patterns"] --> LI["Convert to li elements"]
+        LI --> WRAP_UL["Wrap adjacent li in ul spec-ul"]
+        LI --> WRAP_OL["Wrap adjacent li in ol spec-ol"]
+    end
+
+    WRAP_UL --> PARAGRAPHS
+    WRAP_OL --> PARAGRAPHS
+
+    subgraph PHASE6["Phase 6: Paragraphs"]
+        style PHASE6 fill:#3a1a1a,stroke:#c0392b,color:#fff
+        PARAGRAPHS["Remaining non-tag lines"] --> P_WRAP["Wrap in p spec-p"]
+    end
+
+    P_WRAP --> OUTPUT["Ready for Placeholder Restoration"]

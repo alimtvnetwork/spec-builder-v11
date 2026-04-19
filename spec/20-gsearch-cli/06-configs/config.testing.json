@@ -1,0 +1,177 @@
+{
+  "$schema": "./config.schema.json",
+  "Environment": "testing",
+  
+  "Database": {
+    "Path": ":memory:",
+    "MaxOpenConns": 1,
+    "MaxIdleConns": 1,
+    "ConnMaxLifetime": "1m",
+    "EnableLogging": true,
+    "LogLevel": "debug"
+  },
+  
+  "Search": {
+    "MaxConcurrency": 1,
+    "RequestDelay": "0ms",
+    "Timeout": "5s",
+    "MaxResultsPerEngine": 5,
+    "EnableProgressOutput": false,
+    "RetryAttempts": 1,
+    "RetryDelay": "100ms",
+    "MethodWeights": {
+      "Html": 0.34,
+      "GoogleApi": 0.33,
+      "DuckDuckGo": 0.33,
+      "Bing": 0.00
+    }
+  },
+  
+  "Engines": {
+    "Google": {
+      "Enabled": true,
+      "Weight": 0.34,
+      "Methods": {
+        "Html": {
+          "Enabled": true,
+          "Weight": 1.00
+        },
+        "CustomSearch": {
+          "Enabled": false,
+          "Weight": 0.00,
+          "ApiKey": "test-api-key",
+          "SearchEngineId": "test-engine-id",
+          "DailyQuotaLimit": 10
+        },
+        "SearchConsole": {
+          "Enabled": false,
+          "Weight": 0.00,
+          "CredentialsPath": "./testdata/mock-credentials.json"
+        }
+      },
+      "Cooldown": "0ms",
+      "MaxRequestsPerMinute": 1000
+    },
+    "DuckDuckGo": {
+      "Enabled": true,
+      "Weight": 0.33,
+      "Methods": {
+        "Html": {
+          "Enabled": true,
+          "Weight": 0.50
+        },
+        "InstantAnswer": {
+          "Enabled": true,
+          "Weight": 0.50
+        }
+      },
+      "Cooldown": "0ms",
+      "MaxRequestsPerMinute": 1000
+    },
+    "Bing": {
+      "Enabled": true,
+      "Weight": 0.33,
+      "Methods": {
+        "Html": {
+          "Enabled": true,
+          "Weight": 1.00
+        },
+        "Api": {
+          "Enabled": false,
+          "Weight": 0.00,
+          "ApiKey": "test-bing-key",
+          "MaxRequestsPerSecond": 1000
+        }
+      },
+      "Cooldown": "0ms",
+      "MaxRequestsPerMinute": 1000
+    }
+  },
+  
+  "Blocking": {
+    "DetectionEnabled": true,
+    "Cooldown": "0ms",
+    "MaxConsecutiveBlocks": 10,
+    "AutoSwitchOnBlock": true,
+    "BlockIndicators": {
+      "Google": ["unusual traffic", "captcha"],
+      "DuckDuckGo": ["rate limit"],
+      "Bing": ["blocked"]
+    }
+  },
+  
+  "Backoff": {
+    "InitialDelay": "10ms",
+    "MaxDelay": "100ms",
+    "Multiplier": 1.5,
+    "Jitter": 0.0
+  },
+  
+  "Cache": {
+    "Enabled": true,
+    "TtlDays": 1,
+    "MaxEntries": 100,
+    "AutoCleanup": false,
+    "CleanupInterval": "0ms",
+    "TrackHitRate": true
+  },
+  
+  "Nested": {
+    "Enabled": true,
+    "MaxDepth": 1,
+    "KeywordsPerPage": 2,
+    "MaxPagesPerLevel": 2,
+    "CycleDetection": true,
+    "ExtractionMethod": "simple",
+    "MinKeywordScore": 0.10
+  },
+  
+  "PageContent": {
+    "FetchEnabled": true,
+    "MaxConcurrentFetches": 1,
+    "Timeout": "5s",
+    "MaxContentSizeKb": 100,
+    "ExtractImages": false,
+    "ExtractLinks": true
+  },
+  
+  "Rag": {
+    "ChunkMaxTokens": 256,
+    "ChunkOverlapTokens": 25,
+    "MinChunkTokens": 50,
+    "IncludeMetadata": true,
+    "RelevanceScoring": false
+  },
+  
+  "Output": {
+    "DefaultFormat": "json",
+    "PrettyPrint": true,
+    "IncludeTimestamps": false,
+    "ColorOutput": false,
+    "ProgressBar": false,
+    "VerboseErrors": true
+  },
+  
+  "UserAgent": {
+    "RotationEnabled": false,
+    "RotationStrategy": "fixed",
+    "CustomAgents": ["TestBot/1.0 (Golang Search CLI Test Suite)"],
+    "UseDefaultAgents": false
+  },
+  
+  "Logging": {
+    "Level": "debug",
+    "Format": "text",
+    "OutputPath": "",
+    "MaxSizeMb": 1,
+    "MaxBackups": 0,
+    "Compress": false
+  },
+  
+  "Mock": {
+    "Enabled": true,
+    "MockDataPath": "./testdata/mocks",
+    "RecordResponses": false,
+    "PlaybackMode": "strict"
+  }
+}

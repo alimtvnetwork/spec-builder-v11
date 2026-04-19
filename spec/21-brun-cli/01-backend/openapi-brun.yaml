@@ -1,0 +1,857 @@
+openapi: 3.1.0
+info:
+  title: BRun CLI REST API
+  version: 2.0.0
+  description: |
+    REST API specification for BRun CLI - the multi-runtime build runner.
+    
+    BRun is a CLI tool for executing builds across multiple runtimes (Go, Node.js, PowerShell)
+    with port management, asset operations, and AI-assisted error fixing integration.
+    
+    **Key Features:**
+    - Multi-runtime support (Go, Node.js, PowerShell)
+    - Build profile management
+    - Port availability checking and firewall configuration
+    - Asset copy operations with multiple modes
+    - JSON output for AI integration
+    - Build history persistence
+    
+    **Error Code Range:** 7100-7599
+  contact:
+    name: BRun CLI Team
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8088
+    description: Local development server
+  - url: http://localhost:{port}
+    description: Configurable port
+    variables:
+      port:
+        default: "8088"
+        description: Server port
+
+tags:
+  - name: Build
+    description: Build and check operations
+  - name: Run
+    description: Application execution operations
+  - name: Port
+    description: Port management operations
+  - name: Profile
+    description: Build profile management
+  - name: Config
+    description: Configuration operations
+  - name: Health
+    description: Health and status endpoints
+  - name: History
+    description: Build history and statistics
+
+paths:
+  /api/v1/health:
+    get:
+      tags:
+        - Health
+      operationId: getHealth
+      summary: Get service health status
+      description: Returns health status including runtime availability and configuration state
+      responses:
+        "200":
+          description: Health check successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /api/v1/build/check:
+    post:
+      tags:
+        - Build
+      operationId: runBuildCheck
+      summary: Run build verification
+      description: |
+        Execute build verification without producing artifacts.
+        Validates code compiles correctly and reports any errors.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckRequest"
+      responses:
+        "200":
+          description: Build check completed (may contain errors)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecutionResult"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/build:
+    post:
+      tags:
+        - Build
+      operationId: runBuild
+      summary: Execute full build
+      description: Execute a full build using a profile, optionally copying assets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuildRequest"
+      responses:
+        "200":
+          description: Build completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecutionResult"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/run:
+    post:
+      tags:
+        - Run
+      operationId: runApplication
+      summary: Run application
+      description: Execute application with health check waiting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunRequest"
+      responses:
+        "200":
+          description: Application started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecutionResult"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/port/check:
+    post:
+      tags:
+        - Port
+      operationId: checkPort
+      summary: Check port availability
+      description: Check if a port is available and optionally find alternatives
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PortCheckRequest"
+      responses:
+        "200":
+          description: Port check result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortCheckResponse"
+
+  /api/v1/port/firewall:
+    post:
+      tags:
+        - Port
+      operationId: configureFirewall
+      summary: Configure firewall rule
+      description: Enable or disable firewall rule for a port (Windows only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FirewallRequest"
+      responses:
+        "200":
+          description: Firewall configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FirewallResponse"
+        "400":
+          description: Invalid request or platform not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/profiles:
+    get:
+      tags:
+        - Profile
+      operationId: listProfiles
+      summary: List build profiles
+      description: Get all configured build profiles
+      responses:
+        "200":
+          description: Profile list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileListResponse"
+    post:
+      tags:
+        - Profile
+      operationId: createProfile
+      summary: Create build profile
+      description: Create a new build profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileCreateRequest"
+      responses:
+        "201":
+          description: Profile created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /api/v1/profiles/{name}:
+    get:
+      tags:
+        - Profile
+      operationId: getProfile
+      summary: Get profile by name
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profile details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "404":
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+        - Profile
+      operationId: updateProfile
+      summary: Update profile
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdateRequest"
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    delete:
+      tags:
+        - Profile
+      operationId: deleteProfile
+      summary: Delete profile
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Profile deleted
+
+  /api/v1/config/validate:
+    post:
+      tags:
+        - Config
+      operationId: validateConfig
+      summary: Validate configuration
+      description: Validate a configuration file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigValidateRequest"
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigValidateResponse"
+
+  /api/v1/history:
+    get:
+      tags:
+        - History
+      operationId: getBuildHistory
+      summary: Get build history
+      description: Get recent build execution history
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: profile
+          in: query
+          schema:
+            type: string
+          description: Filter by profile name
+        - name: success
+          in: query
+          schema:
+            type: boolean
+          description: Filter by success status
+      responses:
+        "200":
+          description: Build history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildHistoryResponse"
+
+  /api/v1/history/statistics:
+    get:
+      tags:
+        - History
+      operationId: getBuildStatistics
+      summary: Get build statistics
+      parameters:
+        - name: since
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Start date for statistics
+      responses:
+        "200":
+          description: Build statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildStatistics"
+
+  /api/v1/history/{runId}:
+    get:
+      tags:
+        - History
+      operationId: getBuildRun
+      summary: Get specific build run
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Build run details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecutionResult"
+        "404":
+          description: Run not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        Status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        Version:
+          type: string
+        Runtimes:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/RuntimeStatus"
+        Config:
+          $ref: "#/components/schemas/ConfigStatus"
+        Uptime:
+          type: string
+      required:
+        - Status
+        - Version
+
+    RuntimeStatus:
+      type: object
+      properties:
+        Available:
+          type: boolean
+        Version:
+          type: string
+        Path:
+          type: string
+
+    ConfigStatus:
+      type: object
+      properties:
+        Loaded:
+          type: boolean
+        Path:
+          type: string
+        ProfileCount:
+          type: integer
+
+    CheckRequest:
+      type: object
+      properties:
+        Profile:
+          type: string
+          description: Profile name to use
+        GoPath:
+          type: string
+          description: Go source path (overrides profile)
+        NodePath:
+          type: string
+          description: Node.js source path
+        PsScript:
+          type: string
+          description: PowerShell script path
+        Tidy:
+          type: string
+          enum: [skip, run, force]
+          default: skip
+          description: Go mod tidy behavior
+        Port:
+          type: integer
+          description: Port to check availability
+
+    BuildRequest:
+      type: object
+      properties:
+        Profile:
+          type: string
+          description: Profile name to use
+        Clean:
+          type: boolean
+          default: false
+          description: Clean output before building
+        CopyAssets:
+          type: boolean
+          default: false
+          description: Copy assets after build
+        Output:
+          type: string
+          description: Output directory
+      required:
+        - Profile
+
+    RunRequest:
+      type: object
+      properties:
+        App:
+          type: string
+          description: Application name from profile
+        GoPath:
+          type: string
+          description: Go source path
+        NodeCmd:
+          type: string
+          description: Node.js command
+        PsScript:
+          type: string
+          description: PowerShell script
+        Port:
+          type: integer
+          description: Port to run on
+        HealthCheck:
+          type: string
+          description: Health check endpoint
+        HealthTimeout:
+          type: string
+          default: "30s"
+          description: Health check timeout
+        Detach:
+          type: boolean
+          default: false
+          description: Run in background
+        WorkDir:
+          type: string
+          description: Working directory
+        Env:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables
+
+    ExecutionResult:
+      type: object
+      properties:
+        RunId:
+          type: string
+        Success:
+          type: boolean
+        ExitCode:
+          type: integer
+        StartTime:
+          type: string
+          format: date-time
+        EndTime:
+          type: string
+          format: date-time
+        Duration:
+          type: string
+        Stdout:
+          type: string
+        Stderr:
+          type: string
+        Errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/BuildError"
+        Warnings:
+          type: array
+          items:
+            $ref: "#/components/schemas/BuildError"
+        Port:
+          type: integer
+        LogPath:
+          type: string
+      required:
+        - RunId
+        - Success
+        - ExitCode
+        - StartTime
+        - EndTime
+
+    BuildError:
+      type: object
+      properties:
+        File:
+          type: string
+        Line:
+          type: integer
+        Column:
+          type: integer
+        Message:
+          type: string
+        Severity:
+          type: string
+          enum: [error, warning, info]
+        Code:
+          type: string
+        Source:
+          type: string
+          description: Source line content
+        Context:
+          type: string
+      required:
+        - Message
+        - Severity
+
+    PortCheckRequest:
+      type: object
+      properties:
+        Port:
+          type: integer
+          description: Port to check
+        Fallback:
+          type: array
+          items:
+            type: integer
+          description: Fallback ports to try
+      required:
+        - Port
+
+    PortCheckResponse:
+      type: object
+      properties:
+        RequestedPort:
+          type: integer
+        AvailablePort:
+          type: integer
+        Available:
+          type: boolean
+        CheckedPorts:
+          type: array
+          items:
+            $ref: "#/components/schemas/PortStatus"
+
+    PortStatus:
+      type: object
+      properties:
+        Port:
+          type: integer
+        Available:
+          type: boolean
+        Reason:
+          type: string
+        ProcessName:
+          type: string
+        ProcessPid:
+          type: integer
+
+    FirewallRequest:
+      type: object
+      properties:
+        Port:
+          type: integer
+        Enable:
+          type: boolean
+        RuleName:
+          type: string
+      required:
+        - Port
+        - Enable
+
+    FirewallResponse:
+      type: object
+      properties:
+        Success:
+          type: boolean
+        Port:
+          type: integer
+        RuleName:
+          type: string
+        Message:
+          type: string
+
+    Profile:
+      type: object
+      properties:
+        Name:
+          type: string
+        Runtime:
+          type: string
+          enum: [golang, nodejs, powershell]
+        Command:
+          type: string
+        WorkDir:
+          type: string
+        Port:
+          type: integer
+        HealthCheck:
+          type: string
+        Assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetConfig"
+        Env:
+          type: object
+          additionalProperties:
+            type: string
+        CreatedAt:
+          type: string
+          format: date-time
+        UpdatedAt:
+          type: string
+          format: date-time
+      required:
+        - Name
+        - Runtime
+
+    AssetConfig:
+      type: object
+      properties:
+        Source:
+          type: string
+        Destination:
+          type: string
+        Mode:
+          type: string
+          enum: [copy, clear-copy, override, skip-existing]
+          default: copy
+        Include:
+          type: array
+          items:
+            type: string
+        Exclude:
+          type: array
+          items:
+            type: string
+
+    ProfileListResponse:
+      type: object
+      properties:
+        Profiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Profile"
+        Total:
+          type: integer
+
+    ProfileCreateRequest:
+      type: object
+      properties:
+        Name:
+          type: string
+        Runtime:
+          type: string
+          enum: [golang, nodejs, powershell]
+        Command:
+          type: string
+        WorkDir:
+          type: string
+        Port:
+          type: integer
+        HealthCheck:
+          type: string
+        Assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetConfig"
+        Env:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - Name
+        - Runtime
+
+    ProfileUpdateRequest:
+      type: object
+      properties:
+        Command:
+          type: string
+        WorkDir:
+          type: string
+        Port:
+          type: integer
+        HealthCheck:
+          type: string
+        Assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetConfig"
+        Env:
+          type: object
+          additionalProperties:
+            type: string
+
+    ConfigValidateRequest:
+      type: object
+      properties:
+        ConfigPath:
+          type: string
+        Content:
+          type: string
+          description: Config content as JSON string (alternative to path)
+
+    ConfigValidateResponse:
+      type: object
+      properties:
+        Valid:
+          type: boolean
+        Errors:
+          type: array
+          items:
+            type: string
+        Warnings:
+          type: array
+          items:
+            type: string
+
+    BuildHistoryResponse:
+      type: object
+      properties:
+        Runs:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExecutionResult"
+        Total:
+          type: integer
+        Page:
+          type: integer
+        Limit:
+          type: integer
+
+    BuildStatistics:
+      type: object
+      properties:
+        TotalRuns:
+          type: integer
+        SuccessfulRuns:
+          type: integer
+        FailedRuns:
+          type: integer
+        SuccessRate:
+          type: number
+          format: float
+        AvgDurationMs:
+          type: number
+          format: float
+        ByProfile:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/ProfileStatistics"
+        Since:
+          type: string
+          format: date-time
+
+    ProfileStatistics:
+      type: object
+      properties:
+        TotalRuns:
+          type: integer
+        SuccessfulRuns:
+          type: integer
+        AvgDurationMs:
+          type: number
+          format: float
+
+    ErrorResponse:
+      type: object
+      properties:
+        Code:
+          type: string
+          description: Error code (e.g., BR-7100)
+        Message:
+          type: string
+        Details:
+          type: string
+        Timestamp:
+          type: string
+          format: date-time
+      required:
+        - Code
+        - Message

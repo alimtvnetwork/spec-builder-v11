@@ -1,0 +1,97 @@
+{
+  "Blog": {
+    "Outline": {
+      "DefaultSectionCountMin": 5,
+      "DefaultSectionCountMax": 8,
+      "DefaultTargetWordCount": 2000,
+      "DefaultEnableGSearch": true,
+      "DefaultIncludePaaQuestions": true,
+      "DefaultIncludeCompetitorHeadings": true,
+      "DefaultMaxCompetitorUrls": 5,
+      "DefaultPaaQueryLimit": 10
+    },
+    "Generation": {
+      "DefaultOutputFormat": "html",
+      "DefaultIncludeTableOfContents": true,
+      "DefaultIncludeSchema": true,
+      "DefaultIncludeMetaTags": true,
+      "DefaultSchemaType": "BlogPosting"
+    },
+    "Quotations": {
+      "DefaultEnableQuotations": true,
+      "DefaultSource": "auto",
+      "DefaultQuotesPerSection": 1,
+      "DefaultRequireExternalLink": true,
+      "DefaultFallbackToGSearch": true,
+      "PresetFiles": [
+        "data/presets/seo/quotes/general.json",
+        "data/presets/seo/quotes/cleaning.json",
+        "data/presets/seo/quotes/home-services.json"
+      ]
+    },
+    "FaqBlending": {
+      "DefaultEnableFaqBlending": true,
+      "DefaultBlendMode": "inline",
+      "DefaultMaxFaqsPerSection": 1,
+      "AllowedModes": ["inline", "block", "disabled"]
+    },
+    "Links": {
+      "DefaultEnableSitemapLinking": true,
+      "DefaultEnableSlugGeneration": true,
+      "DefaultInternalLinksPerSection": 2,
+      "DefaultExternalLinksPerSection": 1,
+      "DefaultSlugWordCount": 4
+    },
+    "Headers": {
+      "DefaultIncludeService": true,
+      "DefaultIncludeCompany": true,
+      "DefaultIncludeLocation": true,
+      "DefaultMaxHeaderWords": 12,
+      "DefaultHeaderLevel": 2
+    },
+    "SectionTypeDefaults": {
+      "introduction": {
+        "WordsMin": 100,
+        "WordsMax": 200,
+        "ParagraphCount": 1,
+        "IncludeQuotation": true,
+        "IncludeFaq": false,
+        "Tone": "engaging"
+      },
+      "body": {
+        "WordsMin": 200,
+        "WordsMax": 350,
+        "ParagraphCount": 2,
+        "IncludeQuotation": false,
+        "IncludeFaq": true,
+        "Tone": "informative"
+      },
+      "conclusion": {
+        "WordsMin": 100,
+        "WordsMax": 200,
+        "ParagraphCount": 1,
+        "IncludeQuotation": true,
+        "IncludeFaq": false,
+        "Tone": "persuasive"
+      },
+      "cta": {
+        "WordsMin": 50,
+        "WordsMax": 100,
+        "ParagraphCount": 1,
+        "IncludeQuotation": false,
+        "IncludeFaq": false,
+        "Tone": "action-oriented"
+      }
+    },
+    "Validation": {
+      "RequireServiceInHeader": true,
+      "RequireCompanyInHeader": true,
+      "RequireLocationInHeader": false,
+      "MaxConsecutiveSameTransition": 0,
+      "MinTransitionDensity": 100,
+      "NoHyphens": true,
+      "MaxSentenceWords": 18,
+      "MaxParagraphWords": 180
+    }
+  }
+}

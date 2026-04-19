@@ -1,0 +1,265 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://spec-management/gsearch/config.schema.json",
+  "title": "GSearch CLI Configuration",
+  "description": "Configuration schema for the GSearch CLI application. All property names use PascalCase.",
+  "type": "object",
+  "required": ["Environment", "Database", "Search", "Engines"],
+  
+  "definitions": {
+    "Duration": {
+      "description": "Duration value: string (e.g., '2s', '500ms', '1h') or number (milliseconds)",
+      "oneOf": [
+        { "type": "string", "pattern": "^[0-9]+(ns|us|µs|ms|s|m|h)$" },
+        { "type": "number", "minimum": 0 }
+      ]
+    },
+    "Weight": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Normalized weight value (0.0-1.0). All weights in a group must sum to 1.0"
+    },
+    "EngineConfig": {
+      "type": "object",
+      "properties": {
+        "Enabled": { "type": "boolean", "default": true },
+        "Weight": { "$ref": "#/definitions/Weight", "default": 0.33 },
+        "Methods": { "type": "object" },
+        "Cooldown": { "$ref": "#/definitions/Duration", "default": "10m" },
+        "MaxRequestsPerMinute": { "type": "integer", "minimum": 1, "default": 20 }
+      }
+    }
+  },
+  
+  "properties": {
+    "Environment": {
+      "type": "string",
+      "enum": ["development", "testing", "staging", "production"],
+      "description": "Deployment environment identifier"
+    },
+    
+    "Database": {
+      "type": "object",
+      "required": ["Path"],
+      "properties": {
+        "Path": {
+          "type": "string",
+          "description": "SQLite database file path. Use ':memory:' for in-memory database"
+        },
+        "MaxOpenConns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 10
+        },
+        "MaxIdleConns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50,
+          "default": 5
+        },
+        "ConnMaxLifetime": {
+          "$ref": "#/definitions/Duration",
+          "default": "1h"
+        },
+        "EnableLogging": {
+          "type": "boolean",
+          "default": false
+        },
+        "LogLevel": {
+          "type": "string",
+          "enum": ["silent", "error", "warn", "info", "debug"],
+          "default": "error"
+        }
+      }
+    },
+    
+    "Search": {
+      "type": "object",
+      "properties": {
+        "MaxConcurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 5,
+          "description": "Maximum concurrent search operations"
+        },
+        "RequestDelay": {
+          "$ref": "#/definitions/Duration",
+          "default": "1s",
+          "description": "Delay between requests to avoid rate limiting"
+        },
+        "Timeout": {
+          "$ref": "#/definitions/Duration",
+          "default": "30s"
+        },
+        "MaxResultsPerEngine": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 30
+        },
+        "EnableProgressOutput": {
+          "type": "boolean",
+          "default": true
+        },
+        "RetryAttempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 3
+        },
+        "RetryDelay": {
+          "$ref": "#/definitions/Duration",
+          "default": "1s"
+        },
+        "MethodWeights": {
+          "type": "object",
+          "description": "Method selection weights. Values must be 0.0-1.0 and sum to 1.0",
+          "additionalProperties": { "$ref": "#/definitions/Weight" }
+        }
+      }
+    },
+    
+    "Engines": {
+      "type": "object",
+      "properties": {
+        "Google": { "$ref": "#/definitions/EngineConfig" },
+        "DuckDuckGo": { "$ref": "#/definitions/EngineConfig" },
+        "Bing": { "$ref": "#/definitions/EngineConfig" }
+      }
+    },
+    
+    "Blocking": {
+      "type": "object",
+      "properties": {
+        "DetectionEnabled": { "type": "boolean", "default": true },
+        "Cooldown": { "$ref": "#/definitions/Duration", "default": "15m" },
+        "MaxConsecutiveBlocks": { "type": "integer", "minimum": 1, "default": 3 },
+        "AutoSwitchOnBlock": { "type": "boolean", "default": true },
+        "BlockIndicators": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    
+    "Backoff": {
+      "type": "object",
+      "description": "Exponential backoff configuration for retries",
+      "properties": {
+        "InitialDelay": { "$ref": "#/definitions/Duration", "default": "1s" },
+        "MaxDelay": { "$ref": "#/definitions/Duration", "default": "60s" },
+        "Multiplier": { "type": "number", "minimum": 1.0, "default": 2.0 },
+        "Jitter": { "type": "number", "minimum": 0.0, "maximum": 1.0, "default": 0.2 }
+      }
+    },
+    
+    "Cache": {
+      "type": "object",
+      "properties": {
+        "Enabled": { "type": "boolean", "default": true },
+        "TtlDays": { "type": "integer", "minimum": 1, "maximum": 30, "default": 5 },
+        "MaxEntries": { "type": "integer", "minimum": 0, "default": 10000 },
+        "AutoCleanup": { "type": "boolean", "default": true },
+        "CleanupInterval": { "$ref": "#/definitions/Duration", "default": "1h" },
+        "TrackHitRate": { "type": "boolean", "default": true }
+      }
+    },
+    
+    "Nested": {
+      "type": "object",
+      "properties": {
+        "Enabled": { "type": "boolean", "default": false },
+        "MaxDepth": { "type": "integer", "minimum": 1, "maximum": 5, "default": 2 },
+        "KeywordsPerPage": { "type": "integer", "minimum": 1, "maximum": 20, "default": 5 },
+        "MaxPagesPerLevel": { "type": "integer", "minimum": 1, "maximum": 50, "default": 10 },
+        "CycleDetection": { "type": "boolean", "default": true },
+        "ExtractionMethod": { "type": "string", "enum": ["simple", "tfidf", "rake"], "default": "tfidf" },
+        "MinKeywordScore": { "$ref": "#/definitions/Weight", "default": 0.3 }
+      }
+    },
+    
+    "PageContent": {
+      "type": "object",
+      "properties": {
+        "FetchEnabled": { "type": "boolean", "default": true },
+        "MaxConcurrentFetches": { "type": "integer", "minimum": 1, "maximum": 20, "default": 5 },
+        "Timeout": { "$ref": "#/definitions/Duration", "default": "20s" },
+        "MaxContentSizeKb": { "type": "integer", "minimum": 1, "default": 1024 },
+        "ExtractImages": { "type": "boolean", "default": false },
+        "ExtractLinks": { "type": "boolean", "default": true }
+      }
+    },
+    
+    "Rag": {
+      "type": "object",
+      "properties": {
+        "ChunkMaxTokens": { "type": "integer", "minimum": 100, "maximum": 2048, "default": 512 },
+        "ChunkOverlapTokens": { "type": "integer", "minimum": 0, "maximum": 500, "default": 50 },
+        "MinChunkTokens": { "type": "integer", "minimum": 10, "default": 100 },
+        "IncludeMetadata": { "type": "boolean", "default": true },
+        "RelevanceScoring": { "type": "boolean", "default": true }
+      }
+    },
+    
+    "Output": {
+      "type": "object",
+      "properties": {
+        "DefaultFormat": { "type": "string", "enum": ["json", "yaml", "toml", "table"], "default": "json" },
+        "PrettyPrint": { "type": "boolean", "default": true },
+        "IncludeTimestamps": { "type": "boolean", "default": true },
+        "ColorOutput": { "type": "boolean", "default": true },
+        "ProgressBar": { "type": "boolean", "default": true },
+        "VerboseErrors": { "type": "boolean", "default": false }
+      }
+    },
+    
+    "UserAgent": {
+      "type": "object",
+      "properties": {
+        "RotationEnabled": { "type": "boolean", "default": true },
+        "RotationStrategy": { "type": "string", "enum": ["random", "sequential", "weighted", "fixed"], "default": "random" },
+        "CustomAgents": { "type": "array", "items": { "type": "string" } },
+        "UseDefaultAgents": { "type": "boolean", "default": true }
+      }
+    },
+    
+    "Logging": {
+      "type": "object",
+      "properties": {
+        "Level": { "type": "string", "enum": ["debug", "info", "warn", "error", "silent"], "default": "info" },
+        "Format": { "type": "string", "enum": ["text", "json"], "default": "text" },
+        "OutputPath": { "type": "string", "description": "Empty string for stdout" },
+        "MaxSizeMb": { "type": "integer", "minimum": 1, "default": 50 },
+        "MaxBackups": { "type": "integer", "minimum": 0, "default": 5 },
+        "Compress": { "type": "boolean", "default": true }
+      }
+    },
+    
+    "Metrics": {
+      "type": "object",
+      "properties": {
+        "Enabled": { "type": "boolean", "default": false },
+        "ExportInterval": { "$ref": "#/definitions/Duration", "default": "60s" },
+        "IncludeEngineStats": { "type": "boolean", "default": true },
+        "IncludeCacheStats": { "type": "boolean", "default": true }
+      }
+    },
+    
+    "Mock": {
+      "type": "object",
+      "description": "Testing-only configuration for mock responses",
+      "properties": {
+        "Enabled": { "type": "boolean", "default": false },
+        "MockDataPath": { "type": "string" },
+        "RecordResponses": { "type": "boolean", "default": false },
+        "PlaybackMode": { "type": "string", "enum": ["strict", "fuzzy"], "default": "strict" }
+      }
+    }
+  }
+}

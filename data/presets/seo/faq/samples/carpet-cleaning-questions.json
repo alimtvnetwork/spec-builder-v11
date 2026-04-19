@@ -1,0 +1,149 @@
+{
+  "Industry": "Carpet Cleaning",
+  "Description": "Sample FAQ questions for carpet cleaning industry with service-agnostic patterns",
+  "Questions": [
+    {
+      "Category": "Budget",
+      "Question": "How to clean a carpet on a budget?",
+      "Keywords": ["budget carpet cleaning", "affordable cleaning", "cheap carpet cleaning"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Comparison",
+      "Question": "Is it better to shampoo or steam clean carpets?",
+      "Keywords": ["steam cleaning vs shampooing", "carpet cleaning methods"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Duration",
+      "Question": "How long does it take for carpet to dry after cleaning?",
+      "Keywords": ["carpet drying time", "how long carpet dry"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Cost",
+      "Question": "How much does it cost to clean a carpet per room?",
+      "Keywords": ["carpet cleaning cost", "carpet cleaning price"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Cost Local",
+      "Question": "How much does it cost to clean a carpet per room in Melbourne?",
+      "Keywords": ["carpet cleaning Melbourne", "Melbourne carpet cleaning price"],
+      "Difficulty": "local"
+    },
+    {
+      "Category": "Value",
+      "Question": "Is it worth professionally cleaning a carpet?",
+      "Keywords": ["professional carpet cleaning worth it", "benefits professional cleaning"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "DIY",
+      "Question": "How can I deep clean my carpet myself?",
+      "Keywords": ["DIY carpet cleaning", "clean carpet yourself"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "DIY vs Pro",
+      "Question": "Is it cheaper to DIY or hire a professional cleaner?",
+      "Keywords": ["DIY vs professional", "carpet cleaning comparison"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Process",
+      "Question": "Where does the dirt go when you steam clean a carpet?",
+      "Keywords": ["steam cleaning process", "how steam cleaning works"],
+      "Difficulty": "technical"
+    },
+    {
+      "Category": "Best Method",
+      "Question": "Which method of carpet cleaning is best?",
+      "Keywords": ["best carpet cleaning method", "carpet cleaning techniques"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Disadvantages",
+      "Question": "What are the disadvantages of steam cleaning carpets?",
+      "Keywords": ["steam cleaning cons", "steam cleaning disadvantages"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Mistakes",
+      "Question": "What not to do when shampooing carpet?",
+      "Keywords": ["carpet shampooing mistakes", "carpet cleaning errors"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Drying",
+      "Question": "Is heat or AC better to dry carpet?",
+      "Keywords": ["dry carpet faster", "carpet drying tips"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Risks",
+      "Question": "How quickly can mold grow under wet carpet?",
+      "Keywords": ["mold carpet", "wet carpet dangers"],
+      "Difficulty": "safety"
+    },
+    {
+      "Category": "Deep Clean",
+      "Question": "Is it worth paying for a deep clean?",
+      "Keywords": ["deep cleaning worth it", "deep carpet cleaning"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Difficult",
+      "Question": "How to clean a really filthy carpet?",
+      "Keywords": ["heavily soiled carpet", "dirty carpet cleaning"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Pet",
+      "Question": "How to remove pet stains and odors from carpet?",
+      "Keywords": ["pet stain removal", "carpet pet odor"],
+      "Difficulty": "specialty"
+    },
+    {
+      "Category": "Frequency",
+      "Question": "How often should carpets be professionally cleaned?",
+      "Keywords": ["carpet cleaning frequency", "how often clean carpet"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Safety",
+      "Question": "Is steam cleaning safe for children and pets?",
+      "Keywords": ["safe carpet cleaning", "eco-friendly cleaning"],
+      "Difficulty": "safety"
+    },
+    {
+      "Category": "Preparation",
+      "Question": "How should I prepare for professional carpet cleaning?",
+      "Keywords": ["prepare carpet cleaning", "before carpet cleaning"],
+      "Difficulty": "common"
+    }
+  ],
+  "ServiceVariables": {
+    "ServiceName": "Carpet Cleaning",
+    "ServiceNameLowercase": "carpet cleaning",
+    "ServiceNameLowercasePlural": "carpets",
+    "ServiceUrlSlug": "carpet-cleaning",
+    "ServiceAction": "cleaning",
+    "ServiceMethodPrimary": "steam cleaning",
+    "ServiceMethodSecondary": "shampooing",
+    "ServiceEquipment": "industrial extraction",
+    "ServiceBenefit": "sanitization",
+    "ServiceResult": "pristine floors"
+  },
+  "MetricRanges": {
+    "TrustPercentage": {"min": 2.51, "max": 2.97, "decimals": 2},
+    "MonthlyImprovementPercentage": {"min": 1.0, "max": 5.0, "decimals": 2},
+    "EffectivenessPercentage": {"min": 85.0, "max": 99.0, "decimals": 2},
+    "DryingTimeMinimumHours": {"values": [4, 6]},
+    "DryingTimeMaximumHours": {"values": [8, 12, 24]},
+    "PriceRangeMinimum": {"values": [30, 40, 50]},
+    "PriceRangeMaximum": {"values": [60, 80, 100]},
+    "MoldGrowthTimeMinimumHours": {"value": 24},
+    "MoldGrowthTimeMaximumHours": {"value": 48}
+  }
+}

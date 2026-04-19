@@ -1,0 +1,895 @@
+# Phase 2.2: Local Whisper Transcription Service
+
+**Version:** 2.0.0  
+**Status:** Draft  
+**Updated:** 2026-03-09
+
+---
+
+## Overview
+
+Go backend service integrating whisper.cpp for private, local speech-to-text transcription. No external API dependencies - all processing happens on the server.
+
+**Cross-References:**
+- [Voice Resilience](./20-voice-resilience.md)
+- [Audio Capture](./21-audio-capture.md)
+- [AI Integration](../06-ai-integration/00-overview.md)
+
+---
+
+## 1. Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         Frontend                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  AudioRecording (Blob) + Metadata                                │    │
+│  └──────────────────────────────┬──────────────────────────────────┘    │
+└─────────────────────────────────┼───────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    Go HTTP Server                                        │
+│                                                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  POST /api/v1/audio/transcribe                                  │    │
+│  │  ├── Parse multipart/form-data                                  │    │
+│  │  ├── Validate audio format (webm, mp3, wav, ogg)               │    │
+│  │  ├── Store to temp file                                        │    │
+│  │  └── Queue transcription job                                   │    │
+│  └──────────────────────────────┬──────────────────────────────────┘    │
+│                                 │                                        │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  WebSocket /api/v1/audio/stream                                 │    │
+│  │  ├── Real-time PCM streaming                                   │    │
+│  │  ├── Chunked transcription                                     │    │
+│  │  └── Progressive results                                       │    │
+│  └──────────────────────────────┬──────────────────────────────────┘    │
+│                                 │                                        │
+└─────────────────────────────────┼───────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    Transcription Worker                                  │
+│                                                                          │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  Job Queue (Channel-based)                                      │    │
+│  │  ├── Max concurrent: 2 (based on CPU)                          │    │
+│  │  ├── Timeout: 5 minutes per job                                │    │
+│  │  └── Retry on failure: 3 attempts                              │    │
+│  └──────────────────────────────┬──────────────────────────────────┘    │
+│                                 │                                        │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  Audio Preprocessor (FFmpeg)                                    │    │
+│  │  ├── Convert any format → WAV (16kHz mono)                     │    │
+│  │  ├── Normalize audio levels                                    │    │
+│  │  └── Split long audio (>30s) into chunks                       │    │
+│  └──────────────────────────────┬──────────────────────────────────┘    │
+│                                 │                                        │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  whisper.cpp (Large-v3 Model)                                   │    │
+│  │  ├── Model path: /models/whisper-large-v3.bin                  │    │
+│  │  ├── Language: auto-detect                                     │    │
+│  │  ├── Output: JSON with timestamps                              │    │
+│  │  └── VAD: enabled (skip silence)                               │    │
+│  └──────────────────────────────┬──────────────────────────────────┘    │
+│                                 │                                        │
+└─────────────────────────────────┼───────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         SQLite Database                                  │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  audio_recordings                                               │    │
+│  │  ├── id, project_id, file_path                                 │    │
+│  │  ├── transcription, transcription_status                       │    │
+│  │  └── segments (JSON), language, confidence                     │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Whisper Model Selection
+
+### Model Comparison
+
+| Model | Size | Speed | Quality | VRAM | Use Case |
+|-------|------|-------|---------|------|----------|
+| tiny | 39MB | ~32x | Low | 1GB | Testing only |
+| base | 74MB | ~16x | Fair | 1GB | Fast drafts |
+| small | 244MB | ~6x | Good | 2GB | General use |
+| medium | 769MB | ~2x | Great | 5GB | Production |
+| large-v3 | 1.5GB | 1x | Best | 10GB | Recommended |
+
+### Recommended: `whisper-large-v3`
+
+**Rationale:**
+- Best accuracy for multi-language support
+- Superior handling of accents and noisy audio
+- Improved timestamp accuracy
+- Local execution = no API costs or data privacy concerns
+
+**Hardware Requirements:**
+- CPU: 8+ cores recommended
+- RAM: 16GB minimum
+- GPU: Optional (CUDA/Metal acceleration)
+
+---
+
+## 3. Go Service Implementation
+
+### Project Structure
+
+```
+internal/
+├── ai/
+│   └── whisper/
+│       ├── service.go          # Main service
+│       ├── worker.go           # Job processing
+│       ├── preprocessor.go     # FFmpeg integration
+│       ├── parser.go           # Output parsing
+│       └── models.go           # Types
+├── api/
+│   └── handlers/
+│       └── audio.go            # HTTP handlers
+└── storage/
+    └── audio.go                # File storage
+```
+
+### Core Service
+
+```go
+// internal/ai/whisper/service.go
+
+package whisper
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sync"
+	"time"
+)
+
+// Config for whisper service
+type Config struct {
+	ModelPath      string        // Path to .bin model file
+	WhisperBinary  string        // Path to whisper.cpp binary
+	TempDir        string        // Temp directory for audio files
+	MaxConcurrent  int           // Max concurrent transcriptions
+	JobTimeout     time.Duration // Timeout per job
+	MaxRetries     int           // Retry attempts on failure
+}
+
+// Service manages whisper transcription
+type Service struct {
+	config      Config
+	jobQueue    chan *TranscriptionJob
+	workerWg    sync.WaitGroup
+	preprocessor *Preprocessor
+	
+	mu          sync.RWMutex
+	activeJobs  map[string]*TranscriptionJob
+}
+
+// NewService creates a whisper service
+func NewService(cfg Config) apperror.Result[Service] {
+	// Validate model exists
+	if pathutil.IsMissing(cfg.ModelPath) {
+		return apperror.FailNew[Service](
+			"E9500",
+			fmt.Sprintf("model not found: %s", cfg.ModelPath),
+		)
+	}
+	
+	// Validate binary exists
+	if pathutil.IsMissing(cfg.WhisperBinary) {
+		return apperror.FailNew[Service](
+			"E9500",
+			fmt.Sprintf("whisper binary not found: %s", cfg.WhisperBinary),
+		)
+	}
+	
+	// Create temp directory
+	if err := pathutil.EnsureDir(cfg.TempDir); err != nil {
+		return apperror.FailWrap[Service](
+			err,
+			"E9501",
+			"failed to create temp dir",
+		)
+	}
+	
+	s := Service{
+		config:      cfg,
+		jobQueue:    make(chan *TranscriptionJob, 100),
+		activeJobs:  make(map[string]*TranscriptionJob),
+		preprocessor: NewPreprocessor(),
+	}
+	
+	// Start workers
+	for i := 0; i < cfg.MaxConcurrent; i++ {
+		s.workerWg.Add(1)
+		go s.worker(i)
+	}
+	
+	return apperror.Ok(s)
+}
+
+// Transcribe processes audio file synchronously
+func (s *Service) Transcribe(context stdctx.Context, audioPath, format string) apperror.Result[TranscriptionResult] {
+	job := &TranscriptionJob{
+		Id:        generateJobId(),
+		AudioPath: audioPath,
+		Format:    format,
+		Status:    JobPending,
+		CreatedAt: time.Now(),
+		result:    make(chan *jobResult, 1),
+	}
+	
+	// Track active job
+	s.mu.Lock()
+	s.activeJobs[job.Id] = job
+	s.mu.Unlock()
+	
+	defer func() {
+		s.mu.Lock()
+		delete(s.activeJobs, job.Id)
+		s.mu.Unlock()
+	}()
+	
+	// Send to queue
+	select {
+	case s.jobQueue <- job:
+	case <-context.Done():
+		return apperror.FailWrap[TranscriptionResult](
+			context.Err(),
+			"E9502",
+			"transcription cancelled",
+		)
+	}
+	
+	// Wait for result
+	select {
+	case result := <-job.result:
+		if result.err != nil {
+			return apperror.FailWrap[TranscriptionResult](
+				result.err,
+				"E9503",
+				"transcription failed",
+			)
+		}
+
+		return apperror.Ok(*result.transcription)
+	case <-context.Done():
+		return apperror.FailWrap[TranscriptionResult](
+			context.Err(),
+			"E9502",
+			"transcription cancelled",
+		)
+	}
+}
+
+// TranscribeAsync returns immediately with job Id
+func (s *Service) TranscribeAsync(audioPath, format string, callback func(apperror.Result[TranscriptionResult])) string {
+	job := &TranscriptionJob{
+		Id:        generateJobId(),
+		AudioPath: audioPath,
+		Format:    format,
+		Status:    JobPending,
+		CreatedAt: time.Now(),
+		callback:  callback,
+	}
+	
+	s.mu.Lock()
+	s.activeJobs[job.Id] = job
+	s.mu.Unlock()
+	
+	s.jobQueue <- job
+	
+	return job.Id
+}
+
+// GetJobStatus returns current status of a job
+func (s *Service) GetJobStatus(jobId string) apperror.Result[JobStatus] {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	
+	job, ok := s.activeJobs[jobId]
+	if !ok {
+		return apperror.FailNew[JobStatus](
+			"E9504",
+			fmt.Sprintf("job not found: %s", jobId),
+		)
+	}
+	
+	return apperror.Ok(job.Status)
+}
+
+// Shutdown gracefully stops the service
+func (s *Service) Shutdown() {
+	close(s.jobQueue)
+	s.workerWg.Wait()
+}
+
+func generateJobId() string {
+	return fmt.Sprintf("job_%d", time.Now().UnixNano())
+}
+```
+
+### Worker Implementation
+
+```go
+// internal/ai/whisper/worker.go
+
+package whisper
+
+import (
+	"bytes"
+	stdctx "context"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"time"
+)
+
+// worker processes transcription jobs
+func (s *Service) worker(id int) {
+	defer s.workerWg.Done()
+	
+	for job := range s.jobQueue {
+		s.processJob(id, job)
+	}
+}
+
+func (s *Service) processJob(workerId int, job *TranscriptionJob) {
+	context, cancel := stdctx.WithTimeout(stdctx.Background(), s.config.JobTimeout)
+	defer cancel()
+	
+	job.Status = JobProcessing
+	job.StartedAt = time.Now()
+	
+	var lastErr error
+	
+	for attempt := 0; attempt <= s.config.MaxRetries; attempt++ {
+		result, err := s.runTranscription(context, job)
+		if err == nil {
+			job.Status = JobCompleted
+			s.deliverResult(job, result, nil)
+			return
+		}
+		
+		lastErr = err
+		
+		// Exponential backoff before retry
+		if attempt < s.config.MaxRetries {
+			time.Sleep(time.Duration(1<<attempt) * time.Second)
+		}
+	}
+	
+	job.Status = JobFailed
+	job.Error = lastErr.Error()
+	s.deliverResult(job, nil, lastErr)
+}
+
+func (s *Service) runTranscription(context stdctx.Context, job *TranscriptionJob) apperror.Result[TranscriptionResult] {
+	// Step 1: Preprocess audio to WAV
+	wavPath, err := s.preprocessor.ToWAV(context, job.AudioPath, job.Format)
+	if err != nil {
+		return apperror.FailWrap[TranscriptionResult](
+			err,
+			"E9505",
+			"preprocessing failed",
+		)
+	}
+	defer pathutil.Remove(wavPath)
+	
+	// Step 2: Run whisper.cpp
+	outputPath := filepath.Join(s.config.TempDir, fmt.Sprintf("%s.json", job.ID))
+	defer pathutil.Remove(outputPath)
+	
+	cmd := exec.CommandContext(context, s.config.WhisperBinary,
+		"--model", s.config.ModelPath,
+		"--file", wavPath,
+		"--output-json",
+		"--output-file", outputPath[:len(outputPath)-5], // whisper adds .json
+		"--language", "auto",
+		"--no-prints",
+		"--threads", "4",
+	)
+	
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	
+	if err := cmd.Run(); err != nil {
+		return apperror.FailWrap[TranscriptionResult](
+			err,
+			"E9506",
+			fmt.Sprintf("whisper failed, stderr: %s", stderr.String()),
+		)
+	}
+	
+	// Step 3: Parse output
+	result, err := parseWhisperOutput(outputPath)
+	if err != nil {
+		return apperror.FailWrap[TranscriptionResult](
+			err,
+			"E9507",
+			"parsing failed",
+		)
+	}
+	
+	return apperror.Ok(*result)
+}
+
+func (s *Service) deliverResult(job *TranscriptionJob, result *TranscriptionResult, err error) {
+	if job.callback != nil {
+		job.callback(result, err)
+	}
+	
+	if job.result != nil {
+		job.result <- &jobResult{
+			transcription: result,
+			err:          err,
+		}
+	}
+	
+	// Cleanup job from active map
+	s.mu.Lock()
+	delete(s.activeJobs, job.ID)
+	s.mu.Unlock()
+}
+```
+
+### Audio Preprocessor
+
+```go
+// internal/ai/whisper/preprocessor.go
+
+package whisper
+
+import (
+	"bytes"
+	stdctx "context"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+)
+
+// Preprocessor handles audio format conversion
+type Preprocessor struct {
+	ffmpegPath string
+}
+
+// NewPreprocessor creates a new preprocessor
+func NewPreprocessor() *Preprocessor {
+	return &Preprocessor{
+		ffmpegPath: "ffmpeg", // Assume in PATH
+	}
+}
+
+// ToWAV converts any audio format to 16kHz mono WAV
+func (p *Preprocessor) ToWAV(context stdctx.Context, inputPath, format string) apperror.Result[string] {
+	// Generate output path
+	outputPath := inputPath[:len(inputPath)-len(filepath.Ext(inputPath))] + "_converted.wav"
+	
+	// FFmpeg command for optimal whisper input
+	args := []string{
+		"-i", inputPath,
+		"-ar", "16000",        // 16kHz sample rate
+		"-ac", "1",            // Mono
+		"-c:a", "pcm_s16le",   // 16-bit PCM
+		"-y",                  // Overwrite
+		outputPath,
+	}
+	
+	cmd := exec.CommandContext(context, p.ffmpegPath, args...)
+	
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	
+	if err := cmd.Run(); err != nil {
+		return apperror.FailWrap[string](
+			err,
+			"E9508",
+			fmt.Sprintf("ffmpeg failed, stderr: %s", stderr.String()),
+		)
+	}
+	
+	return apperror.Ok(outputPath)
+}
+
+// NormalizeAudio applies loudness normalization
+func (p *Preprocessor) NormalizeAudio(context stdctx.Context, inputPath string) apperror.Result[string] {
+	outputPath := inputPath[:len(inputPath)-len(filepath.Ext(inputPath))] + "_normalized.wav"
+	
+	// Two-pass loudness normalization to -16 LUFS
+	args := []string{
+		"-i", inputPath,
+		"-af", "loudnorm=I=-16:LRA=11:TP=-1.5",
+		"-ar", "16000",
+		"-ac", "1",
+		"-c:a", "pcm_s16le",
+		"-y",
+		outputPath,
+	}
+	
+	cmd := exec.CommandContext(context, p.ffmpegPath, args...)
+	
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	
+	if err := cmd.Run(); err != nil {
+		return apperror.FailWrap[string](
+			err,
+			"E9509",
+			"normalization failed",
+		)
+	}
+	
+	return apperror.Ok(outputPath)
+}
+
+// GetDuration returns audio duration in seconds
+func (p *Preprocessor) GetDuration(context stdctx.Context, inputPath string) apperror.Result[float64] {
+	cmd := exec.CommandContext(context, "ffprobe",
+		"-v", "quiet",
+		"-show_entries", "format=duration",
+		"-of", "csv=p=0",
+		inputPath,
+	)
+	
+	output, err := cmd.Output()
+	if err != nil {
+		return apperror.FailWrap[float64](
+			err,
+			"E9510",
+			"ffprobe failed",
+		)
+	}
+	
+	var duration float64
+	fmt.Sscanf(string(bytes.TrimSpace(output)), "%f", &duration)
+	
+	return apperror.Ok(duration)
+}
+
+// SplitAudio splits audio into chunks of specified duration
+func (p *Preprocessor) SplitAudio(context stdctx.Context, inputPath string, chunkSeconds int) apperror.Result[[]string] {
+	durationResult := p.GetDuration(context, inputPath)
+	if durationResult.HasError() {
+		return apperror.Fail[[]string](durationResult.Error())
+	}
+
+	duration := durationResult.Value()
+	
+	if duration <= float64(chunkSeconds) {
+		return []string{inputPath}, nil
+	}
+	
+	var chunks []string
+	basePath := inputPath[:len(inputPath)-len(filepath.Ext(inputPath))]
+	
+	for i := 0; float64(i*chunkSeconds) < duration; i++ {
+		chunkPath := fmt.Sprintf("%s_chunk%d.wav", basePath, i)
+		
+		args := []string{
+			"-i", inputPath,
+			"-ss", fmt.Sprintf("%d", i*chunkSeconds),
+			"-t", fmt.Sprintf("%d", chunkSeconds),
+			"-ar", "16000",
+			"-ac", "1",
+			"-c:a", "pcm_s16le",
+			"-y",
+			chunkPath,
+		}
+		
+		cmd := exec.CommandContext(ctx, p.ffmpegPath, args...)
+		if err := cmd.Run(); err != nil {
+			// Cleanup created chunks
+			for _, c := range chunks {
+				pathutil.Remove(c)
+			}
+			return nil, err
+		}
+		
+		chunks = append(chunks, chunkPath)
+	}
+	
+	return chunks, nil
+}
+```
+
+### Output Parser
+
+```go
+// internal/ai/whisper/parser.go
+
+package whisper
+
+import (
+	"encoding/json"
+	"os"
+)
+
+// WhisperOutput represents whisper.cpp JSON output
+type WhisperOutput struct {
+	Transcription []WhisperSegment // External whisper.cpp output
+}
+
+// WhisperSegment is a single transcription segment
+type WhisperSegment struct {
+	Timestamps struct {
+		From string
+		To   string
+	}
+	Offsets struct {
+		From int64
+		To   int64
+	}
+	Text string
+}
+
+// parseWhisperOutput reads and parses whisper.cpp JSON output
+func parseWhisperOutput(jsonPath string) apperror.Result[TranscriptionResult] {
+	data, err := pathutil.ReadFile(jsonPath)
+	if err != nil {
+		return apperror.FailWrap[TranscriptionResult](
+			err,
+			"E9510",
+			"failed to read whisper output",
+		)
+	}
+	
+	var output WhisperOutput
+	if err := json.Unmarshal(data, &output); err != nil {
+		return apperror.FailWrap[TranscriptionResult](
+			err,
+			"E9511",
+			"failed to parse whisper output",
+		)
+	}
+	
+	result := &TranscriptionResult{
+		Segments: make([]Segment, 0, len(output.Transcription)),
+	}
+	
+	var fullText string
+	
+	for _, seg := range output.Transcription {
+		// Convert milliseconds to seconds
+		start := float64(seg.Offsets.From) / 1000.0
+		end := float64(seg.Offsets.To) / 1000.0
+		
+		result.Segments = append(result.Segments, Segment{
+			Start: start,
+			End:   end,
+			Text:  seg.Text,
+		})
+		
+		fullText += seg.Text + " "
+	}
+	
+	result.Text = fullText
+	
+	// Detect language from first segment (whisper provides this)
+	if len(output.Transcription) > 0 {
+		result.Language = "auto" // Could be enhanced to detect
+	}
+	
+	// Calculate duration from last segment
+	if len(result.Segments) > 0 {
+		result.Duration = result.Segments[len(result.Segments)-1].End
+	}
+	
+	return apperror.Ok(*result)
+}
+```
+
+---
+
+## 4. Data Models
+
+```go
+// internal/ai/whisper/models.go
+
+package whisper
+
+import "time"
+
+// TranscriptionResult is the output of transcription
+type TranscriptionResult struct {
+	Text      string
+	Language  string    `json:",omitempty"`
+	Duration  float64
+	Segments  []Segment `json:",omitempty"`
+}
+
+// Segment represents a timed piece of transcription
+type Segment struct {
+	Start      float64 // seconds
+	End        float64 // seconds
+	Text       string
+	Confidence float64 `json:",omitempty"`
+}
+
+// JobStatus represents transcription job state
+type JobStatus string
+
+const (
+	JobPending    JobStatus = "pending"
+	JobProcessing JobStatus = "processing"
+	JobCompleted  JobStatus = "completed"
+	JobFailed     JobStatus = "failed"
+)
+
+// TranscriptionJob represents a queued job
+type TranscriptionJob struct {
+	ID        string
+	AudioPath string
+	Format    string
+	Status    JobStatus
+	Error     string
+	CreatedAt time.Time
+	StartedAt time.Time
+	
+	// Internal fields
+	result   chan *jobResult
+	callback func(apperror.Result[TranscriptionResult])
+}
+
+type jobResult struct {
+	result apperror.Result[TranscriptionResult]
+}
+```
+
+---
+
+## 5. HTTP API
+
+### Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/audio/transcribe` | Upload and transcribe audio |
+| POST | `/api/v1/audio/transcribe/async` | Async transcription (returns job ID) |
+| GET | `/api/v1/audio/jobs/{id}` | Get job status |
+| GET | `/api/v1/audio/jobs/{id}/result` | Get transcription result |
+| WS | `/api/v1/audio/stream` | Real-time streaming transcription |
+
+### Request/Response
+
+```typescript
+// POST /api/v1/audio/transcribe
+// Content-Type: multipart/form-data
+
+// Request
+FormData {
+  audio: File,          // Audio file (webm, mp3, wav, ogg)
+  language?: string,    // Optional language hint (default: "auto")
+}
+
+// Response (200 OK)
+{
+  "Text": "Full transcription text...",
+  "Language": "en",
+  "Duration": 45.5,
+  "Segments": [
+    {
+      "Start": 0.0,
+      "End": 2.5,
+      "Text": "Hello world",
+      "Confidence": 0.95
+    }
+  ]
+}
+
+// Error Response (4xx/5xx)
+{
+  "Error": "transcription_failed",
+  "Message": "Audio format not supported",
+  "Code": "INVALID_FORMAT"
+}
+```
+
+---
+
+## 6. Database Schema
+
+```sql
+-- Transcription jobs table
+CREATE TABLE IF NOT EXISTS transcription_jobs (
+  id TEXT PRIMARY KEY,
+  recording_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+  error TEXT,
+  result_text TEXT,
+  result_language TEXT,
+  result_duration REAL,
+  result_segments TEXT,  -- JSON
+  attempts INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  started_at DATETIME,
+  completed_at DATETIME,
+  FOREIGN KEY (recording_id) REFERENCES audio_recordings(id)
+);
+
+CREATE INDEX IdxJobsStatus ON transcription_jobs(status);
+CREATE INDEX IdxJobsRecording ON transcription_jobs(recording_id);
+
+-- Update audio_recordings to reference job
+ALTER TABLE audio_recordings ADD COLUMN transcription_job_id TEXT
+  REFERENCES transcription_jobs(id);
+```
+
+---
+
+## 7. Deployment Requirements
+
+### whisper.cpp Installation
+
+```bash
+# Clone and build
+git clone https://github.com/ggerganov/whisper.cpp
+cd whisper.cpp
+make
+
+# Download large-v3 model
+bash ./models/download-ggml-model.sh large-v3
+
+# Verify
+./main -m models/ggml-large-v3.bin -f samples/jfk.wav
+```
+
+### FFmpeg Installation
+
+```bash
+# Ubuntu/Debian
+apt-get install ffmpeg
+
+# macOS
+brew install ffmpeg
+
+# Verify
+ffmpeg -version
+```
+
+### Service Configuration
+
+```yaml
+# config.yaml
+whisper:
+  model_path: "/opt/whisper/models/ggml-large-v3.bin"
+  binary_path: "/opt/whisper/main"
+  temp_dir: "/tmp/whisper"
+  max_concurrent: 2
+  job_timeout: "5m"
+  max_retries: 3
+```
+
+---
+
+## 8. Testing Checklist
+
+| Test | Description | Priority |
+|------|-------------|----------|
+| WebM transcription | WebM/Opus input produces text | Critical |
+| MP3 transcription | MP3 input produces text | Critical |
+| Long audio | 10-minute audio processes correctly | High |
+| Concurrent jobs | Multiple jobs process without deadlock | High |
+| Job timeout | Long job times out gracefully | Medium |
+| Retry on failure | Failed job retries correctly | Medium |
+| Language detection | Auto-detect works for EN/ES/FR | Medium |
+| Segment timestamps | Timestamps accurate within 0.5s | Low |
+
+---
+
+## Related Specs
+
+- [Voice Resilience](./20-voice-resilience.md)
+- [Audio Capture](./21-audio-capture.md)
+- [Audio Sync](./23-audio-sync.md)

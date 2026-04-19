@@ -1,0 +1,47 @@
+{
+  "Version": "1.0.0",
+  "Category": "confidence_metrics",
+  "Description": "Confidence analysis weights and thresholds for source reliability scoring",
+  "Values": {
+    "Weights": {
+      "SourceAgreement": 0.40,
+      "DataFreshness": 0.25,
+      "SourceCountConfidence": 0.20,
+      "AuthorityDiversity": 0.15
+    },
+    "Thresholds": {
+      "MinSourcesForHighConfidence": 10,
+      "FreshnessDecayDays": 365,
+      "ContradictionPenalty": 0.70,
+      "LowConfidenceThreshold": 0.40,
+      "HighConfidenceThreshold": 0.75
+    },
+    "ExpertDomains": [
+      "arxiv.org",
+      "scholar.google.com",
+      "researchgate.net",
+      ".edu",
+      ".gov",
+      "nature.com",
+      "sciencedirect.com",
+      "ieee.org",
+      "acm.org"
+    ],
+    "Warnings": {
+      "LowConfidence": "⚠️ Low confidence—limited or conflicting sources",
+      "ContradictionDetected": "⚠️ Findings contradictory—use caution",
+      "StaleData": "⚠️ Data may be outdated—verify with recent sources",
+      "SingleSource": "⚠️ Single source only—seek additional verification"
+    },
+    "FreshnessDecay": {
+      "HalfLifeDays": 180,
+      "MinScore": 0.10,
+      "MaxAgeDays": 1825
+    },
+    "AgreementDetection": {
+      "SimilarityThreshold": 0.85,
+      "MinClaimsForConsensus": 3,
+      "ContradictionSimilarityThreshold": 0.30
+    }
+  }
+}

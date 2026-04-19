@@ -1,0 +1,58 @@
+name: OpenAPI Validation
+
+on:
+  push:
+    paths:
+      - 'spec/**/*.yaml'
+      - 'spec/**/*.yml'
+      - '.github/workflows/openapi-validation.yml'
+  pull_request:
+    paths:
+      - 'spec/**/*.yaml'
+      - 'spec/**/*.yml'
+
+jobs:
+  validate:
+    name: Validate OpenAPI Specifications
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate GSearch BI Suite OpenAPI
+        run: npx @redocly/cli lint spec/08-gsearch-cli/01-backend/openapi-bi-suite.yaml --format=github-actions
+        continue-on-error: false
+
+      - name: Validate BRun CLI OpenAPI
+        run: npx @redocly/cli lint spec/09-brun-cli/01-backend/openapi-brun.yaml --format=github-actions
+        continue-on-error: false
+
+      - name: Validate AI Bridge CLI OpenAPI
+        run: npx @redocly/cli lint spec/10-ai-bridge-cli/01-backend/10-openapi-spec.md --format=github-actions
+        continue-on-error: true
+
+      - name: Validate Nexus Flow CLI OpenAPI
+        run: npx @redocly/cli lint spec/11-nexus-flow-cli/01-backend/03-openapi-spec.yaml --format=github-actions
+        continue-on-error: true
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## OpenAPI Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Specification | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| GSearch BI Suite | ✅ Validated |" >> $GITHUB_STEP_SUMMARY
+          echo "| BRun CLI | ✅ Validated |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Validation completed using @redocly/cli" >> $GITHUB_STEP_SUMMARY

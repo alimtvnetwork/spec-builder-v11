@@ -1,0 +1,66 @@
+{
+  "Category": "HomeServices",
+  "Description": "Quotes for plumbing, HVAC, electrical, and general home services",
+  "Quotes": [
+    {
+      "Text": "Home is where the heart is.",
+      "Author": "Pliny the Elder",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Pliny_the_Elder",
+      "RelevantTopics": ["home", "family", "comfort", "sanctuary"]
+    },
+    {
+      "Text": "A house is made of walls and beams; a home is built with love and dreams.",
+      "Author": "Ralph Waldo Emerson",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Ralph_Waldo_Emerson",
+      "RelevantTopics": ["home", "family", "love", "dreams"]
+    },
+    {
+      "Text": "The ache for home lives in all of us.",
+      "Author": "Maya Angelou",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Maya_Angelou",
+      "RelevantTopics": ["home", "comfort", "belonging", "family"]
+    },
+    {
+      "Text": "There is nothing like staying at home for real comfort.",
+      "Author": "Jane Austen",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Jane_Austen",
+      "RelevantTopics": ["home", "comfort", "relaxation", "peace"]
+    },
+    {
+      "Text": "A good home must be made, not bought.",
+      "Author": "Joyce Maynard",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Joyce_Maynard",
+      "RelevantTopics": ["home", "effort", "investment", "care"]
+    },
+    {
+      "Text": "An investment in knowledge pays the best interest.",
+      "Author": "Benjamin Franklin",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Benjamin_Franklin",
+      "RelevantTopics": ["investment", "knowledge", "expertise", "value"]
+    },
+    {
+      "Text": "The details are not the details. They make the design.",
+      "Author": "Charles Eames",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Charles_and_Ray_Eames",
+      "RelevantTopics": ["details", "craftsmanship", "quality", "design"]
+    },
+    {
+      "Text": "Safety is not expensive, it's priceless.",
+      "Author": "Anonymous",
+      "ExternalUrl": null,
+      "RelevantTopics": ["safety", "protection", "value", "family"]
+    },
+    {
+      "Text": "The strength of a nation derives from the integrity of the home.",
+      "Author": "Confucius",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Confucius",
+      "RelevantTopics": ["home", "integrity", "family", "strength"]
+    },
+    {
+      "Text": "Energy and persistence conquer all things.",
+      "Author": "Benjamin Franklin",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Benjamin_Franklin",
+      "RelevantTopics": ["energy", "persistence", "dedication", "success"]
+    }
+  ]
+}

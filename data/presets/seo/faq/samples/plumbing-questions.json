@@ -1,0 +1,116 @@
+{
+  "Industry": "Plumbing",
+  "Description": "Sample FAQ questions for plumbing industry with service-agnostic patterns",
+  "Questions": [
+    {
+      "Category": "Emergency",
+      "Question": "What should I do if I have a burst pipe?",
+      "Keywords": ["burst pipe", "emergency plumber", "water leak"],
+      "Difficulty": "emergency"
+    },
+    {
+      "Category": "Cost",
+      "Question": "How much does a plumber charge per hour?",
+      "Keywords": ["plumber cost", "plumbing rates", "hourly rate"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Cost Local",
+      "Question": "How much does a plumber cost in Sydney?",
+      "Keywords": ["Sydney plumber cost", "plumbing prices Sydney"],
+      "Difficulty": "local"
+    },
+    {
+      "Category": "DIY vs Pro",
+      "Question": "Can I fix a blocked drain myself?",
+      "Keywords": ["DIY drain cleaning", "unblock drain yourself"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Duration",
+      "Question": "How long does it take to fix a blocked drain?",
+      "Keywords": ["drain cleaning time", "how long unblock drain"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Signs",
+      "Question": "How do I know if I have a water leak?",
+      "Keywords": ["water leak signs", "detect water leak", "hidden leak"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Maintenance",
+      "Question": "How often should drains be professionally cleaned?",
+      "Keywords": ["drain maintenance", "drain cleaning frequency"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Comparison",
+      "Question": "Is hydro jetting better than snaking a drain?",
+      "Keywords": ["hydro jetting vs snake", "drain cleaning methods"],
+      "Difficulty": "technical"
+    },
+    {
+      "Category": "Hot Water",
+      "Question": "Why is my hot water not working?",
+      "Keywords": ["hot water problem", "no hot water", "water heater issue"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Hot Water",
+      "Question": "How long do hot water systems last?",
+      "Keywords": ["hot water lifespan", "water heater replacement"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Value",
+      "Question": "Is it worth calling a plumber for a dripping tap?",
+      "Keywords": ["dripping tap repair", "leaky faucet"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Prevention",
+      "Question": "How can I prevent blocked drains?",
+      "Keywords": ["prevent drain blockage", "drain maintenance tips"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Safety",
+      "Question": "How do I know if I have a gas leak?",
+      "Keywords": ["gas leak signs", "gas smell", "gas safety"],
+      "Difficulty": "safety"
+    },
+    {
+      "Category": "Licensing",
+      "Question": "Do I need a licensed plumber for renovations?",
+      "Keywords": ["licensed plumber required", "plumbing regulations"],
+      "Difficulty": "common"
+    },
+    {
+      "Category": "Warranty",
+      "Question": "What warranty should a plumber offer?",
+      "Keywords": ["plumbing warranty", "workmanship guarantee"],
+      "Difficulty": "common"
+    }
+  ],
+  "ServiceVariables": {
+    "ServiceName": "Plumbing",
+    "ServiceNameLowercase": "plumbing",
+    "ServiceNameLowercasePlural": "pipes",
+    "ServiceUrlSlug": "plumbing",
+    "ServiceAction": "repair",
+    "ServiceMethodPrimary": "hydro jetting",
+    "ServiceMethodSecondary": "drain snaking",
+    "ServiceEquipment": "professional grade tools",
+    "ServiceBenefit": "leak prevention",
+    "ServiceResult": "fully functional plumbing"
+  },
+  "MetricRanges": {
+    "ResponseTimeMinutes": {"values": [30, 45, 60]},
+    "CallOutFeeMin": {"values": [80, 100]},
+    "CallOutFeeMax": {"values": [120, 150]},
+    "BlockedDrainMin": {"values": [150, 180]},
+    "BlockedDrainMax": {"values": [300, 350, 400]},
+    "HotWaterLifespanYears": {"min": 8, "max": 15}
+  }
+}

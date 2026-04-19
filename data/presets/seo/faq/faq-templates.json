@@ -1,0 +1,146 @@
+{
+  "Version": "1.0.0",
+  "Category": "faq",
+  "Description": "FAQ generation templates for HTML and Schema markup",
+  
+  "HtmlTemplates": {
+    "Standard": {
+      "Container": "<div class=\"paragraph-parent-block seo-parent-block seo-page-block center abstract-page-container abstract-page-faq-container\"><div class=\"seo-faq-list seo-container-para contrast\">{FaqItems}</div></div>",
+      "Item": "<div class=\"faq-item\"><details class=\"faq-detail-tab\"><summary class=\"faq-summary-tab\"><h3 title=\"{H3Title}\">{Question}</h3><i class=\"faq-icon-wrapper\"><i class=\"faq-icon\"></i></i></summary><div class=\"faq-content\">{Answer}</div></details></div>"
+    },
+    "Compact": {
+      "Container": "<div class=\"faq-container compact\">{FaqItems}</div>",
+      "Item": "<div class=\"faq-item\"><h3>{Question}</h3><div class=\"faq-answer\">{Answer}</div></div>"
+    },
+    "Detailed": {
+      "Container": "<section class=\"faq-section detailed\" itemscope itemtype=\"https://schema.org/FAQPage\"><div class=\"faq-wrapper\">{FaqItems}</div></section>",
+      "Item": "<article class=\"faq-item\" itemscope itemprop=\"mainEntity\" itemtype=\"https://schema.org/Question\"><h3 itemprop=\"name\" title=\"{H3Title}\">{Question}</h3><div class=\"faq-content\" itemscope itemprop=\"acceptedAnswer\" itemtype=\"https://schema.org/Answer\"><div itemprop=\"text\">{Answer}</div></div></article>"
+    }
+  },
+
+  "SchemaTemplates": {
+    "Default": {
+      "Wrapper": "<div id=\"faq-schema-markup-section\" class=\"faq-schema-markup\"><script type=\"application/ld+json\">{Schema}</script></div>",
+      "Base": {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": []
+      },
+      "Question": {
+        "@type": "Question",
+        "name": "{QuestionText}",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "{AnswerHtml}"
+        }
+      }
+    },
+    "Minimal": {
+      "Wrapper": "<script type=\"application/ld+json\">{Schema}</script>",
+      "Base": {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": []
+      },
+      "Question": {
+        "@type": "Question",
+        "name": "{QuestionText}",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "{AnswerText}"
+        }
+      }
+    },
+    "Extended": {
+      "Wrapper": "<div id=\"faq-schema-markup-section\" class=\"faq-schema-markup\" data-version=\"{Version}\"><script type=\"application/ld+json\">{Schema}</script></div>",
+      "Base": {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "name": "{PageTitle}",
+        "description": "{PageDescription}",
+        "mainEntity": []
+      },
+      "Question": {
+        "@type": "Question",
+        "name": "{QuestionText}",
+        "dateCreated": "{DateCreated}",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "{AnswerHtml}",
+          "dateCreated": "{DateCreated}",
+          "author": {
+            "@type": "Organization",
+            "name": "{CompanyName}",
+            "url": "{CompanyUrl}"
+          }
+        }
+      }
+    }
+  },
+
+  "LinkTemplates": {
+    "CompanyStrong": "<strong title=\"{StrongTitle}\"><a href=\"{CompanyUrl}/\" title=\"{AnchorTitle}\">{CompanyName}</a></strong>",
+    "ServiceStrong": "<strong title=\"{StrongTitle}\"><a href=\"{CompanyUrl}/{ServiceUrlSlug}-in-{AreaUrlSlug}/\" title=\"{AnchorTitle}\">{ServiceName}</a></strong>",
+    "LocationEm": "<em title=\"{EmTitle}\"><a href=\"{CompanyUrl}/{ServiceUrlSlug}-in-{CityUrlSlug}/\" title=\"{AnchorTitle}\">{CityName}</a></em>",
+    "ExternalNofollow": "<a href=\"{ExternalUrl}\" title=\"{AnchorTitle}\" target=\"_blank\" rel=\"nofollow\">{SourceName}</a>",
+    "ServiceSchema": "<a href='{CompanyUrl}/{ServiceUrlSlug}-in-{AreaUrlSlug}/'>{LinkText}</a>",
+    "LocationSchema": "<a href='{CompanyUrl}/{ServiceUrlSlug}-in-{CityUrlSlug}/'>{CityName}</a>"
+  },
+
+  "TitlePatterns": {
+    "H3": "{TransitionWord}, {TopicSummary}: {BenefitDescription} growing trust by {TransitionWordLowercase} {TrustPercentage}% monthly in {AreaName}. {TransitionWord}, this validates {PositiveOutcome} over indeed {NegativeAlternative} consistently.",
+    "CompanyStrong": "{TransitionWord}, founded {CompanyFoundedYear} yet bringing {TransitionWordLowercase} {CombinedExperience} years combined expertise across {TransitionWordLowercase} {CityName}. {TransitionWord}, client loyalty growing {TrustPercentage}% monthly. {TransitionWord}, this demonstrates consistent service excellence indeed building lasting relationships.",
+    "ServiceStrong": "{TransitionWord}, professional {ServiceName} technology delivering affordability without compromising quality. {TransitionWord}, trust increasing {TrustPercentage}% monthly in {TransitionWordLowercase} {AreaName} area. {TransitionWord}, families choose value over thus expensive alternatives consistently.",
+    "LocationEm": "{TransitionWord}, {CityName} families reporting satisfaction improvements of {TransitionWordLowercase} {TrustPercentage}% quarterly choosing {TransitionWordLowercase} professional methods. {TransitionWord}, this validates effectiveness of indeed specialized {ServiceAction} approaches."
+  },
+
+  "TransitionWords": {
+    "Adding": ["Furthermore", "Moreover", "Additionally"],
+    "Contrasting": ["However", "Nevertheless", "In contrast", "On the other hand"],
+    "CauseEffect": ["Therefore", "Consequently", "Thus", "As a result", "Accordingly", "Hence"],
+    "Concluding": ["Ultimately"],
+    "Emphasis": ["Indeed", "Notably"],
+    "Sequence": ["Subsequently", "Meanwhile"],
+    "Similarity": ["Similarly", "Likewise"]
+  },
+
+  "MetricRanges": {
+    "TrustPercentage": {"Min": 2.51, "Max": 2.97, "Decimals": 2},
+    "MonthlyImprovement": {"Min": 1.0, "Max": 5.0, "Decimals": 2},
+    "Effectiveness": {"Min": 85.0, "Max": 95.0, "Decimals": 2}
+  },
+
+  "ValidationRules": {
+    "MaxSentenceWords": 18,
+    "MaxParagraphWords": 180,
+    "MinTransitionDensity": 40,
+    "MinKeywordMentions": 8,
+    "MinAreaMentions": 3,
+    "MaxAreaMentions": 4,
+    "SchemaParagraphs": 3,
+    "NoHyphens": true,
+    "NoConsecutiveSameStart": true,
+    "AnswerFirstSentence": true,
+    "CompanyInFirst2Sentences": true
+  },
+
+  "QuestionPatterns": [
+    {"Category": "Budget", "Pattern": "How to clean a {ServiceNameLowercase} on a budget?"},
+    {"Category": "Comparison", "Pattern": "Is it better to {MethodA} or {MethodB} {ServiceNameLowercasePlural}?"},
+    {"Category": "Duration", "Pattern": "How long does it take for {ServiceNameLowercase} to dry after {ServiceAction}?"},
+    {"Category": "TimeRules", "Pattern": "What is the 20-minute rule in {ServiceAction}?"},
+    {"Category": "CostGeneral", "Pattern": "How much does it cost to clean a {ServiceNameLowercase} per room?"},
+    {"Category": "CostLocal", "Pattern": "How much does it cost to clean a {ServiceNameLowercase} per room in {CityName}?"},
+    {"Category": "Value", "Pattern": "Is it worth professionally {ServiceAction} a {ServiceNameLowercase}?"},
+    {"Category": "DeepClean", "Pattern": "Is it worth paying for a deep clean?"},
+    {"Category": "Difficult", "Pattern": "How to clean a really filthy {ServiceNameLowercase}?"},
+    {"Category": "DIY", "Pattern": "How can I deep clean my {ServiceNameLowercase} myself?"},
+    {"Category": "DIYvsPro", "Pattern": "Is it cheaper to DIY or rent a cleaner?"},
+    {"Category": "Process", "Pattern": "Where does the dirt go when you steam clean a {ServiceNameLowercase}?"},
+    {"Category": "BestMethod", "Pattern": "Which method of {ServiceNameLowercase} {ServiceAction} is best?"},
+    {"Category": "Disadvantages", "Pattern": "What are the disadvantages of steam {ServiceAction} {ServiceNameLowercasePlural}?"},
+    {"Category": "Mistakes", "Pattern": "What not to do when shampooing {ServiceNameLowercase}?"},
+    {"Category": "Drying", "Pattern": "Is heat or AC better to dry {ServiceNameLowercase}?"},
+    {"Category": "Risks", "Pattern": "How quickly can mold grow under wet {ServiceNameLowercase}?"}
+  ]
+}

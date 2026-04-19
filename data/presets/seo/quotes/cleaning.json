@@ -1,0 +1,66 @@
+{
+  "Category": "Cleaning",
+  "Description": "Quotes related to cleaning, hygiene, and home maintenance",
+  "Quotes": [
+    {
+      "Text": "Cleanliness is next to godliness.",
+      "Author": "John Wesley",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/John_Wesley",
+      "RelevantTopics": ["cleanliness", "hygiene", "maintenance", "purity"]
+    },
+    {
+      "Text": "Have nothing in your houses that you do not know to be useful or believe to be beautiful.",
+      "Author": "William Morris",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/William_Morris",
+      "RelevantTopics": ["home", "organization", "minimalism", "beauty"]
+    },
+    {
+      "Text": "Cleaning your house while your kids are still growing is like shoveling the walk before it stops snowing.",
+      "Author": "Phyllis Diller",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Phyllis_Diller",
+      "RelevantTopics": ["family", "home", "humor", "parenting"]
+    },
+    {
+      "Text": "The objective of cleaning is not just to clean, but to feel happiness living within that environment.",
+      "Author": "Marie Kondo",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Marie_Kondo",
+      "RelevantTopics": ["cleaning", "happiness", "environment", "wellness"]
+    },
+    {
+      "Text": "A clean home is a happy home.",
+      "Author": "Traditional Proverb",
+      "ExternalUrl": null,
+      "RelevantTopics": ["home", "happiness", "cleanliness", "family"]
+    },
+    {
+      "Text": "Order is the shape upon which beauty depends.",
+      "Author": "Pearl S. Buck",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Pearl_S._Buck",
+      "RelevantTopics": ["order", "beauty", "organization", "harmony"]
+    },
+    {
+      "Text": "The home should be the treasure chest of living.",
+      "Author": "Le Corbusier",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Le_Corbusier",
+      "RelevantTopics": ["home", "living", "comfort", "sanctuary"]
+    },
+    {
+      "Text": "Outer order contributes to inner calm.",
+      "Author": "Gretchen Rubin",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Gretchen_Rubin",
+      "RelevantTopics": ["order", "calm", "mental health", "organization"]
+    },
+    {
+      "Text": "A place for everything, and everything in its place.",
+      "Author": "Samuel Smiles",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Samuel_Smiles",
+      "RelevantTopics": ["organization", "order", "efficiency", "tidiness"]
+    },
+    {
+      "Text": "Your home is living space, not storage space.",
+      "Author": "Francine Jay",
+      "ExternalUrl": null,
+      "RelevantTopics": ["home", "decluttering", "minimalism", "space"]
+    }
+  ]
+}

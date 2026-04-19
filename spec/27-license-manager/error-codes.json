@@ -1,0 +1,17 @@
+{
+  "title": "License Manager Error Code Index",
+  "description": "Machine-readable index for License Manager (LM). Ecosystem range: 15000-15999.",
+  "version": "1.0.0",
+  "generated": "2026-02-28",
+  "source": null,
+  "project": "LM",
+  "range": { "min": 15000, "max": 15999 },
+  "categories": [],
+  "stats": {
+    "totalCodes": 0,
+    "totalCategories": 0,
+    "retryableCodes": 0,
+    "rangeUtilization": "0/1000 (0%)",
+    "note": "Range allocated per collision Resolution 3 but no error code spec exists yet. Placeholder for future implementation."
+  }
+}

@@ -1,0 +1,35 @@
+name: Validate Error Codes
+
+on:
+  pull_request:
+    branches: ['*']
+
+jobs:
+  validate-errors:
+    name: Error Code Collision Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun run validate:errors
+
+      - name: Validate master index stats
+        run: node spec/07-error-code-registry/scripts/validate-master-stats.mjs
+
+      - name: Check utilization thresholds
+        run: node spec/07-error-code-registry/scripts/check-utilization-threshold.mjs
+
+      - run: bun run report:errors
+
+      - name: Check utilization report is up to date
+        run: |
+          if ! git diff --exit-code spec/07-error-code-registry/error-code-utilization-report.md; then
+            echo "::error::Utilization report is out of date. Run 'bun run report:errors' and commit the result."
+            exit 1
+          fi

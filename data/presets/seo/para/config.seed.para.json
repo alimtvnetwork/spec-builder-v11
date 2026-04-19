@@ -1,0 +1,137 @@
+{
+  "Para": {
+    "DefaultOutputFormat": "html",
+    "DefaultParagraphCount": 3,
+    "DefaultWordsPerParagraphMin": 120,
+    "DefaultWordsPerParagraphMax": 180,
+    "DefaultWordsPerSentenceMin": 10,
+    "DefaultWordsPerSentenceMax": 18,
+    "DefaultLinksPerParagraphMin": 2,
+    "DefaultLinksPerParagraphMax": 3,
+    "DefaultEnableSitemapLinking": true,
+    "DefaultEnableSlugGeneration": true,
+    "DefaultSlugWordCount": 4,
+    "DefaultTransitionWordRequired": true,
+    "DefaultNoConsecutiveSameStart": true,
+    "DefaultNoHyphens": true,
+    "DefaultMinTransitionDensity": 100,
+    "DefaultKeywordMentionsPerParagraph": 3,
+    "DefaultAreaMentionsPerParagraph": 2,
+    "Quotations": {
+      "DefaultEnableQuotations": false,
+      "DefaultSource": "auto",
+      "DefaultQuotesPerParagraph": 0,
+      "DefaultRequireExternalLink": true,
+      "DefaultFallbackToGSearch": true,
+      "SourcePriority": ["request", "presets", "seedable-db", "gsearch"],
+      "PresetFiles": [
+        "data/presets/seo/quotes/general.json",
+        "data/presets/seo/quotes/cleaning.json",
+        "data/presets/seo/quotes/home-services.json"
+      ],
+      "QuotationFormat": {
+        "HtmlTemplate": "<blockquote class=\"famous-quote\"><p>\"{Quote}\"</p><cite>— <a href=\"{ExternalLink}\">{Author}</a></cite></blockquote>",
+        "MarkdownTemplate": "> \"{Quote}\" — [{Author}]({ExternalLink})",
+        "TextTemplate": "\"{Quote}\" — {Author}"
+      }
+    },
+    "FaqBlending": {
+      "DefaultEnableFaqBlending": false,
+      "DefaultBlendMode": "inline",
+      "DefaultMaxFaqsPerParagraph": 1,
+      "AllowedModes": ["inline", "block", "disabled"],
+      "InlineConfig": {
+        "IntroductionPhrases": [
+          "Many customers ask,",
+          "A common question is,",
+          "Clients often wonder,",
+          "Homeowners frequently inquire,"
+        ],
+        "AnswerTransitions": [
+          "The answer is straightforward:",
+          "Simply put,",
+          "In response,",
+          "To clarify,"
+        ]
+      },
+      "BlockConfig": {
+        "HtmlTemplate": "<div class=\"faq-block\"><p class=\"faq-question\"><strong>Q: {Question}</strong></p><p class=\"faq-answer\">{Answer}</p></div>",
+        "MarkdownTemplate": "**Q: {Question}**\n\n{Answer}",
+        "Placement": "after-paragraph"
+      },
+      "SourceOptions": {
+        "AllowFromSession": true,
+        "AllowFromGSearch": true,
+        "AllowFromRequest": true
+      }
+    },
+    "ContentTypeDefaults": {
+      "service-description": {
+        "ParagraphCount": 4,
+        "WordsPerParagraph": {"Min": 150, "Max": 180},
+        "LinksPerParagraph": {"Min": 3, "Max": 4},
+        "EnableQuotations": true,
+        "QuotesPerSection": 1,
+        "EnableFaqBlending": false
+      },
+      "area-page": {
+        "ParagraphCount": 3,
+        "WordsPerParagraph": {"Min": 120, "Max": 160},
+        "LinksPerParagraph": {"Min": 2, "Max": 3},
+        "EnableQuotations": false,
+        "EnableFaqBlending": true,
+        "FaqBlendMode": "inline"
+      },
+      "category-description": {
+        "ParagraphCount": 2,
+        "WordsPerParagraph": {"Min": 100, "Max": 150},
+        "LinksPerParagraph": {"Min": 2, "Max": 3},
+        "EnableQuotations": false,
+        "EnableFaqBlending": false
+      },
+      "blog-intro": {
+        "ParagraphCount": 2,
+        "WordsPerParagraph": {"Min": 80, "Max": 120},
+        "LinksPerParagraph": {"Min": 1, "Max": 2},
+        "EnableQuotations": true,
+        "QuotesPerSection": 1,
+        "EnableFaqBlending": false
+      },
+      "blog-section": {
+        "ParagraphCount": 2,
+        "WordsPerParagraph": {"Min": 150, "Max": 180},
+        "LinksPerParagraph": {"Min": 2, "Max": 3},
+        "EnableQuotations": false,
+        "EnableFaqBlending": true,
+        "FaqBlendMode": "inline"
+      },
+      "about-section": {
+        "ParagraphCount": 3,
+        "WordsPerParagraph": {"Min": 120, "Max": 160},
+        "LinksPerParagraph": {"Min": 2, "Max": 3},
+        "EnableQuotations": true,
+        "QuotesPerSection": 1,
+        "EnableFaqBlending": false
+      },
+      "cta-block": {
+        "ParagraphCount": 1,
+        "WordsPerParagraph": {"Min": 60, "Max": 100},
+        "LinksPerParagraph": {"Min": 1, "Max": 2},
+        "EnableQuotations": false,
+        "EnableFaqBlending": false
+      }
+    },
+    "LinkPatterns": {
+      "ServiceInArea": "{CompanyUrl}/{ServiceUrlSlug}-in-{AreaUrlSlug}/",
+      "ServiceInCity": "{CompanyUrl}/{ServiceUrlSlug}-in-{CityUrlSlug}/",
+      "TopServiceInArea": "{CompanyUrl}/top-{ServiceUrlSlug}-in-{AreaUrlSlug}/",
+      "ServiceDetails": "{CompanyUrl}/{ServiceUrlSlug}-service-{AreaUrlSlug}/"
+    },
+    "Validation": {
+      "CountDisplayWordsOnly": true,
+      "ExcludeHtmlTags": true,
+      "ExcludeAttributes": true,
+      "ExcludePunctuation": true
+    }
+  }
+}

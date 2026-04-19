@@ -1,0 +1,194 @@
+{
+  "$schema": "./config.schema.json",
+  "version": "1.4.0",
+  "changelog": "Added FAQ generation templates and settings",
+  "categories": {
+    "faq": {
+      "displayName": "FAQ Settings",
+      "description": "FAQ generation configuration and templates",
+      "settings": {
+        "defaultOutputFormat": {
+          "type": "string",
+          "label": "Default Output Format",
+          "description": "Default format for FAQ output (html, markdown, text, json)",
+          "default": "html",
+          "enum": ["html", "markdown", "text", "json"]
+        },
+        "defaultIncludeSchema": {
+          "type": "boolean",
+          "label": "Include Schema by Default",
+          "description": "Include JSON-LD schema markup by default",
+          "default": true
+        },
+        "defaultSchemaVariation": {
+          "type": "boolean",
+          "label": "Enable Schema Variation",
+          "description": "Generate schema markup variations by default",
+          "default": false
+        },
+        "defaultEncodeHtmlInJson": {
+          "type": "boolean",
+          "label": "Encode HTML in JSON",
+          "description": "HTML-encode content when output format is JSON",
+          "default": true
+        },
+        "defaultWordLimit": {
+          "type": "number",
+          "label": "Default Word Limit",
+          "description": "Default maximum words per FAQ answer",
+          "default": 180,
+          "min": 50,
+          "max": 500
+        },
+        "defaultTransitionDensity": {
+          "type": "number",
+          "label": "Default Transition Density",
+          "description": "Default minimum percentage of transition words",
+          "default": 40,
+          "min": 10,
+          "max": 80
+        },
+        "defaultKeywordMentions": {
+          "type": "number",
+          "label": "Default Keyword Mentions",
+          "description": "Default minimum keyword occurrences per answer",
+          "default": 8,
+          "min": 3,
+          "max": 20
+        },
+        "defaultAreaMentions": {
+          "type": "number",
+          "label": "Default Area Mentions",
+          "description": "Default minimum area/location mentions per answer",
+          "default": 4,
+          "min": 1,
+          "max": 10
+        },
+        "defaultMaxSentenceWords": {
+          "type": "number",
+          "label": "Default Max Sentence Words",
+          "description": "Default maximum words per sentence",
+          "default": 18,
+          "min": 10,
+          "max": 50
+        },
+        "defaultMaxParagraphWords": {
+          "type": "number",
+          "label": "Default Max Paragraph Words",
+          "description": "Default maximum words per paragraph",
+          "default": 180,
+          "min": 50,
+          "max": 500
+        },
+        "defaultEnableGSearch": {
+          "type": "boolean",
+          "label": "Enable GSearch by Default",
+          "description": "Enable GSearch integration for YouTube videos by default",
+          "default": false
+        },
+        "defaultEnableSitemapLinking": {
+          "type": "boolean",
+          "label": "Enable Sitemap Linking by Default",
+          "description": "Enable sitemap-based internal linking by default",
+          "default": true
+        },
+        "defaultEnableYouTubeEmbed": {
+          "type": "boolean",
+          "label": "Enable YouTube Embed by Default",
+          "description": "Enable YouTube video embedding by default",
+          "default": false
+        },
+        "schemaParagraphs": {
+          "type": "number",
+          "label": "Schema Paragraphs",
+          "description": "Number of paragraphs in schema answer content",
+          "default": 3,
+          "min": 2,
+          "max": 5
+        },
+        "schemaTemplates": {
+          "type": "array",
+          "label": "Schema Templates",
+          "description": "Available schema template names",
+          "default": ["default", "minimal", "extended"]
+        },
+        "htmlTemplates": {
+          "type": "array",
+          "label": "HTML Templates",
+          "description": "Available HTML template names",
+          "default": ["standard", "compact", "detailed"]
+        },
+        "transitionWords": {
+          "type": "array",
+          "label": "Transition Words",
+          "description": "Approved transition words for FAQ content",
+          "default": [
+            "Furthermore", "Moreover", "Additionally", "Consequently", "Therefore",
+            "However", "Nevertheless", "Thus", "Indeed", "Notably",
+            "Subsequently", "Meanwhile", "Ultimately", "Accordingly", "Hence",
+            "Similarly", "Likewise", "In contrast", "On the other hand", "As a result"
+          ]
+        },
+        "trustPercentageMin": {
+          "type": "number",
+          "label": "Trust Percentage Min",
+          "description": "Minimum value for trust metrics (decimal)",
+          "default": 2.51,
+          "min": 0.01,
+          "max": 5.0
+        },
+        "trustPercentageMax": {
+          "type": "number",
+          "label": "Trust Percentage Max",
+          "description": "Maximum value for trust metrics (decimal)",
+          "default": 2.97,
+          "min": 0.01,
+          "max": 5.0
+        },
+        "monthlyImprovementMin": {
+          "type": "number",
+          "label": "Monthly Improvement Min",
+          "description": "Minimum value for improvement metrics",
+          "default": 1.0,
+          "min": 0.1,
+          "max": 10.0
+        },
+        "monthlyImprovementMax": {
+          "type": "number",
+          "label": "Monthly Improvement Max",
+          "description": "Maximum value for improvement metrics",
+          "default": 5.0,
+          "min": 0.1,
+          "max": 10.0
+        },
+        "effectivenessMin": {
+          "type": "number",
+          "label": "Effectiveness Min",
+          "description": "Minimum value for effectiveness percentages",
+          "default": 85.0,
+          "min": 50.0,
+          "max": 99.0
+        },
+        "effectivenessMax": {
+          "type": "number",
+          "label": "Effectiveness Max",
+          "description": "Maximum value for effectiveness percentages",
+          "default": 95.0,
+          "min": 50.0,
+          "max": 99.0
+        },
+        "questionPatterns": {
+          "type": "array",
+          "label": "Question Patterns",
+          "description": "Available FAQ question pattern categories",
+          "default": [
+            "Budget", "Comparison", "Duration", "TimeRules", "CostGeneral",
+            "CostLocal", "Value", "DeepClean", "Difficult", "DIY",
+            "DIYvsPro", "Process", "BestMethod", "Disadvantages", "Mistakes",
+            "Drying", "Risks"
+          ]
+        }
+      }
+    }
+  }
+}

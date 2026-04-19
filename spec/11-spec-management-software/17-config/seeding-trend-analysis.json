@@ -1,0 +1,43 @@
+{
+  "Version": "1.0.0",
+  "Category": "trend_analysis",
+  "Description": "Trend analysis weights for composite scoring of technologies, languages, and market signals",
+  "Values": {
+    "CompositeScoreWeights": {
+      "GithubStars": 0.30,
+      "JobPostings": 0.40,
+      "StackoverflowQuestions": 0.20,
+      "PackageDownloads": 0.10
+    },
+    "SignalNormalization": {
+      "GithubStarsMax": 500000,
+      "JobPostingsMax": 100000,
+      "StackoverflowQuestionsMax": 50000,
+      "PackageDownloadsMax": 1000000000
+    },
+    "GrowthRateWeights": {
+      "WeekOverWeek": 0.15,
+      "MonthOverMonth": 0.35,
+      "QuarterOverQuarter": 0.30,
+      "YearOverYear": 0.20
+    },
+    "Visualization": {
+      "TopNResults": 10,
+      "ChartDpi": 300,
+      "FigureWidth": 12,
+      "FigureHeight": 6
+    },
+    "DataSources": {
+      "GithubApiWeight": 1.0,
+      "StackoverflowApiWeight": 1.0,
+      "IndeedScraperWeight": 0.9,
+      "NpmRegistryWeight": 0.95,
+      "PypiRegistryWeight": 0.95
+    },
+    "FreshnessRequirements": {
+      "MaxDataAgeHours": 24,
+      "StalePenalty": 0.80,
+      "CacheTtlMinutes": 60
+    }
+  }
+}

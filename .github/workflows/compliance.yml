@@ -1,0 +1,20 @@
+name: Compliance Drift Detection
+
+on:
+  pull_request:
+    paths:
+      - 'internal/**'
+      - 'pkg/**'
+      - 'config.seed.json'
+
+jobs:
+  drift-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Run Drift Detection Suite
+        run: bash scripts/drift-detect-all.sh

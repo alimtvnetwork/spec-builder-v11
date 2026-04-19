@@ -1,0 +1,590 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Ubuntu+Mono:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* VS Code Dark+ theme palette */
+    --background: 220 13% 12%;
+    --foreground: 220 13% 87%;
+
+    --card: 220 13% 15%;
+    --card-foreground: 220 13% 87%;
+
+    --popover: 220 13% 15%;
+    --popover-foreground: 220 13% 87%;
+
+    --primary: 207 82% 62%;
+    --primary-foreground: 220 13% 7%;
+
+    --secondary: 220 13% 18%;
+    --secondary-foreground: 220 13% 87%;
+
+    --muted: 220 13% 20%;
+    --muted-foreground: 220 9% 55%;
+
+    --accent: 220 13% 22%;
+    --accent-foreground: 220 13% 87%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 220 13% 22%;
+    --input: 220 13% 22%;
+    --ring: 207 82% 62%;
+
+    --radius: 0.5rem;
+
+    /* Dashboard-specific tokens */
+    --success: 142 72% 45%;
+    --success-foreground: 220 13% 7%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 220 13% 7%;
+    --info: 207 82% 62%;
+    --info-foreground: 220 13% 7%;
+
+    /* VS Code accent colors */
+    --vscode-blue: 207 82% 62%;
+    --vscode-green: 142 72% 45%;
+    --vscode-orange: 28 80% 58%;
+    --vscode-purple: 261 60% 68%;
+    --vscode-yellow: 50 95% 64%;
+    --vscode-red: 0 72% 55%;
+
+    --glow-success: 0 0 30px hsl(142 72% 45% / 0.12);
+    --glow-info: 0 0 30px hsl(207 82% 62% / 0.12);
+
+    /* Reading theme tokens */
+    --heading-gradient-from: 252 85% 70%;
+    --heading-gradient-to: 330 85% 70%;
+    --link-color: 252 85% 72%;
+    --highlight-glow: 252 85% 65%;
+    --table-row-hover: 252 40% 15%;
+    --table-header-bg: 220 13% 16%;
+
+    --sidebar-background: 220 13% 13%;
+    --sidebar-foreground: 220 13% 87%;
+    --sidebar-primary: 207 82% 62%;
+    --sidebar-primary-foreground: 220 13% 7%;
+    --sidebar-accent: 220 13% 20%;
+    --sidebar-accent-foreground: 220 13% 87%;
+    --sidebar-border: 220 13% 22%;
+    --sidebar-ring: 207 82% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Ubuntu', system-ui, sans-serif;
+  }
+
+  code, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Spec file markdown viewer */
+.prose-spec {
+  font-size: 0.875rem;
+  line-height: 1.85;
+  color: hsl(var(--foreground) / 0.85);
+}
+
+/* ── Headings ── */
+
+.prose-spec h1,
+.prose-spec h2,
+.prose-spec h3,
+.prose-spec h4 {
+  font-family: 'Ubuntu', system-ui, sans-serif;
+  color: hsl(var(--foreground));
+  margin-top: 1.75em;
+  margin-bottom: 0.75em;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* H1 & H2: Purple→Pink gradient text with hover glow */
+.prose-spec h1,
+.prose-spec h2 {
+  background: linear-gradient(135deg, hsl(var(--heading-gradient-from)), hsl(var(--heading-gradient-to)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: filter 0.3s ease;
+}
+
+.prose-spec h1:hover,
+.prose-spec h2:hover {
+  filter: brightness(1.2) saturate(1.1);
+}
+
+.prose-spec h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 1rem 0 0.6rem;
+}
+
+.prose-spec h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 1.8rem 0 0.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+  padding-bottom: 0.4em;
+}
+
+/* H3: Left-border slide */
+.prose-spec h3 {
+  font-size: 1.05rem;
+  color: hsl(var(--vscode-purple));
+  padding-left: 0.65rem;
+  border-left: 3px solid hsl(var(--vscode-purple) / 0.5);
+  transition: color 0.2s ease, border-color 0.2s ease, padding-left 0.2s ease;
+}
+
+.prose-spec h3:hover {
+  color: hsl(var(--vscode-purple));
+  border-color: hsl(var(--vscode-purple));
+  padding-left: 0.85rem;
+}
+
+.prose-spec h4 {
+  font-size: 0.95rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── Paragraphs — background highlight on hover ── */
+
+.prose-spec p {
+  margin-bottom: 1em;
+  padding: 0.15em 0.35em;
+  margin-left: -0.35em;
+  margin-right: -0.35em;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.2s ease;
+}
+
+.prose-spec p:hover {
+  background: hsl(var(--highlight-glow) / 0.04);
+}
+
+/* ── Links — sliding underline ── */
+
+.prose-spec a {
+  color: hsl(var(--link-color));
+  text-decoration: none;
+  position: relative;
+  display: inline;
+  transition: color 0.15s ease;
+}
+
+.prose-spec a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background: linear-gradient(90deg, hsl(var(--heading-gradient-from)), hsl(var(--heading-gradient-to)));
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.prose-spec a:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.prose-spec a:hover {
+  color: hsl(var(--heading-gradient-from));
+}
+
+/* ── Strong & Em ── */
+
+.prose-spec strong {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.prose-spec em {
+  color: hsl(var(--foreground) / 0.75);
+  font-style: italic;
+}
+
+/* ── Inline code — micro-lift on hover ── */
+
+.prose-spec code {
+  font-family: 'Ubuntu Mono', 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  color: hsl(var(--vscode-orange));
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.prose-spec code:hover {
+  box-shadow: 0 0 0 2px hsl(var(--highlight-glow) / 0.15);
+  transform: translateY(-1px);
+}
+
+/* ── Pre/Code blocks ── */
+
+.prose-spec pre {
+  margin: 1em 0;
+  border-radius: 8px;
+  border: 1px solid hsl(var(--border));
+  overflow-x: auto;
+}
+
+.prose-spec pre code {
+  display: block;
+  padding: 1em 1.25em;
+  background: hsl(220 13% 10%);
+  border: none;
+  border-radius: 0;
+  font-family: 'Ubuntu Mono', 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: hsl(var(--foreground) / 0.9);
+  box-shadow: none;
+  transform: none;
+}
+
+.prose-spec pre code:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── Code block line hover ── */
+
+.code-line-hover:hover {
+  background: hsl(220 15% 16%) !important;
+}
+
+.code-line-hover:hover td:first-child {
+  background: hsl(220 14% 13%) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+.code-line-selected {
+  background: hsl(var(--primary) / 0.12) !important;
+  box-shadow: inset 3px 0 0 hsl(var(--primary) / 0.6);
+}
+
+.code-line-selected td:first-child {
+  color: hsl(var(--primary)) !important;
+  background: hsl(220 14% 13%) !important;
+}
+
+.code-line-selected:hover {
+  background: hsl(var(--primary) / 0.18) !important;
+}
+
+/* ── Code block wrapper hover glow ── */
+.code-block-glow {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.code-block-glow:hover {
+  transform: translateY(-2px);
+}
+
+/* ── Code block gradient bottom border ── */
+.code-block-glow::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    hsl(252 85% 60%),
+    hsl(330 85% 60%),
+    hsl(38 92% 55%),
+    hsl(194 66% 55%),
+    hsl(142 72% 55%)
+  );
+  opacity: 0.6;
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+/* ── Syntax highlighting overrides (design system tokens) ── */
+.hljs-keyword,
+.hljs-type,
+.hljs-built_in,
+.hljs-literal {
+  color: hsl(var(--primary)) !important;
+}
+
+.hljs-string,
+.hljs-attr,
+.hljs-property {
+  color: hsl(var(--accent)) !important;
+}
+
+.hljs-number,
+.hljs-variable,
+.hljs-regexp,
+.hljs-template-variable {
+  color: hsl(var(--warning)) !important;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: hsl(var(--muted-foreground)) !important;
+  font-style: italic !important;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-tag {
+  color: hsl(var(--foreground) / 0.85) !important;
+}
+
+.hljs-name {
+  color: hsl(var(--info)) !important;
+}
+
+.hljs-selector-class,
+.hljs-selector-id {
+  color: hsl(var(--warning)) !important;
+}
+
+.hljs-meta {
+  color: hsl(var(--muted-foreground) / 0.7) !important;
+}
+
+/* ── Lists — slide right on hover ── */
+
+.prose-spec ul,
+.prose-spec ol {
+  margin: 0.75em 0;
+  padding-left: 1.5em;
+}
+
+.prose-spec ul { list-style-type: none; }
+.prose-spec ol { list-style-type: decimal; }
+
+.prose-spec li {
+  margin-bottom: 0.35em;
+  position: relative;
+  padding-left: 0.75em;
+  transition: transform 0.15s ease, background 0.2s ease;
+  border-radius: 4px;
+}
+
+.prose-spec ul > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: hsl(var(--muted-foreground) / 0.4);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.prose-spec li:hover {
+  transform: translateX(3px);
+}
+
+.prose-spec ul > li:hover::before {
+  transform: scale(1.3);
+  background: hsl(var(--heading-gradient-from));
+}
+
+.prose-spec li > ul,
+.prose-spec li > ol {
+  margin-top: 0.25em;
+}
+
+/* ── Blockquotes — slide right with glow ── */
+
+.prose-spec blockquote {
+  margin: 1em 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid transparent;
+  border-image: linear-gradient(to bottom,
+    hsl(var(--heading-gradient-from)),
+    hsl(var(--heading-gradient-to))
+  ) 1;
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.prose-spec blockquote:hover {
+  background: hsl(var(--muted) / 0.5);
+  transform: translateX(3px);
+  box-shadow: -4px 0 12px hsl(var(--heading-gradient-from) / 0.1);
+}
+
+/* ── HR — gradient fade ── */
+
+.prose-spec hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    hsl(var(--heading-gradient-from) / 0.4),
+    hsl(var(--heading-gradient-to) / 0.4),
+    transparent
+  );
+  margin: 1.5em 0;
+}
+
+  /* ── Tables — row hover with left accent ── */
+
+  .prose-spec .table-wrapper {
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 3px hsl(var(--foreground) / 0.04);
+    overflow: hidden;
+    margin: 1em 0;
+  }
+
+  .prose-spec table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+
+  .prose-spec thead {
+    background: hsl(var(--table-header-bg));
+  }
+
+  .prose-spec th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: hsl(var(--muted-foreground));
+    padding: 0.6em 0.75em;
+    border-bottom: 2px solid hsl(var(--border));
+    font-family: 'Ubuntu', system-ui, sans-serif;
+  }
+
+  .prose-spec td {
+    padding: 0.5em 0.75em;
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
+    vertical-align: top;
+  }
+
+  .prose-spec td code {
+    font-size: 0.85em;
+    color: hsl(var(--vscode-green));
+  }
+
+  .prose-spec tr {
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  }
+
+  .prose-spec tbody tr:nth-child(odd) {
+    background: hsl(var(--muted) / 0.15);
+  }
+
+  .prose-spec tbody tr:hover {
+    background: hsl(var(--table-row-hover));
+    box-shadow: inset 3px 0 0 hsl(var(--primary) / 0.5);
+  }
+
+.prose-spec img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+/* ── Checklists ── */
+
+.prose-spec .contains-task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose-spec .task-list-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  padding: 0.25em 0.4em;
+  border-radius: 6px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.prose-spec .task-list-item:hover {
+  transform: translateX(3px);
+  background: hsl(var(--primary) / 0.06);
+}
+
+/* Hide native checkbox, replace with custom */
+.prose-spec .task-list-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 4px;
+  border: 1.5px solid hsl(var(--muted-foreground) / 0.5);
+  background: hsl(var(--muted) / 0.3);
+  cursor: default;
+  position: relative;
+  top: 2px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.prose-spec .task-list-item input[type="checkbox"]:checked {
+  border-color: hsl(var(--success));
+  background: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success) / 0.8));
+}
+
+.prose-spec .task-list-item input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.prose-spec .task-list-item:hover input[type="checkbox"] {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.3);
+}
+
+/* Strikethrough for checked items */
+.prose-spec .task-list-item:has(input[type="checkbox"]:checked) > *:not(input) {
+  text-decoration: line-through;
+  text-decoration-color: hsl(var(--muted-foreground) / 0.4);
+  opacity: 0.65;
+}
+
+/* Fallback: style the entire li text when checked */
+.prose-spec .task-list-item:has(input[type="checkbox"]:checked) {
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── Selection color ── */
+
+.prose-spec ::selection {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--foreground));
+}

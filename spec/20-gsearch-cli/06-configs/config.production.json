@@ -1,0 +1,181 @@
+{
+  "$schema": "./config.schema.json",
+  "Environment": "production",
+  
+  "Database": {
+    "Path": "${SEARCH_DB_PATH:/var/lib/gsearch/search.db.sqlite}",
+    "MaxOpenConns": 25,
+    "MaxIdleConns": 10,
+    "ConnMaxLifetime": "1h",
+    "EnableLogging": false,
+    "LogLevel": "error"
+  },
+  
+  "Search": {
+    "MaxConcurrency": 10,
+    "RequestDelay": "500ms",
+    "Timeout": "45s",
+    "MaxResultsPerEngine": 50,
+    "EnableProgressOutput": false,
+    "RetryAttempts": 3,
+    "RetryDelay": "2s",
+    "MethodWeights": {
+      "Html": 0.35,
+      "GoogleApi": 0.30,
+      "DuckDuckGo": 0.25,
+      "Bing": 0.10
+    }
+  },
+  
+  "Engines": {
+    "Google": {
+      "Enabled": true,
+      "Weight": 0.35,
+      "Methods": {
+        "Html": {
+          "Enabled": true,
+          "Weight": 0.30
+        },
+        "CustomSearch": {
+          "Enabled": true,
+          "Weight": 0.50,
+          "ApiKey": "${GOOGLE_CUSTOM_SEARCH_API_KEY}",
+          "SearchEngineId": "${GOOGLE_SEARCH_ENGINE_ID}",
+          "DailyQuotaLimit": 10000
+        },
+        "SearchConsole": {
+          "Enabled": true,
+          "Weight": 0.20,
+          "CredentialsPath": "${GOOGLE_CREDENTIALS_PATH:/etc/gsearch/google-credentials.json}"
+        }
+      },
+      "Cooldown": "15m",
+      "MaxRequestsPerMinute": 30
+    },
+    "DuckDuckGo": {
+      "Enabled": true,
+      "Weight": 0.35,
+      "Methods": {
+        "Html": {
+          "Enabled": true,
+          "Weight": 0.50
+        },
+        "InstantAnswer": {
+          "Enabled": true,
+          "Weight": 0.50
+        }
+      },
+      "Cooldown": "10m",
+      "MaxRequestsPerMinute": 30
+    },
+    "Bing": {
+      "Enabled": true,
+      "Weight": 0.30,
+      "Methods": {
+        "Html": {
+          "Enabled": true,
+          "Weight": 0.40
+        },
+        "Api": {
+          "Enabled": true,
+          "Weight": 0.60,
+          "ApiKey": "${BING_SEARCH_API_KEY}",
+          "MaxRequestsPerSecond": 10
+        }
+      },
+      "Cooldown": "10m",
+      "MaxRequestsPerMinute": 30
+    }
+  },
+  
+  "Blocking": {
+    "DetectionEnabled": true,
+    "Cooldown": "30m",
+    "MaxConsecutiveBlocks": 5,
+    "AutoSwitchOnBlock": true,
+    "BlockIndicators": {
+      "Google": ["unusual traffic", "captcha", "consent.google", "sorry/index"],
+      "DuckDuckGo": ["rate limit", "blocked"],
+      "Bing": ["blocked", "unusual activity"]
+    }
+  },
+  
+  "Backoff": {
+    "InitialDelay": "1s",
+    "MaxDelay": "60s",
+    "Multiplier": 2.0,
+    "Jitter": 0.2
+  },
+  
+  "Cache": {
+    "Enabled": true,
+    "TtlDays": 6,
+    "MaxEntries": 50000,
+    "AutoCleanup": true,
+    "CleanupInterval": "6h",
+    "TrackHitRate": true
+  },
+  
+  "Nested": {
+    "Enabled": true,
+    "MaxDepth": 3,
+    "KeywordsPerPage": 5,
+    "MaxPagesPerLevel": 20,
+    "CycleDetection": true,
+    "ExtractionMethod": "tfidf",
+    "MinKeywordScore": 0.40
+  },
+  
+  "PageContent": {
+    "FetchEnabled": true,
+    "MaxConcurrentFetches": 10,
+    "Timeout": "30s",
+    "MaxContentSizeKb": 2048,
+    "ExtractImages": true,
+    "ExtractLinks": true
+  },
+  
+  "Rag": {
+    "ChunkMaxTokens": 512,
+    "ChunkOverlapTokens": 50,
+    "MinChunkTokens": 100,
+    "IncludeMetadata": true,
+    "RelevanceScoring": true
+  },
+  
+  "Output": {
+    "DefaultFormat": "json",
+    "PrettyPrint": false,
+    "IncludeTimestamps": true,
+    "ColorOutput": false,
+    "ProgressBar": false,
+    "VerboseErrors": false
+  },
+  
+  "UserAgent": {
+    "RotationEnabled": true,
+    "RotationStrategy": "weighted",
+    "CustomAgents": [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0"
+    ],
+    "UseDefaultAgents": true
+  },
+  
+  "Logging": {
+    "Level": "warn",
+    "Format": "json",
+    "OutputPath": "${LOG_PATH:/var/log/gsearch/search.log}",
+    "MaxSizeMb": 100,
+    "MaxBackups": 10,
+    "Compress": true
+  },
+  
+  "Metrics": {
+    "Enabled": true,
+    "ExportInterval": "60s",
+    "IncludeEngineStats": true,
+    "IncludeCacheStats": true
+  }
+}

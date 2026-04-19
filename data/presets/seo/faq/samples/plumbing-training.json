@@ -1,0 +1,76 @@
+{
+  "Company": "Metro Plumbing Solutions",
+  "Website": "https://metroplumbing.com.au",
+  "TrainingData": [
+    {
+      "Type": "text",
+      "Content": "# Metro Plumbing Solutions - Professional Plumbing Services\n\n## About Our Company\n\nMetro Plumbing Solutions is Sydney's trusted plumbing service provider, established in 2018 with over 25 years of combined industry experience. We specialize in emergency repairs, installations, and preventive maintenance for residential and commercial properties.\n\n## Our Services\n\n### Emergency Plumbing\nAvailable 24/7 for urgent situations:\n- Burst pipes and water leaks\n- Blocked drains and toilets\n- Hot water system failures\n- Gas leak detection\n- Flooding and water damage prevention\n\n### Drain Cleaning\nProfessional drain maintenance:\n- Hydro jetting for stubborn blockages\n- CCTV drain inspections\n- Root removal from pipes\n- Preventive drain maintenance\n- Grease trap cleaning\n\n### Hot Water Systems\nComplete hot water solutions:\n- Gas, electric, and solar installations\n- Heat pump systems\n- Tankless water heater setup\n- Repairs and maintenance\n- Energy efficiency upgrades\n\n### General Plumbing\nEveryday plumbing needs:\n- Tap and toilet repairs\n- Pipe relining and replacement\n- Bathroom renovations\n- Kitchen plumbing\n- Rainwater tank installation\n\n## Equipment\n\nWe use industry-leading equipment:\n- High-pressure hydro jetters (4000 PSI)\n- CCTV pipe inspection cameras\n- Electronic leak detection devices\n- Pipe relining technology\n- Gas detection equipment\n\n## Service Areas\n\nServicing greater Sydney including:\n- Sydney CBD and Eastern Suburbs\n- North Shore (Chatswood, Lane Cove)\n- Inner West (Newtown, Marrickville)\n- South Sydney (Hurstville, Kogarah)\n- Western Sydney (Parramatta, Blacktown)\n\n## Why Choose Metro Plumbing?\n\n1. **Licensed Master Plumbers**: All technicians fully licensed and insured\n2. **24/7 Emergency Service**: Available around the clock\n3. **Upfront Pricing**: Fixed quotes before work begins\n4. **Lifetime Workmanship Warranty**: We stand behind our work\n5. **Same-Day Service**: Most jobs completed within 24 hours\n\n## Common Questions\n\n**How quickly can you respond to emergencies?**\nWe aim for 60-minute response times across Sydney metro.\n\n**Do you offer free quotes?**\nYes, all inspections and quotes are completely free with no obligation.\n\n**Are your plumbers licensed?**\nEvery technician holds a current NSW plumbing license and working with vulnerable people check.\n\n**What payment methods do you accept?**\nWe accept cash, card, and offer interest-free payment plans for larger jobs.\n\n## Pricing Guide\n\n| Service | Price Range |\n|---------|-------------|\n| Call-out fee | $80-$120 |\n| Blocked drain | $150-$350 |\n| Tap repair | $120-$250 |\n| Hot water repair | $200-$500 |\n| Pipe relining (per meter) | $400-$800 |\n\n## Contact Information\n\n- Emergency: 1300 XXX XXX (24/7)\n- Office: (02) XXXX XXXX\n- Email: info@metroplumbing.com.au\n- Website: https://metroplumbing.com.au\n- Hours: 24/7 Emergency | Office 7am-6pm Mon-Sat"
+    }
+  ],
+  "Keywords": [
+    "plumber Sydney",
+    "emergency plumber",
+    "blocked drain",
+    "hot water repair",
+    "licensed plumber",
+    "24 hour plumber",
+    "drain cleaning",
+    "pipe repair"
+  ],
+  "Prompt": "Focus on emergency response times, licensed professionals, and upfront pricing. Emphasize 24/7 availability and same-day service.",
+  "CompanyProfile": {
+    "Name": "Metro Plumbing Solutions",
+    "Tagline": "Sydney's Trusted 24/7 Plumbing Experts",
+    "AlternateTaglines": [
+      "Your Local Licensed Plumbers",
+      "Fast Response, Fixed Prices",
+      "Professional Plumbing Done Right"
+    ],
+    "Description": "Licensed master plumbers serving Sydney metro with 24/7 emergency service, upfront pricing, and lifetime workmanship warranties.",
+    "Url": "https://metroplumbing.com.au",
+    "FoundedYear": "2018",
+    "YearsOfExperience": "6",
+    "CombinedExperience": "25",
+    "ProjectsCompleted": "12500",
+    "ClientsServed": "8000",
+    "Certifications": ["Licensed Master Plumber", "Gas Fitting License", "Backflow Prevention Certified"],
+    "Specialties": ["Emergency repairs", "Drain cleaning", "Hot water systems", "Pipe relining"]
+  },
+  "Services": [
+    {"Name": "Emergency Plumbing"},
+    {"Name": "Drain Cleaning"},
+    {"Name": "Hot Water Repair"},
+    {"Name": "Pipe Relining"},
+    {"Name": "Gas Fitting"},
+    {"Name": "Blocked Toilet"}
+  ],
+  "Location": {
+    "Country": "Australia",
+    "Region": "New South Wales",
+    "Cities": {
+      "Sydney CBD": ["Surry Hills", "Darlinghurst", "Paddington", "Redfern"],
+      "North Shore": ["Chatswood", "Lane Cove", "Willoughby", "Mosman"],
+      "Inner West": ["Newtown", "Marrickville", "Leichhardt", "Balmain"],
+      "South Sydney": ["Hurstville", "Kogarah", "Rockdale", "Miranda"]
+    }
+  },
+  "Ctas": [
+    {
+      "Type": "phone",
+      "Text": "Call now for emergency service!",
+      "Priority": 1
+    },
+    {
+      "Type": "quote",
+      "Text": "Get your free quote today",
+      "Url": "/free-quote",
+      "Priority": 2
+    }
+  ],
+  "Variables": {
+    "ResponseTime": "60 minutes",
+    "CallOutFee": "$80-$120",
+    "WarrantyPeriod": "lifetime workmanship",
+    "ServiceRadius": "50km from Sydney CBD"
+  }
+}

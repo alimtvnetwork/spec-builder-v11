@@ -1,0 +1,2598 @@
+openapi: 3.1.0
+info:
+  title: GSearch Business Intelligence API
+  version: 2.0.0
+  description: |
+    Unified REST API for the GSearch Business Intelligence Suite.
+    
+    Provides multi-engine web search, FAQ/PAA discovery, SERP position tracking,
+    contact extraction, and Google Maps business discovery capabilities.
+    
+    ## Features
+    - Multi-engine search (Google, Bing, DuckDuckGo)
+    - AI Overview and People Also Ask extraction
+    - SERP position tracking with alerts
+    - Contact information extraction
+    - Google Maps business search
+    - Webhook notifications
+    - Response caching with TTL
+    
+    ## Authentication
+    All endpoints require API key authentication via the `X-API-Key` header.
+    
+    ## Rate Limiting
+    Default: 100 requests/minute per API key. Custom limits available.
+    Headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+    
+    ## Error Codes
+    Error codes range from 7700-7839. See error reference for details.
+  contact:
+    name: GSearch API Support
+    email: support@gsearch.dev
+    url: https://gsearch.dev/support
+  license:
+    name: Proprietary
+    url: https://gsearch.dev/license
+
+servers:
+  - url: http://localhost:8080/api/v1/bi
+    description: Local development
+  - url: https://api.gsearch.dev/v1/bi
+    description: Production
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Search
+    description: Multi-engine web search with result aggregation
+  - name: FAQ
+    description: FAQ discovery, PAA extraction, and AI Overview parsing
+  - name: SERP
+    description: SERP position tracking and competitor analysis
+  - name: Contact
+    description: Contact information extraction from websites
+  - name: Maps
+    description: Google Maps business search and lead generation
+  - name: Extract
+    description: URL content extraction utilities
+  - name: Cache
+    description: Cache management and statistics
+  - name: Webhook
+    description: Webhook registration and management
+  - name: Health
+    description: Server health and status
+
+paths:
+  # ============================================================================
+  # SEARCH ENDPOINTS
+  # ============================================================================
+  /search:
+    post:
+      operationId: executeSearch
+      summary: Execute multi-engine search
+      description: |
+        Performs web search across one or more search engines with optional
+        result aggregation and enrichment (FAQ, contacts, authority scores).
+      tags:
+        - Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+            examples:
+              basic:
+                summary: Basic search
+                value:
+                  Query: "best project management tools 2026"
+              multiEngine:
+                summary: Multi-engine with enrichment
+                value:
+                  Query: "CRM software comparison"
+                  Engines: ["google", "bing"]
+                  Count: 20
+                  Aggregate: true
+                  Enrich:
+                    IncludeFaq: true
+                    IncludeAiOverview: true
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/SearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /search/engines:
+    get:
+      operationId: listSearchEngines
+      summary: List available search engines
+      description: Returns information about available search engines and their capabilities.
+      tags:
+        - Search
+      responses:
+        '200':
+          description: List of engines
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/EngineInfo'
+
+  /search/methods:
+    get:
+      operationId: listSearchMethods
+      summary: List search methods
+      description: Returns available search methods (API, scrape, auto) and their status.
+      tags:
+        - Search
+      responses:
+        '200':
+          description: List of methods
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MethodInfo'
+
+  # ============================================================================
+  # FAQ ENDPOINTS
+  # ============================================================================
+  /faq/discover:
+    post:
+      operationId: discoverFaq
+      summary: Discover FAQs from search query
+      description: |
+        Extracts FAQ data from Google's People Also Ask boxes, JSON-LD schemas,
+        and AI Overview summaries for a given query.
+      tags:
+        - FAQ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FaqDiscoverRequest'
+            examples:
+              basic:
+                summary: Basic FAQ discovery
+                value:
+                  Query: "how to start a small business"
+              expanded:
+                summary: With PAA expansion
+                value:
+                  Query: "how to start a small business"
+                  ExpandPaa: true
+                  MaxExpansion: 3
+                  IncludeAiOverview: true
+      responses:
+        '200':
+          description: Discovered FAQs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/FaqDiscoverResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /faq/expand:
+    post:
+      operationId: expandPaa
+      summary: Expand PAA questions
+      description: |
+        Recursively expands People Also Ask questions to discover additional
+        related questions and answers.
+      tags:
+        - FAQ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FaqExpandRequest'
+      responses:
+        '200':
+          description: Expanded questions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/FaqExpandResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /faq/extract:
+    post:
+      operationId: extractFaqSchema
+      summary: Extract FAQ schema from URL
+      description: Extracts JSON-LD FAQPage schema data from a specific URL.
+      tags:
+        - FAQ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FaqExtractRequest'
+      responses:
+        '200':
+          description: Extracted FAQ schema
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/FaqExtractResponse'
+
+  /faq/schemas:
+    get:
+      operationId: listFaqSchemas
+      summary: List supported FAQ schema types
+      description: Returns supported schema.org types for FAQ extraction.
+      tags:
+        - FAQ
+      responses:
+        '200':
+          description: Schema types
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        type: array
+                        items:
+                          type: string
+                        example: ["FAQPage", "QAPage", "Question", "Answer"]
+
+  # ============================================================================
+  # SERP ENDPOINTS
+  # ============================================================================
+  /serp/check:
+    post:
+      operationId: checkSerpPosition
+      summary: One-time SERP position check
+      description: |
+        Performs a one-time position check for specified domains in search
+        results for a given query.
+      tags:
+        - SERP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerpCheckRequest'
+            examples:
+              basic:
+                summary: Check single domain
+                value:
+                  Query: "project management software"
+                  Domains: ["monday.com"]
+                  Pages: 3
+              multi:
+                summary: Check multiple domains
+                value:
+                  Query: "CRM tools"
+                  Domains: ["salesforce.com", "hubspot.com", "zoho.com"]
+                  Engine: "google"
+                  Pages: 5
+                  Country: "US"
+      responses:
+        '200':
+          description: Position check results
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/SerpCheckResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /serp/track:
+    post:
+      operationId: createSerpTrackingJob
+      summary: Create SERP tracking job
+      description: |
+        Creates a scheduled job to track domain positions over time with
+        optional alerts for position changes.
+      tags:
+        - SERP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SerpTrackRequest'
+      responses:
+        '201':
+          description: Tracking job created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/SerpTrackResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /serp/track/{id}:
+    get:
+      operationId: getSerpTrackingJob
+      summary: Get tracking job status
+      description: Returns the current status and latest results for a tracking job.
+      tags:
+        - SERP
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Tracking job details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/SerpTrackResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: cancelSerpTrackingJob
+      summary: Cancel tracking job
+      description: Cancels an active tracking job.
+      tags:
+        - SERP
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Job cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /serp/history:
+    get:
+      operationId: getSerpHistory
+      summary: Get position history
+      description: |
+        Returns historical position data for a domain/query combination
+        with trend analysis.
+      tags:
+        - SERP
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query
+        - name: domain
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Domain to check
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date (YYYY-MM-DD)
+        - name: engine
+          in: query
+          schema:
+            type: string
+            enum: [google, bing, duckduckgo]
+          description: Search engine
+      responses:
+        '200':
+          description: Position history
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/SerpHistoryResponse'
+
+  /serp/competitors:
+    get:
+      operationId: getSerpCompetitors
+      summary: Competitor analysis
+      description: |
+        Analyzes competitors ranking for the same queries as a tracked domain.
+      tags:
+        - SERP
+      parameters:
+        - name: domain
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Primary domain
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Specific query (optional)
+      responses:
+        '200':
+          description: Competitor analysis
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/CompetitorAnalysis'
+
+  # ============================================================================
+  # CONTACT ENDPOINTS
+  # ============================================================================
+  /contact/extract:
+    post:
+      operationId: extractContact
+      summary: Extract contacts from URL
+      description: |
+        Extracts contact information (emails, phones, social links) from a
+        website with optional verification.
+      tags:
+        - Contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactExtractRequest'
+            examples:
+              basic:
+                summary: Basic extraction
+                value:
+                  Url: "https://example.com"
+              verified:
+                summary: With verification
+                value:
+                  Url: "https://example.com"
+                  FollowContact: true
+                  VerifyEmails: true
+                  VerifySocials: true
+      responses:
+        '200':
+          description: Extracted contacts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/ContactExtractResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /contact/batch:
+    post:
+      operationId: extractContactBatch
+      summary: Batch contact extraction
+      description: |
+        Queues multiple URLs for contact extraction. Returns a batch ID
+        for status tracking.
+      tags:
+        - Contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactBatchRequest'
+      responses:
+        '202':
+          description: Batch accepted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/ContactBatchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /contact/batch/{id}:
+    get:
+      operationId: getContactBatchStatus
+      summary: Get batch status
+      description: Returns the current status and progress of a batch extraction job.
+      tags:
+        - Contact
+      parameters:
+        - $ref: '#/components/parameters/BatchId'
+      responses:
+        '200':
+          description: Batch status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/ContactBatchResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /contact/verify:
+    get:
+      operationId: verifyContact
+      summary: Verify contact
+      description: Verifies an email address or phone number.
+      tags:
+        - Contact
+      parameters:
+        - name: email
+          in: query
+          schema:
+            type: string
+            format: email
+          description: Email to verify
+        - name: phone
+          in: query
+          schema:
+            type: string
+          description: Phone to verify
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/ContactVerifyResponse'
+
+  # ============================================================================
+  # MAPS ENDPOINTS
+  # ============================================================================
+  /maps/search:
+    post:
+      operationId: searchMaps
+      summary: One-time Maps search
+      description: |
+        Performs a one-time Google Maps search for businesses matching
+        the query and location criteria.
+      tags:
+        - Maps
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MapsSearchRequest'
+            examples:
+              basic:
+                summary: Basic search
+                value:
+                  Query: "restaurants"
+                  Location: "New York, NY"
+              filtered:
+                summary: With filters
+                value:
+                  Query: "italian restaurants"
+                  Location: "Manhattan, NY"
+                  Radius: 5
+                  MaxResults: 30
+                  Filters:
+                    MinRating: 4.0
+                    MinReviews: 50
+                    OpenNow: true
+                  Enrich: true
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/MapsSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /maps/job:
+    post:
+      operationId: createMapsJob
+      summary: Create Maps search job
+      description: |
+        Creates a scheduled job for multi-location Maps searches with
+        optional contact enrichment.
+      tags:
+        - Maps
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MapsJobRequest'
+      responses:
+        '201':
+          description: Job created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/MapsJobResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /maps/job/{id}:
+    get:
+      operationId: getMapsJob
+      summary: Get job status
+      description: Returns the current status and progress of a Maps job.
+      tags:
+        - Maps
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Job details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/MapsJobResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateMapsJob
+      summary: Update job status
+      description: Pause, resume, or cancel a Maps job.
+      tags:
+        - Maps
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MapsJobUpdateRequest'
+      responses:
+        '200':
+          description: Job updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/MapsJobResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteMapsJob
+      summary: Cancel job
+      description: Cancels a Maps job and removes associated data.
+      tags:
+        - Maps
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Job cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /maps/job/{id}/results:
+    get:
+      operationId: getMapsJobResults
+      summary: Get job results
+      description: Returns paginated results from a Maps job.
+      tags:
+        - Maps
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Job results
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BusinessRecord'
+                      Pagination:
+                        $ref: '#/components/schemas/PaginationMeta'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================================================
+  # EXTRACT ENDPOINTS
+  # ============================================================================
+  /extract:
+    post:
+      operationId: extractUrl
+      summary: Extract URL content
+      description: |
+        Extracts and parses content from a URL, returning structured data
+        including headings, paragraphs, links, and metadata.
+      tags:
+        - Extract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtractRequest'
+      responses:
+        '200':
+          description: Extracted content
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/ExtractResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /extract/batch:
+    post:
+      operationId: extractUrlBatch
+      summary: Batch URL extraction
+      description: Queues multiple URLs for content extraction.
+      tags:
+        - Extract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtractBatchRequest'
+      responses:
+        '202':
+          description: Batch accepted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/ExtractBatchResponse'
+
+  # ============================================================================
+  # CACHE ENDPOINTS
+  # ============================================================================
+  /cache/stats:
+    get:
+      operationId: getCacheStats
+      summary: Get cache statistics
+      description: Returns cache hit rates, sizes, and TTL information by category.
+      tags:
+        - Cache
+      responses:
+        '200':
+          description: Cache statistics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/CacheStats'
+
+  /cache:
+    delete:
+      operationId: clearCache
+      summary: Clear all cache
+      description: Clears all cached data. Requires cache:manage scope.
+      tags:
+        - Cache
+      security:
+        - ApiKeyAuth: [cache:manage]
+      responses:
+        '200':
+          description: Cache cleared
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /cache/{category}:
+    delete:
+      operationId: clearCacheByCategory
+      summary: Clear cache by category
+      description: Clears cached data for a specific category.
+      tags:
+        - Cache
+      security:
+        - ApiKeyAuth: [cache:manage]
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [search, faq, serp, contact, maps, extract]
+          description: Cache category
+      responses:
+        '200':
+          description: Category cache cleared
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================================================
+  # WEBHOOK ENDPOINTS
+  # ============================================================================
+  /webhook:
+    post:
+      operationId: createWebhook
+      summary: Register webhook
+      description: |
+        Registers a webhook endpoint to receive notifications for specified events.
+      tags:
+        - Webhook
+      security:
+        - ApiKeyAuth: [webhook:manage]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookCreateRequest'
+            examples:
+              basic:
+                summary: Basic webhook
+                value:
+                  Url: "https://example.com/webhook"
+                  Events: ["serp.alert", "maps.complete"]
+              secure:
+                summary: With HMAC signing
+                value:
+                  Url: "https://example.com/webhook"
+                  Events: ["serp.alert", "contact.batch.complete"]
+                  Secret: "whsec_your_signing_secret"
+      responses:
+        '201':
+          description: Webhook created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/WebhookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    get:
+      operationId: listWebhooks
+      summary: List webhooks
+      description: Returns all registered webhooks for the current API key.
+      tags:
+        - Webhook
+      security:
+        - ApiKeyAuth: [webhook:manage]
+      responses:
+        '200':
+          description: Webhook list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/WebhookResponse'
+
+  /webhook/{id}:
+    delete:
+      operationId: deleteWebhook
+      summary: Delete webhook
+      description: Removes a registered webhook.
+      tags:
+        - Webhook
+      security:
+        - ApiKeyAuth: [webhook:manage]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Webhook ID
+      responses:
+        '200':
+          description: Webhook deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /webhook/test/{id}:
+    post:
+      operationId: testWebhook
+      summary: Test webhook
+      description: Sends a test payload to the webhook endpoint.
+      tags:
+        - Webhook
+      security:
+        - ApiKeyAuth: [webhook:manage]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Webhook ID
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/WebhookTestResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================================================
+  # HEALTH ENDPOINT
+  # ============================================================================
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      description: Returns server health status and component availability.
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Server healthy
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Server unhealthy
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ResponseEnvelope'
+                  - type: object
+                    properties:
+                      Data:
+                        $ref: '#/components/schemas/HealthResponse'
+
+# ==============================================================================
+# COMPONENTS
+# ==============================================================================
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        API key for authentication. Obtain from the CLI using:
+        `gsearch api-key create --name "My App" --scopes "search:read,serp:read"`
+
+  parameters:
+    JobId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Job ID
+    BatchId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Batch ID
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Results per page
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Success: false
+            Errors:
+              - Code: 7823
+                Message: "Invalid request body"
+                Details: "Query field is required"
+
+    Unauthorized:
+      description: Authentication failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Success: false
+            Errors:
+              - Code: 7820
+                Message: "API key required"
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Success: false
+            Errors:
+              - Code: 7825
+                Message: "API key lacks required scope"
+                Details: "Required: cache:manage"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Success: false
+            Errors:
+              - Code: 7826
+                Message: "Requested resource not found"
+
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per minute
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Success: false
+            Errors:
+              - Code: 7822
+                Message: "Rate limit exceeded"
+                Details: "Limit: 100 requests/minute"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            Success: false
+            Errors:
+              - Code: 7835
+                Message: "Server temporarily overloaded"
+
+  schemas:
+    # ==========================================================================
+    # COMMON SCHEMAS
+    # ==========================================================================
+    ResponseEnvelope:
+      type: object
+      properties:
+        Success:
+          type: boolean
+          description: Whether the request succeeded
+        Data:
+          type: object
+          description: Response data (varies by endpoint)
+        Meta:
+          $ref: '#/components/schemas/ResponseMeta'
+        Pagination:
+          $ref: '#/components/schemas/PaginationMeta'
+        Cache:
+          $ref: '#/components/schemas/CacheMeta'
+        Errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+      required:
+        - Success
+
+    ErrorResponse:
+      type: object
+      properties:
+        Success:
+          type: boolean
+          const: false
+        Errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseError'
+      required:
+        - Success
+        - Errors
+
+    ResponseMeta:
+      type: object
+      properties:
+        RequestId:
+          type: string
+          format: uuid
+        ProcessingTime:
+          type: integer
+          description: Processing time in milliseconds
+        Version:
+          type: string
+
+    PaginationMeta:
+      type: object
+      properties:
+        Page:
+          type: integer
+        PerPage:
+          type: integer
+        Total:
+          type: integer
+        TotalPages:
+          type: integer
+        HasNext:
+          type: boolean
+        HasPrev:
+          type: boolean
+
+    CacheMeta:
+      type: object
+      properties:
+        Hit:
+          type: boolean
+          description: Whether response was served from cache
+        Key:
+          type: string
+        CachedAt:
+          type: string
+          format: date-time
+        ExpiresAt:
+          type: string
+          format: date-time
+        Ttl:
+          type: integer
+          description: TTL in seconds
+
+    ResponseError:
+      type: object
+      properties:
+        Code:
+          type: integer
+          description: Error code (7700-7839)
+        Message:
+          type: string
+        Details:
+          type: string
+        Field:
+          type: string
+          description: Field name for validation errors
+      required:
+        - Code
+        - Message
+
+    # ==========================================================================
+    # SEARCH SCHEMAS
+    # ==========================================================================
+    SearchRequest:
+      type: object
+      properties:
+        Query:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Search query
+        Engines:
+          type: array
+          items:
+            type: string
+            enum: [google, bing, duckduckgo]
+          description: Search engines to use
+        Method:
+          type: string
+          enum: [auto, api, scrape]
+          description: Search method
+        Count:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+          description: Results per engine
+        Pages:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 1
+          description: Pages to fetch
+        Language:
+          type: string
+          description: ISO 639-1 language code
+        Country:
+          type: string
+          description: ISO 3166-1 country code
+        SafeSearch:
+          type: string
+          enum: [off, moderate, strict]
+          default: moderate
+        Freshness:
+          type: string
+          enum: [day, week, month, year]
+          description: Result freshness filter
+        Aggregate:
+          type: boolean
+          default: false
+          description: Merge and deduplicate results
+        Enrich:
+          $ref: '#/components/schemas/EnrichOptions'
+      required:
+        - Query
+
+    EnrichOptions:
+      type: object
+      properties:
+        IncludeFaq:
+          type: boolean
+          description: Include FAQ/PAA data
+        IncludeContact:
+          type: boolean
+          description: Extract contact info
+        IncludeAuthority:
+          type: boolean
+          description: Calculate authority scores
+        IncludeAiOverview:
+          type: boolean
+          description: Include AI Overview data
+
+    SearchResponse:
+      type: object
+      properties:
+        Query:
+          type: string
+        Engines:
+          type: array
+          items:
+            type: string
+        Results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResultItem'
+        AiOverview:
+          $ref: '#/components/schemas/AiOverviewData'
+        FaqItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/FaqItem'
+        Related:
+          type: array
+          items:
+            type: string
+          description: Related search suggestions
+
+    SearchResultItem:
+      type: object
+      properties:
+        Position:
+          type: integer
+        Title:
+          type: string
+        Url:
+          type: string
+          format: uri
+        Description:
+          type: string
+        Domain:
+          type: string
+        Engine:
+          type: string
+        DisplayUrl:
+          type: string
+        CachedUrl:
+          type: string
+        Timestamp:
+          type: string
+          format: date-time
+        Authority:
+          $ref: '#/components/schemas/AuthorityScore'
+        Contact:
+          $ref: '#/components/schemas/ContactExtractResponse'
+
+    AuthorityScore:
+      type: object
+      properties:
+        Score:
+          type: number
+          minimum: 0
+          maximum: 100
+        DomainAge:
+          type: integer
+          description: Domain age in days
+        BacklinkEstimate:
+          type: integer
+        TrustSignals:
+          type: array
+          items:
+            type: string
+
+    EngineInfo:
+      type: object
+      properties:
+        Id:
+          type: string
+        Name:
+          type: string
+        Methods:
+          type: array
+          items:
+            type: string
+        MaxResults:
+          type: integer
+        Features:
+          type: array
+          items:
+            type: string
+
+    MethodInfo:
+      type: object
+      properties:
+        Id:
+          type: string
+        Name:
+          type: string
+        Status:
+          type: string
+          enum: [available, limited, unavailable]
+        Description:
+          type: string
+
+    # ==========================================================================
+    # FAQ SCHEMAS
+    # ==========================================================================
+    FaqDiscoverRequest:
+      type: object
+      properties:
+        Query:
+          type: string
+          minLength: 1
+          maxLength: 500
+        Engine:
+          type: string
+          enum: [google, bing]
+          default: google
+        ExpandPaa:
+          type: boolean
+          default: false
+          description: Expand People Also Ask questions
+        MaxExpansion:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 3
+          description: Maximum PAA expansion depth
+        IncludeAiOverview:
+          type: boolean
+          default: true
+        IncludeSchemas:
+          type: boolean
+          default: true
+          description: Extract JSON-LD schemas
+        MultiEngine:
+          type: boolean
+          default: false
+          description: Use multiple engines for best answer
+      required:
+        - Query
+
+    FaqDiscoverResponse:
+      type: object
+      properties:
+        Query:
+          type: string
+        Engine:
+          type: string
+        FaqItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/FaqItem'
+        AiOverview:
+          $ref: '#/components/schemas/AiOverviewData'
+        Schemas:
+          type: array
+          items:
+            $ref: '#/components/schemas/FaqSchemaData'
+        SourceCount:
+          type: integer
+
+    FaqItem:
+      type: object
+      properties:
+        Question:
+          type: string
+        Answer:
+          type: string
+        Source:
+          type: string
+          enum: [paa, schema, ai_overview, page]
+        SourceUrl:
+          type: string
+          format: uri
+        Position:
+          type: integer
+        QualityScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        BestAnswer:
+          $ref: '#/components/schemas/FaqAnswer'
+        AlternativeAnswers:
+          type: array
+          items:
+            $ref: '#/components/schemas/FaqAnswer'
+        ExpandedQuestions:
+          type: array
+          items:
+            type: string
+
+    FaqAnswer:
+      type: object
+      properties:
+        Text:
+          type: string
+        Snippet:
+          type: string
+        Url:
+          type: string
+          format: uri
+        Domain:
+          type: string
+        Engine:
+          type: string
+        QualityScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        WordCount:
+          type: integer
+        HasFormatting:
+          type: boolean
+        ReadabilityScore:
+          type: number
+
+    AiOverviewData:
+      type: object
+      properties:
+        Summary:
+          type: string
+        ResponseType:
+          type: string
+          enum: [summary, list, comparison, definition, steps]
+        Confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        Citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CitedUrl'
+        KeyPoints:
+          type: array
+          items:
+            type: string
+        FollowUpQuestions:
+          type: array
+          items:
+            type: string
+        RawHtml:
+          type: string
+          description: Original HTML content
+
+    CitedUrl:
+      type: object
+      properties:
+        Url:
+          type: string
+          format: uri
+        Title:
+          type: string
+        Domain:
+          type: string
+        Favicon:
+          type: string
+        CitationIndex:
+          type: integer
+        PublishDate:
+          type: string
+          format: date
+        Author:
+          type: string
+        ContentType:
+          type: string
+
+    FaqSchemaData:
+      type: object
+      properties:
+        Type:
+          type: string
+        Url:
+          type: string
+          format: uri
+        Questions:
+          type: array
+          items:
+            type: object
+            properties:
+              Question:
+                type: string
+              Answer:
+                type: string
+
+    FaqExpandRequest:
+      type: object
+      properties:
+        Questions:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 20
+        MaxDepth:
+          type: integer
+          minimum: 1
+          maximum: 5
+          default: 2
+        IncludeAnswers:
+          type: boolean
+          default: true
+      required:
+        - Questions
+
+    FaqExpandResponse:
+      type: object
+      properties:
+        ExpandedQuestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FaqItem'
+        Depth:
+          type: integer
+        TotalQuestions:
+          type: integer
+
+    FaqExtractRequest:
+      type: object
+      properties:
+        Url:
+          type: string
+          format: uri
+        SchemaTypes:
+          type: array
+          items:
+            type: string
+            enum: [FAQPage, QAPage, Question]
+      required:
+        - Url
+
+    FaqExtractResponse:
+      type: object
+      properties:
+        Url:
+          type: string
+          format: uri
+        SchemasFound:
+          type: array
+          items:
+            $ref: '#/components/schemas/FaqSchemaData'
+        TotalQuestions:
+          type: integer
+
+    # ==========================================================================
+    # SERP SCHEMAS
+    # ==========================================================================
+    SerpCheckRequest:
+      type: object
+      properties:
+        Query:
+          type: string
+          minLength: 1
+          maxLength: 500
+        Domains:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 20
+        Engine:
+          type: string
+          enum: [google, bing, duckduckgo]
+          default: google
+        Pages:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 3
+        Country:
+          type: string
+      required:
+        - Query
+        - Domains
+
+    SerpCheckResponse:
+      type: object
+      properties:
+        Query:
+          type: string
+        Engine:
+          type: string
+        Positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainPosition'
+        TopResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResultItem'
+        CheckedAt:
+          type: string
+          format: date-time
+
+    DomainPosition:
+      type: object
+      properties:
+        Domain:
+          type: string
+        Position:
+          type: integer
+          description: 0 if not found
+        Page:
+          type: integer
+        Url:
+          type: string
+          format: uri
+        Title:
+          type: string
+        Found:
+          type: boolean
+
+    SerpTrackRequest:
+      type: object
+      properties:
+        Query:
+          type: string
+          minLength: 1
+          maxLength: 500
+        Domains:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 20
+        Engine:
+          type: string
+          enum: [google, bing]
+          default: google
+        Interval:
+          type: string
+          enum: [daily, weekly]
+          default: daily
+        Pages:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 3
+        Country:
+          type: string
+        AlertConfig:
+          $ref: '#/components/schemas/AlertConfig'
+      required:
+        - Query
+        - Domains
+
+    AlertConfig:
+      type: object
+      properties:
+        OnPositionDrop:
+          type: integer
+          description: Alert if position drops by N
+        OnPositionGain:
+          type: integer
+          description: Alert if position gains by N
+        OnPageChange:
+          type: boolean
+          description: Alert on SERP page change
+        OnNotFound:
+          type: boolean
+          description: Alert if domain disappears
+        OnFirstPage:
+          type: boolean
+          description: Alert if reaches page 1
+        WebhookId:
+          type: string
+          description: Webhook ID for alerts
+
+    SerpTrackResponse:
+      type: object
+      properties:
+        JobId:
+          type: string
+        Query:
+          type: string
+        Domains:
+          type: array
+          items:
+            type: string
+        Engine:
+          type: string
+        Interval:
+          type: string
+        Status:
+          type: string
+          enum: [active, paused, cancelled]
+        NextRun:
+          type: string
+          format: date-time
+        LastRun:
+          type: string
+          format: date-time
+        LatestPositions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainPosition'
+        CreatedAt:
+          type: string
+          format: date-time
+
+    SerpHistoryResponse:
+      type: object
+      properties:
+        Query:
+          type: string
+        Domain:
+          type: string
+        Engine:
+          type: string
+        History:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionPoint'
+        Stats:
+          $ref: '#/components/schemas/PositionStats'
+        Trend:
+          type: string
+          enum: [up, down, stable]
+
+    PositionPoint:
+      type: object
+      properties:
+        Date:
+          type: string
+          format: date-time
+        Position:
+          type: integer
+        Page:
+          type: integer
+        Url:
+          type: string
+          format: uri
+
+    PositionStats:
+      type: object
+      properties:
+        Best:
+          type: integer
+        Worst:
+          type: integer
+        Average:
+          type: number
+        Current:
+          type: integer
+        Change:
+          type: integer
+          description: Change vs first record
+
+    CompetitorAnalysis:
+      type: object
+      properties:
+        Domain:
+          type: string
+        Query:
+          type: string
+        Competitors:
+          type: array
+          items:
+            type: object
+            properties:
+              Domain:
+                type: string
+              Position:
+                type: integer
+              Overlap:
+                type: number
+                description: Keyword overlap percentage
+              Trend:
+                type: string
+                enum: [up, down, stable]
+
+    # ==========================================================================
+    # CONTACT SCHEMAS
+    # ==========================================================================
+    ContactExtractRequest:
+      type: object
+      properties:
+        Url:
+          type: string
+          format: uri
+        FollowContact:
+          type: boolean
+          default: false
+          description: Follow links to contact pages
+        VerifyEmails:
+          type: boolean
+          default: false
+          description: Verify emails via MX lookup
+        VerifySocials:
+          type: boolean
+          default: false
+          description: Verify social links
+        MaxDepth:
+          type: integer
+          minimum: 0
+          maximum: 3
+          default: 1
+          description: Crawl depth for contact discovery
+      required:
+        - Url
+
+    ContactExtractResponse:
+      type: object
+      properties:
+        Url:
+          type: string
+          format: uri
+        Domain:
+          type: string
+        Emails:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailRecord'
+        Phones:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneRecord'
+        Socials:
+          type: array
+          items:
+            $ref: '#/components/schemas/SocialLink'
+        Addresses:
+          type: array
+          items:
+            type: string
+        ExtractedAt:
+          type: string
+          format: date-time
+
+    EmailRecord:
+      type: object
+      properties:
+        Email:
+          type: string
+          format: email
+        Type:
+          type: string
+          enum: [generic, personal, support, sales]
+        Verified:
+          type: boolean
+        MxValid:
+          type: boolean
+        Source:
+          type: string
+          description: URL where email was found
+
+    PhoneRecord:
+      type: object
+      properties:
+        Number:
+          type: string
+        Formatted:
+          type: string
+        Type:
+          type: string
+          enum: [main, mobile, fax, toll-free]
+        Country:
+          type: string
+        Source:
+          type: string
+
+    SocialLink:
+      type: object
+      properties:
+        Platform:
+          type: string
+          enum: [linkedin, twitter, facebook, instagram, youtube, github, tiktok]
+        Url:
+          type: string
+          format: uri
+        Username:
+          type: string
+        Verified:
+          type: boolean
+
+    ContactBatchRequest:
+      type: object
+      properties:
+        Urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          minItems: 1
+          maxItems: 100
+        FollowContact:
+          type: boolean
+          default: false
+        VerifyEmails:
+          type: boolean
+          default: false
+        WebhookId:
+          type: string
+          description: Webhook to notify on completion
+      required:
+        - Urls
+
+    ContactBatchResponse:
+      type: object
+      properties:
+        BatchId:
+          type: string
+        Status:
+          type: string
+          enum: [pending, processing, complete, failed]
+        Total:
+          type: integer
+        Completed:
+          type: integer
+        Failed:
+          type: integer
+        Results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactExtractResponse'
+        CreatedAt:
+          type: string
+          format: date-time
+        CompletedAt:
+          type: string
+          format: date-time
+
+    ContactVerifyResponse:
+      type: object
+      properties:
+        Input:
+          type: string
+        Type:
+          type: string
+          enum: [email, phone]
+        Valid:
+          type: boolean
+        Details:
+          type: object
+          properties:
+            MxValid:
+              type: boolean
+            Deliverable:
+              type: boolean
+            Format:
+              type: string
+
+    # ==========================================================================
+    # MAPS SCHEMAS
+    # ==========================================================================
+    MapsSearchRequest:
+      type: object
+      properties:
+        Query:
+          type: string
+          minLength: 1
+          maxLength: 200
+        Location:
+          type: string
+          description: City, region, or coordinates
+        Radius:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Radius in km
+        MaxResults:
+          type: integer
+          minimum: 1
+          maximum: 60
+          default: 20
+        Filters:
+          $ref: '#/components/schemas/MapsFilters'
+        Enrich:
+          type: boolean
+          default: false
+          description: Extract contact information
+      required:
+        - Query
+
+    MapsFilters:
+      type: object
+      properties:
+        MinRating:
+          type: number
+          minimum: 1
+          maximum: 5
+        MinReviews:
+          type: integer
+          minimum: 0
+        OpenNow:
+          type: boolean
+        PriceLevel:
+          type: integer
+          minimum: 1
+          maximum: 4
+        Categories:
+          type: array
+          items:
+            type: string
+
+    MapsSearchResponse:
+      type: object
+      properties:
+        Query:
+          type: string
+        Location:
+          type: string
+        Businesses:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessRecord'
+        Total:
+          type: integer
+        SearchedAt:
+          type: string
+          format: date-time
+
+    BusinessRecord:
+      type: object
+      properties:
+        PlaceId:
+          type: string
+        Name:
+          type: string
+        Address:
+          type: string
+        Phone:
+          type: string
+        Website:
+          type: string
+          format: uri
+        Rating:
+          type: number
+        ReviewCount:
+          type: integer
+        PriceLevel:
+          type: integer
+        Categories:
+          type: array
+          items:
+            type: string
+        Hours:
+          type: object
+          additionalProperties:
+            type: string
+        Coordinates:
+          type: object
+          properties:
+            Lat:
+              type: number
+            Lng:
+              type: number
+        Contact:
+          $ref: '#/components/schemas/ContactExtractResponse'
+        Photos:
+          type: array
+          items:
+            type: string
+            format: uri
+
+    MapsJobRequest:
+      type: object
+      properties:
+        Query:
+          type: string
+          minLength: 1
+          maxLength: 200
+        Locations:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 50
+        MaxResults:
+          type: integer
+          minimum: 1
+          maximum: 60
+          default: 20
+        Filters:
+          $ref: '#/components/schemas/MapsFilters'
+        Enrich:
+          type: boolean
+          default: false
+        Schedule:
+          type: string
+          description: Cron expression or interval
+        WebhookId:
+          type: string
+      required:
+        - Query
+        - Locations
+
+    MapsJobResponse:
+      type: object
+      properties:
+        JobId:
+          type: string
+        Status:
+          type: string
+          enum: [pending, searching, enriching, complete, paused, cancelled, failed]
+        Phase:
+          type: string
+        Progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+        Locations:
+          type: integer
+        ResultCount:
+          type: integer
+        CreatedAt:
+          type: string
+          format: date-time
+        NextRun:
+          type: string
+          format: date-time
+        CompletedAt:
+          type: string
+          format: date-time
+
+    MapsJobUpdateRequest:
+      type: object
+      properties:
+        Action:
+          type: string
+          enum: [pause, resume, cancel]
+      required:
+        - Action
+
+    # ==========================================================================
+    # EXTRACT SCHEMAS
+    # ==========================================================================
+    ExtractRequest:
+      type: object
+      properties:
+        Url:
+          type: string
+          format: uri
+        Format:
+          type: string
+          enum: [text, markdown, html, json]
+          default: markdown
+        IncludeMetadata:
+          type: boolean
+          default: true
+        IncludeLinks:
+          type: boolean
+          default: true
+        MaxLength:
+          type: integer
+          description: Maximum content length
+      required:
+        - Url
+
+    ExtractResponse:
+      type: object
+      properties:
+        Url:
+          type: string
+          format: uri
+        Title:
+          type: string
+        Content:
+          type: string
+        Format:
+          type: string
+        Metadata:
+          type: object
+          properties:
+            Author:
+              type: string
+            PublishDate:
+              type: string
+              format: date
+            Description:
+              type: string
+            Keywords:
+              type: array
+              items:
+                type: string
+        Headings:
+          type: array
+          items:
+            type: object
+            properties:
+              Level:
+                type: integer
+              Text:
+                type: string
+        Links:
+          type: array
+          items:
+            type: object
+            properties:
+              Url:
+                type: string
+                format: uri
+              Text:
+                type: string
+              Type:
+                type: string
+                enum: [internal, external]
+        WordCount:
+          type: integer
+        ExtractedAt:
+          type: string
+          format: date-time
+
+    ExtractBatchRequest:
+      type: object
+      properties:
+        Urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          minItems: 1
+          maxItems: 50
+        Format:
+          type: string
+          enum: [text, markdown, html, json]
+          default: markdown
+        WebhookId:
+          type: string
+      required:
+        - Urls
+
+    ExtractBatchResponse:
+      type: object
+      properties:
+        BatchId:
+          type: string
+        Status:
+          type: string
+          enum: [pending, processing, complete]
+        Total:
+          type: integer
+        Completed:
+          type: integer
+        Results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtractResponse'
+
+    # ==========================================================================
+    # CACHE SCHEMAS
+    # ==========================================================================
+    CacheStats:
+      type: object
+      properties:
+        TotalSize:
+          type: integer
+          description: Total cache size in bytes
+        EntryCount:
+          type: integer
+        HitRate:
+          type: number
+          description: Cache hit percentage
+        Categories:
+          type: array
+          items:
+            type: object
+            properties:
+              Name:
+                type: string
+              Size:
+                type: integer
+              EntryCount:
+                type: integer
+              HitRate:
+                type: number
+              DefaultTtl:
+                type: integer
+                description: TTL in seconds
+
+    # ==========================================================================
+    # WEBHOOK SCHEMAS
+    # ==========================================================================
+    WebhookCreateRequest:
+      type: object
+      properties:
+        Url:
+          type: string
+          format: uri
+        Events:
+          type: array
+          items:
+            type: string
+            enum:
+              - serp.alert
+              - serp.complete
+              - contact.complete
+              - contact.batch.complete
+              - maps.progress
+              - maps.complete
+              - maps.error
+          minItems: 1
+        Secret:
+          type: string
+          description: HMAC signing secret
+        Headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Custom headers to include
+      required:
+        - Url
+        - Events
+
+    WebhookResponse:
+      type: object
+      properties:
+        Id:
+          type: string
+        Url:
+          type: string
+          format: uri
+        Events:
+          type: array
+          items:
+            type: string
+        IsActive:
+          type: boolean
+        CreatedAt:
+          type: string
+          format: date-time
+        LastFiredAt:
+          type: string
+          format: date-time
+        FailCount:
+          type: integer
+
+    WebhookTestResponse:
+      type: object
+      properties:
+        WebhookId:
+          type: string
+        Success:
+          type: boolean
+        StatusCode:
+          type: integer
+        ResponseTime:
+          type: integer
+          description: Response time in milliseconds
+        Error:
+          type: string
+
+    WebhookPayload:
+      type: object
+      description: Payload sent to webhook endpoints
+      properties:
+        Event:
+          type: string
+        Timestamp:
+          type: string
+          format: date-time
+        Data:
+          type: object
+        Signature:
+          type: string
+          description: HMAC-SHA256 signature
+
+    # ==========================================================================
+    # HEALTH SCHEMAS
+    # ==========================================================================
+    HealthResponse:
+      type: object
+      properties:
+        Status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        Version:
+          type: string
+        Uptime:
+          type: integer
+          description: Uptime in seconds
+        Components:
+          type: array
+          items:
+            type: object
+            properties:
+              Name:
+                type: string
+              Status:
+                type: string
+                enum: [healthy, degraded, unhealthy]
+              Message:
+                type: string
+        Timestamp:
+          type: string
+          format: date-time

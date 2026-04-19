@@ -1,0 +1,170 @@
+{
+  "$schema": "./config.schema.json",
+  "Environment": "development",
+  
+  "Database": {
+    "Path": "./data/search.dev.db.sqlite",
+    "MaxOpenConns": 5,
+    "MaxIdleConns": 2,
+    "ConnMaxLifetime": "5m",
+    "EnableLogging": true,
+    "LogLevel": "debug"
+  },
+  
+  "Search": {
+    "MaxConcurrency": 2,
+    "RequestDelay": "2s",
+    "Timeout": "30s",
+    "MaxResultsPerEngine": 20,
+    "EnableProgressOutput": true,
+    "RetryAttempts": 2,
+    "RetryDelay": "1s",
+    "MethodWeights": {
+      "Html": 0.40,
+      "GoogleApi": 0.30,
+      "DuckDuckGo": 0.20,
+      "Bing": 0.10
+    }
+  },
+  
+  "Engines": {
+    "Google": {
+      "Enabled": true,
+      "Weight": 0.40,
+      "Methods": {
+        "Html": {
+          "Enabled": true,
+          "Weight": 0.70
+        },
+        "CustomSearch": {
+          "Enabled": false,
+          "Weight": 0.20,
+          "ApiKey": "${GOOGLE_CUSTOM_SEARCH_API_KEY}",
+          "SearchEngineId": "${GOOGLE_SEARCH_ENGINE_ID}",
+          "DailyQuotaLimit": 100
+        },
+        "SearchConsole": {
+          "Enabled": false,
+          "Weight": 0.10,
+          "CredentialsPath": "./credentials/google-service-account.json"
+        }
+      },
+      "Cooldown": "5m",
+      "MaxRequestsPerMinute": 5
+    },
+    "DuckDuckGo": {
+      "Enabled": true,
+      "Weight": 0.35,
+      "Methods": {
+        "Html": {
+          "Enabled": true,
+          "Weight": 0.60
+        },
+        "InstantAnswer": {
+          "Enabled": true,
+          "Weight": 0.40
+        }
+      },
+      "Cooldown": "3m",
+      "MaxRequestsPerMinute": 10
+    },
+    "Bing": {
+      "Enabled": true,
+      "Weight": 0.25,
+      "Methods": {
+        "Html": {
+          "Enabled": true,
+          "Weight": 0.80
+        },
+        "Api": {
+          "Enabled": false,
+          "Weight": 0.20,
+          "ApiKey": "${BING_SEARCH_API_KEY}",
+          "MaxRequestsPerSecond": 3
+        }
+      },
+      "Cooldown": "3m",
+      "MaxRequestsPerMinute": 10
+    }
+  },
+  
+  "Blocking": {
+    "DetectionEnabled": true,
+    "Cooldown": "10m",
+    "MaxConsecutiveBlocks": 3,
+    "AutoSwitchOnBlock": true,
+    "BlockIndicators": {
+      "Google": ["unusual traffic", "captcha", "consent.google", "sorry/index"],
+      "DuckDuckGo": ["rate limit", "blocked"],
+      "Bing": ["blocked", "unusual activity"]
+    }
+  },
+  
+  "Backoff": {
+    "InitialDelay": "1s",
+    "MaxDelay": "30s",
+    "Multiplier": 2.0,
+    "Jitter": 0.2
+  },
+  
+  "Cache": {
+    "Enabled": true,
+    "TtlDays": 1,
+    "MaxEntries": 500,
+    "AutoCleanup": true,
+    "CleanupInterval": "1h",
+    "TrackHitRate": true
+  },
+  
+  "Nested": {
+    "Enabled": true,
+    "MaxDepth": 1,
+    "KeywordsPerPage": 3,
+    "MaxPagesPerLevel": 5,
+    "CycleDetection": true,
+    "ExtractionMethod": "tfidf",
+    "MinKeywordScore": 0.30
+  },
+  
+  "PageContent": {
+    "FetchEnabled": true,
+    "MaxConcurrentFetches": 2,
+    "Timeout": "15s",
+    "MaxContentSizeKb": 500,
+    "ExtractImages": false,
+    "ExtractLinks": true
+  },
+  
+  "Rag": {
+    "ChunkMaxTokens": 512,
+    "ChunkOverlapTokens": 50,
+    "MinChunkTokens": 100,
+    "IncludeMetadata": true,
+    "RelevanceScoring": true
+  },
+  
+  "Output": {
+    "DefaultFormat": "json",
+    "PrettyPrint": true,
+    "IncludeTimestamps": true,
+    "ColorOutput": true,
+    "ProgressBar": true,
+    "VerboseErrors": true
+  },
+  
+  "UserAgent": {
+    "RotationEnabled": true,
+    "RotationStrategy": "random",
+    "CustomAgents": [],
+    "UseDefaultAgents": true
+  },
+  
+  "Logging": {
+    "Level": "debug",
+    "Format": "text",
+    "OutputPath": "./logs/search.dev.log",
+    "MaxSizeMb": 10,
+    "MaxBackups": 3,
+    "Compress": false
+  }
+}

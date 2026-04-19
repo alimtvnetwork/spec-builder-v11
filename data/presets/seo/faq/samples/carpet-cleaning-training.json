@@ -1,0 +1,80 @@
+{
+  "Company": "Atto Property",
+  "Website": "https://attoproperty.com.au",
+  "TrainingData": [
+    {
+      "Type": "text",
+      "Content": "# Atto Property - Carpet Cleaning Services\n\n## About Our Company\n\nAtto Property is Melbourne's premier carpet cleaning service, founded in 2023 with over 15 years of combined industry expertise. We specialize in eco-friendly cleaning methods that are safe for families, pets, and the environment.\n\n## Our Services\n\n### Steam Cleaning (Hot Water Extraction)\nOur primary method uses high-temperature water and powerful extraction to deep clean carpets. This method:\n- Removes 97% of bacteria and allergens\n- Leaves no chemical residue\n- Dries within 4-8 hours\n- Safe for children and pets\n\n### Dry Cleaning\nFor delicate fibers or when quick drying is essential:\n- Uses minimal moisture\n- Ready to walk on within 1 hour\n- Ideal for commercial settings\n- Effective for light soiling\n\n### Shampooing\nTraditional method with modern improvements:\n- Deep foam penetration\n- Excellent for heavily soiled areas\n- Longer drying time (12-24 hours)\n- Best for synthetic carpets\n\n## Equipment\n\nWe use industrial-grade extraction equipment including:\n- Truck-mounted systems for maximum power\n- Portable units for high-rise access\n- HEPA filtration for allergen capture\n- Eco-certified cleaning solutions\n\n## Service Areas\n\nWe proudly serve the greater Melbourne area including:\n- Melbourne CBD and inner suburbs\n- Melton and surrounding areas\n- Caroline Springs\n- Taylors Lakes\n- Sunbury\n- Geelong region (Lara, Corio, Belmont)\n\n## Why Choose Atto Property?\n\n1. **IICRC Certified Technicians**: All our staff are trained and certified\n2. **Eco-Friendly Products**: EPA approved, biodegradable solutions\n3. **Same-Day Service**: Emergency cleaning available\n4. **Transparent Pricing**: No hidden fees, upfront quotes\n5. **Satisfaction Guarantee**: 100% satisfaction or we re-clean free\n\n## Common Questions Our Customers Ask\n\n**How often should carpets be cleaned?**\nProfessional cleaning every 12-18 months for residential, 6 months for high-traffic areas.\n\n**Is steam cleaning safe for all carpets?**\nMost synthetic and wool carpets handle steam cleaning well. We assess fiber type before treatment.\n\n**How long until I can walk on the carpet?**\nWith our powerful extraction, most carpets are walkable within 2-4 hours.\n\n**Do you move furniture?**\nWe move light furniture at no extra cost. Heavy items should be cleared before our arrival.\n\n**What about pet stains and odors?**\nWe have specialized enzyme treatments that break down pet urine at the molecular level.\n\n## Pricing Guide\n\n| Room Size | Steam Clean | Dry Clean |\n|-----------|-------------|------------|\n| Small (up to 12m²) | $50 | $60 |\n| Medium (12-20m²) | $70 | $85 |\n| Large (20-30m²) | $90 | $110 |\n| Whole House Package | From $199 | From $249 |\n\n## Contact Information\n\n- Phone: 1300 XXX XXX\n- Email: info@attoproperty.com.au\n- Website: https://attoproperty.com.au\n- Hours: Monday-Saturday, 7am-7pm"
+    }
+  ],
+  "Keywords": [
+    "carpet cleaning",
+    "steam cleaning",
+    "professional carpet cleaning",
+    "eco-friendly cleaning",
+    "carpet sanitization",
+    "allergen removal",
+    "deep carpet cleaning",
+    "same-day carpet cleaning"
+  ],
+  "Prompt": "Focus on eco-friendly methods, family safety, and budget-conscious options. Emphasize our IICRC certification and same-day service availability.",
+  "CompanyProfile": {
+    "Name": "Atto Property",
+    "Tagline": "Melbourne's Trusted Cleaning Experts",
+    "AlternateTaglines": [
+      "Your Local Carpet Care Specialists",
+      "Eco-Friendly Cleaning for Modern Families",
+      "Professional Results, Family-Safe Methods"
+    ],
+    "Description": "Full-service property cleaning company serving Melbourne metro area with eco-friendly, family-safe carpet cleaning solutions since 2023.",
+    "Url": "https://attoproperty.com.au",
+    "FoundedYear": "2023",
+    "YearsOfExperience": "5",
+    "CombinedExperience": "15",
+    "ProjectsCompleted": "5647",
+    "ClientsServed": "3000",
+    "Certifications": ["IICRC Certified", "EPA Approved Products", "Green Clean Certified"],
+    "Specialties": ["Eco-friendly cleaning", "Same-day service", "Pet stain removal", "Allergen treatment"]
+  },
+  "Services": [
+    {"Name": "Carpet Cleaning"},
+    {"Name": "Steam Cleaning"},
+    {"Name": "Upholstery Cleaning"},
+    {"Name": "Tile Cleaning"},
+    {"Name": "Rug Cleaning"}
+  ],
+  "Location": {
+    "Country": "Australia",
+    "Region": "Victoria",
+    "Cities": {
+      "Melbourne CBD": ["Melton", "Caroline Springs", "Taylors Lakes", "Sunbury", "Craigieburn"],
+      "Geelong": ["Lara", "Corio", "Belmont", "Newtown"]
+    }
+  },
+  "Ctas": [
+    {
+      "Type": "phone",
+      "Text": "Call us today for a free quote!",
+      "Priority": 1
+    },
+    {
+      "Type": "quote",
+      "Text": "Get your instant online estimate",
+      "Url": "/quote",
+      "Priority": 2
+    },
+    {
+      "Type": "booking",
+      "Text": "Book your cleaning session now",
+      "Url": "/book",
+      "Priority": 3
+    }
+  ],
+  "Variables": {
+    "PriceRange": "$50-$110",
+    "WholeHousePrice": "from $199",
+    "DryingTime": "4-8 hours",
+    "ResponseTime": "same-day available",
+    "ServiceRadius": "50km from Melbourne CBD"
+  }
+}

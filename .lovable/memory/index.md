@@ -1,0 +1,101 @@
+# Memory: index.md
+Updated: 2026-04-19
+
+# Project Memory
+
+## Core
+- **Repository Constraints**: Primarily specification docs. Implementation is OUT OF SCOPE except Health Dashboard.
+- **Naming Conventions**: Strict lowercase kebab-case for all files/folders with numeric prefixes (e.g. `01-name.md`).
+- **Code Identifiers**: PascalCase for abbreviations (`Url`, `Id`). Zero underscores except `SCREAMING_SNAKE_CASE` constants. `Err` prefix for errors.
+- **Error Handling**: Never swallow. Return `*apperror.AppError` in Go. Use positive existence guards.
+- **Type Safety**: Strictly typed; `any` and `unknown` are prohibited. Use `isDefined` positive booleans.
+- **Function Rules**: Return exactly one value/struct. Max 3 parameters. Max 15 lines of logic.
+- **Filesystem Constraints**: Direct OS calls (like `os.Stat`) prohibited. Use `pathutil` or `PathHelper`.
+- **UI Architecture**: React/Vite/TS with VS Code dark theme. Sonner for toasts. Axios strictly pinned.
+- **UI Chrome Pattern (NEW 2026-04-19)**: All chrome toolbars (code-block, file-viewer header, TOC) use discrete pill groups — Poppins font, `gap-2`, `py-[3px]`, `h-3 w-3` icons, border `hsl(220 13% 28%)`, bg `hsl(220 14% 13%)`. Segmented groups use ONE outer border with `border-l` dividers. NEVER monolithic pills, NEVER monospace labels, NEVER `box-shadow` on language dots.
+- **Workflow**: Plan-before-Execute. Write `98-changelog.md` and `99-consistency-report.md` on updates.
+
+## Memories
+- [Chrome Pill Pattern](mem://style/chrome-pill-pattern) — Discrete pill toolbar standard for spec viewer (NEW)
+- [Planning Structure](mem://workflow/planning-structure) — Queued, pending, and done task management
+- [File Naming Conventions](mem://workflow/file-naming-conventions) — Strict lowercase kebab-case
+- [Interaction Protocol](mem://workflow/interaction-protocol) — Plan-before-Execute workflow
+- [Platform Limitations](mem://constraints/platform-limitations) — React, Vite, TS only
+- [Quality Assurance](mem://project/quality-assurance) — Reliability risk reports
+- [Frontend Hooks](mem://architecture/frontend-hooks) — `useLocalStorageForm` and `useStatusLog`
+- [Database Standards](mem://architecture/database-standards) — PascalCase tables/columns
+- [Testing Strategy](mem://architecture/testing-strategy) — 60/30/10 pyramid, 75% coverage
+- [Spec Editor Architecture](mem://architecture/spec-editor) — Monaco + CodeMirror 6
+- [Changelog Management](mem://workflow/changelog-management) — `98-changelog.md` usage
+- [Error Recovery Patterns](mem://architecture/error-recovery-patterns) — Backoff, graceful degradation
+- [Mistake Remediation](mem://workflow/mistake-remediation-protocol) — `spec/23-how-app-issues-track/`
+- [Spec-Only Repository](mem://constraints/spec-only-repository) — Specs only, code in external repos
+- [PowerShell Integration](mem://architecture/powershell-integration-standard) — `run.ps1` v1.3.0
+- [Error Management Standard](mem://architecture/error-management-standard) — 3-tier error flow
+- [Guard Patterns](mem://architecture/coding-standards/guard-patterns) — Positive existence guards
+- [Abbreviation Casing](mem://architecture/naming-conventions/abbreviation-casing) — PascalCase
+- [Go Error Handling](mem://architecture/coding-standards/go-error-handling) — `*apperror.AppError`
+- [PHP API Design](mem://architecture/coding-standards/php-api-design) — PascalCase response keys
+- [Enum Synchronization](mem://architecture/enum-synchronization) — 6-step sync process
+- [Rubric Validation System](mem://features/ai-bridge/rubric-validation-system) — Generate-Judge-Evaluate-Retry
+- [Boolean Logic](mem://architecture/coding-standards/boolean-logic) — Positive naming
+- [Control Flow](mem://architecture/coding-standards/control-flow) — Single-statement ifs
+- [Function Design](mem://architecture/coding-standards/function-design) — 3 params/15 lines max
+- [Filesystem Access](mem://architecture/coding-standards/filesystem-access) — No raw OS calls
+- [Context Keys](mem://architecture/naming-conventions/context-keys) — PascalCase keys
+- [Meaningful Identifiers](mem://architecture/naming-conventions/meaningful-identifiers) — Full names
+- [Link Formatting](mem://workflow/documentation-standards/link-formatting) — Lowercase relative paths
+- [API Client Patterns](mem://architecture/coding-standards/api-client-patterns) — Operation enum
+- [AppError Formatting](mem://architecture/coding-standards/apperror-formatting) — Multi-line for 2+ args
+- [Frontend Architecture](mem://style/frontend-architecture) — Sonner only, heavy libs purged
+- [CLI Module Structure](mem://workflow/cli-module-structure) — `01-backend`/`02-frontend`/`03-deploy`
+- [Error Code Allocations](mem://architecture/error-code-registry/project-allocations) — Numeric ranges
+- [Error Gen Categories](mem://architecture/error-code-registry/gen-categories) — GEN-000+ allocations
+- [Typing & Casting](mem://architecture/coding-standards/typing-and-casting) — Strict type safety
+- [Error Registry Automation](mem://architecture/error-code-registry/automation-and-ci) — CI pipeline
+- [Error Naming Standards](mem://architecture/error-code-registry/naming-standards) — `Err` prefix
+- [Interface Naming](mem://architecture/naming-conventions/interface-naming) — No `I` prefix
+- [Enum Naming](mem://architecture/naming-conventions/enum-naming) — `Type` suffix
+- [Constant Naming](mem://architecture/naming-conventions/constant-naming) — Zero underscores
+- [Python Helpers](mem://architecture/coding-standards/python-helpers) — Positive naming
+- [Naming Exemptions](mem://architecture/naming-conventions/exemptions) — External APIs allowed
+- [Canonical Authority](mem://architecture/coding-standards/canonical-authority) — Master Coding Guidelines
+- [Serialization Tags](mem://architecture/coding-standards/serialization-tags) — PascalCase JSON/YAML
+- [PHP Plugin Identity](mem://architecture/coding-standards/php-plugin-identity) — `PluginConfigType`
+- [PHP Logging Standards](mem://architecture/coding-standards/php-logging-error-handling) — Throwable-first
+- [Guideline Patterns](mem://workflow/documentation-standards/guideline-patterns) — ❌/✅ icons
+- [Orchestration Logic](mem://features/ai-bridge-cli/orchestration-logic) — Kahn's algorithm DAG
+- [Anti-Bot Architecture](mem://features/gsearch-cli/anti-bot-architecture) — Stealth scraping
+- [License Manager Overview](mem://features/license-manager/overview) — Split DB design
+- [Criteria Indexing](mem://workflow/documentation-standards/acceptance-criteria-indexing) — Rule→error code map
+- [License Manager Models](mem://features/license-manager/data-models) — 5 GORM models
+- [Test Naming Conventions](mem://architecture/coding-standards/test-naming) — `Test{Unit}_{Scenario}_{Outcome}`
+- [Folder Index Hierarchy](mem://workflow/folder-index) — Sequence shifts mapping
+- [Spec Folder Standards](mem://workflow/spec-folder-standards) — Required `00-overview.md` etc.
+- [Drift Detection System](mem://qa/drift-detection-system) — `drift-detect-all.sh`
+- [Consistency Maintenance](mem://workflow/consistency-maintenance) — `99-consistency-report.md`
+- [Documentation Maintenance](mem://workflow/documentation-maintenance) — Memory indexes
+- [Visual Dashboard Design](mem://style/visual-dashboard-design) — VS Code dark theme
+- [Dashboard Data Pipeline](mem://architecture/dashboard-data-pipeline) — Metrics manifest
+- [Dashboard Components](mem://architecture/dashboard-component-architecture) — React UI segments
+- [Spec Audit Methodology](mem://qa/spec-audit-v1-methodology) — AI-implementability scoring
+- [Spec Master Index](mem://architecture/spec-master-index) — `spec/00-overview.md` structure
+- [Validation Reports](mem://workflow/validation-reports-structure) — Governance artifacts
+- [Non-Vector RAG Architecture](mem://features/ai-bridge/non-vector-rag-architecture) — Tree retrieval
+- [Tree Visualization](mem://features/shared-cli-frontend/tree-visualization) — React explorer
+- [Non-Vector RAG Diagrams](mem://architecture/diagrams/non-vector-rag) — `.mmd` files
+- [Non-Vector RAG Parsing](mem://features/ai-bridge/non-vector-rag-parsing) — Tree-sitter AST
+- [Non-Vector Benchmarking](mem://features/ai-bridge/non-vector-rag-benchmarking) — NDCG@5 grid search
+- [Spec File Viewer](mem://features/dashboard/spec-file-viewer) — Markdown dashboard viewer
+- [Time Log CLI Overview](mem://features/time-log-cli/overview) — Rust activity tracker
+- [Time Log UI Overview](mem://features/time-log-ui/overview) — React frontend
+- [Rust Coding Standards](mem://architecture/coding-standards/rust) — Tokio, Arc, unsafe rules
+- [Combined Acceptance Criteria](mem://features/time-log-system/combined-acceptance) — 214 rules
+- [Release Readiness Tracker](mem://features/time-log-system/release-readiness-tracker) — 7-gate lifecycle
+- [Spec Authoring Guide](mem://workflow/spec-authoring-guide) — AI Confidence labels
+- [Productivity Model](mem://features/time-log-system/productivity-model) — Active scoring slices
+- [Remote Sync Architecture](mem://features/time-log-system/remote-sync-architecture) — Outbox sync
+- [Remote Settings Logic](mem://features/time-log-system/remote-settings-logic) — Admin API priority
+- [File Path Extraction](mem://features/time-log-system/file-path-extraction) — TitleParser
+- [WP Plugin Structure](mem://architecture/wp-plugin-structure) — Admin/frontend/backend
+- [Axios Version Pinning](mem://constraints/axios-version-pinning) — 1.14.0 / 0.30.3 only

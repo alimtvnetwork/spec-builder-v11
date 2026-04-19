@@ -1,0 +1,66 @@
+{
+  "Category": "General",
+  "Description": "Universal quotes applicable to any industry",
+  "Quotes": [
+    {
+      "Text": "Quality is not an act, it is a habit.",
+      "Author": "Aristotle",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Aristotle",
+      "RelevantTopics": ["quality", "service", "professionalism", "excellence"]
+    },
+    {
+      "Text": "The bitterness of poor quality remains long after the sweetness of low price is forgotten.",
+      "Author": "Benjamin Franklin",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Benjamin_Franklin",
+      "RelevantTopics": ["quality", "value", "pricing", "investment"]
+    },
+    {
+      "Text": "Excellence is not a skill, it's an attitude.",
+      "Author": "Ralph Marston",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Ralph_Marston",
+      "RelevantTopics": ["excellence", "attitude", "professionalism", "mindset"]
+    },
+    {
+      "Text": "The only way to do great work is to love what you do.",
+      "Author": "Steve Jobs",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Steve_Jobs",
+      "RelevantTopics": ["passion", "work", "dedication", "excellence"]
+    },
+    {
+      "Text": "Customer service is not a department, it's everyone's job.",
+      "Author": "Anonymous",
+      "ExternalUrl": null,
+      "RelevantTopics": ["customer service", "teamwork", "responsibility"]
+    },
+    {
+      "Text": "It takes 20 years to build a reputation and five minutes to ruin it.",
+      "Author": "Warren Buffett",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Warren_Buffett",
+      "RelevantTopics": ["reputation", "trust", "quality", "reliability"]
+    },
+    {
+      "Text": "The customer's perception is your reality.",
+      "Author": "Kate Zabriskie",
+      "ExternalUrl": null,
+      "RelevantTopics": ["customer experience", "perception", "service"]
+    },
+    {
+      "Text": "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work.",
+      "Author": "Steve Jobs",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Steve_Jobs",
+      "RelevantTopics": ["work", "satisfaction", "quality", "purpose"]
+    },
+    {
+      "Text": "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+      "Author": "Winston Churchill",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/Winston_Churchill",
+      "RelevantTopics": ["success", "perseverance", "courage", "resilience"]
+    },
+    {
+      "Text": "The secret of success is to do the common thing uncommonly well.",
+      "Author": "John D. Rockefeller",
+      "ExternalUrl": "https://en.wikipedia.org/wiki/John_D._Rockefeller",
+      "RelevantTopics": ["success", "excellence", "dedication", "quality"]
+    }
+  ]
+}

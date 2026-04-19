@@ -1,0 +1,75 @@
+{
+    "Version": "2026-01-v3",
+    "UpdatedAt": "2026-01-29T00:00:00Z",
+    "Engines": {
+        "Google": {
+            "Results": "div.g",
+            "Title": "h3",
+            "Link": "a[href]",
+            "Description": "div.VwiC3b, span.aCOpRe, div[data-sncf]",
+            "NextPage": "a#pnnext",
+            "NoResults": "div.card-section p",
+            "BlockIndicators": ["unusual traffic", "captcha", "consent.google", "Before you continue"],
+            "Fallbacks": [
+                {
+                    "Results": "div.g",
+                    "Title": "h3.r a, h3 a",
+                    "Link": "a[href]",
+                    "Description": "span.st, div.s"
+                },
+                {
+                    "Results": "div[data-sokoban-container]",
+                    "Title": "h3",
+                    "Link": "a[data-ved]",
+                    "Description": "div[data-sncf], span[data-sncf]"
+                }
+            ]
+        },
+        "DuckDuckGo": {
+            "Results": "div.result, article[data-testid='result']",
+            "Title": "a.result__a, h2 a",
+            "Link": "a.result__a, h2 a",
+            "Description": "a.result__snippet, p[data-testid='result-snippet']",
+            "NextPage": "a.result--more__btn",
+            "NoResults": "div.no-results",
+            "BlockIndicators": ["rate-limit-message", "Slow down"],
+            "Fallbacks": [
+                {
+                    "Results": "div.results_links_deep",
+                    "Title": "a.result__a",
+                    "Link": "a.result__a",
+                    "Description": "a.result__snippet"
+                },
+                {
+                    "Results": "div.web-result",
+                    "Title": "a.result__a",
+                    "Link": "a.result__a",
+                    "Description": "div.result__body"
+                }
+            ]
+        },
+        "Bing": {
+            "Results": "li.b_algo",
+            "Title": "h2 a",
+            "Link": "h2 a",
+            "Description": "p, div.b_caption p",
+            "NextPage": "a.sb_pagN",
+            "NoResults": "li.b_no",
+            "BlockIndicators": [],
+            "Fallbacks": [
+                {
+                    "Results": "ol#b_results li.b_algo",
+                    "Title": "h2 a",
+                    "Link": "h2 a",
+                    "Description": "p"
+                },
+                {
+                    "Results": "div.b_algo",
+                    "Title": "h2 a",
+                    "Link": "h2 a",
+                    "Description": "div.b_caption p"
+                }
+            ]
+        }
+    }
+}
