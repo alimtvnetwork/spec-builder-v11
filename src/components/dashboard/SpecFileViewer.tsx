@@ -1437,7 +1437,7 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
                                               title="Copy"
                                             >
                                               {codeCopied ? <Check className="h-2.5 w-2.5" style={{ color: "hsl(152 70% 50%)" }} /> : <Copy className="h-2.5 w-2.5" style={{ color: "hsl(220 10% 70%)" }} />}
-                                              <span className="text-[10px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>Copy</span>
+                                              <span className="text-[10px] font-medium hidden sm:inline" style={{ color: "hsl(220 10% 75%)" }}>Copy</span>
                                             </button>
 
                                             {/* Download — standalone pill */}
@@ -1448,7 +1448,7 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
                                               title="Download"
                                             >
                                               <Download className="h-2.5 w-2.5" style={{ color: "hsl(220 10% 70%)" }} />
-                                              <span className="text-[10px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>Download</span>
+                                              <span className="text-[10px] font-medium hidden sm:inline" style={{ color: "hsl(220 10% 75%)" }}>Download</span>
                                             </button>
 
                                             {/* Select all — standalone pill */}
@@ -1462,7 +1462,7 @@ const SpecFileViewer = forwardRef<SpecFileViewerHandle, SpecFileViewerProps>(({ 
                                               title="Select all lines"
                                             >
                                               <ListChecks className="h-2.5 w-2.5" style={{ color: "hsl(220 10% 70%)" }} />
-                                              <span className="text-[10px] font-medium" style={{ color: "hsl(220 10% 75%)" }}>
+                                              <span className="text-[10px] font-medium hidden sm:inline" style={{ color: "hsl(220 10% 75%)" }}>
                                                 {selectedLines.size === lineCount ? "Deselect" : "Select all"}
                                               </span>
                                             </button>
