@@ -283,7 +283,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full workflow, changelog rule
 
 | Dimension | Details |
 |---|---|
-| **Role** | Chief Software Engineer & CEO of [Riseup Asia LLC](https://riseup-asia.com/) |
+| **Role** | Chief Software Engineer of [Riseup Asia LLC](https://riseup-asia.com/) |
 | **Experience** | 20+ years across .NET, JavaScript, TypeScript, Go, PHP, Rust, Python |
 | **Engineering philosophy** | Systems thinker — treats code quality as infrastructure, not discipline |
 | **This project** | A production-grade specification system with 285+ files, self-validating architecture, cross-language consistency, and an AI optimization layer |
