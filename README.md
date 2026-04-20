@@ -10,6 +10,60 @@ This repo also ships a small **Health Dashboard** (React + Vite + TypeScript) th
 
 ---
 
+## 🗺️ Architecture
+
+```mermaid
+graph TD
+    ROOT["Spec Tree Architecture"]
+
+    ROOT --> FOUNDATION["Foundation and Standards"]
+    ROOT --> CORE["Core Systems"]
+    ROOT --> AI["AI and Integration"]
+    ROOT --> APPS["Applications"]
+    ROOT --> QA["Quality Assurance"]
+    ROOT --> DASHBOARD["Health Dashboard"]
+
+    FOUNDATION --> F1["00 Overview and Index"]
+    FOUNDATION --> F2["02 Spec Management"]
+    FOUNDATION --> F3["03 Coding Guidelines"]
+    FOUNDATION --> F4["04 Database Conventions"]
+    FOUNDATION --> F5["07 Error Code Registry"]
+    FOUNDATION --> F6["09 Code Block System"]
+
+    CORE --> C1["08 Spec Authoring Guide"]
+    CORE --> C2["17 Consolidated Guidelines"]
+    CORE --> C3["18 Error Resolution"]
+    CORE --> C4["19 License Manager"]
+    CORE --> C5["20 Shared CLI Frontend"]
+
+    AI --> A1["11 AI Bridge CLI"]
+    AI --> A2["33 Non-Vector RAG"]
+    AI --> A3["22 AI Bridge Adapter"]
+
+    APPS --> AP1["34 Time Log CLI - Rust"]
+    APPS --> AP2["35 Time Log UI - React"]
+    APPS --> AP3["36 Combined Acceptance"]
+    APPS --> AP4["WP Plugins"]
+
+    QA --> Q1["Consistency Reports - 99"]
+    QA --> Q2["Changelogs - 98"]
+    QA --> Q3["Acceptance Criteria - 97"]
+    QA --> Q4["Validation Reports"]
+    QA --> Q5["Drift Detection Scripts"]
+
+    DASHBOARD --> D1["src - React + Vite + TS"]
+    DASHBOARD --> D2["Spec Browser and Viewer"]
+    DASHBOARD --> D3["Metrics Manifest Pipeline"]
+
+    A1 --> A2
+    AP1 --> AP2
+    AP2 --> AP3
+    C5 --> AP2
+    F5 --> C3
+```
+
+---
+
 ## ✨ What's Inside
 
 - **`spec/`** — The full specification tree. Numeric-prefixed, lowercase-kebab-case folders covering coding standards, error codes, AI-bridge architecture, license manager, time-log system, dashboards, and more.
