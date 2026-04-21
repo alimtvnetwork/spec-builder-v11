@@ -131,7 +131,7 @@ Clone the spec tree into any project without cloning the full repo.
 
 ```bash
 # One-liner (latest from main)
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v14/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.sh | bash
 
 # Or clone locally and run with options
 bash install.sh                              # defaults: spec + scripts + memories
@@ -146,7 +146,7 @@ bash install.sh --list-versions              # show available tags
 
 ```powershell
 # One-liner (latest from main)
-irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v14/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.ps1 | iex
 
 # Or clone locally and run with options
 .\install.ps1                                          # defaults
@@ -160,7 +160,7 @@ irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v14/main/i
 
 | Flag (Bash) | Flag (PowerShell) | Default | Description |
 |---|---|---|---|
-| `--repo` | `-Repo` | `alimtvnetwork/coding-guidelines-v14` | Source GitHub repo |
+| `--repo` | `-Repo` | `alimtvnetwork/coding-guidelines-v15` | Source GitHub repo |
 | `--branch` | `-Branch` | `main` | Branch to download from |
 | `--version` | `-Version` | _(latest)_ | Specific release tag |
 | `--folders` | `-Folders` | `spec,scripts,.lovable/memories` | Comma-separated folder list |

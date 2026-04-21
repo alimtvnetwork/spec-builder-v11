@@ -6,7 +6,7 @@
 > **Ambiguity:** None
 > **Updated:** 2026-04-21
 > **Location:** `spec/51-upload-scripts/06-release-version-installer.md`
-> **Repo:** `alimtvnetwork/coding-guidelines-v14`
+> **Repo:** `alimtvnetwork/coding-guidelines-v15`
 
 ---
 
@@ -57,12 +57,12 @@ https://github.com/<owner>/<repo>/releases/download/<TAG>/release-version.sh
 
 **PowerShell:**
 ```powershell
-irm https://github.com/alimtvnetwork/coding-guidelines-v14/releases/download/v3.16.0/release-version.ps1 | iex
+irm https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.ps1 | iex
 ```
 
 **Bash:**
 ```bash
-curl -fsSL https://github.com/alimtvnetwork/coding-guidelines-v14/releases/download/v3.16.0/release-version.sh | bash
+curl -fsSL https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.sh | bash
 ```
 
 ---
@@ -92,12 +92,12 @@ Because `irm | iex` and `curl | bash` do not natively expose the source URL to t
 
 ```powershell
 # Stamped at build time — DO NOT EDIT MANUALLY
-$script:ReleaseUrl = 'https://github.com/alimtvnetwork/coding-guidelines-v14/releases/download/v3.16.0/release-version.ps1'
+$script:ReleaseUrl = 'https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.ps1'
 ```
 
 ```bash
 # Stamped at build time — DO NOT EDIT MANUALLY
-RELEASE_URL='https://github.com/alimtvnetwork/coding-guidelines-v14/releases/download/v3.16.0/release-version.sh'
+RELEASE_URL='https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.sh'
 ```
 
 The stamp is the **single source of version truth** at runtime. Parsing is then deterministic and offline-safe.
@@ -166,7 +166,7 @@ Every successful run prints:
 ```
 ════════════════════════════════════════════════════════
   Release-Pinned Installer
-  Source:   alimtvnetwork/coding-guidelines-v14
+  Source:   alimtvnetwork/coding-guidelines-v15
   Version:  v3.16.0   (pinned — will not auto-update)
   Folders:  spec, scripts, .lovable/memories
   Dest:     /home/user/project

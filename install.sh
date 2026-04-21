@@ -9,11 +9,11 @@
 #   bash install.sh --dest ~/my-project          # custom dest
 #   bash install.sh --dry-run                    # preview only
 #   bash install.sh --list-versions              # show tags
-#   curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v14/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.sh | bash
 # ────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-REPO="${REPO:-alimtvnetwork/coding-guidelines-v14}"
+REPO="${REPO:-alimtvnetwork/coding-guidelines-v15}"
 BRANCH="${BRANCH:-main}"
 VERSION=""
 DEST="."

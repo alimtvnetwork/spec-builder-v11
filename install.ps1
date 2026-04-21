@@ -17,11 +17,11 @@
     .\install.ps1
     .\install.ps1 -Version v3.15.0 -Folders spec
     .\install.ps1 -DryRun
-    irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v14/main/install.ps1 | iex
+    irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.ps1 | iex
 #>
 
 param(
-    [string]$Repo         = "alimtvnetwork/coding-guidelines-v14",
+    [string]$Repo         = "alimtvnetwork/coding-guidelines-v15",
     [string]$Branch       = "main",
     [string]$Version      = "",
     [string]$Dest         = "",
