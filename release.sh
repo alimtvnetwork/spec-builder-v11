@@ -9,7 +9,7 @@
 # ────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-REPO="alimtvnetwork/coding-guidelines-v14"
+REPO="alimtvnetwork/coding-guidelines-v15"
 RELEASE_VERSION_INPUT="${RELEASE_VERSION:-}"
 REQUIRED_PATHS=("spec" "src" "package.json" "README.md")
 
