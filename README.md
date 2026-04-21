@@ -125,10 +125,66 @@ bun run test
 
 ## 📥 Install Scripts
 
-Clone the spec tree into any project without cloning the full repo.
+There are **two installer families**. Use the one that matches your intent:
 
-### Bash (Linux / macOS / WSL)
+| Installer | Source | Version behavior | When to use |
+|---|---|---|---|
+| `release-version.ps1` / `release-version.sh` | GitHub **Releases** tab (per-tag asset) | **Pinned** to the tag in the URL — never auto-updates | Production / reproducible installs |
+| `install.ps1` / `install.sh` | `main` branch (or any tag via `--version`) | Rolling — defaults to `main`, can target any tag | Day-to-day dev / latest spec |
 
+### 🔒 Release-Pinned Installer (recommended)
+
+Each GitHub Release page ships `release-version.ps1` and `release-version.sh` as assets. Both scripts are **stamped at build time** with the exact release URL they were uploaded to, so when you run them they install **only that tag** — never `main`, never `latest`, never a newer release.
+
+**How the pinning works:** the release builder injects the canonical asset URL (`https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/<TAG>/release-version.{ps1,sh}`) into the script. At runtime the script parses the URL, extracts the tag, and downloads `https://codeload.github.com/alimtvnetwork/coding-guidelines-v15/zip/refs/tags/<TAG>`.
+
+**Bash (Linux / macOS / WSL):**
+```bash
+# Replace v3.16.0 with the tag you want from the Releases tab
+curl -fsSL https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.sh | bash
+
+# With options (same flags work locally)
+bash release-version.sh --folders spec --dest ~/my-project --dry-run
+```
+
+**PowerShell (Windows):**
+```powershell
+irm https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.ps1 | iex
+
+# With options
+.\release-version.ps1 -Folders spec -Dest C:\Projects\my-app -DryRun
+```
+
+**On success you'll see:**
+```
+  ════════════════════════════════════════════════════════
+    Release-Pinned Installer
+    Source:   alimtvnetwork/coding-guidelines-v15
+    Version:  v3.16.0   (pinned — will not auto-update)
+    Folders:  spec, scripts, .lovable/memories
+    Dest:     /home/you/my-project
+  ════════════════════════════════════════════════════════
+```
+
+**On failure** the script exits `1` and points you at `install.sh` / `install.ps1`:
+
+| Trigger | Error message |
+|---|---|
+| URL stamp missing (script not built by `release.sh`) | `❌ This script was not built by release.sh / release.ps1 — version stamp is missing. Use install.sh instead.` |
+| URL contains `/releases/latest/download/` | `❌ Refusing to run from /releases/latest/. Download from a specific tag, or use install.sh if you want latest.` |
+| URL doesn't match the release-asset pattern | `❌ Cannot determine pinned version from URL. Use install.sh instead.` |
+| Tag archive returns 404 | `❌ Release tag <TAG> not found on alimtvnetwork/coding-guidelines-v15.` |
+| Forbidden flag passed (`--branch`, `--version`, `--list-versions`, `-NoLatest:$false`, `--no-latest=false`) | `❌ release-version is pinned. Use install.sh for other versions or branches (forbidden flag: <flag>).` |
+
+Every error message also prints the general installer URL: `https://github.com/alimtvnetwork/coding-guidelines-v15/raw/main/install.sh`.
+
+> ⚠️ **Forbidden flags on the pinned installer:** `--branch` / `-Branch`, `--version` / `-Version`, `--list-versions` / `-ListVersions`, and disabling `--no-latest` / `-NoLatest`. Version is URL-derived; if you need any of these, use `install.sh` / `install.ps1` instead.
+
+### 🛠 General Installer (`install.ps1` / `install.sh`)
+
+Use this when you want the latest spec from `main`, want to switch tags ad-hoc, or are scripting against the repo without going through the Releases tab.
+
+**Bash (Linux / macOS / WSL):**
 ```bash
 # One-liner (latest from main)
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.sh | bash
@@ -142,8 +198,7 @@ bash install.sh --dry-run                    # preview without writing
 bash install.sh --list-versions              # show available tags
 ```
 
-### PowerShell (Windows)
-
+**PowerShell (Windows):**
 ```powershell
 # One-liner (latest from main)
 irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.ps1 | iex
@@ -158,16 +213,21 @@ irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/i
 
 ### Flags Reference
 
-| Flag (Bash) | Flag (PowerShell) | Default | Description |
-|---|---|---|---|
-| `--repo` | `-Repo` | `alimtvnetwork/coding-guidelines-v15` | Source GitHub repo |
-| `--branch` | `-Branch` | `main` | Branch to download from |
-| `--version` | `-Version` | _(latest)_ | Specific release tag |
-| `--folders` | `-Folders` | `spec,scripts,.lovable/memories` | Comma-separated folder list |
-| `--dest` | `-Dest` | `.` (cwd) | Destination directory |
-| `--dry-run` | `-DryRun` | off | Preview without writing files |
-| `--list-versions` | `-ListVersions` | off | List available release tags |
-| | `-Force` | off | Overwrite without prompting |
+| Flag (Bash) | Flag (PowerShell) | Default | Description | Pinned? |
+|---|---|---|---|---|
+| `--repo` | `-Repo` | `alimtvnetwork/coding-guidelines-v15` | Source GitHub repo | ❌ |
+| `--branch` | `-Branch` | `main` | Branch to download from | ❌ |
+| `--version` | `-Version` | _(latest)_ | Specific release tag | ❌ |
+| `--list-versions` | `-ListVersions` | off | List available release tags | ❌ |
+| `--folders` | `-Folders` | `spec,scripts,.lovable/memories` | Comma-separated folder list | ✅ |
+| `--dest` | `-Dest` | `.` (cwd) | Destination directory | ✅ |
+| `--dry-run` | `-DryRun` | off | Preview without writing files | ✅ |
+| | `-Force` | off | Overwrite without prompting | ✅ |
+| `--no-latest` | `-NoLatest` | always on | Hard-locks to stamped tag (release-pinned only) | ✅ |
+
+Columns marked **❌ Pinned** are forbidden on `release-version.{ps1,sh}` and will hard-fail.
+
+
 
 ---
 
