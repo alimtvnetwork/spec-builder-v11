@@ -269,7 +269,9 @@ RELEASE_VERSION=3.16.0 bash release.sh
 | `coding-guidelines-vX.Y.Z.zip` | Full release: spec + scripts + dashboard + docs |
 | `coding-guidelines-vX.Y.Z.tar.gz` | Same as above, tar.gz format |
 | `dashboard-vX.Y.Z.zip` | Dashboard build only (`dist/`) |
-| `checksums.txt` | SHA-256 hashes for all archives |
+| `release-version.ps1` | Release-pinned PowerShell installer (URL-stamped to this tag) |
+| `release-version.sh` | Release-pinned Bash installer (URL-stamped to this tag) |
+| `checksums.txt` | SHA-256 hashes for all archives + installer scripts |
 
 ---
 
