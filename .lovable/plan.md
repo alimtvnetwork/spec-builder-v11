@@ -183,6 +183,31 @@ Insert `spec/05-spec-authoring-guide/` as a new module. All existing modules at 
 
 ---
 
+## Active Track: Release-Pinned Installer (v4.0.0)
+
+**Started:** 2026-04-21
+**Spec:** `spec/51-upload-scripts/06-release-version-installer.md` (v1.0.0, draft)
+**Memory:** `mem://features/installer/release-version-pinned`
+
+### Goal
+Add a second installer pair (`release-version.ps1` / `release-version.sh`) that ships per-release as a GitHub Release asset and is hard-locked to the tag it was built for. The existing `install.ps1` / `install.sh` remain the general/dev installer.
+
+### Decisions (locked)
+- **Version source:** parsed from a build-time stamped URL constant (`__RELEASE_URL__` token replaced by `release.sh` / `release.ps1`). No `-Version` flag, no `package.json` lookup.
+- **Failure mode:** hard fail (`exit 1`) with a message that explicitly directs users to `install.ps1` / `install.sh` for non-pinned installs. No silent fallback to `main` or latest.
+- **Forbidden flags:** `-Branch`, `-Version`, `-ListVersions`, `-NoLatest:$false` — all rejected.
+- **Banner contract:** must include literal `(pinned — will not auto-update)`.
+
+### ⏳ Pending Phases
+1. **Spec review & sign-off** — confirm `spec/51-upload-scripts/06-release-version-installer.md` v1.0.0
+2. **Templates** — author `templates/release-version.ps1.tmpl` + `.sh.tmpl` with `__RELEASE_URL__` placeholder
+3. **Release builder integration** — extend `release.sh` + `release.ps1` to stamp templates and emit them into `release-artifacts/` + `checksums.txt`
+4. **CI** — extend `.github/workflows/release.yml` to upload both stamped scripts as Release assets
+5. **Acceptance tests** — implement RVI-001 … RVI-010
+6. **README update** — document the two-installer model and canonical Release-asset URLs
+
+---
+
 ## Completed Tracks
 
 ### v1.0.0 — Spec Consistency Improvement (6 phases) — ✅ Complete 2026-02-12
