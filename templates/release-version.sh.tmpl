@@ -59,7 +59,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ─── Validate stamped URL ──────────────────────────────────────────────────
-if [[ -z "$RELEASE_URL" || "$RELEASE_URL" == "__RELEASE_URL__" ]]; then
+SENTINEL='__RELEASE'"_URL__"
+if [[ -z "$RELEASE_URL" || "$RELEASE_URL" == "$SENTINEL" ]]; then
   fail_hard "This script was not built by release.sh / release.ps1 — version stamp is missing. Use install.sh instead."
 fi
 if [[ "$RELEASE_URL" == *"/releases/latest/download/"* ]]; then
