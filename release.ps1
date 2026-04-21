@@ -84,6 +84,8 @@ Write-Step "Copying dashboard build..."
 Copy-Item -Path "dist" -Destination "$stagingDir/dashboard" -Recurse
 
 # ── Stamp release-pinned installers ──────────────────────────────
+# Injects URL + audit header (build date, tag, commit, builder) so future
+# auditors can verify provenance from the first ~10 lines of the script.
 Write-Step "Stamping release-pinned installers..."
 $tmplPs1 = "templates/release-version.ps1.tmpl"
 $tmplSh  = "templates/release-version.sh.tmpl"
@@ -93,12 +95,69 @@ if (-not (Test-Path $tmplPs1) -or -not (Test-Path $tmplSh)) {
 }
 $tag = "v$version"
 $baseUrl = "https://github.com/$repo/releases/download/$tag"
-(Get-Content $tmplPs1 -Raw).Replace('__RELEASE_URL__', "$baseUrl/release-version.ps1") |
-    Set-Content "$distDir/release-version.ps1" -NoNewline
-(Get-Content $tmplSh  -Raw).Replace('__RELEASE_URL__', "$baseUrl/release-version.sh") |
-    Set-Content "$distDir/release-version.sh"  -NoNewline
-Copy-Item "$distDir/release-version.ps1" "$stagingDir/release-version.ps1"
-Copy-Item "$distDir/release-version.sh"  "$stagingDir/release-version.sh"
+$buildDate = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+$commitSha = try { (git rev-parse --short=12 HEAD 2>$null).Trim() } catch { "unknown" }
+if ([string]::IsNullOrWhiteSpace($commitSha)) { $commitSha = "unknown" }
+$builder = if ($env:GITHUB_ACTOR) { $env:GITHUB_ACTOR } elseif ($env:USERNAME) { $env:USERNAME } else { "local" }
+
+function New-AuditHeader {
+    param([string]$AssetUrl)
+    @"
+# ╔═══════════════════════════════════════════════════════════════════════╗
+# ║  RELEASE-PINNED INSTALLER — AUDIT HEADER (stamped by release.ps1)    ║
+# ║  Tag:        $tag
+# ║  Repo:       $repo
+# ║  Built:      $buildDate
+# ║  Commit:     $commitSha
+# ║  Builder:    $builder
+# ║  Asset URL:  $AssetUrl
+# ╚═══════════════════════════════════════════════════════════════════════╝
+"@
+}
+
+# PowerShell template — replace only the $script:ReleaseUrl assignment, then
+# insert the audit header after the closing #> of the SYNOPSIS block.
+$ps1Url    = "$baseUrl/release-version.ps1"
+$ps1Header = New-AuditHeader -AssetUrl $ps1Url
+$ps1Lines  = Get-Content $tmplPs1
+$ps1Out    = New-Object System.Collections.Generic.List[string]
+$ps1HeaderInserted = $false
+foreach ($line in $ps1Lines) {
+    if ($line -match '^\$script:ReleaseUrl\s*=') {
+        $line = $line -replace '__RELEASE_URL__', [System.Text.RegularExpressions.Regex]::Escape($ps1Url).Replace('\','')
+        $line = $line -replace '__RELEASE_URL__', $ps1Url
+    }
+    $ps1Out.Add($line)
+    if (-not $ps1HeaderInserted -and $line -eq '#>') {
+        $ps1Out.Add('')
+        $ps1Out.Add($ps1Header)
+        $ps1HeaderInserted = $true
+    }
+}
+Set-Content -Path "$distDir/release-version.ps1" -Value $ps1Out
+
+# Bash template — replace only the RELEASE_URL= assignment, then insert the
+# audit header right after the shebang.
+$shUrl    = "$baseUrl/release-version.sh"
+$shHeader = New-AuditHeader -AssetUrl $shUrl
+$shLines  = Get-Content $tmplSh
+$shOut    = New-Object System.Collections.Generic.List[string]
+for ($i = 0; $i -lt $shLines.Count; $i++) {
+    $line = $shLines[$i]
+    if ($i -eq 0) {
+        $shOut.Add($line)
+        $shOut.Add($shHeader)
+        continue
+    }
+    if ($line -match '^RELEASE_URL=') {
+        $line = $line -replace '__RELEASE_URL__', $shUrl
+    }
+    $shOut.Add($line)
+}
+Set-Content -Path "$distDir/release-version.sh" -Value $shOut
+
+Copy-Item "$distDir/release-version.ps1" "$stagingDir/release-version.ps1" -Force
+Copy-Item "$distDir/release-version.sh"  "$stagingDir/release-version.sh"  -Force
 
 # ── Archives ─────────────────────────────────────────────────────
 Write-Step "Creating ZIP archives..."
