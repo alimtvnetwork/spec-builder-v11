@@ -71,7 +71,8 @@ if ($PSBoundParameters.ContainsKey('NoLatest') -and -not $NoLatest) {
 }
 
 # ─── Validate stamped URL ───────────────────────────────────────────────────
-if ([string]::IsNullOrWhiteSpace($script:ReleaseUrl) -or $script:ReleaseUrl -eq '__RELEASE_URL__') {
+$sentinel = '__RELEASE' + '_URL__'
+if ([string]::IsNullOrWhiteSpace($script:ReleaseUrl) -or $script:ReleaseUrl -eq $sentinel) {
     Fail-Hard "This script was not built by release.ps1 / release.sh — version stamp is missing. Use install.ps1 instead."
 }
 if ($script:ReleaseUrl -match '/releases/latest/download/') {
