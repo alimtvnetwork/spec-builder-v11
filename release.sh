@@ -62,15 +62,19 @@ stamp_release_version_installers() {
 # ╚═══════════════════════════════════════════════════════════════════════╝"
 
   # PowerShell: insert audit header after the closing comment of the SYNOPSIS block (#>)
+  # Substitution is anchored to the $script:ReleaseUrl assignment so prose
+  # references to the placeholder name in comments stay intact for auditors.
   awk -v hdr="$audit_ps1" -v url="$base/release-version.ps1" '
-    { gsub(/__RELEASE_URL__/, url); print }
+    /^\$script:ReleaseUrl[[:space:]]*=/ { sub(/__RELEASE_URL__/, url) }
+    { print }
     /^#>$/ && !done { print ""; print hdr; done=1 }
   ' "$tmpl_ps1" > "$DIST_DIR/release-version.ps1"
 
-  # Bash: insert audit header after the shebang line
+  # Bash: insert audit header after the shebang; anchor sub to the RELEASE_URL= line
   awk -v hdr="$audit_sh" -v url="$base/release-version.sh" '
     NR==1 { print; print hdr; next }
-    { gsub(/__RELEASE_URL__/, url); print }
+    /^RELEASE_URL=/ { sub(/__RELEASE_URL__/, url) }
+    { print }
   ' "$tmpl_sh" > "$DIST_DIR/release-version.sh"
 
   chmod +x "$DIST_DIR/release-version.sh"
