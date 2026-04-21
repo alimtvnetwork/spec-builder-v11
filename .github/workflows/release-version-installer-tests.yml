@@ -1,0 +1,321 @@
+name: release-version installer tests
+
+# Validates that the release-pinned installer (release-version.ps1 / .sh):
+#   1. Refuses to run unstamped (no __RELEASE_URL__ replacement).
+#   2. Refuses URLs pointing at /releases/latest/download/.
+#   3. Refuses forbidden flags (--branch, --version, --list-versions, --no-latest=false).
+#   4. Resolves the pinned tag from the stamped URL.
+#   5. Never falls back to `main`, `latest`, or a different tag — even when
+#      the pinned tag does not exist (must hard-fail with exit 1).
+#
+# Triggered on:
+#   - PRs touching the templates, release builders, or this workflow itself
+#   - Pushes to main (regression guard)
+#   - Manual dispatch with an optional override tag
+
+on:
+  pull_request:
+    paths:
+      - 'templates/release-version.*.tmpl'
+      - 'release.sh'
+      - 'release.ps1'
+      - '.github/workflows/release-version-installer-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'templates/release-version.*.tmpl'
+      - 'release.sh'
+      - 'release.ps1'
+  workflow_dispatch:
+    inputs:
+      pinned_tag:
+        description: 'Tag to stamp into the test installer (must exist on Releases for the success-path assertion)'
+        required: false
+        default: 'v3.15.0'
+
+permissions:
+  contents: read
+
+env:
+  REPO: alimtvnetwork/coding-guidelines-v15
+  PINNED_TAG: ${{ github.event.inputs.pinned_tag || 'v3.15.0' }}
+
+jobs:
+  bash-installer-tests:
+    name: Bash installer — no-fallback assertions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp release-version.sh from template
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          BASE="https://github.com/${REPO}/releases/download/${PINNED_TAG}"
+          # Anchored substitution — only the RELEASE_URL= assignment is replaced
+          awk -v url="${BASE}/release-version.sh" '
+            /^RELEASE_URL=/ { sub(/__RELEASE_URL__/, url) }
+            { print }
+          ' templates/release-version.sh.tmpl > out/release-version.sh
+          chmod +x out/release-version.sh
+
+          # Sanity: confirm exactly one stamped URL on the assignment line
+          grep -E "^RELEASE_URL='https://github.com/${REPO}/releases/download/${PINNED_TAG}/release-version\.sh'$" out/release-version.sh
+
+      - name: ❌ Reject unstamped script
+        run: |
+          set +e
+          bash templates/release-version.sh.tmpl --dry-run > out.log 2>&1
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] || { echo "Expected exit 1, got $code"; cat out.log; exit 1; }
+          grep -q "version stamp is missing" out.log
+          grep -q "install.sh" out.log
+
+      - name: ❌ Reject /releases/latest/download/ URL
+        run: |
+          set -euo pipefail
+          awk -v url="https://github.com/${REPO}/releases/latest/download/release-version.sh" '
+            /^RELEASE_URL=/ { sub(/__RELEASE_URL__/, url) }
+            { print }
+          ' templates/release-version.sh.tmpl > out/rv-latest.sh
+          set +e
+          bash out/rv-latest.sh --dry-run > out.log 2>&1
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] || { echo "Expected exit 1, got $code"; cat out.log; exit 1; }
+          grep -q "Refusing to run from /releases/latest/" out.log
+
+      - name: ❌ Reject malformed (non-release-asset) URL
+        run: |
+          set -euo pipefail
+          awk -v url="https://example.com/not-a-release/release-version.sh" '
+            /^RELEASE_URL=/ { sub(/__RELEASE_URL__/, url) }
+            { print }
+          ' templates/release-version.sh.tmpl > out/rv-bad.sh
+          set +e
+          bash out/rv-bad.sh --dry-run > out.log 2>&1
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] || { echo "Expected exit 1, got $code"; cat out.log; exit 1; }
+          grep -q "Cannot determine pinned version" out.log
+
+      - name: ❌ Reject forbidden flag --branch (no fallback to main)
+        run: |
+          set +e
+          bash out/release-version.sh --branch main > out.log 2>&1
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] || { echo "Expected exit 1, got $code"; cat out.log; exit 1; }
+          grep -q "forbidden flag: --branch" out.log
+
+      - name: ❌ Reject forbidden flag --version (no fallback to other tag)
+        run: |
+          set +e
+          bash out/release-version.sh --version v999.999.999 > out.log 2>&1
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] || { echo "Expected exit 1, got $code"; cat out.log; exit 1; }
+          grep -q "forbidden flag: --version" out.log
+
+      - name: ❌ Reject forbidden flag --list-versions
+        run: |
+          set +e
+          bash out/release-version.sh --list-versions > out.log 2>&1
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] || { echo "Expected exit 1, got $code"; cat out.log; exit 1; }
+          grep -q "forbidden flag: --list-versions" out.log
+
+      - name: ❌ Reject --no-latest=false
+        run: |
+          set +e
+          bash out/release-version.sh --no-latest=false > out.log 2>&1
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] || { echo "Expected exit 1, got $code"; cat out.log; exit 1; }
+          grep -q "no-latest=false is not allowed" out.log
+
+      - name: 🔒 Bogus tag must hard-fail (NEVER fall back to main/latest)
+        run: |
+          set -euo pipefail
+          BOGUS="v999.999.999"
+          BASE="https://github.com/${REPO}/releases/download/${BOGUS}"
+          awk -v url="${BASE}/release-version.sh" '
+            /^RELEASE_URL=/ { sub(/__RELEASE_URL__/, url) }
+            { print }
+          ' templates/release-version.sh.tmpl > out/rv-bogus.sh
+          chmod +x out/rv-bogus.sh
+          mkdir -p sandbox
+          set +e
+          bash out/rv-bogus.sh --dest sandbox > out.log 2>&1
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] || { echo "Expected exit 1, got $code"; cat out.log; exit 1; }
+          grep -q "Release tag ${BOGUS} not found" out.log
+          # Critical: nothing was written to the sandbox
+          [ -z "$(ls -A sandbox 2>/dev/null)" ] || {
+            echo "FAIL: sandbox contains files — installer fell back to another source"
+            ls -la sandbox
+            exit 1
+          }
+
+      - name: ✅ Banner advertises pinned tag
+        run: |
+          set -euo pipefail
+          # Use --dry-run + dest sandbox to avoid mutating the workspace; tag may
+          # 404 (that's fine — we only inspect the banner before the network call).
+          bash out/release-version.sh --dry-run > out.log 2>&1 || true
+          grep -F "Version:  ${PINNED_TAG}   (pinned — will not auto-update)" out.log
+          grep -F "Source:   ${REPO}" out.log
+
+  powershell-installer-tests:
+    name: PowerShell installer — no-fallback assertions
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp release-version.ps1 from template
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path out -Force | Out-Null
+          $base = "https://github.com/$env:REPO/releases/download/$env:PINNED_TAG"
+          $url  = "$base/release-version.ps1"
+          $lines = Get-Content templates/release-version.ps1.tmpl
+          $out = foreach ($line in $lines) {
+            if ($line -match '^\$script:ReleaseUrl\s*=') {
+              $line -replace '__RELEASE_URL__', $url
+            } else {
+              $line
+            }
+          }
+          Set-Content -Path out/release-version.ps1 -Value $out
+          Select-String -Path out/release-version.ps1 -Pattern "^\`$script:ReleaseUrl\s*=\s*'$([regex]::Escape($url))'$" | Out-Null
+
+      - name: ❌ Reject unstamped script
+        shell: pwsh
+        run: |
+          $log = & pwsh -NoProfile -File templates/release-version.ps1.tmpl -DryRun 2>&1 | Out-String
+          if ($LASTEXITCODE -ne 1) { Write-Host $log; throw "Expected exit 1, got $LASTEXITCODE" }
+          if ($log -notmatch 'version stamp is missing') { throw "Missing expected error" }
+          if ($log -notmatch 'install\.ps1') { throw "Did not direct user to install.ps1" }
+
+      - name: ❌ Reject /releases/latest/download/ URL
+        shell: pwsh
+        run: |
+          $url = "https://github.com/$env:REPO/releases/latest/download/release-version.ps1"
+          $lines = Get-Content templates/release-version.ps1.tmpl
+          $out = foreach ($line in $lines) {
+            if ($line -match '^\$script:ReleaseUrl\s*=') { $line -replace '__RELEASE_URL__', $url } else { $line }
+          }
+          Set-Content -Path out/rv-latest.ps1 -Value $out
+          $log = & pwsh -NoProfile -File out/rv-latest.ps1 -DryRun 2>&1 | Out-String
+          if ($LASTEXITCODE -ne 1) { Write-Host $log; throw "Expected exit 1, got $LASTEXITCODE" }
+          if ($log -notmatch 'Refusing to run from /releases/latest/') { throw "Missing expected error" }
+
+      - name: ❌ Reject forbidden flag -Branch (no fallback to main)
+        shell: pwsh
+        run: |
+          $log = & pwsh -NoProfile -File out/release-version.ps1 -Branch main 2>&1 | Out-String
+          if ($LASTEXITCODE -ne 1) { Write-Host $log; throw "Expected exit 1, got $LASTEXITCODE" }
+          if ($log -notmatch 'forbidden flag: -Branch') { throw "Missing expected error" }
+
+      - name: ❌ Reject forbidden flag -Version (no fallback to other tag)
+        shell: pwsh
+        run: |
+          $log = & pwsh -NoProfile -File out/release-version.ps1 -Version v999.999.999 2>&1 | Out-String
+          if ($LASTEXITCODE -ne 1) { Write-Host $log; throw "Expected exit 1, got $LASTEXITCODE" }
+          if ($log -notmatch 'forbidden flag: -Version') { throw "Missing expected error" }
+
+      - name: ❌ Reject -NoLatest:$false
+        shell: pwsh
+        run: |
+          $log = & pwsh -NoProfile -File out/release-version.ps1 -NoLatest:$false 2>&1 | Out-String
+          if ($LASTEXITCODE -ne 1) { Write-Host $log; throw "Expected exit 1, got $LASTEXITCODE" }
+          if ($log -notmatch '-NoLatest:\$false is not allowed') { throw "Missing expected error" }
+
+      - name: 🔒 Bogus tag must hard-fail (NEVER fall back to main/latest)
+        shell: pwsh
+        run: |
+          $bogus = 'v999.999.999'
+          $url = "https://github.com/$env:REPO/releases/download/$bogus/release-version.ps1"
+          $lines = Get-Content templates/release-version.ps1.tmpl
+          $out = foreach ($line in $lines) {
+            if ($line -match '^\$script:ReleaseUrl\s*=') { $line -replace '__RELEASE_URL__', $url } else { $line }
+          }
+          Set-Content -Path out/rv-bogus.ps1 -Value $out
+          New-Item -ItemType Directory -Path sandbox -Force | Out-Null
+          $log = & pwsh -NoProfile -File out/rv-bogus.ps1 -Dest sandbox 2>&1 | Out-String
+          if ($LASTEXITCODE -ne 1) { Write-Host $log; throw "Expected exit 1, got $LASTEXITCODE" }
+          if ($log -notmatch "Release tag $bogus not found") { throw "Missing expected error" }
+          if ((Get-ChildItem sandbox -Force | Measure-Object).Count -ne 0) {
+            throw "FAIL: sandbox contains files — installer fell back to another source"
+          }
+
+      - name: ✅ Banner advertises pinned tag
+        shell: pwsh
+        run: |
+          $log = & pwsh -NoProfile -File out/release-version.ps1 -DryRun 2>&1 | Out-String
+          if ($log -notmatch [regex]::Escape("Version:  $env:PINNED_TAG   (pinned — will not auto-update)")) {
+            Write-Host $log; throw "Banner missing pinned-tag line"
+          }
+          if ($log -notmatch [regex]::Escape("Source:   $env:REPO")) {
+            Write-Host $log; throw "Banner missing repo line"
+          }
+
+  release-builder-stamp-test:
+    name: release.sh stamper produces correctly stamped artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run only the stamper function from release.sh
+        run: |
+          set -euo pipefail
+          mkdir -p release-artifacts/coding-guidelines-v3.16.0
+          {
+            echo 'set -euo pipefail'
+            echo 'REPO="alimtvnetwork/coding-guidelines-v15"'
+            echo 'VERSION="3.16.0"'
+            echo 'DIST_DIR="release-artifacts"'
+            echo 'STAGING_DIR="$DIST_DIR/coding-guidelines-v$VERSION"'
+            echo 'err() { printf "%s\n" "$1" >&2; }'
+            sed -n '/^stamp_release_version_installers() {/,/^}$/p' release.sh
+            echo 'stamp_release_version_installers'
+          } > /tmp/run-stamp.sh
+          bash /tmp/run-stamp.sh
+
+      - name: Verify audit header and URL injection
+        run: |
+          set -euo pipefail
+          # Audit header present
+          grep -q "RELEASE-PINNED INSTALLER — AUDIT HEADER" release-artifacts/release-version.sh
+          grep -q "RELEASE-PINNED INSTALLER — AUDIT HEADER" release-artifacts/release-version.ps1
+          grep -q "Tag:        v3.16.0" release-artifacts/release-version.sh
+          grep -q "Tag:        v3.16.0" release-artifacts/release-version.ps1
+
+          # URL stamped on assignment line
+          grep -qE "^RELEASE_URL='https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3\.16\.0/release-version\.sh'\$" release-artifacts/release-version.sh
+          grep -qE "^\\\$script:ReleaseUrl = 'https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3\.16\.0/release-version\.ps1'\$" release-artifacts/release-version.ps1
+
+          # Staging copy made
+          test -f release-artifacts/coding-guidelines-v3.16.0/release-version.sh
+          test -f release-artifacts/coding-guidelines-v3.16.0/release-version.ps1
+
+          # Stamped sh runs and shows the pinned banner (404 on tag is fine — we
+          # only care that no fallback happened)
+          mkdir -p sandbox
+          set +e
+          bash release-artifacts/release-version.sh --dest sandbox > out.log 2>&1
+          code=$?
+          set -e
+          [ "$code" -eq 1 ] || { echo "Expected exit 1, got $code"; cat out.log; exit 1; }
+          grep -F "Version:  v3.16.0   (pinned — will not auto-update)" out.log
+          [ -z "$(ls -A sandbox 2>/dev/null)" ] || { echo "FAIL: fallback occurred"; exit 1; }
+
+      - name: Upload stamped artifacts (debug aid)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stamped-installers
+          path: release-artifacts/
