@@ -17,6 +17,26 @@ step() { printf '\033[0;36m▸ %s\033[0m\n' "$1"; }
 ok()   { printf '\033[0;32m✅ %s\033[0m\n' "$1"; }
 err()  { printf '\033[0;31m❌ %s\033[0m\n' "$1" >&2; }
 
+# ── Stamp release-pinned installer templates ─────────────────────────────
+stamp_release_version_installers() {
+  local tag="v$VERSION"
+  local base="https://github.com/$REPO/releases/download/$tag"
+  local tmpl_ps1="templates/release-version.ps1.tmpl"
+  local tmpl_sh="templates/release-version.sh.tmpl"
+
+  if [[ ! -f "$tmpl_ps1" || ! -f "$tmpl_sh" ]]; then
+    err "Missing release-version templates under templates/"
+    exit 1
+  fi
+
+  sed "s|__RELEASE_URL__|$base/release-version.ps1|g" "$tmpl_ps1" > "$DIST_DIR/release-version.ps1"
+  sed "s|__RELEASE_URL__|$base/release-version.sh|g"  "$tmpl_sh"  > "$DIST_DIR/release-version.sh"
+  chmod +x "$DIST_DIR/release-version.sh"
+
+  cp "$DIST_DIR/release-version.ps1" "$STAGING_DIR/release-version.ps1"
+  cp "$DIST_DIR/release-version.sh"  "$STAGING_DIR/release-version.sh"
+}
+
 # ── Resolve version ──────────────────────────────────────────────
 resolve_version() {
   local version="${RELEASE_VERSION_INPUT#v}"
@@ -85,6 +105,9 @@ prepare_staging() {
   [[ -f install.sh ]]  && cp install.sh  "$STAGING_DIR/install.sh"
   [[ -f install.ps1 ]] && cp install.ps1 "$STAGING_DIR/install.ps1"
 
+  step "Stamping release-pinned installers..."
+  stamp_release_version_installers
+
   step "Copying documentation..."
   cp README.md "$STAGING_DIR/README.md"
   [[ -f CONTRIBUTING.md ]] && cp CONTRIBUTING.md "$STAGING_DIR/CONTRIBUTING.md"
@@ -123,6 +146,8 @@ generate_checksums() {
     "$ARCHIVE_BASENAME.zip" \
     "$ARCHIVE_BASENAME.tar.gz" \
     "dashboard-v$VERSION.zip" \
+    "release-version.ps1" \
+    "release-version.sh" \
     > checksums.txt)
 }
 

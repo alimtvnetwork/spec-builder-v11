@@ -32,6 +32,7 @@ if ([string]::IsNullOrEmpty($version)) {
     exit 1
 }
 
+$repo         = "alimtvnetwork/coding-guidelines-v15"
 $distDir      = "release-artifacts"
 $stagingDir   = "$distDir/coding-guidelines-v$version"
 $archiveBase  = "coding-guidelines-v$version"
@@ -82,6 +83,23 @@ if (Test-Path "CHANGELOG.md")   { Copy-Item "CHANGELOG.md"   "$stagingDir/CHANGE
 Write-Step "Copying dashboard build..."
 Copy-Item -Path "dist" -Destination "$stagingDir/dashboard" -Recurse
 
+# ── Stamp release-pinned installers ──────────────────────────────
+Write-Step "Stamping release-pinned installers..."
+$tmplPs1 = "templates/release-version.ps1.tmpl"
+$tmplSh  = "templates/release-version.sh.tmpl"
+if (-not (Test-Path $tmplPs1) -or -not (Test-Path $tmplSh)) {
+    Write-Err "Missing release-version templates under templates/"
+    exit 1
+}
+$tag = "v$version"
+$baseUrl = "https://github.com/$repo/releases/download/$tag"
+(Get-Content $tmplPs1 -Raw).Replace('__RELEASE_URL__', "$baseUrl/release-version.ps1") |
+    Set-Content "$distDir/release-version.ps1" -NoNewline
+(Get-Content $tmplSh  -Raw).Replace('__RELEASE_URL__', "$baseUrl/release-version.sh") |
+    Set-Content "$distDir/release-version.sh"  -NoNewline
+Copy-Item "$distDir/release-version.ps1" "$stagingDir/release-version.ps1"
+Copy-Item "$distDir/release-version.sh"  "$stagingDir/release-version.sh"
+
 # ── Archives ─────────────────────────────────────────────────────
 Write-Step "Creating ZIP archives..."
 Compress-Archive -Path $stagingDir -DestinationPath "$distDir/$archiveBase.zip" -Force
@@ -91,7 +109,9 @@ Compress-Archive -Path "$stagingDir/dashboard" -DestinationPath "$distDir/dashbo
 Write-Step "Generating checksums..."
 $hashes = @(
     "$distDir/$archiveBase.zip",
-    "$distDir/dashboard-v$version.zip"
+    "$distDir/dashboard-v$version.zip",
+    "$distDir/release-version.ps1",
+    "$distDir/release-version.sh"
 ) | ForEach-Object {
     $h = Get-FileHash -Path $_ -Algorithm SHA256
     "$($h.Hash)  $(Split-Path $_ -Leaf)"
