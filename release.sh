@@ -18,19 +18,61 @@ ok()   { printf '\033[0;32m✅ %s\033[0m\n' "$1"; }
 err()  { printf '\033[0;31m❌ %s\033[0m\n' "$1" >&2; }
 
 # ── Stamp release-pinned installer templates ─────────────────────────────
+# Injects:
+#   - __RELEASE_URL__      → canonical asset URL for this tag (drives version detection)
+#   - audit header banner  → build date, tag, commit SHA, builder identity
+# This guarantees that any user (or future auditor) can read the first ~10
+# lines of release-version.{ps1,sh} and verify provenance offline.
 stamp_release_version_installers() {
   local tag="v$VERSION"
   local base="https://github.com/$REPO/releases/download/$tag"
   local tmpl_ps1="templates/release-version.ps1.tmpl"
   local tmpl_sh="templates/release-version.sh.tmpl"
+  local build_date commit_sha builder
 
   if [[ ! -f "$tmpl_ps1" || ! -f "$tmpl_sh" ]]; then
     err "Missing release-version templates under templates/"
     exit 1
   fi
 
-  sed "s|__RELEASE_URL__|$base/release-version.ps1|g" "$tmpl_ps1" > "$DIST_DIR/release-version.ps1"
-  sed "s|__RELEASE_URL__|$base/release-version.sh|g"  "$tmpl_sh"  > "$DIST_DIR/release-version.sh"
+  build_date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  commit_sha="$(git rev-parse --short=12 HEAD 2>/dev/null || echo 'unknown')"
+  builder="${GITHUB_ACTOR:-${USER:-local}}"
+
+  local audit_ps1="\
+# ╔═══════════════════════════════════════════════════════════════════════╗
+# ║  RELEASE-PINNED INSTALLER — AUDIT HEADER (stamped by release.sh)     ║
+# ║  Tag:        $tag
+# ║  Repo:       $REPO
+# ║  Built:      $build_date
+# ║  Commit:     $commit_sha
+# ║  Builder:    $builder
+# ║  Asset URL:  $base/release-version.ps1
+# ╚═══════════════════════════════════════════════════════════════════════╝"
+
+  local audit_sh="\
+# ╔═══════════════════════════════════════════════════════════════════════╗
+# ║  RELEASE-PINNED INSTALLER — AUDIT HEADER (stamped by release.sh)     ║
+# ║  Tag:        $tag
+# ║  Repo:       $REPO
+# ║  Built:      $build_date
+# ║  Commit:     $commit_sha
+# ║  Builder:    $builder
+# ║  Asset URL:  $base/release-version.sh
+# ╚═══════════════════════════════════════════════════════════════════════╝"
+
+  # PowerShell: insert audit header after the closing comment of the SYNOPSIS block (#>)
+  awk -v hdr="$audit_ps1" -v url="$base/release-version.ps1" '
+    { gsub(/__RELEASE_URL__/, url); print }
+    /^#>$/ && !done { print ""; print hdr; done=1 }
+  ' "$tmpl_ps1" > "$DIST_DIR/release-version.ps1"
+
+  # Bash: insert audit header after the shebang line
+  awk -v hdr="$audit_sh" -v url="$base/release-version.sh" '
+    NR==1 { print; print hdr; next }
+    { gsub(/__RELEASE_URL__/, url); print }
+  ' "$tmpl_sh" > "$DIST_DIR/release-version.sh"
+
   chmod +x "$DIST_DIR/release-version.sh"
 
   cp "$DIST_DIR/release-version.ps1" "$STAGING_DIR/release-version.ps1"
