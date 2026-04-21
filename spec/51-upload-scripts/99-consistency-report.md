@@ -16,10 +16,11 @@
 | 4 | `03-upload-plugin-v3.md` | ✅ Present |
 | 5 | `04-upload-plugin-custom.md` | ✅ Present |
 | 6 | `05-configuration.md` | ✅ Present |
-| 7 | `97-acceptance-criteria.md` | ✅ Present |
-| 8 | `98-changelog.md` | ✅ Present |
+| 7 | `06-release-version-installer.md` | ✅ Present (v1.0.0 draft, 2026-04-21) |
+| 8 | `97-acceptance-criteria.md` | ✅ Present |
+| 9 | `98-changelog.md` | ✅ Present |
 
-**Total:** 8 files (excluding this report)
+**Total:** 9 files (excluding this report)
 
 ---
 
