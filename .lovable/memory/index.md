@@ -99,3 +99,4 @@ Updated: 2026-04-19
 - [File Path Extraction](mem://features/time-log-system/file-path-extraction) — TitleParser
 - [WP Plugin Structure](mem://architecture/wp-plugin-structure) — Admin/frontend/backend
 - [Axios Version Pinning](mem://constraints/axios-version-pinning) — 1.14.0 / 0.30.3 only
+- [Release-Pinned Installer](mem://features/installer/release-version-pinned) — `release-version.ps1/.sh` shipped per-release, URL-stamped, hard-fails instead of falling back to main/latest
