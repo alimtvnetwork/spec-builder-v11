@@ -35,3 +35,22 @@
 - **Implementing code in this repo without explicit request:** This is a spec-only repository (Health Dashboard UI is the sole exception). See: `.lovable/memories/constraints/01-no-code-policy.md`.
 - **Boilerplate sign-offs:** Do NOT append "If you have any question and confusion..." or "Do you understand? Always add this part..." blocks. Per `.lovable/user-preferences`.
 - **Code changes without minor version bump:** Every code change must bump at least minor version. Per `.lovable/user-preferences`.
+
+---
+
+## Code Quality & Standards (CODE RED)
+
+- **Strict Boolean Standard:** `is` and `has` prefixes ONLY are acceptable. Nothing else is acceptable, including but not limited to `can`, `should`, `was`, etc.
+- **Raw `!` Negation on Calls:** Never use `!` on function calls; call semantic inverse functions (`isInvalid()`, `isMissing()`).
+- **No Bare Tuple Returns / Bare Void in Go:** Functions must return `apperror.Result[T]` or outcome structs with `*apperror.AppError`. Bare `(*Type, error)` and bare void returns are forbidden.
+- **No Loose Parameters (>2-3):** Banned loose >2-3 parameters; use `*Params` structs.
+- **No Raw SQL:** Use GORM and `database.NewDBOperation()` wrapper for 99% of database operations. Auto-capture stack traces via `runtime.Callers()`.
+- **No Dropping Stack Traces:** Never log bare `$e->getMessage()` in catch blocks without capturing `$e->getTraceAsString()`.
+- **No Weak Typing:** Prohibit `any`, `interface{}`, `map[string]any`. Strict typing with concrete structs or generic constraints.
+- **PascalCase Database Naming:** Tables and custom columns must be `PascalCase`. Indexes use `Idx` prefix + `PascalCase`.
+- **Never Disable CI/CD:** Never disable, comment out, bypass, or delete CI/CD checks, GitHub Actions, or tests.
+- **Root README Casing:** Root readme must strictly remain lowercase `readme.md`.
+- **No Defer on ZIP Writer Closure Before Return:** Never use `defer zipWriter.Close()` when returning an archive path.
+- **No React Query Retry Loops:** Always configure `retry: false` and `refetchOnWindowFocus: false`.
+- **No Magic String HTTP Methods:** Never use raw `"GET"`, `"POST"`, `"DELETE"`; use `HttpMethod` enum.
+
