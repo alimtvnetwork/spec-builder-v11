@@ -210,6 +210,8 @@ type TTSProvider interface {
     Name() string
     Synthesize(context stdctx.Context, text string, opts *SynthesizeOptions) appfault.Result[AudioResult]
     SynthesizeStream(context stdctx.Context, text string, opts *SynthesizeOptions) appfault.Result[<-chan *AudioChunk]
+    // Note: VoiceSlice is defined in types.go (created from generic appfault.ResultSlice[Voice]):
+    // type VoiceSlice = appfault.ResultSlice[Voice]
     ListVoices() VoiceSlice
     CloneVoice(context stdctx.Context, name string, samples [][]byte) appfault.Result[Voice]
     IsAvailable() bool

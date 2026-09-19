@@ -194,16 +194,18 @@ func (c *WordPressClient) CreateCategory(cat Category) appfault.Result[*Category
     return appfault.Ok(&result)
 }
 
+// Note: CategorySlice is defined in types.go (created from generic appfault.ResultSlice[Category]):
+// type CategorySlice = appfault.ResultSlice[Category]
 func (c *WordPressClient) GetCategories() CategorySlice {
     resp := c.doRequest(httpmethod.Get, "/categories?per_page=100", nil)
     if resp.HasError() {
-        return appfault.Fail[[]Category](resp.Error())
+        return appfault.FailSlice[Category](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     var categories []Category
     if err := json.NewDecoder(resp.Value().Body).Decode(&categories); err != nil {
-        return appfault.Fail[[]Category](
+        return appfault.FailSlice[Category](
             appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode categories",
@@ -211,7 +213,7 @@ func (c *WordPressClient) GetCategories() CategorySlice {
             ),
         )
     }
-    return appfault.Ok(categories)
+    return appfault.OkSlice(categories)
 }
 
 func (c *WordPressClient) UpdateCategory(id int, cat Category) appfault.Result[*Category] {
@@ -433,16 +435,18 @@ func (c *WordPressClient) CreateTag(tag Tag) appfault.Result[*Tag] {
     return appfault.Ok(&result)
 }
 
+// Note: TagSlice is defined in types.go (created from generic appfault.ResultSlice[Tag]):
+// type TagSlice = appfault.ResultSlice[Tag]
 func (c *WordPressClient) GetTags() TagSlice {
     resp := c.doRequest(httpmethod.Get, "/tags?per_page=100", nil)
     if resp.HasError() {
-        return appfault.Fail[[]Tag](resp.Error())
+        return appfault.FailSlice[Tag](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     var tags []Tag
     if err := json.NewDecoder(resp.Value().Body).Decode(&tags); err != nil {
-        return appfault.Fail[[]Tag](
+        return appfault.FailSlice[Tag](
             appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode tags",
@@ -450,7 +454,7 @@ func (c *WordPressClient) GetTags() TagSlice {
             ),
         )
     }
-    return appfault.Ok(tags)
+    return appfault.OkSlice(tags)
 }
 ```
 

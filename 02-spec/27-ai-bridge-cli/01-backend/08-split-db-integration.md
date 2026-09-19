@@ -533,7 +533,7 @@ func (m *AiBridgeDbManager) ListChatSessions(appName string) ChatSessionInfoSlic
         }
     }
     
-    return appfault.Ok(sessions)
+    return appfault.OkSlice(sessions)
 }
 
 // DbRegistryEntry is the GORM model for the DbRegistry table

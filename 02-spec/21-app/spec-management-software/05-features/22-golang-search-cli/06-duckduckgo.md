@@ -71,6 +71,8 @@ func (d *DuckDuckGoSearch) RequiresApi() bool { return false }
 ### Search Execution
 
 ```go
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     // Build form data (DDG uses POST)
     formData := url.Values{}
@@ -80,7 +82,7 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
     
     req, err := http.NewRequestWithContext(context, httpmethod.Post.String(), d.endpoint, strings.NewReader(formData.Encode()))
     if err != nil {
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.Wrap(
                 err,
                 "create request",
@@ -95,7 +97,7 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
     
     resp, err := d.client.Do(req)
     if err != nil {
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.Wrap(
                 err,
                 "network error",
@@ -105,7 +107,7 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.New(
                 "unexpected status: " + strconv.Itoa(resp.StatusCode),
             ),
@@ -114,7 +116,7 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
     
     doc, err := goquery.NewDocumentFromReader(resp.Body)
     if err != nil {
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.Wrap(
                 err,
                 "parse HTML",
@@ -122,7 +124,7 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
         )
     }
     
-    return appfault.Ok(d.parseResults(doc, opts.MaxResults))
+    return appfault.OkSlice(d.parseResults(doc, opts.MaxResults))
 }
 ```
 
@@ -282,6 +284,8 @@ var ddgRegions = map[string]string{
     "global": "wt-wt", // No region preference
 }
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (d *DuckDuckGoSearch) SearchWithRegion(context stdctx.Context, query, region string, opts SearchOptions) SearchResultSlice {
     kl, ok := ddgRegions[region]
     if !ok {

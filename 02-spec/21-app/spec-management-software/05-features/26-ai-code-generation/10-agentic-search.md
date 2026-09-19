@@ -128,6 +128,8 @@ const (
     ResultTypeSpec    ResultType = "specification"
 )
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (se *SearchEngine) Search(query SearchQuery) SearchResultSlice {
     var wg sync.WaitGroup
     var lexicalResults, semanticResults []SearchResult
@@ -177,6 +179,8 @@ type LexicalSearcher struct {
     db *gorm.DB
 }
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (ls *LexicalSearcher) Search(query SearchQuery) SearchResultSlice {
     // SQLite FTS5 for full-text search
     var results []SearchResult
@@ -241,6 +245,8 @@ type SemanticSearcher struct {
 }
 
 type Embedder interface {
+    // Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+    // type Float32Slice = appfault.ResultSlice[float32]
     Embed(text string) Float32Slice
 }
 
@@ -249,6 +255,8 @@ type VectorStore interface {
     Insert(id string, vector []float32, metadata map[string]string) error
 }
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (ss *SemanticSearcher) Search(query SearchQuery) SearchResultSlice {
     // Generate embedding for query
     embedding, err := ss.embedder.Embed(query.Text)

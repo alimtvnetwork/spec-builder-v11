@@ -337,9 +337,11 @@ func EvaluateContextNeeds(prompt string, ragContext []Chunk) []ContextNeed {
 When web search is needed, delegate to GSearch CLI:
 
 ```go
+// Note: ChunkSlice is defined in types.go (created from generic appfault.ResultSlice[Chunk]):
+// type ChunkSlice = appfault.ResultSlice[Chunk]
 func FetchWebContext(need ContextNeed) ChunkSlice {
     if need.Type != "WebSearch" {
-        return appfault.Ok([]Chunk(nil))
+        return appfault.OkSlice([]Chunk(nil))
     }
     
     // Call GSearch CLI
@@ -353,7 +355,7 @@ func FetchWebContext(need ContextNeed) ChunkSlice {
     }
     
     // Convert to RAG chunks
-    return appfault.Ok(convertToChunks(results))
+    return appfault.OkSlice(convertToChunks(results))
 }
 ```
 

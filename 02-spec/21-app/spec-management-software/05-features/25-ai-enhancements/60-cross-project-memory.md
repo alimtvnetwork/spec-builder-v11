@@ -326,6 +326,8 @@ func (s *ShareService) Share(context stdctx.Context, req ShareRequest) appfault.
 }
 
 // GetSharedMemories returns all memories shared TO a project
+// Note: MemoryShareSlice is defined in types.go (created from generic appfault.ResultSlice[MemoryShare]):
+// type MemoryShareSlice = appfault.ResultSlice[MemoryShare]
 func (s *ShareService) GetSharedMemories(context stdctx.Context, projectId string) MemoryShareSlice {
 	rows, err := s.db.QueryContext(context, `
 		SELECT id, source_project_id, target_project_id, memory_type, memory_path, 
@@ -360,7 +362,7 @@ func (s *ShareService) GetSharedMemories(context stdctx.Context, projectId strin
 		shares = append(shares, share)
 	}
 	
-	return appfault.Ok(shares)
+	return appfault.OkSlice(shares)
 }
 
 // GetSharedContent retrieves the actual content of a shared memory

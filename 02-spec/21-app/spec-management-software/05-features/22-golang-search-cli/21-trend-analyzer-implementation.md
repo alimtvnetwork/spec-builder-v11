@@ -177,6 +177,8 @@ type SettingsService interface {
     ResetToDefault(category, key string) error
     
     // GetCategory retrieves all settings in a category
+    // Note: SettingSlice is defined in types.go (created from generic appfault.ResultSlice[Setting]):
+    // type SettingSlice = appfault.ResultSlice[Setting]
     GetCategory(category string) SettingSlice
     
     // SeedFromFile processes a seed JSON file
@@ -472,6 +474,8 @@ type JobCollector struct {
 }
 
 type JobScraper interface {
+    // Note: JobPostingSlice is defined in types.go (created from generic appfault.ResultSlice[JobPosting]):
+    // type JobPostingSlice = appfault.ResultSlice[JobPosting]
     Scrape(context stdctx.Context, query string) JobPostingSlice
     Source() string
 }

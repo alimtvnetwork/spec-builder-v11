@@ -179,6 +179,8 @@ func NewSegmentationParser(tokenCounter TokenCounter, config SegmentationConfig)
 }
 
 // Parse splits instruction content into sections
+// Note: ParsedSectionSlice is defined in types.go (created from generic appfault.ResultSlice[ParsedSection]):
+// type ParsedSectionSlice = appfault.ResultSlice[ParsedSection]
 func (p *SegmentationParser) Parse(context stdctx.Context, content string) ParsedSectionSlice {
     lines := strings.Split(content, "\n")
     sections := make([]ParsedSection, 0)
@@ -248,7 +250,7 @@ func (p *SegmentationParser) Parse(context stdctx.Context, content string) Parse
         sections = p.mergeSmallSections(sections)
     }
     
-    return appfault.Ok(sections)
+    return appfault.OkSlice(sections)
 }
 
 // extractKeywords extracts relevant keywords for dependency detection
@@ -578,6 +580,8 @@ func (r *DependencyResolver) breakCycles(graph *DependencyGraph) *DependencyGrap
 }
 
 // TopologicalSort returns execution order respecting dependencies
+// Note: IntSlice is defined in types.go (created from generic appfault.ResultSlice[int]):
+// type IntSlice = appfault.ResultSlice[int]
 func (g *DependencyGraph) TopologicalSort() IntSlice {
     inDegree := make(map[int]int)
     for i := range g.segments {
@@ -620,7 +624,7 @@ func (g *DependencyGraph) TopologicalSort() IntSlice {
         )
     }
     
-    return appfault.Ok(result)
+    return appfault.OkSlice(result)
 }
 ```
 

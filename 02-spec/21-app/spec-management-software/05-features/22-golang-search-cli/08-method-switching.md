@@ -568,6 +568,8 @@ import (
 type SearchMethod interface {
     Id() string
     Name() string
+    // Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+    // type SearchResultSlice = appfault.ResultSlice[SearchResult]
     Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice
     IsAvailable() bool
     RequiresApi() bool
@@ -823,6 +825,8 @@ func NewExecutor(switcher *MethodSwitcher, cfg *config.Config) *Executor {
     }
 }
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     var lastErr *appfault.AppError
     triedMethods := make(map[string]bool)
@@ -840,13 +844,13 @@ func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptio
                     Msg("All methods blocked, waiting before retry")
                     
                 if waitErr := backoff.Wait(context); waitErr != nil {
-                    return appfault.Fail[[]Result](
+                    return appfault.FailSlice[Result](
                         appfault.Wrap(waitErr, "backoff wait cancelled"),
                     )
                 }
                 continue
             }
-            return appfault.Fail[[]Result](methodResult.Error)
+            return appfault.FailSlice[Result](methodResult.Error)
         }
         
         method := methodResult.Value
@@ -855,7 +859,7 @@ func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptio
         // Track method attempts for this request
         if triedMethods[methodId] {
             if waitErr := backoff.Wait(context); waitErr != nil {
-                return appfault.Fail[[]Result](
+                return appfault.FailSlice[Result](
                     appfault.Wrap(waitErr, "backoff wait cancelled"),
                 )
             }
@@ -902,16 +906,16 @@ func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptio
             Msg("Transient error, applying backoff")
             
         if waitErr := backoff.Wait(context); waitErr != nil {
-            return appfault.Fail[[]Result](
+            return appfault.FailSlice[Result](
                 appfault.Wrap(waitErr, "backoff wait cancelled"),
             )
         }
     }
     
     if lastErr != nil {
-        return appfault.Fail[[]Result](lastErr)
+        return appfault.FailSlice[Result](lastErr)
     }
-    return appfault.Fail[[]Result](
+    return appfault.FailSlice[Result](
         appfault.New("search failed after max attempts"),
     )
 }
@@ -923,6 +927,8 @@ func (e *Executor) isBlockingError(appErr *appfault.AppError) bool {
 }
 
 // SearchWithRetryPolicy allows custom retry policies
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (e *Executor) SearchWithRetryPolicy(
     context stdctx.Context,
     query string,
@@ -934,7 +940,7 @@ func (e *Executor) SearchWithRetryPolicy(
     return retry.ExecuteWithResult(context, backoff, policy, func(ctx stdctx.Context) SearchResultSlice {
         methodResult := e.switcher.SelectMethod()
         if !methodResult.IsSuccess {
-            return appfault.Fail[[]Result](methodResult.Error)
+            return appfault.FailSlice[Result](methodResult.Error)
         }
         
         method := methodResult.Value

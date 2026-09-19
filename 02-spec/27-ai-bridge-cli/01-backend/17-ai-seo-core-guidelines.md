@@ -227,11 +227,13 @@ type ValidationDataService struct {
     cache sync.Map
 }
 
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (s *ValidationDataService) GetSeoStringArray(key SeoKey) StringSlice {
     cacheKey := string(CategorySeo) + ":" + string(key)
     // EXEMPTED: typed accessor internal — cache stores known []string values (§7.2)
     if cached, ok := s.cache.Load(cacheKey); ok {
-        return appfault.Ok(cached.([]string))
+        return appfault.OkSlice(cached.([]string))
     }
     
     var data ValidationData
@@ -243,7 +245,7 @@ func (s *ValidationDataService) GetSeoStringArray(key SeoKey) StringSlice {
     var result []string
     json.Unmarshal([]byte(data.Value), &result)
     s.cache.Store(cacheKey, result)
-    return appfault.Ok(result)
+    return appfault.OkSlice(result)
 }
 
 func (s *ValidationDataService) GetSeoNumber(key SeoKey) appfault.Result[float64] {

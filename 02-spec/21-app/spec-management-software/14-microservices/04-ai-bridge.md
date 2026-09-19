@@ -135,6 +135,8 @@ type Provider interface {
     Available(context stdctx.Context) bool
     
     // Models returns list of available models on this provider
+    // Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+    // type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
     Models(context stdctx.Context) ModelInfoSlice
     
     // LoadModel loads a model into memory (may be no-op for some providers)
@@ -393,6 +395,8 @@ func (o *OllamaAdapter) Available(context stdctx.Context) bool {
 }
 
 // Models returns all models available on Ollama
+// Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+// type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
 func (o *OllamaAdapter) Models(context stdctx.Context) ModelInfoSlice {
     _, file, line, _ := runtime.Caller(0)
     o.logger.Debug("fetching Ollama models",
@@ -937,6 +941,8 @@ func (l *LlamaAdapter) Available(context stdctx.Context) bool {
 }
 
 // Models returns models available in router mode
+// Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+// type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
 func (l *LlamaAdapter) Models(context stdctx.Context) ModelInfoSlice {
     _, file, line, _ := runtime.Caller(0)
     l.logger.Debug("fetching llama.cpp models",
@@ -1262,6 +1268,8 @@ func (ls *LlamaSwapAdapter) UnloadModel(context stdctx.Context, modelId string) 
 }
 
 // Models returns configured models from swap config
+// Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+// type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
 func (ls *LlamaSwapAdapter) Models(context stdctx.Context) ModelInfoSlice {
     models := make([]ModelInfo, 0, len(ls.swapConfig.Models))
     for alias := range ls.swapConfig.Models {
@@ -1272,7 +1280,7 @@ func (ls *LlamaSwapAdapter) Models(context stdctx.Context) ModelInfoSlice {
         })
     }
 
-    return appfault.Ok(models)
+    return appfault.OkSlice(models)
 }
 ```
 
@@ -1443,6 +1451,8 @@ func (r *Registry) findProviderWithModel(context stdctx.Context, modelId string)
 }
 
 // AllModels returns models from all providers
+// Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+// type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
 func (r *Registry) AllModels(context stdctx.Context) ModelInfoSlice {
     r.mu.RLock()
     defer r.mu.RUnlock()
@@ -1472,7 +1482,7 @@ func (r *Registry) AllModels(context stdctx.Context) ModelInfoSlice {
         }
     }
     
-    return appfault.Ok(allModels)
+    return appfault.OkSlice(allModels)
 }
 
 // HealthCheck returns status of all providers

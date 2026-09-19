@@ -349,7 +349,7 @@ func (s *InternalLinkService) FindLinksForKeywords(
         }
     }
     
-    return appfault.Ok(links)
+    return appfault.OkSlice(links)
 }
 
 func (s *InternalLinkService) generateSlug(keyword string) string {

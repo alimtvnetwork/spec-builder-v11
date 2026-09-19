@@ -29,7 +29,11 @@ import (
 
 type Service interface {
     // CRUD operations
+    // Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+    // type PluginSlice = appfault.ResultSlice[models.Plugin]
     List(context stdctx.Context) PluginSlice
+    // Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+    // type PluginSlice = appfault.ResultSlice[models.Plugin]
     ListBySite(context stdctx.Context, siteId int64) PluginSlice
     GetById(context stdctx.Context, id int64) appfault.Result[*models.Plugin]
     Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Plugin]
@@ -46,6 +50,8 @@ type Service interface {
     
     // Watcher management
     SetWatching(context stdctx.Context, id int64, watching bool) *appfault.AppError
+    // Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+    // type PluginSlice = appfault.ResultSlice[models.Plugin]
     GetWatchedPlugins(context stdctx.Context) PluginSlice
     
     // Status
@@ -183,6 +189,8 @@ import (
     "gorm.io/gorm"
 )
 
+// Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+// type PluginSlice = appfault.ResultSlice[models.Plugin]
 func (s *serviceImpl) List(context stdctx.Context) PluginSlice {
     s.log.Debug("Listing all plugins")
     
@@ -196,6 +204,8 @@ func (s *serviceImpl) List(context stdctx.Context) PluginSlice {
     return plugins, nil
 }
 
+// Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+// type PluginSlice = appfault.ResultSlice[models.Plugin]
 func (s *serviceImpl) ListBySite(context stdctx.Context, siteId int64) PluginSlice {
     s.log.Debug("Listing plugins by site", "siteId", siteId)
     
@@ -625,6 +635,8 @@ func (s *serviceImpl) SetWatching(context stdctx.Context, id int64, watching boo
     return nil
 }
 
+// Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+// type PluginSlice = appfault.ResultSlice[models.Plugin]
 func (s *serviceImpl) GetWatchedPlugins(context stdctx.Context) PluginSlice {
     s.log.Debug("Getting watched plugins")
     

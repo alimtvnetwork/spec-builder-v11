@@ -157,6 +157,8 @@ type RAGVector struct {
 }
 
 func (r *RAGService) Index(content string, source string) *appfault.AppError
+// Note: RAGResultSlice is defined in types.go (created from generic appfault.ResultSlice[RAGResult]):
+// type RAGResultSlice = appfault.ResultSlice[RAGResult]
 func (r *RAGService) Query(prompt string, topK int) RAGResultSlice
 func (r *RAGService) ImportPreset(path string) *appfault.AppError
 ```
@@ -208,6 +210,8 @@ type AIRequest struct {
 }
 
 func (c *AIBridgeClient) Generate(req AIRequest) appfault.Result[string]
+// Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+// type Float32Slice = appfault.ResultSlice[float32]
 func (c *AIBridgeClient) Embed(text string) Float32Slice
 func (c *AIBridgeClient) Stream(req AIRequest, handler StreamHandler) *appfault.AppError
 ```

@@ -384,6 +384,8 @@ type EncoderConfig struct {
     Quality    int    // 0-10 for variable bitrate
 }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (ae *AudioEncoder) Encode(chunk *AudioChunk) ByteSlice {
     switch ae.format {
     case "pcm":
@@ -406,6 +408,8 @@ func (ae *AudioEncoder) Encode(chunk *AudioChunk) ByteSlice {
     }
 }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (ae *AudioEncoder) encodeOpus(chunk *AudioChunk) ByteSlice {
     encoder, err := opus.NewEncoder(ae.sampleRate, 1, opus.AppVoIP)
     if err != nil {

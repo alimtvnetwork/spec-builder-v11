@@ -1047,6 +1047,8 @@ func EncodePCM16ToBase64(samples []float32) string {
 }
 
 // DecodePCM16FromBase64 decodes base64 PCM16 to float32 samples
+// Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+// type Float32Slice = appfault.ResultSlice[float32]
 func DecodePCM16FromBase64(encoded string) Float32Slice {
     data, err := base64.StdEncoding.DecodeString(encoded)
     if err != nil {
@@ -2363,6 +2365,8 @@ func (c *SpecManagementClient) GetProjectContext(context stdctx.Context, project
 }
 
 // Search project content using voice query
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (c *SpecManagementClient) VoiceSearch(context stdctx.Context, projectId, query string) SearchResultSlice {
     resp, err := c.get(context, fmt.Sprintf("/projects/%s/search?q=%s&source=voice", projectId, url.QueryEscape(query)))
     if err != nil {

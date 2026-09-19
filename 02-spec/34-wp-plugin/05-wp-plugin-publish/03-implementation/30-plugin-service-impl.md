@@ -98,6 +98,8 @@ import (
 // Service interface for plugin operations
 type Service interface {
 	// CRUD operations
+    // Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+    // type PluginSlice = appfault.ResultSlice[models.Plugin]
 	List(context stdctx.Context) PluginSlice
 	GetById(context stdctx.Context, id int64) appfault.Result[*models.Plugin]
 	Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Plugin]
@@ -110,9 +112,13 @@ type Service interface {
 	RefreshFileCount(context stdctx.Context, id int64) *appfault.AppError
 
 	// Mappings
+    // Note: PluginMappingSlice is defined in types.go (created from generic appfault.ResultSlice[models.PluginMapping]):
+    // type PluginMappingSlice = appfault.ResultSlice[models.PluginMapping]
 	GetMappings(context stdctx.Context, pluginId int64) PluginMappingSlice
 	CreateMapping(context stdctx.Context, input CreateMappingInput) appfault.Result[*models.PluginMapping]
 	DeleteMapping(context stdctx.Context, mappingId int64) *appfault.AppError
+    // Note: PluginMappingSlice is defined in types.go (created from generic appfault.ResultSlice[models.PluginMapping]):
+    // type PluginMappingSlice = appfault.ResultSlice[models.PluginMapping]
 	GetMappingsBySite(context stdctx.Context, siteId int64) PluginMappingSlice
 }
 
@@ -155,6 +161,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+// type PluginSlice = appfault.ResultSlice[models.Plugin]
 func (s *serviceImpl) List(context stdctx.Context) PluginSlice {
 	s.log.Debug("Listing all plugins")
 
@@ -549,6 +557,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// Note: PluginMappingSlice is defined in types.go (created from generic appfault.ResultSlice[models.PluginMapping]):
+// type PluginMappingSlice = appfault.ResultSlice[models.PluginMapping]
 func (s *serviceImpl) GetMappings(context stdctx.Context, pluginId int64) PluginMappingSlice {
 	var mappings []models.PluginMapping
 	if err := s.db.GormDb().WithContext(context).
@@ -564,6 +574,8 @@ func (s *serviceImpl) GetMappings(context stdctx.Context, pluginId int64) Plugin
 	return mappings, nil
 }
 
+// Note: PluginMappingSlice is defined in types.go (created from generic appfault.ResultSlice[models.PluginMapping]):
+// type PluginMappingSlice = appfault.ResultSlice[models.PluginMapping]
 func (s *serviceImpl) GetMappingsBySite(context stdctx.Context, siteId int64) PluginMappingSlice {
 	var mappings []models.PluginMapping
 	if err := s.db.GormDb().WithContext(context).

@@ -284,7 +284,11 @@ func GenerateChunkId(fileId string, chunkIndex int) string {
 // EmbeddingStorage handles embedding persistence
 type EmbeddingStorage interface {
     Store(chunkId string, embedding []float32) *appfault.AppError
+    // Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+    // type Float32Slice = appfault.ResultSlice[float32]
     Retrieve(chunkId string) Float32Slice
+    // Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+    // type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
     Search(queryEmbedding []float32, limit int) ChunkScoreSlice
     Delete(chunkId string) *appfault.AppError
 }

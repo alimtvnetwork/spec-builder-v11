@@ -139,9 +139,13 @@ type InstructionHistoryService interface {
     GetInstructionImpact(context stdctx.Context, instructionId string) appfault.Result[*InstructionImpact]
     
     // Get all changes for a specific file
+    // Note: FileChangeSlice is defined in types.go (created from generic appfault.ResultSlice[FileChange]):
+    // type FileChangeSlice = appfault.ResultSlice[FileChange]
     GetFileHistory(context stdctx.Context, fileId string, limit int) FileChangeSlice
     
     // Get changes within time range
+    // Note: FileChangeSlice is defined in types.go (created from generic appfault.ResultSlice[FileChange]):
+    // type FileChangeSlice = appfault.ResultSlice[FileChange]
     GetChangesByTimeRange(context stdctx.Context, projectId string, from, to time.Time) FileChangeSlice
     
     // Get instruction that last modified a file

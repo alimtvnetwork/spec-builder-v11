@@ -62,6 +62,8 @@ type Provider interface {
     Search(context stdctx.Context, req *SearchRequest) appfault.Result[*SearchResponse]
     
     // SearchParallel executes multiple searches in parallel
+    // Note: SearchResponseSlice is defined in types.go (created from generic appfault.ResultSlice[*SearchResponse]):
+    // type SearchResponseSlice = appfault.ResultSlice[*SearchResponse]
     SearchParallel(context stdctx.Context, reqs []*SearchRequest) SearchResponseSlice
     
     // HealthCheck verifies provider connectivity
@@ -278,6 +280,8 @@ func (p *SerpApiProvider) Search(context stdctx.Context, req *serpProvider.Searc
     return appfault.Ok(p.convertToUnified(req, &serpResp, time.Since(startTime)))
 }
 
+// Note: SearchResponseSlice is defined in types.go (created from generic appfault.ResultSlice[*SearchResponse]):
+// type SearchResponseSlice = appfault.ResultSlice[*SearchResponse]
 func (p *SerpApiProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) SearchResponseSlice {
     results := make([]*serpProvider.SearchResponse, len(reqs))
     var wg sync.WaitGroup
@@ -308,14 +312,14 @@ func (p *SerpApiProvider) SearchParallel(context stdctx.Context, reqs []*serpPro
     }
     
     if len(errs) == len(reqs) {
-        return appfault.Fail[[]*serpProvider.SearchResponse](
+        return appfault.FailSlice[*serpProvider.SearchResponse](
             appfault.New(
                 "all requests failed",
             ),
         )
     }
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 func (p *SerpApiProvider) HealthCheck(context stdctx.Context) *appfault.AppError {
@@ -475,6 +479,8 @@ func (p *MapsScraperProvider) Search(context stdctx.Context, req *serpProvider.S
     return appfault.Ok(response)
 }
 
+// Note: SearchResponseSlice is defined in types.go (created from generic appfault.ResultSlice[*SearchResponse]):
+// type SearchResponseSlice = appfault.ResultSlice[*SearchResponse]
 func (p *MapsScraperProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) SearchResponseSlice {
     // Maps scraper already supports internal concurrency
     results := make([]*serpProvider.SearchResponse, len(reqs))
@@ -505,7 +511,7 @@ func (p *MapsScraperProvider) SearchParallel(context stdctx.Context, reqs []*ser
     wg.Wait()
     close(errChan)
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 func (p *MapsScraperProvider) HealthCheck(context stdctx.Context) *appfault.AppError {
@@ -752,6 +758,8 @@ func (p *CollyProvider) Search(context stdctx.Context, req *serpProvider.SearchR
     return appfault.Ok(response)
 }
 
+// Note: SearchResponseSlice is defined in types.go (created from generic appfault.ResultSlice[*SearchResponse]):
+// type SearchResponseSlice = appfault.ResultSlice[*SearchResponse]
 func (p *CollyProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) SearchResponseSlice {
     results := make([]*serpProvider.SearchResponse, len(reqs))
     var wg sync.WaitGroup
@@ -760,7 +768,7 @@ func (p *CollyProvider) SearchParallel(context stdctx.Context, reqs []*serpProvi
     // Create request queue
     q, err := queue.New(p.config.MaxConcurrent, &queue.InMemoryQueueStorage{MaxSize: 10000})
     if err != nil {
-        return appfault.Fail[[]*serpProvider.SearchResponse](
+        return appfault.FailSlice[*serpProvider.SearchResponse](
             appfault.Wrap(err, "create queue"),
         )
     }
@@ -782,7 +790,7 @@ func (p *CollyProvider) SearchParallel(context stdctx.Context, reqs []*serpProvi
     wg.Wait()
     close(errChan)
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 func (p *CollyProvider) buildSearchUrl(req *serpProvider.SearchRequest) string {

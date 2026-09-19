@@ -489,9 +489,13 @@ type CommandRegistry interface {
     GetByName(name string) appfault.Result[*Command]
     
     // Match finds commands matching the input text
+    // Note: CommandSlice is defined in types.go (created from generic appfault.ResultSlice[*Command]):
+    // type CommandSlice = appfault.ResultSlice[*Command]
     Match(input string) CommandSlice
     
     // List returns all registered commands
+    // Note: CommandSlice is defined in types.go (created from generic appfault.ResultSlice[*Command]):
+    // type CommandSlice = appfault.ResultSlice[*Command]
     List(filter *CommandFilter) CommandSlice
     
     // LoadBuiltIn loads all built-in commands
@@ -512,9 +516,13 @@ type CommandFilter struct {
 // ParallelFetcher handles concurrent URL and file fetching
 type ParallelFetcher interface {
     // FetchUrls fetches multiple URLs concurrently
+    // Note: FetchResultSlice is defined in types.go (created from generic appfault.ResultSlice[*FetchResult]):
+    // type FetchResultSlice = appfault.ResultSlice[*FetchResult]
     FetchUrls(context stdctx.Context, urls []string, opts *FetchOptions) FetchResultSlice
     
     // FetchFiles reads multiple files concurrently
+    // Note: FileResultSlice is defined in types.go (created from generic appfault.ResultSlice[*FileResult]):
+    // type FileResultSlice = appfault.ResultSlice[*FileResult]
     FetchFiles(context stdctx.Context, paths []string, opts *FileOptions) FileResultSlice
 }
 
@@ -1328,7 +1336,7 @@ func (dag *TaskDAG) ScheduleWaves() ExecutionWaveSlice {
         }
     }
 
-    return appfault.Ok(waves)
+    return appfault.OkSlice(waves)
 }
 
 type ExecutionWave struct {

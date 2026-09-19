@@ -272,6 +272,8 @@ func (v *VectorSearchService) IndexEmbedding(context stdctx.Context, chunkId str
 }
 
 // SearchHybrid combines semantic and keyword search using RRF
+// Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+// type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
 func (v *VectorSearchService) SearchHybrid(
     context stdctx.Context,
     queryEmbedding []float32,
@@ -293,6 +295,8 @@ func (v *VectorSearchService) SearchHybrid(
 }
 
 // SearchSemantic performs vector similarity search
+// Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+// type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
 func (v *VectorSearchService) SearchSemantic(context stdctx.Context, queryEmbed []float32, limit int) ChunkScoreSlice {
     if !v.vssLoaded {
         return nil, appfault.New(
@@ -335,6 +339,8 @@ func (v *VectorSearchService) SearchSemantic(context stdctx.Context, queryEmbed 
 }
 
 // SearchKeyword performs FTS5 search
+// Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+// type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
 func (v *VectorSearchService) SearchKeyword(context stdctx.Context, query string, limit int) ChunkScoreSlice {
     var results []struct {
         ChunkId       string  `gorm:"column:chunk_id"`
@@ -772,6 +778,8 @@ func NewSegmentationParser(counter *TokenCounter, config SegmentationConfig) *Se
 }
 
 // Parse splits instruction into sections
+// Note: ParsedSectionSlice is defined in types.go (created from generic appfault.ResultSlice[ParsedSection]):
+// type ParsedSectionSlice = appfault.ResultSlice[ParsedSection]
 func (p *SegmentationParser) Parse(context stdctx.Context, content string) ParsedSectionSlice {
     lines := strings.Split(content, "\n")
     sections := make([]ParsedSection, 0)
@@ -921,6 +929,8 @@ func NewDependencyResolver(rules []KeywordRule) *DependencyResolver {
 }
 
 // TopologicalSort returns execution order
+// Note: IntSlice is defined in types.go (created from generic appfault.ResultSlice[int]):
+// type IntSlice = appfault.ResultSlice[int]
 func (r *DependencyResolver) TopologicalSort(sections []ParsedSection) IntSlice {
     n := len(sections)
     adjacency := make(map[int][]int)

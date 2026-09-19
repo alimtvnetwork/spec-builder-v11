@@ -708,18 +708,20 @@ func (p *HtmlParser) RequiresApi() bool { return false }
 ### Google Search Parser
 
 ```go
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (p *HtmlParser) SearchGoogle(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     searchUrl := p.buildGoogleUrl(query, opts.MaxResults)
     
     docResult := p.fetchAndParse(context, searchUrl)
     if !docResult.IsSuccess {
-        return appfault.Fail[[]Result](docResult.Error)
+        return appfault.FailSlice[Result](docResult.Error)
     }
     
     doc := docResult.Value
     selResult := p.selectors.GetSelectors("google")
     if !selResult.IsSuccess {
-        return appfault.Fail[[]Result](selResult.Error)
+        return appfault.FailSlice[Result](selResult.Error)
     }
     
     sel := selResult.Value
@@ -736,7 +738,7 @@ func (p *HtmlParser) SearchGoogle(context stdctx.Context, query string, opts Sea
         }
     }
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 func (p *HtmlParser) buildGoogleUrl(query string, maxResults int) string {
@@ -819,18 +821,20 @@ func (p *HTMLParser) parseWithSelectors(doc *goquery.Document, sel selectors.Eng
 ### DuckDuckGo Parser
 
 ```go
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (p *HtmlParser) SearchDuckDuckGo(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     searchUrl := p.buildDdgUrl(query)
     
     docResult := p.fetchAndParse(context, searchUrl)
     if !docResult.IsSuccess {
-        return appfault.Fail[[]Result](docResult.Error)
+        return appfault.FailSlice[Result](docResult.Error)
     }
     
     doc := docResult.Value
     selResult := p.selectors.GetSelectors("duckduckgo")
     if !selResult.IsSuccess {
-        return appfault.Fail[[]Result](selResult.Error)
+        return appfault.FailSlice[Result](selResult.Error)
     }
     
     sel := selResult.Value
@@ -847,7 +851,7 @@ func (p *HtmlParser) SearchDuckDuckGo(context stdctx.Context, query string, opts
         }
     }
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 func (p *HtmlParser) buildDdgUrl(query string) string {
@@ -885,18 +889,20 @@ func (p *HtmlParser) extractDdgUrl(ddgUrl string) string {
 ### Bing Parser
 
 ```go
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (p *HtmlParser) SearchBing(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     searchUrl := p.buildBingUrl(query, opts.MaxResults)
     
     docResult := p.fetchAndParse(context, searchUrl)
     if !docResult.IsSuccess {
-        return appfault.Fail[[]Result](docResult.Error)
+        return appfault.FailSlice[Result](docResult.Error)
     }
     
     doc := docResult.Value
     selResult := p.selectors.GetSelectors("bing")
     if !selResult.IsSuccess {
-        return appfault.Fail[[]Result](selResult.Error)
+        return appfault.FailSlice[Result](selResult.Error)
     }
     
     sel := selResult.Value
@@ -913,7 +919,7 @@ func (p *HtmlParser) SearchBing(context stdctx.Context, query string, opts Searc
         }
     }
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 func (p *HtmlParser) buildBingUrl(query string, maxResults int) string {

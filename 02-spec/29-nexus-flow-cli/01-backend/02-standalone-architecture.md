@@ -848,6 +848,8 @@ type PrerequisiteConfig struct {
     Runtimes []RuntimeType // Required runtimes
 }
 
+// Note: PrerequisiteCheckSlice is defined in types.go (created from generic appfault.ResultSlice[PrerequisiteCheck]):
+// type PrerequisiteCheckSlice = appfault.ResultSlice[PrerequisiteCheck]
 func (e *Engine) CheckPrerequisites(config PrerequisiteConfig) PrerequisiteCheckSlice {
     if !config.Enabled {
         return nil, nil
@@ -1004,6 +1006,8 @@ type SearchResult struct {
     PublishedAt time.Time `json:",omitempty"`
 }
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (c *GSearchClient) Search(context stdctx.Context, query SearchQuery) SearchResultSlice {
     args := []string{
         "search",

@@ -202,6 +202,8 @@ func (r *BuildRunRepository) GetByRunId(runId string) appfault.Result[BuildRun] 
     return appfault.Ok(run)
 }
 
+// Note: BuildRunSlice is defined in types.go (created from generic appfault.ResultSlice[BuildRun]):
+// type BuildRunSlice = appfault.ResultSlice[BuildRun]
 func (r *BuildRunRepository) GetRecent(limit int) BuildRunSlice {
     var runs []BuildRun
     err := r.db.Preload("Errors").
@@ -209,13 +211,15 @@ func (r *BuildRunRepository) GetRecent(limit int) BuildRunSlice {
         Limit(limit).
         Find(&runs).Error
     if err != nil {
-        return appfault.Fail[[]BuildRun](
+        return appfault.FailSlice[BuildRun](
             appfault.Wrap(err, 7406, "failed to get recent runs"),
         )
     }
-    return appfault.Ok(runs)
+    return appfault.OkSlice(runs)
 }
 
+// Note: BuildRunSlice is defined in types.go (created from generic appfault.ResultSlice[BuildRun]):
+// type BuildRunSlice = appfault.ResultSlice[BuildRun]
 func (r *BuildRunRepository) GetByProfile(profileName string, limit int) BuildRunSlice {
     var runs []BuildRun
     err := r.db.Where("ProfileName = ?", profileName).
@@ -223,13 +227,15 @@ func (r *BuildRunRepository) GetByProfile(profileName string, limit int) BuildRu
         Limit(limit).
         Find(&runs).Error
     if err != nil {
-        return appfault.Fail[[]BuildRun](
+        return appfault.FailSlice[BuildRun](
             appfault.Wrap(err, 7407, "failed to get runs by profile"),
         )
     }
-    return appfault.Ok(runs)
+    return appfault.OkSlice(runs)
 }
 
+// Note: BuildRunSlice is defined in types.go (created from generic appfault.ResultSlice[BuildRun]):
+// type BuildRunSlice = appfault.ResultSlice[BuildRun]
 func (r *BuildRunRepository) GetFailedRuns(since time.Time) BuildRunSlice {
     var runs []BuildRun
     err := r.db.Preload("Errors").
@@ -237,11 +243,11 @@ func (r *BuildRunRepository) GetFailedRuns(since time.Time) BuildRunSlice {
         Order("CreatedAt DESC").
         Find(&runs).Error
     if err != nil {
-        return appfault.Fail[[]BuildRun](
+        return appfault.FailSlice[BuildRun](
             appfault.Wrap(err, 7408, "failed to get failed runs"),
         )
     }
-    return appfault.Ok(runs)
+    return appfault.OkSlice(runs)
 }
 
 func (r *BuildRunRepository) DeleteOldRuns(keepCount int) *appfault.AppError {

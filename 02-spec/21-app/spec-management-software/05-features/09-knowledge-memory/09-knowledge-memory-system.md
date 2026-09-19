@@ -773,6 +773,8 @@ func (i *SpecIngester) IngestSpec(context stdctx.Context) error {
     return nil
 }
 
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (i *SpecIngester) discoverFiles() StringSlice {
     var files []string
     

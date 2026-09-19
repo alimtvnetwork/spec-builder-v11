@@ -509,6 +509,8 @@ func NewFTSEngine(db *sql.DB, logger *logging.Logger) *FTSEngine {
 }
 
 // Search performs FTS5 search
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (e *FTSEngine) Search(context stdctx.Context, req model.SearchRequest) SearchResultSlice {
     _, file, line, _ := runtime.Caller(0)
     start := time.Now()
@@ -648,6 +650,8 @@ func NewVSSEngine(db *sql.DB, embeddingClient *EmbeddingService, logger *logging
 }
 
 // Search performs vector similarity search
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (e *VSSEngine) Search(context stdctx.Context, req model.SearchRequest) SearchResultSlice {
     _, file, line, _ := runtime.Caller(0)
     start := time.Now()
@@ -1157,6 +1161,8 @@ func NewEmbeddingService(aiBridgeUrl, modelName string, dimensions int, logger *
 }
 
 // GenerateEmbedding generates embedding for a single text
+// Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+// type Float32Slice = appfault.ResultSlice[float32]
 func (s *EmbeddingService) GenerateEmbedding(context stdctx.Context, text string) Float32Slice {
     embeddings, err := s.GenerateEmbeddings(context, []string{text})
     if err != nil {
@@ -1310,6 +1316,8 @@ type RagPipeline struct {
 
 // ChunkRepository interface for chunk access
 type ChunkRepository interface {
+    // Note: ChunkSlice is defined in types.go (created from generic appfault.ResultSlice[Chunk]):
+    // type ChunkSlice = appfault.ResultSlice[Chunk]
     GetRecentChunks(context stdctx.Context, projectId types.ProjectId, limit int) ChunkSlice
     GetChunkById(context stdctx.Context, chunkId types.ChunkId) appfault.Result[model.Chunk]
 }

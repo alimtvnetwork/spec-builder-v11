@@ -150,10 +150,12 @@ func (s *ConfigService) UpdateLLaMAConfig(context stdctx.Context, updates map[st
     return tx.Commit()
 }
 
+// Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+// type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
 func (s *ConfigService) ListAvailableModels(context stdctx.Context) ModelInfoSlice {
     configResult := s.GetLLaMAConfig(context)
     if configResult.HasError() {
-        return appfault.Fail[[]ModelInfo](configResult.Error())
+        return appfault.FailSlice[ModelInfo](configResult.Error())
     }
     config := configResult.Value()
     
@@ -177,7 +179,7 @@ func (s *ConfigService) ListAvailableModels(context stdctx.Context) ModelInfoSli
         }
     }
     
-    return appfault.Ok(models)
+    return appfault.OkSlice(models)
 }
 
 type ModelInfo struct {
@@ -216,6 +218,8 @@ func NewModelRegistryService(db *sql.DB, configService *ConfigService) *ModelReg
 }
 
 // ScanModels discovers models from configured root paths
+// Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+// type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
 func (s *ModelRegistryService) ScanModels(context stdctx.Context) ModelInfoSlice {
     // Get model root paths from config
     rootPaths, err := s.configService.GetConfigAsArray(context, "llama.models.rootPaths")
@@ -255,7 +259,7 @@ func (s *ModelRegistryService) ScanModels(context stdctx.Context) ModelInfoSlice
         }
     }
     
-    return appfault.Ok(discovered)
+    return appfault.OkSlice(discovered)
 }
 
 // ModelCategory defines the 4 primary categories for model selection
@@ -1940,6 +1944,8 @@ func NewTransportFormatService(configService *ConfigService) appfault.Result[*Tr
 }
 
 // Encode serializes data to configured format
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (s *TransportFormatService) Encode(envelope *TransportEnvelope) ByteSlice {
     switch s.format {
     case FormatJson:
@@ -1975,43 +1981,51 @@ func (s *TransportFormatService) Decode(data []byte, envelope *TransportEnvelope
     }
 }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (s *TransportFormatService) encodeJson(envelope *TransportEnvelope) ByteSlice {
     if s.prettyPrint {
         data, err := json.MarshalIndent(envelope, "", "  ")
         if err != nil {
-            return appfault.Fail[[]byte](err)
+            return appfault.FailSlice[byte](err)
         }
 
-        return appfault.Ok(data)
+        return appfault.OkSlice(data)
     }
 
     data, err := json.Marshal(envelope)
     if err != nil {
-        return appfault.Fail[[]byte](err)
+        return appfault.FailSlice[byte](err)
     }
 
-    return appfault.Ok(data)
+    return appfault.OkSlice(data)
 }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (s *TransportFormatService) encodeYaml(envelope *TransportEnvelope) ByteSlice {
     data, err := yaml.Marshal(envelope)
     if err != nil {
-        return appfault.Fail[[]byte](err)
+        return appfault.FailSlice[byte](err)
     }
 
-    return appfault.Ok(data)
+    return appfault.OkSlice(data)
 }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (s *TransportFormatService) encodeTOML(envelope *TransportEnvelope) ByteSlice {
     var buf bytes.Buffer
     encoder := toml.NewEncoder(&buf)
     if err := encoder.Encode(envelope); err != nil {
-        return appfault.Fail[[]byte](err)
+        return appfault.FailSlice[byte](err)
     }
 
-    return appfault.Ok(buf.Bytes())
+    return appfault.OkSlice(buf.Bytes())
 }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (s *TransportFormatService) encodeMarkdown(envelope *TransportEnvelope) ByteSlice {
     templateName, _ := s.configService.GetConfig(stdctx.Background(), "ai.transport.markdownTemplate")
     if templateName == "" {
@@ -2025,16 +2039,18 @@ func (s *TransportFormatService) encodeMarkdown(envelope *TransportEnvelope) Byt
     
     var buf bytes.Buffer
     if err := tmpl.Execute(&buf, envelope); err != nil {
-        return appfault.Fail[[]byte](err)
+        return appfault.FailSlice[byte](err)
     }
 
-    return appfault.Ok(buf.Bytes())
+    return appfault.OkSlice(buf.Bytes())
 }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (s *TransportFormatService) encodeToFile(envelope *TransportEnvelope) ByteSlice {
     // Ensure output directory exists
     if err := pathutil.EnsureDir(s.outputDir, 0755); err != nil {
-        return appfault.Fail[[]byte](err)
+        return appfault.FailSlice[byte](err)
     }
     
     // Generate filename: {requestId}_{direction}_{timestamp}.json
@@ -2048,15 +2064,15 @@ func (s *TransportFormatService) encodeToFile(envelope *TransportEnvelope) ByteS
     // Write JSON content to file
     content, err := json.MarshalIndent(envelope, "", "  ")
     if err != nil {
-        return appfault.Fail[[]byte](err)
+        return appfault.FailSlice[byte](err)
     }
     
     if err := pathutil.WriteFile(filepath, content, 0644); err != nil {
-        return appfault.Fail[[]byte](err)
+        return appfault.FailSlice[byte](err)
     }
     
     // Return file path reference
-    return appfault.Ok([]byte(filepath))
+    return appfault.OkSlice([]byte(filepath))
 }
 
 func (s *TransportFormatService) decodeFromFile(data []byte, envelope *TransportEnvelope) error {

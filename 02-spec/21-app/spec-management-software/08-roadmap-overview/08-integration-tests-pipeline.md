@@ -272,6 +272,8 @@ func (m *MockTokenCounter) Count(text string) appfault.Result[int] {
     return int(float64(len(text)) / m.CharsPerToken), nil
 }
 
+// Note: IntSlice is defined in types.go (created from generic appfault.ResultSlice[int]):
+// type IntSlice = appfault.ResultSlice[int]
 func (m *MockTokenCounter) CountBatch(texts []string) IntSlice {
     results := make([]int, len(texts))
     for i, text := range texts {
@@ -348,6 +350,8 @@ func (m *MockAIService) Summarize(context stdctx.Context, content string, maxTok
     return "### Summary\n" + strings.Join(words, " "), nil
 }
 
+// Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+// type Float32Slice = appfault.ResultSlice[float32]
 func (m *MockAIService) Embed(context stdctx.Context, text string) Float32Slice {
     m.mu.Lock()
     m.CallCount["embed"]++
@@ -1550,5 +1554,5 @@ tests/
 - [Context Window Manager](../05-features/09-knowledge-memory/06-context-window-manager.md) - Component under test
 - [Instruction Segmentation](../05-features/06-ai-integration/05-instruction-segmentation.md) - Component under test
 - [Memory Compression](../05-features/09-knowledge-memory/07-memory-compression.md) - Component under test
-- [Testing Standards](../../01-spec-authoring-guide/03-quality/01-testing-standards-quality.md) - Testing patterns
+- [Testing Standards](../../../02-coding-guidelines/01-index.md) - Testing patterns
 - [Database Schema](../07-database-design/01-schema.md) - Data models

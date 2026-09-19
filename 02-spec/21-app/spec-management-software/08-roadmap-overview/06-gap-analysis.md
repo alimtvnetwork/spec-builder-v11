@@ -1339,6 +1339,8 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // Search uses GORM's Raw for FTS5 queries (only exception to ORM policy)
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
   func (r *SearchRepo) Search(projectId, query string, limit int) SearchResultSlice {
       var results []SearchResult
       
@@ -1543,6 +1545,8 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // ConvertToPCM16 converts audio to 16-bit PCM at 24kHz (placeholder - use ffmpeg in production)
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
   func (v *AudioValidator) ConvertToPCM16(inputPath string) ByteSlice {
       // For production, use ffmpeg:
       // ffmpeg -i input.wav -ar 24000 -ac 1 -f s16le -acodec pcm_s16le output.raw
@@ -1564,6 +1568,8 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       )
   }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
   func (v *AudioValidator) extractWavPCM(data []byte) ByteSlice {
       // Find "data" chunk
       dataIndex := bytes.Index(data, []byte("data"))
@@ -2912,6 +2918,8 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // GetActiveSessions returns all active sessions for a user
+// Note: SessionSlice is defined in types.go (created from generic appfault.ResultSlice[models.Session]):
+// type SessionSlice = appfault.ResultSlice[models.Session]
   func (r *SessionRepo) GetActiveSessions(userId string) SessionSlice {
       var sessions []models.Session
       now := time.Now().UTC()

@@ -485,6 +485,8 @@ type ChunkResult struct {
 }
 
 // ChunkAudio splits audio into segments
+// Note: ChunkResultSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkResult]):
+// type ChunkResultSlice = appfault.ResultSlice[ChunkResult]
 func (c *AudioChunker) ChunkAudio(
     context stdctx.Context,
     inputPath string,
@@ -517,7 +519,7 @@ func (c *AudioChunker) ChunkAudio(
         
         cmd := exec.CommandContext(context, c.config.FFmpegPath, args...)
         if err := cmd.Run(); err != nil {
-            return appfault.Fail[[]ChunkResult](
+            return appfault.FailSlice[ChunkResult](
                 appfault.Wrap(err, appfault.ErrExternalCommand, "chunk failed"),
             )
         }
@@ -538,7 +540,7 @@ func (c *AudioChunker) ChunkAudio(
         currentTime = endTime
     }
     
-    return appfault.Ok(chunks)
+    return appfault.OkSlice(chunks)
 }
 ```
 
@@ -561,16 +563,18 @@ type PureGoChunker struct {
 }
 
 // ChunkWav splits a WAV file using pure Go
+// Note: ChunkResultSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkResult]):
+// type ChunkResultSlice = appfault.ResultSlice[ChunkResult]
 func (c *PureGoChunker) ChunkWav(inputPath, outputDir string) ChunkResultSlice {
     f, err := pathutil.OpenFile(inputPath)
     if err != nil {
-        return appfault.Fail[[]ChunkResult](err)
+        return appfault.FailSlice[ChunkResult](err)
     }
     defer f.Close()
     
     decoder := wav.NewDecoder(f)
     if decoder.IsInvalidFile() {
-        return appfault.Fail[[]ChunkResult](
+        return appfault.FailSlice[ChunkResult](
             appfault.New(appfault.ErrInvalidInput, "invalid WAV file"),
         )
     }
@@ -596,7 +600,7 @@ func (c *PureGoChunker) ChunkWav(inputPath, outputDir string) ChunkResultSlice {
         // Write chunk to file
         chunkPath := filepath.Join(outputDir, fmt.Sprintf("chunk_%03d.wav", chunkIndex))
         if err := c.writeWav(chunkPath, buf, sampleRate); err != nil {
-            return appfault.Fail[[]ChunkResult](err)
+            return appfault.FailSlice[ChunkResult](err)
         }
         
         chunks = append(chunks, ChunkResult{
@@ -608,7 +612,7 @@ func (c *PureGoChunker) ChunkWav(inputPath, outputDir string) ChunkResultSlice {
         chunkIndex++
     }
     
-    return appfault.Ok(chunks)
+    return appfault.OkSlice(chunks)
 }
 ```
 
@@ -687,6 +691,8 @@ func NewParallelTranscriber(
 }
 
 // TranscribeChunks processes all chunks in parallel
+// Note: TranscriptionResultSlice is defined in types.go (created from generic appfault.ResultSlice[TranscriptionResult]):
+// type TranscriptionResultSlice = appfault.ResultSlice[TranscriptionResult]
 func (t *ParallelTranscriber) TranscribeChunks(
     context stdctx.Context,
     voiceFileId string,
@@ -719,7 +725,7 @@ func (t *ParallelTranscriber) TranscribeChunks(
     // Wait for all chunks
     if err := g.Wait(); err != nil {
         t.voiceRepo.UpdateVoiceFileError(context, voiceFileId, err.Error())
-        return appfault.Fail[[]TranscriptionResult](
+        return appfault.FailSlice[TranscriptionResult](
             appfault.Wrap(err, appfault.ErrTranscription, "transcription failed"),
         )
     }
@@ -736,7 +742,7 @@ func (t *ParallelTranscriber) TranscribeChunks(
         return results[i].ChunkId < results[j].ChunkId
     })
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 // --- Typed Event Payloads (no interface{} or map[string]any) ---

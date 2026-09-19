@@ -558,10 +558,12 @@ func (p *Preprocessor) GetDuration(context stdctx.Context, inputPath string) app
 }
 
 // SplitAudio splits audio into chunks of specified duration
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (p *Preprocessor) SplitAudio(context stdctx.Context, inputPath string, chunkSeconds int) StringSlice {
 	durationResult := p.GetDuration(context, inputPath)
 	if durationResult.HasError() {
-		return appfault.Fail[[]string](durationResult.Error())
+		return appfault.FailSlice[string](durationResult.Error())
 	}
 
 	duration := durationResult.Value()

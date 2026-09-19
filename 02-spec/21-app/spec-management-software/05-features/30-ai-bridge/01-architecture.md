@@ -111,6 +111,8 @@ type BackendAdapter interface {
     GenerateStream(context stdctx.Context, req *NormalizedRequest) appfault.Result[<-chan StreamChunk]
     
     // Model management
+    // Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+    // type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
     ListModels(context stdctx.Context) ModelInfoSlice
     LoadModel(context stdctx.Context, modelId string) *appfault.AppError
     UnloadModel(context stdctx.Context, modelId string) *appfault.AppError

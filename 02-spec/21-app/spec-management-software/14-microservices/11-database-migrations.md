@@ -620,6 +620,8 @@ type MigrationRunner interface {
     Version(context stdctx.Context, db *sql.DB) appfault.Result[string]
     
     // List pending migrations
+    // Note: MigrationSlice is defined in types.go (created from generic appfault.ResultSlice[Migration]):
+    // type MigrationSlice = appfault.ResultSlice[Migration]
     Pending(context stdctx.Context, db *sql.DB, dbType string) MigrationSlice
 }
 

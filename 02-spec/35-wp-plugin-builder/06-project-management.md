@@ -163,6 +163,8 @@ type ListProjectsOptions struct {
     Order   string // asc, desc
 }
 
+// Note: ProjectSlice is defined in types.go (created from generic appfault.ResultSlice[Project]):
+// type ProjectSlice = appfault.ResultSlice[Project]
 func (pm *ProjectManager) List(opts ListProjectsOptions) ProjectSlice {
     var projects []Project
     

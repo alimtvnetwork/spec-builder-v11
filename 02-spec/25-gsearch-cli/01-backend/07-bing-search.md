@@ -82,9 +82,11 @@ func (b *BingSearch) IsAvailable() bool {
 ### Search Execution
 
 ```go
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     if !b.quota.CanMakeRequest() {
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.New(
                 "Bing Search quota exhausted",
             ),
@@ -103,7 +105,7 @@ func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOpt
     
     req, err := http.NewRequestWithContext(context, httpmethod.Get.String(), reqUrl, nil)
     if err != nil {
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.Wrap(
                 err,
                 "create request",
@@ -115,7 +117,7 @@ func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOpt
     
     resp, err := b.client.Do(req)
     if err != nil {
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.Wrap(
                 err,
                 "network error",
@@ -125,14 +127,14 @@ func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOpt
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
-        return appfault.Fail[[]Result](b.handleError(resp))
+        return appfault.FailSlice[Result](b.handleError(resp))
     }
     
     b.quota.RecordRequest()
     
     var bingResp BingSearchResponse
     if err := json.NewDecoder(resp.Body).Decode(&bingResp); err != nil {
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.Wrap(
                 err,
                 "decode response",
@@ -140,7 +142,7 @@ func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOpt
         )
     }
     
-    return appfault.Ok(b.parseResults(bingResp))
+    return appfault.OkSlice(b.parseResults(bingResp))
 }
 ```
 
@@ -240,6 +242,8 @@ type BingSearchOptions struct {
     Site       string // Limit to specific site
 }
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (b *BingSearch) SearchAdvanced(context stdctx.Context, query string, opts BingSearchOptions) SearchResultSlice {
     params := url.Values{}
     params.Set("q", b.buildAdvancedQuery(query, opts))

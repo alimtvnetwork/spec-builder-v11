@@ -30,6 +30,8 @@ type Client interface {
     GetSiteInfo(context stdctx.Context, url, username, password string) appfault.Result[*SiteInfo]
     
     // Plugin operations
+    // Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+    // type PluginSlice = appfault.ResultSlice[models.Plugin]
     ListPlugins(context stdctx.Context, url, username, password string) PluginSlice
     GetPlugin(context stdctx.Context, url, username, password, slug string) appfault.Result[*Plugin]
     ActivatePlugin(context stdctx.Context, url, username, password, slug string) *appfault.AppError
@@ -339,6 +341,8 @@ import (
     "wp-plugin-publish/pkg/appfault"
 )
 
+// Note: PluginSlice is defined in types.go (created from generic appfault.ResultSlice[models.Plugin]):
+// type PluginSlice = appfault.ResultSlice[models.Plugin]
 func (c *clientImpl) ListPlugins(context stdctx.Context, url, username, password string) PluginSlice {
     c.log.Debug("Listing plugins", "url", url)
     

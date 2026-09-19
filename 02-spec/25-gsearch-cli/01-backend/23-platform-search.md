@@ -200,12 +200,14 @@ func NewYouTubeSearchService(config *YouTubeConfig) appfault.Result[YouTubeSearc
     })
 }
 
+// Note: YouTubeResultSlice is defined in types.go (created from generic appfault.ResultSlice[YouTubeResult]):
+// type YouTubeResultSlice = appfault.ResultSlice[YouTubeResult]
 func (s *YouTubeSearchService) Search(query string) YouTubeResultSlice {
     // Check cache first
     cacheKey := s.buildCacheKey(query)
     // EXEMPTED: typed accessor internal — cache stores known []YouTubeResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return appfault.Ok(cached.([]YouTubeResult))
+        return appfault.OkSlice(cached.([]YouTubeResult))
     }
     
     // Build search request
@@ -234,7 +236,7 @@ func (s *YouTubeSearchService) Search(query string) YouTubeResultSlice {
     
     response, err := call.Do()
     if err != nil {
-        return appfault.Fail[[]YouTubeResult](
+        return appfault.FailSlice[YouTubeResult](
             appfault.Wrap(
                 err,
                 "YouTube search failed",
@@ -280,7 +282,7 @@ func (s *YouTubeSearchService) Search(query string) YouTubeResultSlice {
     // Cache results
     s.cache.Set(cacheKey, results, 24*time.Hour)
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 func (s *YouTubeSearchService) generateEmbed(videoId, title string) string {
@@ -315,14 +317,14 @@ func NewRedditSearchService(config *RedditConfig) *RedditSearchService {
 func (s *RedditSearchService) Search(query string) RedditResultSlice {
     // Ensure valid auth token
     if authErr := s.ensureAuth(); authErr != nil {
-        return appfault.Fail[[]RedditResult](authErr)
+        return appfault.FailSlice[RedditResult](authErr)
     }
     
     // Check cache
     cacheKey := s.buildCacheKey(query)
     // EXEMPTED: typed accessor internal — cache stores known []RedditResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return appfault.Ok(cached.([]RedditResult))
+        return appfault.OkSlice(cached.([]RedditResult))
     }
     
     // Build search URL
@@ -343,7 +345,7 @@ func (s *RedditSearchService) Search(query string) RedditResultSlice {
     
     req, reqErr := http.NewRequest(httpmethod.Get.String(), searchUrl+"?"+params.Encode(), nil)
     if reqErr != nil {
-        return appfault.Fail[[]RedditResult](
+        return appfault.FailSlice[RedditResult](
             appfault.Wrap(
                 reqErr,
                 "create reddit search request",
@@ -356,7 +358,7 @@ func (s *RedditSearchService) Search(query string) RedditResultSlice {
     
     resp, httpErr := s.httpClient.Do(req)
     if httpErr != nil {
-        return appfault.Fail[[]RedditResult](
+        return appfault.FailSlice[RedditResult](
             appfault.Wrap(
                 httpErr,
                 "execute reddit search request",
@@ -368,7 +370,7 @@ func (s *RedditSearchService) Search(query string) RedditResultSlice {
     
     var listing redditListing
     if decodeErr := json.NewDecoder(resp.Body).Decode(&listing); decodeErr != nil {
-        return appfault.Fail[[]RedditResult](
+        return appfault.FailSlice[RedditResult](
             appfault.Wrap(
                 decodeErr,
                 "decode reddit response",
@@ -413,7 +415,7 @@ func (s *RedditSearchService) Search(query string) RedditResultSlice {
     // Cache results
     s.cache.Set(cacheKey, results, 1*time.Hour)
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 ```
 
@@ -643,18 +645,20 @@ type MediumSearchService struct {
     cache      *CacheService
 }
 
+// Note: MediumResultSlice is defined in types.go (created from generic appfault.ResultSlice[MediumResult]):
+// type MediumResultSlice = appfault.ResultSlice[MediumResult]
 func (s *MediumSearchService) Search(query string) MediumResultSlice {
     cacheKey := s.buildCacheKey(query)
     // EXEMPTED: typed accessor internal — cache stores known []MediumResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return appfault.Ok(cached.([]MediumResult))
+        return appfault.OkSlice(cached.([]MediumResult))
     }
     
     // Use Google site:medium.com search via GSearch core
     siteQuery := fmt.Sprintf("site:medium.com %s", query)
     rawResults, err := s.siteSearch(siteQuery)
     if err != nil {
-        return appfault.Fail[[]MediumResult](
+        return appfault.FailSlice[MediumResult](
             appfault.Wrap(
                 err,
                 "Medium search failed",
@@ -675,7 +679,7 @@ func (s *MediumSearchService) Search(query string) MediumResultSlice {
     
     s.cache.Set(cacheKey, results, 24*time.Hour)
 
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 ```
 
@@ -744,18 +748,20 @@ type LinkedInSearchService struct {
     cache      *CacheService
 }
 
+// Note: LinkedInPostResultSlice is defined in types.go (created from generic appfault.ResultSlice[LinkedInPostResult]):
+// type LinkedInPostResultSlice = appfault.ResultSlice[LinkedInPostResult]
 func (s *LinkedInSearchService) SearchPosts(query string) LinkedInPostResultSlice {
     cacheKey := s.buildCacheKey("posts", query)
     // EXEMPTED: typed accessor internal — cache stores known []LinkedInPostResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return appfault.Ok(cached.([]LinkedInPostResult))
+        return appfault.OkSlice(cached.([]LinkedInPostResult))
     }
     
     // Use Google site:linkedin.com/posts search via GSearch core
     siteQuery := fmt.Sprintf("site:linkedin.com/posts %s", query)
     rawResults, err := s.siteSearch(siteQuery)
     if err != nil {
-        return appfault.Fail[[]LinkedInPostResult](
+        return appfault.FailSlice[LinkedInPostResult](
             appfault.Wrap(
                 err,
                 "LinkedIn post search failed",
@@ -772,20 +778,22 @@ func (s *LinkedInSearchService) SearchPosts(query string) LinkedInPostResultSlic
     
     s.cache.Set(cacheKey, results, 6*time.Hour)
 
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
+// Note: LinkedInCompanyResultSlice is defined in types.go (created from generic appfault.ResultSlice[LinkedInCompanyResult]):
+// type LinkedInCompanyResultSlice = appfault.ResultSlice[LinkedInCompanyResult]
 func (s *LinkedInSearchService) SearchCompanies(query string) LinkedInCompanyResultSlice {
     cacheKey := s.buildCacheKey("companies", query)
     // EXEMPTED: typed accessor internal — cache stores known []LinkedInCompanyResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return appfault.Ok(cached.([]LinkedInCompanyResult))
+        return appfault.OkSlice(cached.([]LinkedInCompanyResult))
     }
     
     siteQuery := fmt.Sprintf("site:linkedin.com/company %s", query)
     rawResults, err := s.siteSearch(siteQuery)
     if err != nil {
-        return appfault.Fail[[]LinkedInCompanyResult](
+        return appfault.FailSlice[LinkedInCompanyResult](
             appfault.Wrap(
                 err,
                 "LinkedIn company search failed",
@@ -802,7 +810,7 @@ func (s *LinkedInSearchService) SearchCompanies(query string) LinkedInCompanyRes
     
     s.cache.Set(cacheKey, results, 24*time.Hour)
 
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 ```
 
@@ -877,6 +885,8 @@ func (e *YouTubeDeepExtractor) ExtractVideo(videoUrl string) appfault.Result[You
 }
 
 // ExtractBatch processes multiple videos in parallel
+// Note: YouTubeResultSlice is defined in types.go (created from generic appfault.ResultSlice[YouTubeResult]):
+// type YouTubeResultSlice = appfault.ResultSlice[YouTubeResult]
 func (e *YouTubeDeepExtractor) ExtractBatch(videoUrls []string) YouTubeResultSlice {
     results := make([]YouTubeResult, 0, len(videoUrls))
     var mu sync.Mutex
@@ -902,7 +912,7 @@ func (e *YouTubeDeepExtractor) ExtractBatch(videoUrls []string) YouTubeResultSli
     
     wg.Wait()
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 // getTranscript fetches auto-generated or manual captions

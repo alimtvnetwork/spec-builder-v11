@@ -569,6 +569,8 @@ func (s *CheckerService) calculateSummary(
 	return summary
 }
 
+// Note: ConsistencyIssueSlice is defined in types.go (created from generic appfault.ResultSlice[models.ConsistencyIssue]):
+// type ConsistencyIssueSlice = appfault.ResultSlice[models.ConsistencyIssue]
 func (s *CheckerService) findOrphans(
 	context stdctx.Context,
 	files []models.FileInfo,
@@ -677,6 +679,8 @@ func NewScanner() *Scanner {
 }
 
 // ScanDirectory scans all markdown files in a directory
+// Note: FileInfoSlice is defined in types.go (created from generic appfault.ResultSlice[FileInfo]):
+// type FileInfoSlice = appfault.ResultSlice[FileInfo]
 func (s *Scanner) ScanDirectory(
 	context stdctx.Context,
 	rootPath string,
@@ -933,6 +937,8 @@ func NewLinkValidator() *LinkValidator {
 }
 
 // ValidateAll checks all links in all files
+// Note: ConsistencyIssueSlice is defined in types.go (created from generic appfault.ResultSlice[models.ConsistencyIssue]):
+// type ConsistencyIssueSlice = appfault.ResultSlice[models.ConsistencyIssue]
 func (v *LinkValidator) ValidateAll(
 	context stdctx.Context,
 	files []models.FileInfo,
@@ -1242,6 +1248,8 @@ func (v *NamingValidator) registerDefaultRules() {
 }
 
 // ValidateAll checks naming conventions for all files
+// Note: ConsistencyIssueSlice is defined in types.go (created from generic appfault.ResultSlice[models.ConsistencyIssue]):
+// type ConsistencyIssueSlice = appfault.ResultSlice[models.ConsistencyIssue]
 func (v *NamingValidator) ValidateAll(
 	context stdctx.Context,
 	files []models.FileInfo,
@@ -1362,6 +1370,8 @@ func NewDuplicateFinder() *DuplicateFinder {
 }
 
 // FindAll detects duplicate definitions across all files
+// Note: ConsistencyIssueSlice is defined in types.go (created from generic appfault.ResultSlice[models.ConsistencyIssue]):
+// type ConsistencyIssueSlice = appfault.ResultSlice[models.ConsistencyIssue]
 func (d *DuplicateFinder) FindAll(
 	context stdctx.Context,
 	files []models.FileInfo,
@@ -1556,6 +1566,8 @@ func (c *CompletenessChecker) registerPatterns() {
 }
 
 // CheckAll validates completeness of all files
+// Note: ConsistencyIssueSlice is defined in types.go (created from generic appfault.ResultSlice[models.ConsistencyIssue]):
+// type ConsistencyIssueSlice = appfault.ResultSlice[models.ConsistencyIssue]
 func (c *CompletenessChecker) CheckAll(
 	context stdctx.Context,
 	files []models.FileInfo,
@@ -1565,7 +1577,7 @@ func (c *CompletenessChecker) CheckAll(
 	for _, file := range files {
 		select {
 		case <-context.Done():
-			return appfault.Fail[[]models.ConsistencyIssue](
+			return appfault.FailSlice[models.ConsistencyIssue](
 				appfault.New(
 					appfault.ErrContextCancelled,
 					"completeness check cancelled",
@@ -1938,6 +1950,8 @@ func (r *ConsistencyRepo) GetLatestReport(
 }
 
 // GetReportHistory retrieves past reports for a project
+// Note: ConsistencyReportSlice is defined in types.go (created from generic appfault.ResultSlice[ConsistencyReport]):
+// type ConsistencyReportSlice = appfault.ResultSlice[ConsistencyReport]
 func (r *ConsistencyRepo) GetReportHistory(
 	context stdctx.Context,
 	projectId string,

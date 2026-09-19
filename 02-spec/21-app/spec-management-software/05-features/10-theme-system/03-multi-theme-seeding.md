@@ -445,6 +445,8 @@ type ThemeService struct {
 }
 
 // GetAllThemes returns all available themes
+// Note: ThemeSlice is defined in types.go (created from generic appfault.ResultSlice[Theme]):
+// type ThemeSlice = appfault.ResultSlice[Theme]
 func (s *ThemeService) GetAllThemes(context stdctx.Context) ThemeSlice {
     return s.themeRepo.FindAllOrdered(context)
 }

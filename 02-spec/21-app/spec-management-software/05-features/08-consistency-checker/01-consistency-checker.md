@@ -235,12 +235,18 @@ Content must be embedding-friendly:
 ```go
 type RAGValidator interface {
     // Validate single artifact
+    // Note: FindingSlice is defined in types.go (created from generic appfault.ResultSlice[Finding]):
+    // type FindingSlice = appfault.ResultSlice[Finding]
     ValidateArtifact(context stdctx.Context, filePath string) FindingSlice
     
     // Validate all artifacts in project
+    // Note: FindingSlice is defined in types.go (created from generic appfault.ResultSlice[Finding]):
+    // type FindingSlice = appfault.ResultSlice[Finding]
     ValidateAllArtifacts(context stdctx.Context, projectPath string) FindingSlice
     
     // Check frontmatter completeness
+    // Note: FindingSlice is defined in types.go (created from generic appfault.ResultSlice[Finding]):
+    // type FindingSlice = appfault.ResultSlice[Finding]
     ValidateFrontmatter(content []byte) FindingSlice
     
     // Analyze chunk boundaries
@@ -609,6 +615,8 @@ type ConsistencyService interface {
     GetLatestReport(context stdctx.Context, projectId string) appfault.Result[*ConsistencyReport]
     
     // Get report history
+    // Note: ConsistencyReportSlice is defined in types.go (created from generic appfault.ResultSlice[ConsistencyReport]):
+    // type ConsistencyReportSlice = appfault.ResultSlice[ConsistencyReport]
     GetReportHistory(context stdctx.Context, projectId string, limit int) ConsistencyReportSlice
     
     // Preview auto-fixes for a report
@@ -627,10 +635,14 @@ type LinkValidator interface {
 }
 
 type SchemaValidator interface {
+    // Note: FindingSlice is defined in types.go (created from generic appfault.ResultSlice[Finding]):
+    // type FindingSlice = appfault.ResultSlice[Finding]
     ValidateSchemaAlignment(context stdctx.Context, schemaPath, apiPath string) FindingSlice
 }
 
 type TerminologyValidator interface {
+    // Note: FindingSlice is defined in types.go (created from generic appfault.ResultSlice[Finding]):
+    // type FindingSlice = appfault.ResultSlice[Finding]
     ValidateTerms(context stdctx.Context, glossaryPath, targetPath string) FindingSlice
 }
 ```

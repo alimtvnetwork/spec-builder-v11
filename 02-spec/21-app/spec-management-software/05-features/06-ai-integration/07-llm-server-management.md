@@ -366,6 +366,8 @@ func (r *ServerRegistry) Initialize(context stdctx.Context) *appfault.AppError {
     return nil
 }
 
+// Note: LLMServerConfigSlice is defined in types.go (created from generic appfault.ResultSlice[LLMServerConfig]):
+// type LLMServerConfigSlice = appfault.ResultSlice[LLMServerConfig]
 func (r *ServerRegistry) loadServerConfigs(context stdctx.Context) LLMServerConfigSlice {
     value, err := r.configService.GetConfig(context, "llm.servers")
     if err != nil {
@@ -383,7 +385,7 @@ func (r *ServerRegistry) loadServerConfigs(context stdctx.Context) LLMServerConf
         )
     }
     
-    return appfault.Ok(configs)
+    return appfault.OkSlice(configs)
 }
 
 // GetServer returns a server instance by ID

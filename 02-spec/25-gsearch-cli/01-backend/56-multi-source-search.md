@@ -326,6 +326,8 @@ func (o *MultiSourceOrchestrator) SearchParallel(context stdctx.Context, req *Pa
     return appfault.Ok(response)
 }
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (o *MultiSourceOrchestrator) searchPlatform(context stdctx.Context, plat platform.Variant, query string, limit int) SearchResultSlice {
     // Build site-scoped query using platform's site operator
     siteOp := plat.SiteOperator()
@@ -337,10 +339,14 @@ func (o *MultiSourceOrchestrator) searchPlatform(context stdctx.Context, plat pl
     return o.engineSearcher.Search(context, engine.Google, query, limit)
 }
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (o *MultiSourceOrchestrator) searchEngine(context stdctx.Context, eng engine.Variant, query string, limit int) SearchResultSlice {
     return o.engineSearcher.Search(context, eng, query, limit)
 }
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (o *MultiSourceOrchestrator) searchSite(context stdctx.Context, siteUrl, query string, limit int) SearchResultSlice {
     siteQuery := fmt.Sprintf("site:%s %s", siteUrl, query)
 

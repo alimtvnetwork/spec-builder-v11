@@ -55,6 +55,12 @@
   - Token density reduction: **26%** savings across interface signatures.
   - Complete elimination of generic type stutter and tuple return hallucinations.
 
+### Subtask 05: Explicit types.go Annotations & Constructor Harmonization
+- Across all 118 specification files where compact types (`StringSlice`, `ByteSlice`, `SearchResultSlice`, `SettingSlice`, `ModelInfoSlice`, `CommandSlice`, `BuildRunSlice`, etc.) are returned:
+  - Added explicit annotations above every function and interface method explaining that the type is defined in `types.go` and created from the generic wrapper (`appfault.ResultSlice[T]`).
+  - Harmonized all return constructors in function bodies to call `appfault.OkSlice(...)` and `appfault.FailSlice[T](...)`.
+  - Resolved all internal cross-references to 100% validity.
+
 ---
 
 ## 2. Verification & Quality Gates

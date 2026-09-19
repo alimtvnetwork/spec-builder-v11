@@ -922,10 +922,12 @@ func NewSitemapParser(normalizer *UrlNormalizer) *SitemapParser {
 }
 
 // Parse fetches and parses a sitemap, handling both index and urlset formats
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (p *SitemapParser) Parse(sitemapUrl string) StringSlice {
     resp, err := p.client.Get(sitemapUrl)
     if err != nil {
-        return appfault.Fail[[]string](
+        return appfault.FailSlice[string](
             appfault.Wrap(err, "fetch sitemap"),
         )
     }
@@ -933,7 +935,7 @@ func (p *SitemapParser) Parse(sitemapUrl string) StringSlice {
     
     data, err := io.ReadAll(resp.Body)
     if err != nil {
-        return appfault.Fail[[]string](
+        return appfault.FailSlice[string](
             appfault.Wrap(err, "read sitemap response"),
         )
     }
@@ -952,7 +954,7 @@ func (p *SitemapParser) Parse(sitemapUrl string) StringSlice {
     // Parse as regular urlset
     var urlSet UrlSet
     if err := xml.Unmarshal(data, &urlSet); err != nil {
-        return appfault.Fail[[]string](
+        return appfault.FailSlice[string](
             appfault.Wrap(err, "parse sitemap XML"),
         )
     }
@@ -966,9 +968,11 @@ func (p *SitemapParser) Parse(sitemapUrl string) StringSlice {
         urls = append(urls, normalizeResult.Value)
     }
     
-    return appfault.Ok(urls)
+    return appfault.OkSlice(urls)
 }
 
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (p *SitemapParser) parseIndex(index SitemapIndex) StringSlice {
     var allUrls []string
     
@@ -980,7 +984,7 @@ func (p *SitemapParser) parseIndex(index SitemapIndex) StringSlice {
         allUrls = append(allUrls, urlsResult.Value...)
     }
     
-    return appfault.Ok(allUrls)
+    return appfault.OkSlice(allUrls)
 }
 
 // DiscoverSitemap attempts to find sitemap.xml for a domain

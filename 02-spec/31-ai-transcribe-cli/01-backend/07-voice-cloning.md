@@ -274,6 +274,8 @@ func (c *XTTSCloner) InstantClone(req InstantCloneRequest) appfault.Result[Voice
 }
 
 // Synthesis uses the stored sample as reference
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (c *XTTSCloner) Synthesize(profile *VoiceProfile, text string) ByteSlice {
     // EXEMPTED: external XTTS API — raw JSON payload required by third-party TTS server (§7.2)
     payload := map[string]any{

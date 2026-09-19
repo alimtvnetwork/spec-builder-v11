@@ -95,6 +95,8 @@ type ConnectionConfig struct {
 func (s *ConnectionService) Connect(cfg ConnectionConfig) appfault.Result[Website]
 func (s *ConnectionService) Validate(websiteId string) appfault.Result[ValidationResult]
 func (s *ConnectionService) Disconnect(websiteId string) *appfault.AppError
+// Note: WebsiteSlice is defined in types.go (created from generic appfault.ResultSlice[Website]):
+// type WebsiteSlice = appfault.ResultSlice[Website]
 func (s *ConnectionService) List() WebsiteSlice
 ```
 
@@ -157,9 +159,13 @@ type VariableSource struct {
 }
 
 func (s *VariableService) Import(source VariableSource) appfault.Result[ImportResult]
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (s *VariableService) Export(scope string, format string) ByteSlice
 func (s *VariableService) Get(scope string, key string) appfault.Result[any]
 func (s *VariableService) Set(scope string, key string, value any) *appfault.AppError
+// Note: VariableSlice is defined in types.go (created from generic appfault.ResultSlice[Variable]):
+// type VariableSlice = appfault.ResultSlice[Variable]
 func (s *VariableService) List(scope string) VariableSlice
 ```
 
@@ -191,6 +197,8 @@ type AutomationResult struct {
 }
 
 func (s *AutomationService) Run(cfg AutomationConfig) appfault.Result[AutomationResult]
+// Note: PreviewItemSlice is defined in types.go (created from generic appfault.ResultSlice[PreviewItem]):
+// type PreviewItemSlice = appfault.ResultSlice[PreviewItem]
 func (s *AutomationService) Preview(cfg AutomationConfig, limit int) PreviewItemSlice
 ```
 
@@ -208,12 +216,16 @@ type WordPressClient struct {
 // Categories
 func (c *WordPressClient) CreateCategory(cat Category) appfault.Result[Category]
 func (c *WordPressClient) UpdateCategory(id int, cat Category) appfault.Result[Category]
+// Note: CategorySlice is defined in types.go (created from generic appfault.ResultSlice[Category]):
+// type CategorySlice = appfault.ResultSlice[Category]
 func (c *WordPressClient) GetCategories() CategorySlice
 
 // Posts
 func (c *WordPressClient) CreatePost(post Post) appfault.Result[Post]
 func (c *WordPressClient) UpdatePost(id int, post Post) appfault.Result[Post]
 func (c *WordPressClient) GetPost(id int) appfault.Result[Post]
+// Note: PostSlice is defined in types.go (created from generic appfault.ResultSlice[Post]):
+// type PostSlice = appfault.ResultSlice[Post]
 func (c *WordPressClient) GetPosts(params PostQuery) PostSlice
 
 // Pages
@@ -223,6 +235,8 @@ func (c *WordPressClient) GetPage(id int) appfault.Result[Page]
 
 // Tags
 func (c *WordPressClient) CreateTag(tag Tag) appfault.Result[Tag]
+// Note: TagSlice is defined in types.go (created from generic appfault.ResultSlice[Tag]):
+// type TagSlice = appfault.ResultSlice[Tag]
 func (c *WordPressClient) GetTags() TagSlice
 
 // Media
@@ -261,7 +275,11 @@ type SeoResponse struct {
 
 func (c *AiBridgeClient) GenerateSeo(req SeoRequest) appfault.Result[SeoResponse]
 func (c *AiBridgeClient) GenerateSeoStream(req SeoRequest) appfault.Result[<-chan SeoChunk]
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (c *AiBridgeClient) SuggestCategories(content string) StringSlice
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (c *AiBridgeClient) SuggestTags(content string) StringSlice
 func (c *AiBridgeClient) RewriteContent(content, prompt string) appfault.Result[SeoResponse]
 ```

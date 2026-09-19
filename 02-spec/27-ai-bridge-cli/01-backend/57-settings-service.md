@@ -133,6 +133,8 @@ type SettingsService interface {
     GetFloat(category configcategorytype.Type, key string) appfault.Result[float64]
     GetInt(category configcategorytype.Type, key string) appfault.Result[int]
     GetBool(category configcategorytype.Type, key string) appfault.Result[bool]
+    // Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+    // type StringSlice = appfault.ResultSlice[string]
     GetStringSlice(category configcategorytype.Type, key string) StringSlice
     GetMap(category configcategorytype.Type, key string) appfault.Result[map[string]string]
     
@@ -146,6 +148,8 @@ type SettingsService interface {
     ForceReseed(category configcategorytype.Type) *appfault.AppError
     
     // Query methods
+    // Note: SettingSlice is defined in types.go (created from generic appfault.ResultSlice[Setting]):
+    // type SettingSlice = appfault.ResultSlice[Setting]
     GetByCategory(category configcategorytype.Type) SettingSlice
     GetCategoryVersion(category configcategorytype.Type) appfault.Result[string]
     

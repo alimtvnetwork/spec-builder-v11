@@ -482,9 +482,11 @@ func (s *Service) TranscribeStream(
 	})
 }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (s *Service) convertToWav(data []byte, format string) ByteSlice {
 	if format == "wav" || format == "pcm" {
-		return appfault.Ok(data)
+		return appfault.OkSlice(data)
 	}
 	
 	// Use ffmpeg for conversion
@@ -509,7 +511,7 @@ func (s *Service) convertToWav(data []byte, format string) ByteSlice {
 		)
 	}
 	
-	return appfault.Ok(stdout.Bytes())
+	return appfault.OkSlice(stdout.Bytes())
 }
 
 func (s *Service) parseOutput(data []byte) appfault.Result[TranscriptionResult] {

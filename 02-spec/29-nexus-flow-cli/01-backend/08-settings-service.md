@@ -50,6 +50,8 @@ type SettingsService interface {
     SetWithCategory(key, value, category string) *appfault.AppError
     
     // Bulk operations
+    // Note: SettingSlice is defined in types.go (created from generic appfault.ResultSlice[Setting]):
+    // type SettingSlice = appfault.ResultSlice[Setting]
     GetByCategory(category string) SettingSlice
     SeedFromConfig(configPath string) *appfault.AppError
     

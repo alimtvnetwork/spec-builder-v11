@@ -29,6 +29,8 @@ import (
 
 type Service interface {
     // CRUD operations
+    // Note: SiteSlice is defined in types.go (created from generic appfault.ResultSlice[models.Site]):
+    // type SiteSlice = appfault.ResultSlice[models.Site]
     List(context stdctx.Context) SiteSlice
     GetById(context stdctx.Context, id int64) appfault.Result[*models.Site]
     GetByUrl(context stdctx.Context, url string) appfault.Result[*models.Site]
@@ -162,6 +164,8 @@ import (
     "gorm.io/gorm"
 )
 
+// Note: SiteSlice is defined in types.go (created from generic appfault.ResultSlice[models.Site]):
+// type SiteSlice = appfault.ResultSlice[models.Site]
 func (s *serviceImpl) List(context stdctx.Context) SiteSlice {
     s.log.Debug("Listing all sites")
     

@@ -167,6 +167,8 @@ func (c *Chunker) Chunk(text string) []Chunk {
 ### Via AI Bridge
 
 ```go
+// Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+// type Float32Slice = appfault.ResultSlice[float32]
 func (r *RAGService) Embed(text string) Float32Slice {
     resp, err := r.aiBridge.Embed(AIEmbedRequest{
         Input: text,
@@ -221,6 +223,8 @@ func (v *VectorStore) Insert(vec RAGVector) error {
     return v.db.Create(&vec).Error
 }
 
+// Note: RAGResultSlice is defined in types.go (created from generic appfault.ResultSlice[RAGResult]):
+// type RAGResultSlice = appfault.ResultSlice[RAGResult]
 func (v *VectorStore) Search(query []float32, topK int, minScore float64) RAGResultSlice {
     queryBlob := serializeFloat32(query)
     
@@ -354,6 +358,8 @@ func (r *RAGService) ImportPreset(path string) appfault.Result[*Preset] {
 ### Context Retrieval
 
 ```go
+// Note: RAGResultSlice is defined in types.go (created from generic appfault.ResultSlice[RAGResult]):
+// type RAGResultSlice = appfault.ResultSlice[RAGResult]
 func (r *RAGService) Query(prompt string, topK int) RAGResultSlice {
     // 1. Embed the query
     queryVec, err := r.Embed(prompt)

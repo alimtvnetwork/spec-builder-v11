@@ -116,6 +116,8 @@ func (v *VectorSearchService) Initialize() error {
 }
 
 // SearchSimilar finds top-K similar chunks
+// Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+// type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
 func (v *VectorSearchService) SearchSimilar(
     queryEmbedding []float32, 
     limit int,

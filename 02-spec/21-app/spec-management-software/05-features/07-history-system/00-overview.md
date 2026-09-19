@@ -250,11 +250,17 @@ type GitAdapter interface {
     MergeBranch(source, target string) appfault.Result[MergeResult]
     
     // Blob operations
+    // Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+    // type ByteSlice = appfault.ResultSlice[byte]
     GetBlob(sha string) ByteSlice
+    // Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+    // type ByteSlice = appfault.ResultSlice[byte]
     GetBlobAtCommit(path, commitSha string) ByteSlice
     
     // Tag operations (for snapshots)
     CreateTag(name, commitSha, message string) *appfault.AppError
+    // Note: TagSlice is defined in types.go (created from generic appfault.ResultSlice[Tag]):
+    // type TagSlice = appfault.ResultSlice[Tag]
     ListTags() TagSlice
     GetTaggedCommit(tagName string) appfault.Result[string]
 }

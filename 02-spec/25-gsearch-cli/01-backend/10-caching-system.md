@@ -365,15 +365,17 @@ func (db *DB) UpdateCacheValidity(keyHash string, valid bool) *appfault.AppError
     return nil
 }
 
+// Note: CacheEntrySlice is defined in types.go (created from generic appfault.ResultSlice[models.CacheEntry]):
+// type CacheEntrySlice = appfault.ResultSlice[models.CacheEntry]
 func (db *DB) FindCacheEntriesByKeyword(keyword string) CacheEntrySlice {
     var entries []models.CacheEntry
     pattern := "%" + keyword + "%"
     if err := db.Where("keywords LIKE ?", pattern).Find(&entries).Error; err != nil {
-        return appfault.Fail[[]models.CacheEntry](
+        return appfault.FailSlice[models.CacheEntry](
             appfault.Wrap(err, "find cache entries by keyword"),
         )
     }
-    return appfault.Ok(entries)
+    return appfault.OkSlice(entries)
 }
 ```
 

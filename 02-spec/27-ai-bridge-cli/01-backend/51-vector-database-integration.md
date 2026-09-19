@@ -197,6 +197,8 @@ type MetadataFilter struct {
 // EmbeddingProvider generates vector embeddings
 type EmbeddingProvider interface {
     // Generate embedding for single text
+    // Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+    // type Float32Slice = appfault.ResultSlice[float32]
     Embed(context stdctx.Context, text string) Float32Slice
     
     // Batch embedding generation
@@ -351,6 +353,8 @@ type OllamaEmbedOptions struct {
 }
 
 // Embed generates embedding via Ollama
+// Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+// type Float32Slice = appfault.ResultSlice[float32]
 func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) Float32Slice {
     start := time.Now()
     
@@ -413,7 +417,7 @@ func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) Float32Slice
     vectorEmbedDuration.Observe(time.Since(start).Seconds())
     vectorEmbedTotal.Inc()
     
-    return appfault.Ok(result.Embedding)
+    return appfault.OkSlice(result.Embedding)
 }
 ```
 

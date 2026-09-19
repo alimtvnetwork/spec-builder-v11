@@ -98,12 +98,16 @@ import (
 type Service interface {
 	// Publishing
 	Publish(context stdctx.Context, pluginId, siteId int64, opts PublishOptions) appfault.Result[*PublishResult]
+    // Note: PublishResultSlice is defined in types.go (created from generic appfault.ResultSlice[PublishResult]):
+    // type PublishResultSlice = appfault.ResultSlice[PublishResult]
 	PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) PublishResultSlice
 
 	// Packaging
 	CreatePackage(context stdctx.Context, pluginId int64, files []string) appfault.Result[*PackageInfo]
 
 	// History
+    // Note: PublishResultSlice is defined in types.go (created from generic appfault.ResultSlice[PublishResult]):
+    // type PublishResultSlice = appfault.ResultSlice[PublishResult]
 	GetHistory(context stdctx.Context, pluginId int64, siteId *int64) PublishResultSlice
 
 	// Rollback
@@ -349,6 +353,8 @@ func (s *serviceImpl) failPublish(result *PublishResult, stage string, err error
 	return appfault.Fail[PublishResult](appfault.Wrap(err, appfault.ErrPublishFailed, stage))
 }
 
+// Note: PublishResultSlice is defined in types.go (created from generic appfault.ResultSlice[PublishResult]):
+// type PublishResultSlice = appfault.ResultSlice[PublishResult]
 func (s *serviceImpl) PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) PublishResultSlice {
 	mappings, err := s.pluginService.GetMappings(context, pluginId)
 	if err != nil {
@@ -364,6 +370,8 @@ func (s *serviceImpl) PublishToAll(context stdctx.Context, pluginId int64, opts 
 	return results, nil
 }
 
+// Note: PublishResultSlice is defined in types.go (created from generic appfault.ResultSlice[PublishResult]):
+// type PublishResultSlice = appfault.ResultSlice[PublishResult]
 func (s *serviceImpl) GetHistory(context stdctx.Context, pluginId int64, siteId *int64) PublishResultSlice {
 	// TODO: Query publish history from database
 	return []PublishResult{}, nil

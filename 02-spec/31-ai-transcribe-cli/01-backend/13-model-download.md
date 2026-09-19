@@ -86,6 +86,8 @@ type ModelDownloader interface {
     GetModel(context stdctx.Context, modelId string) appfault.Result[Model]
     
     // ListModels returns available models
+    // Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+    // type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
     ListModels(modelType ModelType) ModelInfoSlice
     
     // DeleteModel removes a cached model
@@ -223,6 +225,8 @@ func (d *modelDownloader) Download(context stdctx.Context, modelId string, opts 
 // ModelRegistry provides model metadata
 type ModelRegistry interface {
     GetModelInfo(modelId string) appfault.Result[ModelInfo]
+    // Note: ModelInfoSlice is defined in types.go (created from generic appfault.ResultSlice[ModelInfo]):
+    // type ModelInfoSlice = appfault.ResultSlice[ModelInfo]
     ListAvailable(modelType ModelType) ModelInfoSlice
     CheckUpdates(installed []string) UpdateInfoSlice
     GetMirrors(modelId string) MirrorInfoSlice

@@ -322,20 +322,22 @@ func Parse(s string) appfault.Result[Variant] {
     ))
 }
 
+// Note: VariantSlice is defined in types.go (created from generic appfault.ResultSlice[Variant]):
+// type VariantSlice = appfault.ResultSlice[Variant]
 func ParseMultiple(s string) VariantSlice {
     if s == "" {
-        return appfault.Ok([]Variant{})
+        return appfault.OkSlice([]Variant{})
     }
     parts := strings.Split(s, ",")
     variants := make([]Variant, 0, len(parts))
     for _, p := range parts {
         res := Parse(strings.TrimSpace(p))
         if res.HasError() {
-            return appfault.Fail[[]Variant](res.AppError())
+            return appfault.FailSlice[Variant](res.AppError())
         }
         variants = append(variants, res.Value())
     }
-    return appfault.Ok(variants)
+    return appfault.OkSlice(variants)
 }
 
 func Values() []string {

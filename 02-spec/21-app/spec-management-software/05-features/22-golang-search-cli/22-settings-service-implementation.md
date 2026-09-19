@@ -115,6 +115,8 @@ type SettingsService interface {
     GetFloat(category ConfigCategory, key string) appfault.Result[float64]
     GetInt(category ConfigCategory, key string) appfault.Result[int]
     GetBool(category ConfigCategory, key string) appfault.Result[bool]
+    // Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+    // type StringSlice = appfault.ResultSlice[string]
     GetStringSlice(category ConfigCategory, key string) StringSlice
     GetMap(category ConfigCategory, key string) appfault.Result[SettingMap]
     
@@ -129,7 +131,11 @@ type SettingsService interface {
     ForceReseed(category ConfigCategory) *appfault.AppError
     
     // Query methods
+    // Note: SettingSlice is defined in types.go (created from generic appfault.ResultSlice[Setting]):
+    // type SettingSlice = appfault.ResultSlice[Setting]
     GetByCategory(category ConfigCategory) SettingSlice
+    // Note: ConfigCategorySlice is defined in types.go (created from generic appfault.ResultSlice[ConfigCategory]):
+    // type ConfigCategorySlice = appfault.ResultSlice[ConfigCategory]
     GetAllCategories() ConfigCategorySlice
     GetCategoryVersion(category ConfigCategory) appfault.Result[string]
     
@@ -368,6 +374,8 @@ func (ss *SettingsServiceImpl) GetBool(category ConfigCategory, key string) appf
 // Errors:
 // - ErrSettingNotFound: Key doesn't exist
 // - ErrTypeMismatch: Value is not an array
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (ss *SettingsServiceImpl) GetStringSlice(category ConfigCategory, key string) StringSlice
 ```
 
@@ -527,6 +535,8 @@ func (ss *SettingsServiceImpl) ForceReseed(category ConfigCategory) error
 //
 // Errors:
 // - ErrCategoryNotFound: Category doesn't exist
+// Note: SettingSlice is defined in types.go (created from generic appfault.ResultSlice[Setting]):
+// type SettingSlice = appfault.ResultSlice[Setting]
 func (ss *SettingsServiceImpl) GetByCategory(category ConfigCategory) SettingSlice
 ```
 

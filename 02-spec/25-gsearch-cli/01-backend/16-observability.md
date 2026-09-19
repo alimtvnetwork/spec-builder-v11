@@ -619,6 +619,8 @@ import (
 var tracer = otel.Tracer("gosearch/search")
 
 // Execute performs a search with tracing
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (e *SearchEngine) Execute(searchContext context.Context, query string) SearchResultSlice {
     searchContext, span := tracer.Start(searchContext, "search.execute",
         trace.WithAttributes(
@@ -656,6 +658,8 @@ func (e *SearchEngine) Execute(searchContext context.Context, query string) Sear
 }
 
 // executeSearch performs the actual search request
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (e *SearchEngine) executeSearch(searchContext context.Context, query string) SearchResultSlice {
     searchContext, span := tracer.Start(searchContext, "search.engine.request",
         trace.WithAttributes(

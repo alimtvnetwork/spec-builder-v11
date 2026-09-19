@@ -306,13 +306,15 @@ var contactLinkPatterns = []*regexp.Regexp{
     regexp.MustCompile(`(?i)support`),
 }
 
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (f *ContactPageFinder) FindContactPages(context stdctx.Context, baseUrl string) StringSlice {
     pages := []string{baseUrl}
     
     // Parse base URL
     base, err := url.Parse(baseUrl)
     if err != nil {
-        return appfault.Fail[[]string](
+        return appfault.FailSlice[string](
             appfault.Wrap(
                 err,
                 "parse base URL",
@@ -323,7 +325,7 @@ func (f *ContactPageFinder) FindContactPages(context stdctx.Context, baseUrl str
     // Fetch homepage
     doc, err := f.fetchPage(context, baseUrl)
     if err != nil {
-        return appfault.Ok(pages) // Return just homepage on error
+        return appfault.OkSlice(pages) // Return just homepage on error
     }
     
     // 1. Check common URL patterns
@@ -359,7 +361,7 @@ func (f *ContactPageFinder) FindContactPages(context stdctx.Context, baseUrl str
     footerLinks := f.extractFooterLinks(doc, base)
     pages = append(pages, footerLinks...)
     
-    return appfault.Ok(deduplicateStrings(pages))
+    return appfault.OkSlice(deduplicateStrings(pages))
 }
 
 func (f *ContactPageFinder) extractFooterLinks(doc *goquery.Document, base *url.URL) []string {

@@ -1099,6 +1099,8 @@ type TopPagesResponse struct {
     } `json:"pages"`
 }
 
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func FetchTopPages(domain string, limit int) StringSlice {
     params := url.Values{}
     params.Set("target", domain)

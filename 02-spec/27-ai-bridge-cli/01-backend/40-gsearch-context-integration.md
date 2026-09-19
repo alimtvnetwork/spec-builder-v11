@@ -281,6 +281,8 @@ func (e *ContextFetcher) FetchContextNeeds(context stdctx.Context, needs []Conte
     return appfault.Ok(result)
 }
 
+// Note: RAGChunkSlice is defined in types.go (created from generic appfault.ResultSlice[RAGChunk]):
+// type RAGChunkSlice = appfault.ResultSlice[RAGChunk]
 func (e *ContextFetcher) fetchSingleNeed(context stdctx.Context, need ContextNeed) RAGChunkSlice {
     switch need.Type {
     case ContextTypeWebSearch:

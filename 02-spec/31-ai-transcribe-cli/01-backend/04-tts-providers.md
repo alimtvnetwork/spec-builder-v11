@@ -33,6 +33,8 @@ type TTSProvider interface {
     SynthesizeStream(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[<-chan *AudioChunk]
     
     // Voice management
+    // Note: VoiceSlice is defined in types.go (created from generic appfault.ResultSlice[Voice]):
+    // type VoiceSlice = appfault.ResultSlice[Voice]
     ListVoices() VoiceSlice
     GetVoice(voiceId string) appfault.Result[Voice]
     CloneVoice(context context.Context, name string, samples [][]byte) appfault.Result[Voice]
@@ -346,6 +348,8 @@ func (xp *XTTSProvider) CloneVoice(context context.Context, name string, samples
     })
 }
 
+// Note: VoiceSlice is defined in types.go (created from generic appfault.ResultSlice[Voice]):
+// type VoiceSlice = appfault.ResultSlice[Voice]
 func (xp *XTTSProvider) ListVoices() VoiceSlice {
     xp.mu.RLock()
     defer xp.mu.RUnlock()
@@ -371,7 +375,7 @@ func (xp *XTTSProvider) ListVoices() VoiceSlice {
         })
     }
     
-    return appfault.Ok(voices)
+    return appfault.OkSlice(voices)
 }
 
 func (xp *XTTSProvider) Name() string {
@@ -458,6 +462,8 @@ func (ep *ElevenLabsProvider) Initialize(context context.Context, config *Provid
     return nil
 }
 
+// Note: VoiceSlice is defined in types.go (created from generic appfault.ResultSlice[Voice]):
+// type VoiceSlice = appfault.ResultSlice[Voice]
 func (ep *ElevenLabsProvider) fetchVoices(context context.Context) VoiceSlice {
     req, _ := http.NewRequestWithContext(context, httpmethodtype.Get.HttpVerb(),
         ep.config.Endpoint+"/v1/voices", nil)
@@ -513,7 +519,7 @@ func (ep *ElevenLabsProvider) fetchVoices(context context.Context) VoiceSlice {
         })
     }
     
-    return appfault.Ok(voices)
+    return appfault.OkSlice(voices)
 }
 
 func (ep *ElevenLabsProvider) Synthesize(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[AudioResult] {
@@ -753,11 +759,13 @@ func (ep *ElevenLabsProvider) CloneVoice(context context.Context, name string, s
     })
 }
 
+// Note: VoiceSlice is defined in types.go (created from generic appfault.ResultSlice[Voice]):
+// type VoiceSlice = appfault.ResultSlice[Voice]
 func (ep *ElevenLabsProvider) ListVoices() VoiceSlice {
     ep.mu.RLock()
     defer ep.mu.RUnlock()
 
-    return appfault.Ok(ep.voices)
+    return appfault.OkSlice(ep.voices)
 }
 
 func (ep *ElevenLabsProvider) Name() string {
@@ -958,6 +966,8 @@ func (ap *AzureTtsProvider) getOutputFormat(opts *SynthesizeOptions) string {
     }
 }
 
+// Note: VoiceSlice is defined in types.go (created from generic appfault.ResultSlice[Voice]):
+// type VoiceSlice = appfault.ResultSlice[Voice]
 func (ap *AzureTtsProvider) fetchVoices(context context.Context) VoiceSlice {
     endpoint := fmt.Sprintf("https://%s.tts.speech.microsoft.com/cognitiveservices/voices/list",
         ap.config.Region)
@@ -998,14 +1008,16 @@ func (ap *AzureTtsProvider) fetchVoices(context context.Context) VoiceSlice {
         })
     }
     
-    return appfault.Ok(voices)
+    return appfault.OkSlice(voices)
 }
 
+// Note: VoiceSlice is defined in types.go (created from generic appfault.ResultSlice[Voice]):
+// type VoiceSlice = appfault.ResultSlice[Voice]
 func (ap *AzureTtsProvider) ListVoices() VoiceSlice {
     ap.mu.RLock()
     defer ap.mu.RUnlock()
 
-    return appfault.Ok(ap.voices)
+    return appfault.OkSlice(ap.voices)
 }
 
 func (ap *AzureTtsProvider) Name() string {

@@ -451,6 +451,8 @@ func (s *URLContextService) runCrawl(
 }
 
 // SearchSite performs vector/keyword search on cached site
+// Note: SiteSearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SiteSearchResult]):
+// type SiteSearchResultSlice = appfault.ResultSlice[SiteSearchResult]
 func (s *URLContextService) SearchSite(
     context stdctx.Context,
     req SiteSearchRequest,
@@ -468,6 +470,8 @@ func (s *URLContextService) SearchSite(
     return s.keywordSearch(context, siteDb, req.Query, req.Limit)
 }
 
+// Note: SiteSearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SiteSearchResult]):
+// type SiteSearchResultSlice = appfault.ResultSlice[SiteSearchResult]
 func (s *URLContextService) vectorSearch(
     context stdctx.Context,
     db *gorm.DB,

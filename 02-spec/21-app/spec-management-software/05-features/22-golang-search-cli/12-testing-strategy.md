@@ -1797,13 +1797,15 @@ type FixtureInfo struct {
 }
 
 // LoadFixture loads a fixture file from the embedded filesystem
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func LoadFixture(path string) ByteSlice {
     data, err := FixtureFS.ReadFile(filepath.Join("fixtures", path))
     if err != nil {
-        return appfault.Fail[[]byte](err)
+        return appfault.FailSlice[byte](err)
     }
 
-    return appfault.Ok(data)
+    return appfault.OkSlice(data)
 }
 
 // LoadGoogleNormal loads the standard Google results fixture

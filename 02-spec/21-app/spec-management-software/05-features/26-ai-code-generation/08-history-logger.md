@@ -294,6 +294,8 @@ func (hl *HistoryLogger) CalculateChecksumWithSize(filePath string) appfault.Res
 ### History Queries
 
 ```go
+// Note: LogEntrySlice is defined in types.go (created from generic appfault.ResultSlice[LogEntry]):
+// type LogEntrySlice = appfault.ResultSlice[LogEntry]
 func (hl *HistoryLogger) GetTaskHistory(taskId uint) LogEntrySlice {
     var dbEntries []FilesystemHistory
     
@@ -325,6 +327,8 @@ func (hl *HistoryLogger) GetTaskHistory(taskId uint) LogEntrySlice {
     return entries, nil
 }
 
+// Note: LogEntrySlice is defined in types.go (created from generic appfault.ResultSlice[LogEntry]):
+// type LogEntrySlice = appfault.ResultSlice[LogEntry]
 func (hl *HistoryLogger) GetOperationsByPath(path string) LogEntrySlice {
     var dbEntries []FilesystemHistory
     
@@ -341,6 +345,8 @@ func (hl *HistoryLogger) GetOperationsByPath(path string) LogEntrySlice {
     return nil, nil
 }
 
+// Note: LogEntrySlice is defined in types.go (created from generic appfault.ResultSlice[LogEntry]):
+// type LogEntrySlice = appfault.ResultSlice[LogEntry]
 func (hl *HistoryLogger) GetFailedOperations(since time.Time) LogEntrySlice {
     var dbEntries []FilesystemHistory
     

@@ -241,6 +241,8 @@ For detailed errors, the error is captured to the global error store with full c
 
 ```go
 // Get all plugins from remote site
+// Note: PluginInfoSlice is defined in types.go (created from generic appfault.ResultSlice[wordpress.PluginInfo]):
+// type PluginInfoSlice = appfault.ResultSlice[wordpress.PluginInfo]
 func (c *Client) ListPlugins() PluginInfoSlice
 
 // Enable a plugin
@@ -257,6 +259,8 @@ func (c *Client) DeletePlugin(slug string) *appfault.AppError
 
 ```go
 // Proxy methods that handle site lookup and client creation
+// Note: PluginInfoSlice is defined in types.go (created from generic appfault.ResultSlice[wordpress.PluginInfo]):
+// type PluginInfoSlice = appfault.ResultSlice[wordpress.PluginInfo]
 func (s *Service) GetRemotePlugins(siteId int64) PluginInfoSlice
 func (s *Service) EnableRemotePlugin(siteId int64, slug string) *appfault.AppError
 func (s *Service) DisableRemotePlugin(siteId int64, slug string) *appfault.AppError

@@ -466,7 +466,7 @@ func (e *PaaExtractor) Extract(context stdctx.Context, query string) FaqSlice {
         }
     }
     
-    return appfault.Ok(e.deduplicateFaqs(faqs))
+    return appfault.OkSlice(e.deduplicateFaqs(faqs))
 }
 
 // 2026 PAA Container Selectors (updated February 2026)
@@ -570,13 +570,13 @@ func (e *FAQSchemaExtractor) ExtractFromUrl(context stdctx.Context, targetUrl st
     // Fetch page
     resp, err := e.httpClient.Get(targetUrl)
     if err != nil {
-        return appfault.Fail[[]FAQ](appfault.Wrap(err, "fetch page"))
+        return appfault.FailSlice[FAQ](appfault.Wrap(err, "fetch page"))
     }
     defer resp.Body.Close()
     
     doc, err := goquery.NewDocumentFromReader(resp.Body)
     if err != nil {
-        return appfault.Fail[[]FAQ](appfault.Wrap(err, "parse document"))
+        return appfault.FailSlice[FAQ](appfault.Wrap(err, "parse document"))
     }
     
     faqs := []FAQ{}
@@ -621,7 +621,7 @@ func (e *FAQSchemaExtractor) ExtractFromUrl(context stdctx.Context, targetUrl st
     // Also extract semantic FAQ patterns in HTML
     faqs = append(faqs, e.extractSemanticFaqs(doc, targetUrl)...)
     
-    return appfault.Ok(faqs)
+    return appfault.OkSlice(faqs)
 }
 
 func (e *FaqSchemaExtractor) extractSemanticFaqs(doc *goquery.Document, url string) []Faq {
@@ -712,7 +712,7 @@ func (e *AnswerEnricher) EnrichFaqs(context stdctx.Context, faqs []Faq) FaqSlice
     }
     
     wg.Wait()
-    return appfault.Ok(enriched)
+    return appfault.OkSlice(enriched)
 }
 
 func (e *AnswerEnricher) selectBestAnswer(answers []Answer) *Answer {

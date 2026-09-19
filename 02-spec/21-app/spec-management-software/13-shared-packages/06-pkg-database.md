@@ -474,6 +474,8 @@ type Migration struct {
 
 // MigrationSource provides migrations
 type MigrationSource interface {
+    // Note: MigrationSlice is defined in types.go (created from generic appfault.ResultSlice[Migration]):
+    // type MigrationSlice = appfault.ResultSlice[Migration]
     Migrations() MigrationSlice
 }
 
@@ -484,6 +486,8 @@ type EmbedSource struct {
 }
 
 // Migrations loads migrations from embedded filesystem
+// Note: MigrationSlice is defined in types.go (created from generic appfault.ResultSlice[Migration]):
+// type MigrationSlice = appfault.ResultSlice[Migration]
 func (s *EmbedSource) Migrations() MigrationSlice {
     var migrations []Migration
     
@@ -642,6 +646,8 @@ func (m *Migrator) Rollback(context stdctx.Context, n int) error {
 }
 
 // Status returns the status of all migrations
+// Note: MigrationSlice is defined in types.go (created from generic appfault.ResultSlice[Migration]):
+// type MigrationSlice = appfault.ResultSlice[Migration]
 func (m *Migrator) Status(context stdctx.Context) MigrationSlice {
     migrations, err := m.source.Migrations()
     if err != nil {
@@ -1003,7 +1009,7 @@ func GetMany[T any](context stdctx.Context, e Executor, query string, args []any
     for rows.Next() {
         itemResult := scan(rows)
         if itemResult.HasError() {
-            return appfault.Fail[[]T](itemResult.Error())
+            return appfault.FailSlice[T](itemResult.Error())
         }
 
         results = append(results, itemResult.Value())

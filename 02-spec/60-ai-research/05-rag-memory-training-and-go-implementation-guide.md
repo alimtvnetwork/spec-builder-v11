@@ -183,6 +183,8 @@ func (vm *VectorMemory) Store(
 }
 
 // Retrieve relevant memories
+// Note: ChromemResultSlice is defined in types.go (created from generic appfault.ResultSlice[chromem.Result]):
+// type ChromemResultSlice = appfault.ResultSlice[chromem.Result]
 func (vm *VectorMemory) Retrieve(
     query string,
     topK int,
@@ -224,6 +226,8 @@ func (vm *VectorMemory) StoreConversationTurn(
 }
 
 // Retrieve similar past conversations
+// Note: ChromemResultSlice is defined in types.go (created from generic appfault.ResultSlice[chromem.Result]):
+// type ChromemResultSlice = appfault.ResultSlice[chromem.Result]
 func (vm *VectorMemory) RetrieveSimilarConversations(
     query string,
     userID string,
@@ -657,6 +661,8 @@ func (em *EntityMemory) GetEntityGraph(entityID string, depth int) appfault.Resu
 }
 
 // Semantic search for entities
+// Note: EntitySlice is defined in types.go (created from generic appfault.ResultSlice[Entity]):
+// type EntitySlice = appfault.ResultSlice[Entity]
 func (em *EntityMemory) SearchEntities(
     query string,
     entityType EntityType,
@@ -867,6 +873,8 @@ func (sm *SemanticMemory) StoreConcept(
 }
 
 // Query semantic memory (searches all types)
+// Note: ChromemResultSlice is defined in types.go (created from generic appfault.ResultSlice[chromem.Result]):
+// type ChromemResultSlice = appfault.ResultSlice[chromem.Result]
 func (sm *SemanticMemory) Query(
     query string,
     memoryType string, // "fact", "procedure", "concept", or "all"
@@ -1090,6 +1098,8 @@ Tags: %s
 }
 
 // Retrieve similar past episodes
+// Note: EpisodeSlice is defined in types.go (created from generic appfault.ResultSlice[Episode]):
+// type EpisodeSlice = appfault.ResultSlice[Episode]
 func (em *EpisodicMemory) RetrieveSimilarEpisodes(
     currentContext string,
     userID string,
@@ -1135,6 +1145,8 @@ func (em *EpisodicMemory) RetrieveSimilarEpisodes(
 }
 
 // Get episodes by time range
+// Note: EpisodeSlice is defined in types.go (created from generic appfault.ResultSlice[Episode]):
+// type EpisodeSlice = appfault.ResultSlice[Episode]
 func (em *EpisodicMemory) GetEpisodesByTimeRange(
     userID string,
     startTime, endTime time.Time,

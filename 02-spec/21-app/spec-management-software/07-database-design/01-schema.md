@@ -880,6 +880,8 @@ type Embedding struct {
 func (Embedding) TableName() string { return "Embedding" }
 
 // GetVector deserializes the embedding vector from bytes
+// Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+// type Float32Slice = appfault.ResultSlice[float32]
 func (e *Embedding) GetVector() Float32Slice {
     if len(e.EmbeddingVector) == 0 {
         return nil, nil
@@ -1166,6 +1168,8 @@ func InitDatabase(dbPath string) appfault.Result[*gorm.DB] {
 ### Get Project Tree
 
 ```go
+// Note: ProjectSlice is defined in types.go (created from generic appfault.ResultSlice[Project]):
+// type ProjectSlice = appfault.ResultSlice[Project]
 func (r *ProjectRepository) GetProjectTree(context stdctx.Context) ProjectSlice {
     var projects []Project
     err := r.db.WithContext(context).
@@ -1211,6 +1215,8 @@ func (r *QuestionRepository) GetQuestionsWithAnswers(context stdctx.Context, rep
 
 ```go
 // GetActiveArtifacts retrieves active artifacts for a project
+// Note: ArtifactSlice is defined in types.go (created from generic appfault.ResultSlice[Artifact]):
+// type ArtifactSlice = appfault.ResultSlice[Artifact]
 func (r *ArtifactRepository) GetActiveArtifacts(context stdctx.Context, projectId string, artifactType artifact_type.Variant) ArtifactSlice {
     var artifacts []Artifact
     err := r.db.WithContext(context).
@@ -1221,6 +1227,8 @@ func (r *ArtifactRepository) GetActiveArtifacts(context stdctx.Context, projectI
 }
 
 // GetPinnedArtifactsWithChunks retrieves pinned artifacts with their chunks for top-K memory
+// Note: ArtifactSlice is defined in types.go (created from generic appfault.ResultSlice[Artifact]):
+// type ArtifactSlice = appfault.ResultSlice[Artifact]
 func (r *ArtifactRepository) GetPinnedArtifactsWithChunks(context stdctx.Context, projectId string, limit int) ArtifactSlice {
     var artifacts []Artifact
     err := r.db.WithContext(context).
@@ -1235,6 +1243,8 @@ func (r *ArtifactRepository) GetPinnedArtifactsWithChunks(context stdctx.Context
 }
 
 // GetChunksWithEmbeddings retrieves chunks with their embeddings for similarity search
+// Note: ChunkSlice is defined in types.go (created from generic appfault.ResultSlice[Chunk]):
+// type ChunkSlice = appfault.ResultSlice[Chunk]
 func (r *ChunkRepository) GetChunksWithEmbeddings(context stdctx.Context, artifactIds []string) ChunkSlice {
     var chunks []Chunk
     err := r.db.WithContext(context).
@@ -1246,6 +1256,8 @@ func (r *ChunkRepository) GetChunksWithEmbeddings(context stdctx.Context, artifa
 }
 
 // FindSimilarChunks performs vector similarity search (requires application-level calculation)
+// Note: ChunkSlice is defined in types.go (created from generic appfault.ResultSlice[Chunk]):
+// type ChunkSlice = appfault.ResultSlice[Chunk]
 func (r *ChunkRepository) FindSimilarChunks(context stdctx.Context, projectId string, limit int) ChunkSlice {
     var chunks []Chunk
     err := r.db.WithContext(context).
@@ -1333,6 +1345,8 @@ type InstructionSegment struct {
 func (InstructionSegment) TableName() string { return "InstructionSegment" }
 
 // GetDependencies parses the DependsOnSegments JSON array
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (s *InstructionSegment) GetDependencies() StringSlice {
     if s.DependsOnSegments == "" {
         return []string{}, nil
@@ -1378,6 +1392,8 @@ type MemoryEntry struct {
 func (MemoryEntry) TableName() string { return "MemoryEntry" }
 
 // GetKeyDecisions parses the KeyDecisions JSON array
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (m *MemoryEntry) GetKeyDecisions() StringSlice {
     if m.KeyDecisions == "" {
         return []string{}, nil
@@ -1388,6 +1404,8 @@ func (m *MemoryEntry) GetKeyDecisions() StringSlice {
 }
 
 // GetArtifactsCreated parses the ArtifactsCreated JSON array
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (m *MemoryEntry) GetArtifactsCreated() StringSlice {
     if m.ArtifactsCreated == "" {
         return []string{}, nil

@@ -178,6 +178,8 @@ type MockAIBridge struct {
     mock.Mock
 }
 
+// Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+// type Float32Slice = appfault.ResultSlice[float32]
 func (m *MockAIBridge) Embed(text string) Float32Slice {
     args := m.Called(text)
     return args.Get(0).([]float32), args.Error(1)
@@ -473,6 +475,8 @@ func (m *MockAIBridgeClient) Generate(req AIRequest) appfault.Result[string] {
     return appfault.Ok("```php:test.php\n<?php\n// Mock response\n```")
 }
 
+// Note: Float32Slice is defined in types.go (created from generic appfault.ResultSlice[float32]):
+// type Float32Slice = appfault.ResultSlice[float32]
 func (m *MockAIBridgeClient) Embed(text string) Float32Slice {
     if m.EmbedFunc != nil {
         return m.EmbedFunc(text)

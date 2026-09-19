@@ -574,10 +574,12 @@ func SlugFromTitle(title string) string {
 
 ```go
 // SafeRead reads file content with path validation
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (pm *PathManager) SafeRead(relativePath string) ByteSlice {
     result := pm.Resolve(relativePath)
     if result.HasError() {
-        return appfault.Fail[[]byte](result.Error())
+        return appfault.FailSlice[byte](result.Error())
     }
     
     data, err := pathutil.ReadFile(result.Value())
@@ -588,7 +590,7 @@ func (pm *PathManager) SafeRead(relativePath string) ByteSlice {
         )
     }
     
-    return appfault.Ok(data)
+    return appfault.OkSlice(data)
 }
 
 // SafeWrite writes content with path validation

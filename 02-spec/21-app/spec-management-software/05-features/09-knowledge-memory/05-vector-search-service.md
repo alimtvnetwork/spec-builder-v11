@@ -93,8 +93,14 @@ type VectorSearchService interface {
     RemoveByArtifact(context stdctx.Context, artifactId string) *appfault.AppError
     
     // Searching
+    // Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+    // type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
     SearchSemantic(context stdctx.Context, queryEmbedding []float32, limit int) ChunkScoreSlice
+    // Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+    // type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
     SearchKeyword(context stdctx.Context, query string, limit int) ChunkScoreSlice
+    // Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+    // type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
     SearchHybrid(context stdctx.Context, queryEmbedding []float32, queryText string, limit int) ChunkScoreSlice
     
     // Maintenance
@@ -370,6 +376,8 @@ func (v *VectorSearchServiceImpl) blobToEmbed(blob []byte) []float32 {
 
 ```go
 // SearchSemantic performs vector similarity search using sqlite-vss
+// Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+// type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
 func (v *VectorSearchServiceImpl) SearchSemantic(
     context stdctx.Context, 
     queryEmbedding []float32, 
@@ -432,6 +440,8 @@ func (v *VectorSearchServiceImpl) SearchSemantic(
 }
 
 // SearchKeyword performs FTS5 keyword search
+// Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+// type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
 func (v *VectorSearchServiceImpl) SearchKeyword(
     context stdctx.Context,
     query string,
@@ -536,6 +546,8 @@ The hybrid search combines semantic and keyword results using the **Reciprocal R
 
 ```go
 // SearchHybrid combines semantic and keyword search using RRF
+// Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+// type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
 func (v *VectorSearchServiceImpl) SearchHybrid(
     context stdctx.Context,
     queryEmbedding []float32,
@@ -675,6 +687,8 @@ For cases where raw score fusion is preferred over rank fusion:
 
 ```go
 // SearchHybridWeighted uses weighted score combination instead of RRF
+// Note: ChunkScoreSlice is defined in types.go (created from generic appfault.ResultSlice[ChunkScore]):
+// type ChunkScoreSlice = appfault.ResultSlice[ChunkScore]
 func (v *VectorSearchServiceImpl) SearchHybridWeighted(
     context stdctx.Context,
     queryEmbedding []float32,
@@ -863,6 +877,8 @@ type RAGService struct {
 }
 
 // RetrieveContext fetches relevant context for a query
+// Note: RetrievedChunkSlice is defined in types.go (created from generic appfault.ResultSlice[RetrievedChunk]):
+// type RetrievedChunkSlice = appfault.ResultSlice[RetrievedChunk]
 func (r *RAGService) RetrieveContext(
     context stdctx.Context,
     projectId string,

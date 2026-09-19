@@ -366,6 +366,8 @@ func (sp *SpecParser) extractPRDSection(content, sectionName string) string {
 ## Zip Processing
 
 ```go
+// Note: SpecFileSlice is defined in types.go (created from generic appfault.ResultSlice[SpecFile]):
+// type SpecFileSlice = appfault.ResultSlice[SpecFile]
 func (sp *SpecParser) extractAndReadZip(path string) SpecFileSlice {
     // Create temp directory
     tempDir, err := pathutil.MkdirTemp("", "wpb-spec-*")
@@ -383,6 +385,8 @@ func (sp *SpecParser) extractAndReadZip(path string) SpecFileSlice {
     return sp.readFolder(tempDir)
 }
 
+// Note: SpecFileSlice is defined in types.go (created from generic appfault.ResultSlice[SpecFile]):
+// type SpecFileSlice = appfault.ResultSlice[SpecFile]
 func (sp *SpecParser) readFolder(path string) SpecFileSlice {
     var files []SpecFile
     

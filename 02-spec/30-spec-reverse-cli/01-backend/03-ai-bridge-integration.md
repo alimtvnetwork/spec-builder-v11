@@ -448,6 +448,8 @@ type RAGLoader struct {
 //
 // knowledgecategorytype.Variant: Unknown, SplitDb, SeedableConfig, ErrorCodes, GeneralSpec, CliPatterns
 
+// Note: RAGChunkSlice is defined in types.go (created from generic appfault.ResultSlice[RAGChunk]):
+// type RAGChunkSlice = appfault.ResultSlice[RAGChunk]
 func (l *RAGLoader) LoadKnowledge(categories []KnowledgeCategory) RAGChunkSlice {
     var chunks []RAGChunk
     
@@ -462,6 +464,8 @@ func (l *RAGLoader) LoadKnowledge(categories []KnowledgeCategory) RAGChunkSlice 
     return chunks, nil
 }
 
+// Note: RAGChunkSlice is defined in types.go (created from generic appfault.ResultSlice[RAGChunk]):
+// type RAGChunkSlice = appfault.ResultSlice[RAGChunk]
 func (l *RAGLoader) loadCategory(category KnowledgeCategory) RAGChunkSlice {
     paths := map[KnowledgeCategory]string{
         KnowledgeSplitDb:     "02-spec/06-split-db-architecture/00-overview.md",
@@ -517,6 +521,8 @@ type SemanticSearcher struct {
     embedder EmbeddingService
 }
 
+// Note: RAGChunkSlice is defined in types.go (created from generic appfault.ResultSlice[RAGChunk]):
+// type RAGChunkSlice = appfault.ResultSlice[RAGChunk]
 func (s *SemanticSearcher) Search(query string, limit int) RAGChunkSlice {
     // Get query embedding
     embedding, err := s.embedder.Embed(query)

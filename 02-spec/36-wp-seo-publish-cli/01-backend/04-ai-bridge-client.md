@@ -271,6 +271,8 @@ type CategorySuggestion struct {
     Reasoning   string  `json:",omitempty"`
 }
 
+// Note: CategorySuggestionSlice is defined in types.go (created from generic appfault.ResultSlice[CategorySuggestion]):
+// type CategorySuggestionSlice = appfault.ResultSlice[CategorySuggestion]
 func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) CategorySuggestionSlice {
     endpoint := c.baseUrl + "/api/seo/suggest-categories"
     
@@ -318,7 +320,7 @@ func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) Catego
         )
     }
     
-    return appfault.Ok(result.Suggestions)
+    return appfault.OkSlice(result.Suggestions)
 }
 ```
 
@@ -337,6 +339,8 @@ type TagSuggestion struct {
     Confidence  float64 
 }
 
+// Note: TagSuggestionSlice is defined in types.go (created from generic appfault.ResultSlice[TagSuggestion]):
+// type TagSuggestionSlice = appfault.ResultSlice[TagSuggestion]
 func (c *AiBridgeClient) SuggestTags(req TagSuggestionRequest) TagSuggestionSlice {
     endpoint := c.baseUrl + "/api/seo/suggest-tags"
     // Similar implementation to SuggestCategories

@@ -680,6 +680,8 @@ func (s *MemoryStore) SaveMemoryEntry(context stdctx.Context, entry *models.Memo
 }
 
 // GetMemoryEntries retrieves all memory entries for an instruction
+// Note: MemoryEntrySlice is defined in types.go (created from generic appfault.ResultSlice[models.MemoryEntry]):
+// type MemoryEntrySlice = appfault.ResultSlice[models.MemoryEntry]
 func (s *MemoryStore) GetMemoryEntries(
     context stdctx.Context,
     instructionId string,
@@ -710,6 +712,8 @@ func (s *MemoryStore) GetLatestMemory(
 }
 
 // GetMemoryForSession retrieves memory entries for a specific session
+// Note: MemoryEntrySlice is defined in types.go (created from generic appfault.ResultSlice[models.MemoryEntry]):
+// type MemoryEntrySlice = appfault.ResultSlice[models.MemoryEntry]
 func (s *MemoryStore) GetMemoryForSession(
     context stdctx.Context,
     sessionId string,
@@ -1126,6 +1130,8 @@ type MemoryCompressionServiceInterface interface {
     
     // Memory Management
     StoreMemory(context stdctx.Context, instructionId, sessionId string, turnIndex int, output string) *appfault.AppError
+    // Note: MemoryEntrySlice is defined in types.go (created from generic appfault.ResultSlice[models.MemoryEntry]):
+    // type MemoryEntrySlice = appfault.ResultSlice[models.MemoryEntry]
     GetMemory(context stdctx.Context, instructionId string) MemoryEntrySlice
     GetCombinedMemory(context stdctx.Context, instructionId string, maxTokens int) appfault.Result[string]
     GetCompressionStats(context stdctx.Context, instructionId string) appfault.Result[*CompressionStats]
@@ -1193,6 +1199,8 @@ func (s *FullMemoryCompressionService) StoreMemory(context stdctx.Context, instr
 }
 
 // GetMemory retrieves memory entries
+// Note: MemoryEntrySlice is defined in types.go (created from generic appfault.ResultSlice[models.MemoryEntry]):
+// type MemoryEntrySlice = appfault.ResultSlice[models.MemoryEntry]
 func (s *FullMemoryCompressionService) GetMemory(context stdctx.Context, instructionId string) MemoryEntrySlice {
     return s.store.GetMemoryEntries(context, instructionId)
 }

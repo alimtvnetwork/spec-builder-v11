@@ -458,6 +458,8 @@ func (s *ShareService) CreateShare(context stdctx.Context, req CreateShareReques
 }
 
 // GetSharesForProject returns all shares where project is target
+// Note: MemoryShareSlice is defined in types.go (created from generic appfault.ResultSlice[MemoryShare]):
+// type MemoryShareSlice = appfault.ResultSlice[MemoryShare]
 func (s *ShareService) GetSharesForProject(context stdctx.Context, projectId string) MemoryShareSlice {
 	query := `
 		SELECT * FROM memory_shares 
@@ -474,10 +476,12 @@ func (s *ShareService) GetSharesForProject(context stdctx.Context, projectId str
 		)
 	}
 
-	return appfault.Ok(shares)
+	return appfault.OkSlice(shares)
 }
 
 // GetSharesFromProject returns all shares where project is source
+// Note: MemoryShareSlice is defined in types.go (created from generic appfault.ResultSlice[MemoryShare]):
+// type MemoryShareSlice = appfault.ResultSlice[MemoryShare]
 func (s *ShareService) GetSharesFromProject(context stdctx.Context, projectId string) MemoryShareSlice {
 	query := `
 		SELECT * FROM memory_shares 
@@ -494,7 +498,7 @@ func (s *ShareService) GetSharesFromProject(context stdctx.Context, projectId st
 		)
 	}
 
-	return appfault.Ok(shares)
+	return appfault.OkSlice(shares)
 }
 
 // GetShareContent retrieves the actual content of a shared resource

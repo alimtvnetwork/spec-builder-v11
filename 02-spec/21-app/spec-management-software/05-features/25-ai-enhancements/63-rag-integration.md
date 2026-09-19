@@ -214,6 +214,8 @@ func NewEmbeddingService(db *db.DB, apiKey string) *EmbeddingService {
 }
 
 // EmbedDocument chunks and embeds a document
+// Note: EmbeddedChunkSlice is defined in types.go (created from generic appfault.ResultSlice[EmbeddedChunk]):
+// type EmbeddedChunkSlice = appfault.ResultSlice[EmbeddedChunk]
 func (s *EmbeddingService) EmbedDocument(context stdctx.Context, doc Document) EmbeddedChunkSlice {
 	// Chunk the content
 	chunks := s.chunkText(doc.Content)
@@ -398,6 +400,8 @@ type SearchOptions struct {
 }
 
 // Search finds relevant chunks for a query
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (s *SearchService) Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
 	// Embed the query
 	queryEmbedding, err := s.embedding.EmbedQuery(context, query)
@@ -437,6 +441,8 @@ func (s *SearchService) Search(context stdctx.Context, query string, opts Search
 	return results, nil
 }
 
+// Note: EmbeddedChunkSlice is defined in types.go (created from generic appfault.ResultSlice[EmbeddedChunk]):
+// type EmbeddedChunkSlice = appfault.ResultSlice[EmbeddedChunk]
 func (s *SearchService) getCandidateChunks(context stdctx.Context, opts SearchOptions) EmbeddedChunkSlice {
 	query := `
 		SELECT id, project_id, source_id, source_type, content, chunk_index, total_chunks,
@@ -982,6 +988,8 @@ func (w *IndexingWorker) indexSharedMemories(context stdctx.Context) {
 	}
 }
 
+// Note: FileInfoSlice is defined in types.go (created from generic appfault.ResultSlice[FileInfo]):
+// type FileInfoSlice = appfault.ResultSlice[FileInfo]
 func (w *IndexingWorker) getFilesNeedingIndexing(context stdctx.Context) FileInfoSlice {
 	// Find files where hash changed or not indexed
 	rows, err := w.db.QueryContext(context, `

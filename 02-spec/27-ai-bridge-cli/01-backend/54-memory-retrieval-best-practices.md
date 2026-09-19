@@ -88,7 +88,7 @@ func (r *Retriever) Retrieve(
     // Step 2: Tag pre-filter
     candidatesResult := r.TagPreFilter(sessionId, keywords, config.MaxCandidates)
     if candidatesResult.IsErr() {
-        return appfault.Fail[[]RetrievalResult](candidatesResult.Err())
+        return appfault.FailSlice[RetrievalResult](candidatesResult.Err())
     }
 
     candidates := candidatesResult.Value()
@@ -99,7 +99,7 @@ func (r *Retriever) Retrieve(
     // Step 4: Vector similarity (only on candidates)
     embedResult := r.Embed(query)
     if embedResult.IsErr() {
-        return appfault.Fail[[]RetrievalResult](embedResult.Err())
+        return appfault.FailSlice[RetrievalResult](embedResult.Err())
     }
 
     r.ApplyVectorScores(candidates, embedResult.Value())
@@ -108,7 +108,7 @@ func (r *Retriever) Retrieve(
     r.ExpandLinks(candidates, config.MaxLinkedDepth)
 
     // Step 6: Rank and budget
-    return appfault.Ok(r.RankAndBudget(candidates, config.TokenBudget, config.TopK))
+    return appfault.OkSlice(r.RankAndBudget(candidates, config.TokenBudget, config.TopK))
 }
 ```
 

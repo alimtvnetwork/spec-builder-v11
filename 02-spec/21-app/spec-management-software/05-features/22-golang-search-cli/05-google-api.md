@@ -84,9 +84,11 @@ func (g *GoogleCustomSearch) IsAvailable() bool {
 ### Search Implementation
 
 ```go
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (g *GoogleCustomSearch) Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     if !g.quota.CanMakeRequest() {
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.New(
                 "Google Custom Search quota exhausted",
             ),
@@ -100,12 +102,12 @@ func (g *GoogleCustomSearch) Search(context stdctx.Context, query string, opts S
     
     resp, err := call.Context(context).Do()
     if err != nil {
-        return appfault.Fail[[]Result](g.handleError(err))
+        return appfault.FailSlice[Result](g.handleError(err))
     }
     
     g.quota.RecordRequest()
     
-    return appfault.Ok(g.parseResults(resp))
+    return appfault.OkSlice(g.parseResults(resp))
 }
 
 func (g *GoogleCustomSearch) parseResults(resp *customsearch.Search) []Result {
@@ -221,6 +223,8 @@ type SearchAnalytics struct {
     Position    float64
 }
 
+// Note: SearchAnalyticsSlice is defined in types.go (created from generic appfault.ResultSlice[SearchAnalytics]):
+// type SearchAnalyticsSlice = appfault.ResultSlice[SearchAnalytics]
 func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startDate, endDate string) SearchAnalyticsSlice {
     req := &searchconsole.SearchAnalyticsQueryRequest{
         StartDate:  startDate,
@@ -231,7 +235,7 @@ func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startD
     
     resp, err := g.service.Searchanalytics.Query(g.siteUrl, req).Context(context).Do()
     if err != nil {
-        return appfault.Fail[[]SearchAnalytics](
+        return appfault.FailSlice[SearchAnalytics](
             appfault.Wrap(
                 err,
                 "query analytics",
@@ -250,7 +254,7 @@ func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startD
         })
     }
     
-    return appfault.Ok(analytics)
+    return appfault.OkSlice(analytics)
 }
 ```
 

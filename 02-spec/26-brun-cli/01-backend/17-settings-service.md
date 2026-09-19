@@ -132,6 +132,8 @@ type SettingsService interface {
     GetFloat(category ConfigCategory, key string) appfault.Result[float64]
     GetInt(category ConfigCategory, key string) appfault.Result[int]
     GetBool(category ConfigCategory, key string) appfault.Result[bool]
+    // Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+    // type StringSlice = appfault.ResultSlice[string]
     GetStringSlice(category ConfigCategory, key string) StringSlice
     GetMap(category ConfigCategory, key string) appfault.Result[map[string]string]
     
@@ -144,6 +146,8 @@ type SettingsService interface {
     SeedFromFile(filepath string) error
     
     // Query methods
+    // Note: SettingSlice is defined in types.go (created from generic appfault.ResultSlice[Setting]):
+    // type SettingSlice = appfault.ResultSlice[Setting]
     GetByCategory(category ConfigCategory) SettingSlice
     GetCategoryVersion(category ConfigCategory) appfault.Result[string]
     

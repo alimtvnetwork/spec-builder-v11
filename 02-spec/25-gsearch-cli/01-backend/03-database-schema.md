@@ -201,18 +201,20 @@ func (p *PageContent) BeforeCreate(tx *gorm.DB) error {
 }
 
 // Helper to get keywords as slice
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (p *PageContent) GetKeywords() StringSlice {
     var keywords []string
     if p.Keywords == "" {
-        return appfault.Ok(keywords)
+        return appfault.OkSlice(keywords)
     }
     err := json.Unmarshal([]byte(p.Keywords), &keywords)
     if err != nil {
-        return appfault.Fail[[]string](
+        return appfault.FailSlice[string](
             appfault.Wrap(err, "unmarshal keywords"),
         )
     }
-    return appfault.Ok(keywords)
+    return appfault.OkSlice(keywords)
 }
 
 // Helper to set keywords from slice
@@ -387,28 +389,30 @@ var (
 )
 
 // GetEncryptionKey retrieves and validates the encryption key from environment
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func GetEncryptionKey() ByteSlice {
     keyHex := os.Getenv(EnvTokenKey)
     if keyHex == "" {
-        return appfault.Fail[[]byte](
+        return appfault.FailSlice[byte](
             appfault.New("encryption key not configured"),
         )
     }
     
     key, err := hex.DecodeString(keyHex)
     if err != nil {
-        return appfault.Fail[[]byte](
+        return appfault.FailSlice[byte](
             appfault.New("encryption key must be valid hex string"),
         )
     }
     
     if len(key) != KeySizeBytes {
-        return appfault.Fail[[]byte](
+        return appfault.FailSlice[byte](
             appfault.New("encryption key must be 32 bytes (64 hex chars)"),
         )
     }
     
-    return appfault.Ok(key)
+    return appfault.OkSlice(key)
 }
 
 // GenerateKey creates a new random encryption key (for initial setup)
@@ -838,15 +842,17 @@ func (db *DB) GetOAuthToken(provider OAuthProvider) appfault.Result[OAuthToken] 
 ### List All Tokens
 
 ```go
+// Note: OAuthTokenSlice is defined in types.go (created from generic appfault.ResultSlice[OAuthToken]):
+// type OAuthTokenSlice = appfault.ResultSlice[OAuthToken]
 func (db *DB) ListOAuthTokens() OAuthTokenSlice {
     var tokens []OAuthToken
     err := db.Find(&tokens).Error
 
     if err != nil {
-        return appfault.Fail[[]OAuthToken](appfault.Wrap(err, 7106, "list oauth tokens"))
+        return appfault.FailSlice[OAuthToken](appfault.Wrap(err, 7106, "list oauth tokens"))
     }
 
-    return appfault.Ok(tokens)
+    return appfault.OkSlice(tokens)
 }
 ```
 
@@ -972,6 +978,8 @@ func (db *DB) UpdateSearchStatus(id string, status SearchStatus, resultCount int
 ### Get Results with Page Content
 
 ```go
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (db *DB) GetResultsWithContent(searchId string) SearchResultSlice {
     var results []SearchResult
     err := db.Preload("PageContent").
@@ -980,10 +988,10 @@ func (db *DB) GetResultsWithContent(searchId string) SearchResultSlice {
         Find(&results).Error
 
     if err != nil {
-        return appfault.Fail[[]SearchResult](appfault.Wrap(err, 7109, "get results with content"))
+        return appfault.FailSlice[SearchResult](appfault.Wrap(err, 7109, "get results with content"))
     }
 
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 ```
 
@@ -1014,6 +1022,8 @@ func (db *DB) CheckCache(keywords, engine string) appfault.Result[CacheEntry] {
 ### Get Nested Search Tree
 
 ```go
+// Note: NestedSearchSlice is defined in types.go (created from generic appfault.ResultSlice[NestedSearch]):
+// type NestedSearchSlice = appfault.ResultSlice[NestedSearch]
 func (db *DB) GetNestedSearchTree(rootId string, maxDepth int) NestedSearchSlice {
     var nested []NestedSearch
     err := db.Where("parent_search_id = ? AND depth <= ?", rootId, maxDepth).

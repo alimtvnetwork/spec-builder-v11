@@ -1066,6 +1066,8 @@ This document provides AI-friendly implementation checklists broken into small, 
           Update("revoked_at", now).Error
   }
 
+// Note: SessionSlice is defined in types.go (created from generic appfault.ResultSlice[models.Session]):
+// type SessionSlice = appfault.ResultSlice[models.Session]
   func (r *SessionRepo) GetActiveSessions(userId string) SessionSlice {
       var sessions []models.Session
       now := time.Now().UTC()

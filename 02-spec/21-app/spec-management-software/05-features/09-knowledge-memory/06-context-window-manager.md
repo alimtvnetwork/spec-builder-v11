@@ -235,6 +235,8 @@ type TokenCounter interface {
     Count(text string) appfault.Result[int]
     
     // CountBatch counts tokens for multiple texts
+    // Note: IntSlice is defined in types.go (created from generic appfault.ResultSlice[int]):
+    // type IntSlice = appfault.ResultSlice[int]
     CountBatch(texts []string) IntSlice
     
     // CountMessages counts tokens for chat message format
@@ -350,19 +352,21 @@ func (t *TokenCounterImpl) countTokensHeuristic(text string) int {
 }
 
 // CountBatch counts tokens for multiple texts efficiently
+// Note: IntSlice is defined in types.go (created from generic appfault.ResultSlice[int]):
+// type IntSlice = appfault.ResultSlice[int]
 func (t *TokenCounterImpl) CountBatch(texts []string) IntSlice {
     results := make([]int, len(texts))
     
     for i, text := range texts {
         countResult := t.Count(text)
         if countResult.HasError() {
-            return appfault.Fail[[]int](countResult.Error())
+            return appfault.FailSlice[int](countResult.Error())
         }
 
         results[i] = countResult.Value()
     }
     
-    return appfault.Ok(results)
+    return appfault.OkSlice(results)
 }
 
 // CountMessages counts tokens for chat message format with overhead

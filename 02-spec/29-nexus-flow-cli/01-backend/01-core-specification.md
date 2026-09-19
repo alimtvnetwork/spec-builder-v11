@@ -2019,6 +2019,8 @@ func NewLoopController(registry *block.Registry, logger *logging.Logger) *LoopCo
 }
 
 // Execute runs a loop with concurrency throttling
+// Note: BlockOutputDataSlice is defined in types.go (created from generic appfault.ResultSlice[BlockOutputData]):
+// type BlockOutputDataSlice = appfault.ResultSlice[BlockOutputData]
 func (c *LoopController) Execute(
     context stdctx.Context,
     config LoopConfig,
@@ -2057,6 +2059,8 @@ func (c *LoopController) Execute(
 }
 
 // executeForEach runs forEach loop with parallel execution
+// Note: BlockOutputDataSlice is defined in types.go (created from generic appfault.ResultSlice[BlockOutputData]):
+// type BlockOutputDataSlice = appfault.ResultSlice[BlockOutputData]
 func (c *LoopController) executeForEach(
     context stdctx.Context,
     config LoopConfig,
@@ -2206,6 +2210,8 @@ type Bridge struct {
 type CheckpointRepository interface {
     Create(context stdctx.Context, checkpoint model.Checkpoint) *appfault.AppError
     GetLatest(context stdctx.Context, executionId string) appfault.Result[model.Checkpoint]
+    // Note: CheckpointSlice is defined in types.go (created from generic appfault.ResultSlice[model.Checkpoint]):
+    // type CheckpointSlice = appfault.ResultSlice[model.Checkpoint]
     List(context stdctx.Context, executionId string) CheckpointSlice
 }
 

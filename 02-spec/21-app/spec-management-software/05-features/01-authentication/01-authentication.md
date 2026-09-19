@@ -178,6 +178,8 @@ Salts are generated using `crypto/rand` which provides cryptographically secure 
 
 ```go
 // GenerateSalt creates a cryptographically secure random salt
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func GenerateSalt(length int) ByteSlice {
     salt := make([]byte, length)
     _, err := rand.Read(salt)
@@ -1136,5 +1138,5 @@ func SetSecurityHeaders(w http.ResponseWriter) {
 ## Cross-References
 
 - [Database Schema](../../07-database-design/01-schema.md) - User & Session Tables
-- [General Spec: Security Patterns](../../../01-spec-authoring-guide/04-advanced/01-security-patterns-advanced.md)
-- [General Spec: Error Management](../../../01-spec-authoring-guide/01-foundation/02-error-management-foundation.md)
+- [General Spec: Security Patterns](../../../../02-coding-guidelines/01-cross-language/01-index.md)
+- [General Spec: Error Management](../../../../03-error-manage/01-index.md)

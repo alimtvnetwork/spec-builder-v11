@@ -565,6 +565,8 @@ import (
     "gorm.io/gorm"
 )
 
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func ReadSearchResults(dbPath string) SearchResultSlice {
     db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
     if err != nil {

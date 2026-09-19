@@ -207,6 +207,8 @@ type FirewallRule struct {
 
 func (fm *FirewallManager) EnablePort(port int, name string, protocol string) error
 func (fm *FirewallManager) DisablePort(port int) error
+// Note: FirewallRuleSlice is defined in types.go (created from generic appfault.ResultSlice[FirewallRule]):
+// type FirewallRuleSlice = appfault.ResultSlice[FirewallRule]
 func (fm *FirewallManager) ListRules() FirewallRuleSlice
 func (fm *FirewallManager) RuleExists(port int) appfault.Result[bool]
 ```
@@ -247,6 +249,8 @@ func (fm *FirewallManager) disablePortWindows(port int) error {
     return cmd.Run()
 }
 
+// Note: FirewallRuleSlice is defined in types.go (created from generic appfault.ResultSlice[FirewallRule]):
+// type FirewallRuleSlice = appfault.ResultSlice[FirewallRule]
 func (fm *FirewallManager) listRulesWindows() FirewallRuleSlice {
     cmd := exec.Command("netsh", "advfirewall", "firewall", "show", "rule", 
         fmt.Sprintf("name=%s*", fm.ruleName))

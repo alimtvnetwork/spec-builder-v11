@@ -111,6 +111,8 @@ type Service interface {
 	CheckAllPlugins(context stdctx.Context) SyncResultSlice
 
 	// File change management
+    // Note: FileChangeSlice is defined in types.go (created from generic appfault.ResultSlice[FileChange]):
+    // type FileChangeSlice = appfault.ResultSlice[FileChange]
 	GetFileChanges(context stdctx.Context, pluginId, siteId int64) FileChangeSlice
 	RecordFileChange(context stdctx.Context, change *models.FileChange) *appfault.AppError
 	MarkSynced(context stdctx.Context, pluginId, siteId int64, files []string) *appfault.AppError
@@ -427,6 +429,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// Note: FileChangeSlice is defined in types.go (created from generic appfault.ResultSlice[FileChange]):
+// type FileChangeSlice = appfault.ResultSlice[FileChange]
 func (s *serviceImpl) GetFileChanges(context stdctx.Context, pluginId, siteId int64) FileChangeSlice {
 	var changes []models.FileChange
 	if err := s.db.GormDb().WithContext(context).

@@ -351,7 +351,7 @@ func (m *BranchManager) GetBranchMessages(branchId string) ChatMessageSlice {
         currentBranchId = *b.ParentBranchId
     }
     
-    return appfault.Ok(messages)
+    return appfault.OkSlice(messages)
 }
 ```
 

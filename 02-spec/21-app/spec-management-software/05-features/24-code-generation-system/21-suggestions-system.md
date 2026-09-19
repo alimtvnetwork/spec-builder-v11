@@ -402,6 +402,8 @@ type SuggestionInput struct {
 }
 
 // GenerateFromTask creates suggestions after task completion
+// Note: SuggestionSlice is defined in types.go (created from generic appfault.ResultSlice[Suggestion]):
+// type SuggestionSlice = appfault.ResultSlice[Suggestion]
 func (g *SuggestionGenerator) GenerateFromTask(
     context stdctx.Context,
     projectId string,
@@ -908,6 +910,8 @@ func (q *QueryService) GetStats(
 }
 
 // GetBySource returns suggestions for a specific task/chat
+// Note: SuggestionSlice is defined in types.go (created from generic appfault.ResultSlice[Suggestion]):
+// type SuggestionSlice = appfault.ResultSlice[Suggestion]
 func (q *QueryService) GetBySource(
     context stdctx.Context,
     sourceType string,
@@ -925,7 +929,7 @@ func (q *QueryService) GetBySource(
         )
     }
 
-    return appfault.Ok(suggestions)
+    return appfault.OkSlice(suggestions)
 }
 ```
 

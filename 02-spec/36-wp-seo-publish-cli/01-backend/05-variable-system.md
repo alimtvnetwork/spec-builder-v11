@@ -412,6 +412,8 @@ type ExportRequest struct {
     Format    variablesourcetype.Variant       // → internal/enums/variablesourcetype/
 }
 
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func (s *VariableService) Export(req ExportRequest) ByteSlice {
     variables, err := s.db.GetVariables(req.Scope, req.WebsiteId)
     if err != nil {

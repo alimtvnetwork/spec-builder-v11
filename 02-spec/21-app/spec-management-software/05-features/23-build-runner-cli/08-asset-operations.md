@@ -241,6 +241,8 @@ func (c *AssetCopier) copyMatchingFiles(op AssetOperation, result *CopyResult) *
 ### Pattern Support
 
 ```go
+// Note: StringSlice is defined in types.go (created from generic appfault.ResultSlice[string]):
+// type StringSlice = appfault.ResultSlice[string]
 func (c *AssetCopier) getFilesToCopy(op AssetOperation) StringSlice {
     var files []string
     

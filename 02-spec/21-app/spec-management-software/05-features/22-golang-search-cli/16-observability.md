@@ -614,6 +614,8 @@ import (
 var tracer = otel.Tracer("gosearch/search")
 
 // Execute performs a search with tracing
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (e *SearchEngine) Execute(context stdctx.Context, query string) SearchResultSlice {
     context, span := tracer.Start(context, "search.execute",
         trace.WithAttributes(
@@ -631,7 +633,7 @@ func (e *SearchEngine) Execute(context stdctx.Context, query string) SearchResul
     
     if isHit {
         span.SetAttributes(attribute.Bool("search.cache_hit", true))
-        return appfault.Ok(cached)
+        return appfault.OkSlice(cached)
     }
     
     // Execute search
@@ -651,6 +653,8 @@ func (e *SearchEngine) Execute(context stdctx.Context, query string) SearchResul
 }
 
 // executeSearch performs the actual search request
+// Note: SearchResultSlice is defined in types.go (created from generic appfault.ResultSlice[SearchResult]):
+// type SearchResultSlice = appfault.ResultSlice[SearchResult]
 func (e *SearchEngine) executeSearch(context stdctx.Context, query string) SearchResultSlice {
     context, span := tracer.Start(context, "search.engine.request",
         trace.WithAttributes(
@@ -664,7 +668,7 @@ func (e *SearchEngine) executeSearch(context stdctx.Context, query string) Searc
     req, err := e.buildRequest(context, query)
     if err != nil {
         span.RecordError(err)
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.Wrap(err, "build request"),
         )
     }
@@ -679,7 +683,7 @@ func (e *SearchEngine) executeSearch(context stdctx.Context, query string) Searc
     if err != nil {
         span.RecordError(err)
         span.SetStatus(codes.Error, "request failed")
-        return appfault.Fail[[]Result](
+        return appfault.FailSlice[Result](
             appfault.Wrap(err, "request failed"),
         )
     }

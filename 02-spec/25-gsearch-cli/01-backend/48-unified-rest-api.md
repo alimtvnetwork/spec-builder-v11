@@ -657,6 +657,8 @@ func RegisterSwagger(router *gin.Engine, cfg ApiConfig) {
 }
 
 // GenerateOpenApiSpec creates spec from route definitions
+// Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+// type ByteSlice = appfault.ResultSlice[byte]
 func GenerateOpenApiSpec(router *gin.Engine) ByteSlice {
     spec := openapi3.T{
         OpenAPI: "3.1.0",

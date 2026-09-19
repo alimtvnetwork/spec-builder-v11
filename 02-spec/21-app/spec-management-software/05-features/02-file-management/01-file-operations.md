@@ -637,6 +637,8 @@ type FileService interface {
     DeleteDirectory(context stdctx.Context, req DeleteDirRequest) *appfault.AppError
     
     // Content operations
+    // Note: ByteSlice is defined in types.go (created from generic appfault.ResultSlice[byte]):
+    // type ByteSlice = appfault.ResultSlice[byte]
     GetContent(context stdctx.Context, projectId, fileId string) ByteSlice
     SetContent(context stdctx.Context, projectId, fileId string, content []byte) *appfault.AppError
     
@@ -1292,12 +1294,12 @@ func (s *metadataService) handleExternalChange(projectId string) {
 
 ## Cross-References
 
-- [Database Schema: File Table](../../07-database-design/01-schema.md#file-table)
-- [Database Schema: Project Metadata](../../07-database-design/01-schema.md#projectmetadata)
-- [Database Schema: PromotionEvent](../../07-database-design/01-schema.md#promotionevent)
-- [API Endpoints: File Routes](../24-code-generation-system/13-api-endpoints.md#file-endpoints)
+- [Database Schema: File Table](../../07-database-design/01-schema.md)
+- [Database Schema: Project Metadata](../../07-database-design/01-schema.md)
+- [Database Schema: PromotionEvent](../../07-database-design/01-schema.md)
+- [API Endpoints: File Routes](../24-code-generation-system/13-api-endpoints.md)
 - [History System: Snapshot Triggers](../07-history-system/02-history-system.md)
 - [Git Integration: Auto-Commit](../07-history-system/01-git-integration.md)
 - [PathManager: Path Validation](./02-path-manager.md)
 - [RAG System: Artifact Indexing](../09-knowledge-memory/01-rag-system.md)
-- [General Spec: Error Management](../../../01-spec-authoring-guide/01-foundation/02-error-management-foundation.md)
+- [General Spec: Error Management](../../../../03-error-manage/01-index.md)
