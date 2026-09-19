@@ -490,7 +490,7 @@ func (c *AudioChunker) ChunkAudio(
     inputPath string,
     outputDir string,
     totalDuration float64,
-) appfault.Result[[]ChunkResult] {
+) appfault.ResultSlice[ChunkResult] {
     var chunks []ChunkResult
     chunkIndex := 1
     currentTime := 0.0
@@ -561,7 +561,7 @@ type PureGoChunker struct {
 }
 
 // ChunkWav splits a WAV file using pure Go
-func (c *PureGoChunker) ChunkWav(inputPath, outputDir string) appfault.Result[[]ChunkResult] {
+func (c *PureGoChunker) ChunkWav(inputPath, outputDir string) appfault.ResultSlice[ChunkResult] {
     f, err := pathutil.OpenFile(inputPath)
     if err != nil {
         return appfault.Fail[[]ChunkResult](err)
@@ -691,7 +691,7 @@ func (t *ParallelTranscriber) TranscribeChunks(
     context stdctx.Context,
     voiceFileId string,
     chunks []VoiceChunk,
-) appfault.Result[[]TranscriptionResult] {
+) appfault.ResultSlice[TranscriptionResult] {
     // Update voice file status
     t.voiceRepo.UpdateVoiceFileStatus(context, voiceFileId, "transcribing")
     

@@ -453,7 +453,7 @@ type FaqServiceInterface interface {
 
     // Sessions
     GetSession(sessionId string) appfault.Result[*FaqSession]
-    ListSessions(company string) appfault.Result[[]FaqSession]
+    ListSessions(company string) appfault.ResultSlice[FaqSession]
     DeleteSession(sessionId string) *appfault.AppError
 
     // RAG
@@ -468,9 +468,9 @@ type FaqServiceInterface interface {
     ValidateContent(content string) *FaqValidationResult
 
     // Route DB Exploration (registered companies/sessions)
-    ListCompanies() appfault.Result[[]FaqCompanyRegistry]
+    ListCompanies() appfault.ResultSlice[FaqCompanyRegistry]
     GetCompany(companySlug string) appfault.Result[*FaqCompanyRegistry]
-    ListCompanySessions(companySlug string) appfault.Result[[]FaqSessionRegistry]
+    ListCompanySessions(companySlug string) appfault.ResultSlice[FaqSessionRegistry]
 }
 ```
 

@@ -84,7 +84,7 @@ func (g *GoogleCustomSearch) IsAvailable() bool {
 ### Search Implementation
 
 ```go
-func (g *GoogleCustomSearch) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
+func (g *GoogleCustomSearch) Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     if !g.quota.CanMakeRequest() {
         return appfault.Fail[[]Result](
             appfault.New(
@@ -109,10 +109,10 @@ func (g *GoogleCustomSearch) Search(context stdctx.Context, query string, opts S
 }
 
 func (g *GoogleCustomSearch) parseResults(resp *customsearch.Search) []Result {
-    var results []Result
+    var results []SearchResult
     
     for i, item := range resp.Items {
-        results = append(results, Result{
+        results = append(results, SearchSearchResult{
             Title:       item.Title,
             Description: item.Snippet,
             URL:         item.Link,
@@ -221,7 +221,7 @@ type SearchAnalytics struct {
     Position    float64
 }
 
-func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startDate, endDate string) appfault.Result[[]SearchAnalytics] {
+func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startDate, endDate string) appfault.ResultSlice[SearchAnalytics] {
     req := &searchconsole.SearchAnalyticsQueryRequest{
         StartDate:  startDate,
         EndDate:    endDate,

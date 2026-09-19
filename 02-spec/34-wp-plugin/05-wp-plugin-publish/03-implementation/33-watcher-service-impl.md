@@ -136,7 +136,7 @@ type Service interface {
 	ScanAfterGitPull(context stdctx.Context, pluginId int64) appfault.Result[*ScanResult]
 	
 	// Batch operations
-	ScanAll(context stdctx.Context) appfault.Result[[]ScanResult]
+	ScanAll(context stdctx.Context) appfault.ResultSlice[ScanResult]
 	
 	// Cache management
 	InitializeCache(context stdctx.Context, pluginId int64) *appfault.AppError
@@ -212,7 +212,7 @@ func (s *serviceImpl) ScanAfterGitPull(context stdctx.Context, pluginId int64) a
 }
 
 // ScanAll scans all cached plugins
-func (s *serviceImpl) ScanAll(context stdctx.Context) appfault.Result[[]ScanResult] {
+func (s *serviceImpl) ScanAll(context stdctx.Context) appfault.ResultSlice[ScanResult] {
 	s.mu.RLock()
 	pluginIds := make([]int64, 0, len(s.cache))
 	for id := range s.cache {

@@ -637,7 +637,7 @@ type FileService interface {
     DeleteDirectory(context stdctx.Context, req DeleteDirRequest) *appfault.AppError
     
     // Content operations
-    GetContent(context stdctx.Context, projectId, fileId string) appfault.Result[[]byte]
+    GetContent(context stdctx.Context, projectId, fileId string) appfault.ResultSlice[byte]
     SetContent(context stdctx.Context, projectId, fileId string, content []byte) *appfault.AppError
     
     // Validation

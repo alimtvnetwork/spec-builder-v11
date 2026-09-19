@@ -163,7 +163,7 @@ type ListProjectsOptions struct {
     Order   string // asc, desc
 }
 
-func (pm *ProjectManager) List(opts ListProjectsOptions) appfault.Result[[]Project] {
+func (pm *ProjectManager) List(opts ListProjectsOptions) appfault.ResultSlice[Project] {
     var projects []Project
     
     query := pm.rootDb.Model(&Project{})

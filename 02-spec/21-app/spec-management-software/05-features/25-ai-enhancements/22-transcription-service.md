@@ -558,7 +558,7 @@ func (p *Preprocessor) GetDuration(context stdctx.Context, inputPath string) app
 }
 
 // SplitAudio splits audio into chunks of specified duration
-func (p *Preprocessor) SplitAudio(context stdctx.Context, inputPath string, chunkSeconds int) appfault.Result[[]string] {
+func (p *Preprocessor) SplitAudio(context stdctx.Context, inputPath string, chunkSeconds int) appfault.ResultSlice[string] {
 	durationResult := p.GetDuration(context, inputPath)
 	if durationResult.HasError() {
 		return appfault.Fail[[]string](durationResult.Error())

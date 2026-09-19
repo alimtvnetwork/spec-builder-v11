@@ -445,7 +445,7 @@ type ThemeService struct {
 }
 
 // GetAllThemes returns all available themes
-func (s *ThemeService) GetAllThemes(context stdctx.Context) appfault.Result[[]Theme] {
+func (s *ThemeService) GetAllThemes(context stdctx.Context) appfault.ResultSlice[Theme] {
     return s.themeRepo.FindAllOrdered(context)
 }
 

@@ -317,7 +317,7 @@ func (m *BranchManager) SwitchBranch(sessionId, branchId string) error {
         Update("active_branch_id", branchId).Error
 }
 
-func (m *BranchManager) GetBranchMessages(branchId string) appfault.Result[[]ChatMessage] {
+func (m *BranchManager) GetBranchMessages(branchId string) appfault.ResultSlice[ChatMessage] {
     var branch Branch
     if err := m.db.First(&branch, "id = ?", branchId).Error; err != nil {
         return appfault.FailWrap[[]ChatMessage](

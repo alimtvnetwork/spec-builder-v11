@@ -448,7 +448,7 @@ type RAGLoader struct {
 //
 // knowledgecategorytype.Variant: Unknown, SplitDb, SeedableConfig, ErrorCodes, GeneralSpec, CliPatterns
 
-func (l *RAGLoader) LoadKnowledge(categories []KnowledgeCategory) appfault.Result[[]RAGChunk] {
+func (l *RAGLoader) LoadKnowledge(categories []KnowledgeCategory) appfault.ResultSlice[RAGChunk] {
     var chunks []RAGChunk
     
     for _, cat := range categories {
@@ -462,7 +462,7 @@ func (l *RAGLoader) LoadKnowledge(categories []KnowledgeCategory) appfault.Resul
     return chunks, nil
 }
 
-func (l *RAGLoader) loadCategory(category KnowledgeCategory) appfault.Result[[]RAGChunk] {
+func (l *RAGLoader) loadCategory(category KnowledgeCategory) appfault.ResultSlice[RAGChunk] {
     paths := map[KnowledgeCategory]string{
         KnowledgeSplitDb:     "02-spec/06-split-db-architecture/00-overview.md",
         KnowledgeSeedable:    "02-spec/07-seedable-config-architecture/00-overview.md",
@@ -517,7 +517,7 @@ type SemanticSearcher struct {
     embedder EmbeddingService
 }
 
-func (s *SemanticSearcher) Search(query string, limit int) appfault.Result[[]RAGChunk] {
+func (s *SemanticSearcher) Search(query string, limit int) appfault.ResultSlice[RAGChunk] {
     // Get query embedding
     embedding, err := s.embedder.Embed(query)
     if err != nil {

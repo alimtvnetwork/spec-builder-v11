@@ -337,7 +337,7 @@ func EvaluateContextNeeds(prompt string, ragContext []Chunk) []ContextNeed {
 When web search is needed, delegate to GSearch CLI:
 
 ```go
-func FetchWebContext(need ContextNeed) appfault.Result[[]Chunk] {
+func FetchWebContext(need ContextNeed) appfault.ResultSlice[Chunk] {
     if need.Type != "WebSearch" {
         return appfault.Ok([]Chunk(nil))
     }

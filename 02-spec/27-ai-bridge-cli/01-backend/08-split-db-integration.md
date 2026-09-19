@@ -506,7 +506,7 @@ type ChatSessionInfo struct {
 }
 
 // ListChatSessions lists all chat sessions for an application
-func (m *AiBridgeDbManager) ListChatSessions(appName string) appfault.Result[[]ChatSessionInfo] {
+func (m *AiBridgeDbManager) ListChatSessions(appName string) appfault.ResultSlice[ChatSessionInfo] {
     var registries []DbRegistryEntry
     result := m.rootDb.
         Joins("JOIN Applications ON DbRegistry.ApplicationId = Applications.Id").

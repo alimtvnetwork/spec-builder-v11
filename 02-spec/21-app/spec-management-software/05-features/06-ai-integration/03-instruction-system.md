@@ -1008,7 +1008,7 @@ type InstructionService interface {
     
     // Retrieval
     GetInstruction(context stdctx.Context, id string) appfault.Result[*InstructionDetails]
-    ListInstructions(context stdctx.Context, projectId string, filter InstructionFilter) appfault.Result[[]InstructionSummary]
+    ListInstructions(context stdctx.Context, projectId string, filter InstructionFilter) appfault.ResultSlice[InstructionSummary]
     
     // Lifecycle
     ApproveInstruction(context stdctx.Context, id string) *appfault.AppError
@@ -1016,7 +1016,7 @@ type InstructionService interface {
     ReplanInstruction(context stdctx.Context, id string) *appfault.AppError
     
     // Task management
-    GetTasks(context stdctx.Context, instructionId string) appfault.Result[[]Task]
+    GetTasks(context stdctx.Context, instructionId string) appfault.ResultSlice[Task]
     SkipTask(context stdctx.Context, taskId string) *appfault.AppError
     RetryTask(context stdctx.Context, taskId string) *appfault.AppError
     

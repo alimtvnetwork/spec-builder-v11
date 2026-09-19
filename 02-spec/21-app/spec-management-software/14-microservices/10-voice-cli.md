@@ -1047,7 +1047,7 @@ func EncodePCM16ToBase64(samples []float32) string {
 }
 
 // DecodePCM16FromBase64 decodes base64 PCM16 to float32 samples
-func DecodePCM16FromBase64(encoded string) appfault.Result[[]float32] {
+func DecodePCM16FromBase64(encoded string) appfault.ResultSlice[float32] {
     data, err := base64.StdEncoding.DecodeString(encoded)
     if err != nil {
         return nil, err
@@ -2363,7 +2363,7 @@ func (c *SpecManagementClient) GetProjectContext(context stdctx.Context, project
 }
 
 // Search project content using voice query
-func (c *SpecManagementClient) VoiceSearch(context stdctx.Context, projectId, query string) appfault.Result[[]SearchResult] {
+func (c *SpecManagementClient) VoiceSearch(context stdctx.Context, projectId, query string) appfault.ResultSlice[SearchResult] {
     resp, err := c.get(context, fmt.Sprintf("/projects/%s/search?q=%s&source=voice", projectId, url.QueryEscape(query)))
     if err != nil {
         return nil, err

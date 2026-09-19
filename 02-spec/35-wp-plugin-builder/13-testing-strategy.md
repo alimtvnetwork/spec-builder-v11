@@ -178,7 +178,7 @@ type MockAIBridge struct {
     mock.Mock
 }
 
-func (m *MockAIBridge) Embed(text string) appfault.Result[[]float32] {
+func (m *MockAIBridge) Embed(text string) appfault.ResultSlice[float32] {
     args := m.Called(text)
     return args.Get(0).([]float32), args.Error(1)
 }
@@ -463,7 +463,7 @@ func TestGeneratedCode_WordPressStandards(t *testing.T) {
 ```go
 type MockAIBridgeClient struct {
     GenerateFunc func(req AIRequest) appfault.Result[string]
-    EmbedFunc    func(text string) appfault.Result[[]float32]
+    EmbedFunc    func(text string) appfault.ResultSlice[float32]
 }
 
 func (m *MockAIBridgeClient) Generate(req AIRequest) appfault.Result[string] {
@@ -473,7 +473,7 @@ func (m *MockAIBridgeClient) Generate(req AIRequest) appfault.Result[string] {
     return appfault.Ok("```php:test.php\n<?php\n// Mock response\n```")
 }
 
-func (m *MockAIBridgeClient) Embed(text string) appfault.Result[[]float32] {
+func (m *MockAIBridgeClient) Embed(text string) appfault.ResultSlice[float32] {
     if m.EmbedFunc != nil {
         return m.EmbedFunc(text)
     }

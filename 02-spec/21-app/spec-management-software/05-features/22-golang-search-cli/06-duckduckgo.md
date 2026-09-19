@@ -71,7 +71,7 @@ func (d *DuckDuckGoSearch) RequiresApi() bool { return false }
 ### Search Execution
 
 ```go
-func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
+func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     // Build form data (DDG uses POST)
     formData := url.Values{}
     formData.Set("q", query)
@@ -130,7 +130,7 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
 
 ```go
 func (d *DuckDuckGoSearch) parseResults(doc *goquery.Document, maxResults int) []Result {
-    var results []Result
+    var results []SearchResult
     position := 0
     
     // Parse organic results
@@ -173,8 +173,8 @@ func (d *DuckDuckGoSearch) parseResultItem(s *goquery.Selection) (Result, bool) 
     snippet := s.Find("a.result__snippet").First()
     description := strings.TrimSpace(snippet.Text())
     
-    return Result{
-        Title:       title,
+    return SearchResult{
+            Title:       title,
         Description: description,
         Url:         actualUrl,
     }, true
@@ -282,7 +282,7 @@ var ddgRegions = map[string]string{
     "global": "wt-wt", // No region preference
 }
 
-func (d *DuckDuckGoSearch) SearchWithRegion(context stdctx.Context, query, region string, opts SearchOptions) appfault.Result[[]Result] {
+func (d *DuckDuckGoSearch) SearchWithRegion(context stdctx.Context, query, region string, opts SearchOptions) SearchResultSlice {
     kl, ok := ddgRegions[region]
     if !ok {
         kl = "us-en"

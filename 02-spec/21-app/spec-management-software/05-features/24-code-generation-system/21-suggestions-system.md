@@ -406,7 +406,7 @@ func (g *SuggestionGenerator) GenerateFromTask(
     context stdctx.Context,
     projectId string,
     task TaskInfo,
-) appfault.Result[[]Suggestion] {
+) appfault.ResultSlice[Suggestion] {
     // Determine target count based on task size
     targetCount := g.config.SuggestionsPerTask
     if len(task.Description) > g.config.TaskSizeThreshold {
@@ -912,7 +912,7 @@ func (q *QueryService) GetBySource(
     context stdctx.Context,
     sourceType string,
     sourceId string,
-) appfault.Result[[]Suggestion] {
+) appfault.ResultSlice[Suggestion] {
     suggestions, _, err := q.suggestionRepo.Query(context, QueryOptions{
         SourceType: sourceType,
         SourceId:   sourceId,

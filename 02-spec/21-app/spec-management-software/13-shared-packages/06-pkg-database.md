@@ -474,7 +474,7 @@ type Migration struct {
 
 // MigrationSource provides migrations
 type MigrationSource interface {
-    Migrations() appfault.Result[[]Migration]
+    Migrations() appfault.ResultSlice[Migration]
 }
 
 // EmbedSource loads migrations from embedded files
@@ -484,7 +484,7 @@ type EmbedSource struct {
 }
 
 // Migrations loads migrations from embedded filesystem
-func (s *EmbedSource) Migrations() appfault.Result[[]Migration] {
+func (s *EmbedSource) Migrations() appfault.ResultSlice[Migration] {
     var migrations []Migration
     
     entries, err := fs.ReadDir(s.FS, s.Dir)
@@ -642,7 +642,7 @@ func (m *Migrator) Rollback(context stdctx.Context, n int) error {
 }
 
 // Status returns the status of all migrations
-func (m *Migrator) Status(context stdctx.Context) appfault.Result[[]Migration] {
+func (m *Migrator) Status(context stdctx.Context) appfault.ResultSlice[Migration] {
     migrations, err := m.source.Migrations()
     if err != nil {
         return nil, err
@@ -989,7 +989,7 @@ func GetOne[T any](context stdctx.Context, e Executor, query string, args []any,
 }
 
 // GetMany retrieves multiple rows
-func GetMany[T any](context stdctx.Context, e Executor, query string, args []any, scan func(*sql.Rows) appfault.Result[T]) appfault.Result[[]T] {
+func GetMany[T any](context stdctx.Context, e Executor, query string, args []any, scan func(*sql.Rows) appfault.Result[T]) appfault.ResultSlice[T] {
     rows, err := e.QueryContext(context, query, args...)
     if err != nil {
         return appfault.FailNew[[]T](

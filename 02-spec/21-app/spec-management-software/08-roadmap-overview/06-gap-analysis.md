@@ -1339,7 +1339,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // Search uses GORM's Raw for FTS5 queries (only exception to ORM policy)
-  func (r *SearchRepo) Search(projectId, query string, limit int) appfault.Result[[]SearchResult] {
+  func (r *SearchRepo) Search(projectId, query string, limit int) appfault.ResultSlice[SearchResult] {
       var results []SearchResult
       
       // FTS5 queries require Raw - this is the only acceptable exception
@@ -1543,7 +1543,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // ConvertToPCM16 converts audio to 16-bit PCM at 24kHz (placeholder - use ffmpeg in production)
-  func (v *AudioValidator) ConvertToPCM16(inputPath string) appfault.Result[[]byte] {
+  func (v *AudioValidator) ConvertToPCM16(inputPath string) appfault.ResultSlice[byte] {
       // For production, use ffmpeg:
       // ffmpeg -i input.wav -ar 24000 -ac 1 -f s16le -acodec pcm_s16le output.raw
       
@@ -1564,7 +1564,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       )
   }
 
-  func (v *AudioValidator) extractWavPCM(data []byte) appfault.Result[[]byte] {
+  func (v *AudioValidator) extractWavPCM(data []byte) appfault.ResultSlice[byte] {
       // Find "data" chunk
       dataIndex := bytes.Index(data, []byte("data"))
       if dataIndex == -1 {
@@ -2313,7 +2313,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       return &preset, nil
   }
 
-  func (r *PresetRepo) ListByType(presetType models.PresetType) appfault.Result[[]models.Preset] {
+  func (r *PresetRepo) ListByType(presetType models.PresetType) appfault.ResultSlice[models.Preset] {
       var presets []models.Preset
       err := r.db.
           Where("type = ?", presetType).
@@ -2555,7 +2555,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       return r.db.Create(g).Error
   }
 
-  func (r *GuidelineRepo) ListForProject(projectId *string, category *models.GuidelineCategory, activeOnly bool) appfault.Result[[]models.Guideline] {
+  func (r *GuidelineRepo) ListForProject(projectId *string, category *models.GuidelineCategory, activeOnly bool) appfault.ResultSlice[models.Guideline] {
       var guidelines []models.Guideline
       
       query := r.db.Where("project_id = ? OR project_id IS NULL", projectId)
@@ -2912,7 +2912,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // GetActiveSessions returns all active sessions for a user
-  func (r *SessionRepo) GetActiveSessions(userId string) appfault.Result[[]models.Session] {
+  func (r *SessionRepo) GetActiveSessions(userId string) appfault.ResultSlice[models.Session] {
       var sessions []models.Session
       now := time.Now().UTC()
       

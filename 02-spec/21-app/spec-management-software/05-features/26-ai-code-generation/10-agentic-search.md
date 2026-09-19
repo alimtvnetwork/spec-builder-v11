@@ -128,7 +128,7 @@ const (
     ResultTypeSpec    ResultType = "specification"
 )
 
-func (se *SearchEngine) Search(query SearchQuery) appfault.Result[[]SearchResult] {
+func (se *SearchEngine) Search(query SearchQuery) appfault.ResultSlice[SearchResult] {
     var wg sync.WaitGroup
     var lexicalResults, semanticResults []SearchResult
     var lexErr, semErr error
@@ -177,7 +177,7 @@ type LexicalSearcher struct {
     db *gorm.DB
 }
 
-func (ls *LexicalSearcher) Search(query SearchQuery) appfault.Result[[]SearchResult] {
+func (ls *LexicalSearcher) Search(query SearchQuery) appfault.ResultSlice[SearchResult] {
     // SQLite FTS5 for full-text search
     var results []SearchResult
     
@@ -241,15 +241,15 @@ type SemanticSearcher struct {
 }
 
 type Embedder interface {
-    Embed(text string) appfault.Result[[]float32]
+    Embed(text string) appfault.ResultSlice[float32]
 }
 
 type VectorStore interface {
-    Search(vector []float32, limit int) appfault.Result[[]VectorResult]
+    Search(vector []float32, limit int) appfault.ResultSlice[VectorResult]
     Insert(id string, vector []float32, metadata map[string]string) error
 }
 
-func (ss *SemanticSearcher) Search(query SearchQuery) appfault.Result[[]SearchResult] {
+func (ss *SemanticSearcher) Search(query SearchQuery) appfault.ResultSlice[SearchResult] {
     // Generate embedding for query
     embedding, err := ss.embedder.Embed(query.Text)
     if err != nil {
@@ -674,7 +674,7 @@ type PassResult struct {
     Coverage     float64
 }
 
-func (mps *MultiPassSearcher) Search(query SearchQuery) appfault.Result[[]PassResult] {
+func (mps *MultiPassSearcher) Search(query SearchQuery) appfault.ResultSlice[PassResult] {
     passes := make([]PassResult, 0, mps.maxPasses)
     allResults := make(map[string]SearchResult)
     currentQuery := query.Text
@@ -789,7 +789,7 @@ type ValidationResult struct {
     ConflictingSources []string
 }
 
-func (ve *ValidationEngine) Validate(claims []string, sources []SearchResult) appfault.Result[[]ValidationResult] {
+func (ve *ValidationEngine) Validate(claims []string, sources []SearchResult) appfault.ResultSlice[ValidationResult] {
     results := make([]ValidationResult, len(claims))
     
     for i, claim := range claims {

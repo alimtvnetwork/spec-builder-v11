@@ -98,7 +98,7 @@ import (
 // Service interface for plugin operations
 type Service interface {
 	// CRUD operations
-	List(context stdctx.Context) appfault.Result[[]models.Plugin]
+	List(context stdctx.Context) appfault.ResultSlice[models.Plugin]
 	GetById(context stdctx.Context, id int64) appfault.Result[*models.Plugin]
 	Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Plugin]
 	Update(context stdctx.Context, id int64, input UpdateInput) appfault.Result[*models.Plugin]
@@ -110,10 +110,10 @@ type Service interface {
 	RefreshFileCount(context stdctx.Context, id int64) *appfault.AppError
 
 	// Mappings
-	GetMappings(context stdctx.Context, pluginId int64) appfault.Result[[]models.PluginMapping]
+	GetMappings(context stdctx.Context, pluginId int64) appfault.ResultSlice[models.PluginMapping]
 	CreateMapping(context stdctx.Context, input CreateMappingInput) appfault.Result[*models.PluginMapping]
 	DeleteMapping(context stdctx.Context, mappingId int64) *appfault.AppError
-	GetMappingsBySite(context stdctx.Context, siteId int64) appfault.Result[[]models.PluginMapping]
+	GetMappingsBySite(context stdctx.Context, siteId int64) appfault.ResultSlice[models.PluginMapping]
 }
 
 // Config holds service configuration
@@ -155,7 +155,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *serviceImpl) List(context stdctx.Context) appfault.Result[[]models.Plugin] {
+func (s *serviceImpl) List(context stdctx.Context) appfault.ResultSlice[models.Plugin] {
 	s.log.Debug("Listing all plugins")
 
 	var plugins []models.Plugin
@@ -549,7 +549,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *serviceImpl) GetMappings(context stdctx.Context, pluginId int64) appfault.Result[[]models.PluginMapping] {
+func (s *serviceImpl) GetMappings(context stdctx.Context, pluginId int64) appfault.ResultSlice[models.PluginMapping] {
 	var mappings []models.PluginMapping
 	if err := s.db.GormDb().WithContext(context).
 		Joins("JOIN Sites s ON s.Id = PluginMappings.SiteId").
@@ -564,7 +564,7 @@ func (s *serviceImpl) GetMappings(context stdctx.Context, pluginId int64) appfau
 	return mappings, nil
 }
 
-func (s *serviceImpl) GetMappingsBySite(context stdctx.Context, siteId int64) appfault.Result[[]models.PluginMapping] {
+func (s *serviceImpl) GetMappingsBySite(context stdctx.Context, siteId int64) appfault.ResultSlice[models.PluginMapping] {
 	var mappings []models.PluginMapping
 	if err := s.db.GormDb().WithContext(context).
 		Joins("JOIN Plugins p ON p.Id = PluginMappings.PluginId").

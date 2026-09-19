@@ -454,7 +454,7 @@ func (s *URLContextService) runCrawl(
 func (s *URLContextService) SearchSite(
     context stdctx.Context,
     req SiteSearchRequest,
-) appfault.Result[[]SiteSearchResult] {
+) appfault.ResultSlice[SiteSearchResult] {
     // Open site-specific database
     siteDb, err := s.openSiteDb(req.Domain)
     if err != nil {
@@ -473,7 +473,7 @@ func (s *URLContextService) vectorSearch(
     db *gorm.DB,
     query string,
     limit int,
-) appfault.Result[[]SiteSearchResult] {
+) appfault.ResultSlice[SiteSearchResult] {
     // Generate query embedding
     embedding, err := s.embedder.Embed(query)
     if err != nil {

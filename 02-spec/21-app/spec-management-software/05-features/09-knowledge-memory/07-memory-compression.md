@@ -683,7 +683,7 @@ func (s *MemoryStore) SaveMemoryEntry(context stdctx.Context, entry *models.Memo
 func (s *MemoryStore) GetMemoryEntries(
     context stdctx.Context,
     instructionId string,
-) appfault.Result[[]models.MemoryEntry] {
+) appfault.ResultSlice[models.MemoryEntry] {
     var entries []models.MemoryEntry
     err := s.db.WithContext(context).
         Where("instruction_id = ?", instructionId).
@@ -713,7 +713,7 @@ func (s *MemoryStore) GetLatestMemory(
 func (s *MemoryStore) GetMemoryForSession(
     context stdctx.Context,
     sessionId string,
-) appfault.Result[[]models.MemoryEntry] {
+) appfault.ResultSlice[models.MemoryEntry] {
     var entries []models.MemoryEntry
     err := s.db.WithContext(context).
         Where("session_id = ?", sessionId).
@@ -1126,7 +1126,7 @@ type MemoryCompressionServiceInterface interface {
     
     // Memory Management
     StoreMemory(context stdctx.Context, instructionId, sessionId string, turnIndex int, output string) *appfault.AppError
-    GetMemory(context stdctx.Context, instructionId string) appfault.Result[[]models.MemoryEntry]
+    GetMemory(context stdctx.Context, instructionId string) appfault.ResultSlice[models.MemoryEntry]
     GetCombinedMemory(context stdctx.Context, instructionId string, maxTokens int) appfault.Result[string]
     GetCompressionStats(context stdctx.Context, instructionId string) appfault.Result[*CompressionStats]
     
@@ -1193,7 +1193,7 @@ func (s *FullMemoryCompressionService) StoreMemory(context stdctx.Context, instr
 }
 
 // GetMemory retrieves memory entries
-func (s *FullMemoryCompressionService) GetMemory(context stdctx.Context, instructionId string) appfault.Result[[]models.MemoryEntry] {
+func (s *FullMemoryCompressionService) GetMemory(context stdctx.Context, instructionId string) appfault.ResultSlice[models.MemoryEntry] {
     return s.store.GetMemoryEntries(context, instructionId)
 }
 

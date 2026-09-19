@@ -568,7 +568,7 @@ import (
 type SearchMethod interface {
     Id() string
     Name() string
-    Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result]
+    Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice
     IsAvailable() bool
     RequiresApi() bool
 }
@@ -579,12 +579,17 @@ type SearchOptions struct {
     UserAgent  string
 }
 
-type Result struct {
-    Title       string
-    Description string
-    URL         string
-    Position    int
-}
+type (
+    SearchResult struct {
+        Title       string
+        Description string
+        URL         string
+        Position    int
+    }
+
+    // SearchResultSlice is the canonical single reusable result envelope for search results.
+    SearchResultSlice = appfault.ResultSlice[SearchResult]
+)
 ```
 
 ### Method Switcher
@@ -818,7 +823,7 @@ func NewExecutor(switcher *MethodSwitcher, cfg *config.Config) *Executor {
     }
 }
 
-func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
+func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     var lastErr *appfault.AppError
     triedMethods := make(map[string]bool)
     backoff := retry.NewBackoff(e.backoffCfg)
@@ -923,10 +928,10 @@ func (e *Executor) SearchWithRetryPolicy(
     query string,
     opts SearchOptions,
     policy retry.RetryPolicy,
-) appfault.Result[[]Result] {
+) SearchResultSlice {
     backoff := retry.NewBackoff(e.backoffCfg)
     
-    return retry.ExecuteWithResult(context, backoff, policy, func(ctx stdctx.Context) appfault.Result[[]Result] {
+    return retry.ExecuteWithResult(context, backoff, policy, func(ctx stdctx.Context) SearchResultSlice {
         methodResult := e.switcher.SelectMethod()
         if !methodResult.IsSuccess {
             return appfault.Fail[[]Result](methodResult.Error)

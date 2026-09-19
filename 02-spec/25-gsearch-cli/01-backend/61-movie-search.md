@@ -410,7 +410,7 @@ import "context"
 // Provider interface for all movie data sources
 type Provider interface {
     Name() string
-    Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]MediaResult]
+    Search(context stdctx.Context, query string, opts SearchOptions) appfault.ResultSlice[MediaResult]
     GetMovie(context stdctx.Context, id string) appfault.Result[*MovieDetails]
     GetTVShow(context stdctx.Context, id string) appfault.Result[*TVShowDetails]
     GetEpisode(context stdctx.Context, showId string, season, episode int) appfault.Result[*EpisodeDetails]
@@ -449,7 +449,7 @@ type Orchestrator struct {
 }
 
 // SearchAll queries multiple providers in parallel
-func (o *Orchestrator) SearchAll(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]MediaResult] {
+func (o *Orchestrator) SearchAll(context stdctx.Context, query string, opts SearchOptions) appfault.ResultSlice[MediaResult] {
     if !o.parallel {
         return o.searchSequential(context, query, opts)
     }

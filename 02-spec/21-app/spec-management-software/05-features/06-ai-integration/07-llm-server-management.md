@@ -366,7 +366,7 @@ func (r *ServerRegistry) Initialize(context stdctx.Context) *appfault.AppError {
     return nil
 }
 
-func (r *ServerRegistry) loadServerConfigs(context stdctx.Context) appfault.Result[[]LLMServerConfig] {
+func (r *ServerRegistry) loadServerConfigs(context stdctx.Context) appfault.ResultSlice[LLMServerConfig] {
     value, err := r.configService.GetConfig(context, "llm.servers")
     if err != nil {
         return appfault.FailWrap[[]LLMServerConfig](

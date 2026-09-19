@@ -271,7 +271,7 @@ type CategorySuggestion struct {
     Reasoning   string  `json:",omitempty"`
 }
 
-func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) appfault.Result[[]CategorySuggestion] {
+func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) appfault.ResultSlice[CategorySuggestion] {
     endpoint := c.baseUrl + "/api/seo/suggest-categories"
     
     if req.MaxResults == 0 {
@@ -337,7 +337,7 @@ type TagSuggestion struct {
     Confidence  float64 
 }
 
-func (c *AiBridgeClient) SuggestTags(req TagSuggestionRequest) appfault.Result[[]TagSuggestion] {
+func (c *AiBridgeClient) SuggestTags(req TagSuggestionRequest) appfault.ResultSlice[TagSuggestion] {
     endpoint := c.baseUrl + "/api/seo/suggest-tags"
     // Similar implementation to SuggestCategories
     // ...

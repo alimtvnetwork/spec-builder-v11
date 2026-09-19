@@ -632,7 +632,7 @@ type ConflictInfo struct {
     Merged      string
 }
 
-func (r *ConflictResolver) DetectConflicts(repoPath string) appfault.Result[[]ConflictInfo] {
+func (r *ConflictResolver) DetectConflicts(repoPath string) appfault.ResultSlice[ConflictInfo] {
     cmd := exec.Command("git", "diff", "--name-only", "--diff-filter=U")
     cmd.Dir = repoPath
     output, err := cmd.Output()

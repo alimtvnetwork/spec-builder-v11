@@ -1066,7 +1066,7 @@ This document provides AI-friendly implementation checklists broken into small, 
           Update("revoked_at", now).Error
   }
 
-  func (r *SessionRepo) GetActiveSessions(userId string) appfault.Result[[]models.Session] {
+  func (r *SessionRepo) GetActiveSessions(userId string) appfault.ResultSlice[models.Session] {
       var sessions []models.Session
       now := time.Now().UTC()
       

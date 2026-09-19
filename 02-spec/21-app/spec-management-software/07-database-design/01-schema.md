@@ -880,7 +880,7 @@ type Embedding struct {
 func (Embedding) TableName() string { return "Embedding" }
 
 // GetVector deserializes the embedding vector from bytes
-func (e *Embedding) GetVector() appfault.Result[[]float32] {
+func (e *Embedding) GetVector() appfault.ResultSlice[float32] {
     if len(e.EmbeddingVector) == 0 {
         return nil, nil
     }
@@ -1166,7 +1166,7 @@ func InitDatabase(dbPath string) appfault.Result[*gorm.DB] {
 ### Get Project Tree
 
 ```go
-func (r *ProjectRepository) GetProjectTree(context stdctx.Context) appfault.Result[[]Project] {
+func (r *ProjectRepository) GetProjectTree(context stdctx.Context) appfault.ResultSlice[Project] {
     var projects []Project
     err := r.db.WithContext(context).
         Preload("Children").
@@ -1180,7 +1180,7 @@ func (r *ProjectRepository) GetProjectTree(context stdctx.Context) appfault.Resu
 ### Get File Tree for Project
 
 ```go
-func (r *FileRepository) GetFileTree(context stdctx.Context, projectId string) appfault.Result[[]File] {
+func (r *FileRepository) GetFileTree(context stdctx.Context, projectId string) appfault.ResultSlice[File] {
     var files []File
     err := r.db.WithContext(context).
         Preload("Children").
@@ -1194,7 +1194,7 @@ func (r *FileRepository) GetFileTree(context stdctx.Context, projectId string) a
 ### Get Questions with Answers
 
 ```go
-func (r *QuestionRepository) GetQuestionsWithAnswers(context stdctx.Context, reportId string) appfault.Result[[]ClarificationQuestion] {
+func (r *QuestionRepository) GetQuestionsWithAnswers(context stdctx.Context, reportId string) appfault.ResultSlice[ClarificationQuestion] {
     var questions []ClarificationQuestion
     err := r.db.WithContext(context).
         Preload("Answer").
@@ -1211,7 +1211,7 @@ func (r *QuestionRepository) GetQuestionsWithAnswers(context stdctx.Context, rep
 
 ```go
 // GetActiveArtifacts retrieves active artifacts for a project
-func (r *ArtifactRepository) GetActiveArtifacts(context stdctx.Context, projectId string, artifactType artifact_type.Variant) appfault.Result[[]Artifact] {
+func (r *ArtifactRepository) GetActiveArtifacts(context stdctx.Context, projectId string, artifactType artifact_type.Variant) appfault.ResultSlice[Artifact] {
     var artifacts []Artifact
     err := r.db.WithContext(context).
         Where("project_id = ? AND artifact_type = ? AND status = ?", projectId, artifactType, artifact_status.Active).
@@ -1221,7 +1221,7 @@ func (r *ArtifactRepository) GetActiveArtifacts(context stdctx.Context, projectI
 }
 
 // GetPinnedArtifactsWithChunks retrieves pinned artifacts with their chunks for top-K memory
-func (r *ArtifactRepository) GetPinnedArtifactsWithChunks(context stdctx.Context, projectId string, limit int) appfault.Result[[]Artifact] {
+func (r *ArtifactRepository) GetPinnedArtifactsWithChunks(context stdctx.Context, projectId string, limit int) appfault.ResultSlice[Artifact] {
     var artifacts []Artifact
     err := r.db.WithContext(context).
         Preload("Chunks", func(db *gorm.DB) *gorm.DB {
@@ -1235,7 +1235,7 @@ func (r *ArtifactRepository) GetPinnedArtifactsWithChunks(context stdctx.Context
 }
 
 // GetChunksWithEmbeddings retrieves chunks with their embeddings for similarity search
-func (r *ChunkRepository) GetChunksWithEmbeddings(context stdctx.Context, artifactIds []string) appfault.Result[[]Chunk] {
+func (r *ChunkRepository) GetChunksWithEmbeddings(context stdctx.Context, artifactIds []string) appfault.ResultSlice[Chunk] {
     var chunks []Chunk
     err := r.db.WithContext(context).
         Preload("Embedding").
@@ -1246,7 +1246,7 @@ func (r *ChunkRepository) GetChunksWithEmbeddings(context stdctx.Context, artifa
 }
 
 // FindSimilarChunks performs vector similarity search (requires application-level calculation)
-func (r *ChunkRepository) FindSimilarChunks(context stdctx.Context, projectId string, limit int) appfault.Result[[]Chunk] {
+func (r *ChunkRepository) FindSimilarChunks(context stdctx.Context, projectId string, limit int) appfault.ResultSlice[Chunk] {
     var chunks []Chunk
     err := r.db.WithContext(context).
         Preload("Embedding").
@@ -1333,7 +1333,7 @@ type InstructionSegment struct {
 func (InstructionSegment) TableName() string { return "InstructionSegment" }
 
 // GetDependencies parses the DependsOnSegments JSON array
-func (s *InstructionSegment) GetDependencies() appfault.Result[[]string] {
+func (s *InstructionSegment) GetDependencies() appfault.ResultSlice[string] {
     if s.DependsOnSegments == "" {
         return []string{}, nil
     }
@@ -1378,7 +1378,7 @@ type MemoryEntry struct {
 func (MemoryEntry) TableName() string { return "MemoryEntry" }
 
 // GetKeyDecisions parses the KeyDecisions JSON array
-func (m *MemoryEntry) GetKeyDecisions() appfault.Result[[]string] {
+func (m *MemoryEntry) GetKeyDecisions() appfault.ResultSlice[string] {
     if m.KeyDecisions == "" {
         return []string{}, nil
     }
@@ -1388,7 +1388,7 @@ func (m *MemoryEntry) GetKeyDecisions() appfault.Result[[]string] {
 }
 
 // GetArtifactsCreated parses the ArtifactsCreated JSON array
-func (m *MemoryEntry) GetArtifactsCreated() appfault.Result[[]string] {
+func (m *MemoryEntry) GetArtifactsCreated() appfault.ResultSlice[string] {
     if m.ArtifactsCreated == "" {
         return []string{}, nil
     }

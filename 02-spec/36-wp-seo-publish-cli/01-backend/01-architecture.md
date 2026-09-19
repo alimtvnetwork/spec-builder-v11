@@ -95,7 +95,7 @@ type ConnectionConfig struct {
 func (s *ConnectionService) Connect(cfg ConnectionConfig) appfault.Result[Website]
 func (s *ConnectionService) Validate(websiteId string) appfault.Result[ValidationResult]
 func (s *ConnectionService) Disconnect(websiteId string) *appfault.AppError
-func (s *ConnectionService) List() appfault.Result[[]Website]
+func (s *ConnectionService) List() appfault.ResultSlice[Website]
 ```
 
 #### Content Service
@@ -157,10 +157,10 @@ type VariableSource struct {
 }
 
 func (s *VariableService) Import(source VariableSource) appfault.Result[ImportResult]
-func (s *VariableService) Export(scope string, format string) appfault.Result[[]byte]
+func (s *VariableService) Export(scope string, format string) appfault.ResultSlice[byte]
 func (s *VariableService) Get(scope string, key string) appfault.Result[any]
 func (s *VariableService) Set(scope string, key string, value any) *appfault.AppError
-func (s *VariableService) List(scope string) appfault.Result[[]Variable]
+func (s *VariableService) List(scope string) appfault.ResultSlice[Variable]
 ```
 
 #### Automation Service
@@ -191,7 +191,7 @@ type AutomationResult struct {
 }
 
 func (s *AutomationService) Run(cfg AutomationConfig) appfault.Result[AutomationResult]
-func (s *AutomationService) Preview(cfg AutomationConfig, limit int) appfault.Result[[]PreviewItem]
+func (s *AutomationService) Preview(cfg AutomationConfig, limit int) appfault.ResultSlice[PreviewItem]
 ```
 
 ### 3. Client Layer
@@ -208,13 +208,13 @@ type WordPressClient struct {
 // Categories
 func (c *WordPressClient) CreateCategory(cat Category) appfault.Result[Category]
 func (c *WordPressClient) UpdateCategory(id int, cat Category) appfault.Result[Category]
-func (c *WordPressClient) GetCategories() appfault.Result[[]Category]
+func (c *WordPressClient) GetCategories() appfault.ResultSlice[Category]
 
 // Posts
 func (c *WordPressClient) CreatePost(post Post) appfault.Result[Post]
 func (c *WordPressClient) UpdatePost(id int, post Post) appfault.Result[Post]
 func (c *WordPressClient) GetPost(id int) appfault.Result[Post]
-func (c *WordPressClient) GetPosts(params PostQuery) appfault.Result[[]Post]
+func (c *WordPressClient) GetPosts(params PostQuery) appfault.ResultSlice[Post]
 
 // Pages
 func (c *WordPressClient) CreatePage(page Page) appfault.Result[Page]
@@ -223,7 +223,7 @@ func (c *WordPressClient) GetPage(id int) appfault.Result[Page]
 
 // Tags
 func (c *WordPressClient) CreateTag(tag Tag) appfault.Result[Tag]
-func (c *WordPressClient) GetTags() appfault.Result[[]Tag]
+func (c *WordPressClient) GetTags() appfault.ResultSlice[Tag]
 
 // Media
 func (c *WordPressClient) UploadMedia(file []byte, filename string) appfault.Result[Media]
@@ -261,8 +261,8 @@ type SeoResponse struct {
 
 func (c *AiBridgeClient) GenerateSeo(req SeoRequest) appfault.Result[SeoResponse]
 func (c *AiBridgeClient) GenerateSeoStream(req SeoRequest) appfault.Result[<-chan SeoChunk]
-func (c *AiBridgeClient) SuggestCategories(content string) appfault.Result[[]string]
-func (c *AiBridgeClient) SuggestTags(content string) appfault.Result[[]string]
+func (c *AiBridgeClient) SuggestCategories(content string) appfault.ResultSlice[string]
+func (c *AiBridgeClient) SuggestTags(content string) appfault.ResultSlice[string]
 func (c *AiBridgeClient) RewriteContent(content, prompt string) appfault.Result[SeoResponse]
 ```
 

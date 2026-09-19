@@ -574,7 +574,7 @@ func SlugFromTitle(title string) string {
 
 ```go
 // SafeRead reads file content with path validation
-func (pm *PathManager) SafeRead(relativePath string) appfault.Result[[]byte] {
+func (pm *PathManager) SafeRead(relativePath string) appfault.ResultSlice[byte] {
     result := pm.Resolve(relativePath)
     if result.HasError() {
         return appfault.Fail[[]byte](result.Error())

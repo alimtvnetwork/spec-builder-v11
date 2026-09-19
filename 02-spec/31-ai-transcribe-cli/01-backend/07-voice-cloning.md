@@ -274,7 +274,7 @@ func (c *XTTSCloner) InstantClone(req InstantCloneRequest) appfault.Result[Voice
 }
 
 // Synthesis uses the stored sample as reference
-func (c *XTTSCloner) Synthesize(profile *VoiceProfile, text string) appfault.Result[[]byte] {
+func (c *XTTSCloner) Synthesize(profile *VoiceProfile, text string) appfault.ResultSlice[byte] {
     // EXEMPTED: external XTTS API — raw JSON payload required by third-party TTS server (§7.2)
     payload := map[string]any{
         "text":           text,

@@ -135,7 +135,7 @@ type Provider interface {
     Available(context stdctx.Context) bool
     
     // Models returns list of available models on this provider
-    Models(context stdctx.Context) appfault.Result[[]ModelInfo]
+    Models(context stdctx.Context) appfault.ResultSlice[ModelInfo]
     
     // LoadModel loads a model into memory (may be no-op for some providers)
     LoadModel(context stdctx.Context, modelId string) *appfault.AppError
@@ -393,7 +393,7 @@ func (o *OllamaAdapter) Available(context stdctx.Context) bool {
 }
 
 // Models returns all models available on Ollama
-func (o *OllamaAdapter) Models(context stdctx.Context) appfault.Result[[]ModelInfo] {
+func (o *OllamaAdapter) Models(context stdctx.Context) appfault.ResultSlice[ModelInfo] {
     _, file, line, _ := runtime.Caller(0)
     o.logger.Debug("fetching Ollama models",
         "func", "Models",
@@ -937,7 +937,7 @@ func (l *LlamaAdapter) Available(context stdctx.Context) bool {
 }
 
 // Models returns models available in router mode
-func (l *LlamaAdapter) Models(context stdctx.Context) appfault.Result[[]ModelInfo] {
+func (l *LlamaAdapter) Models(context stdctx.Context) appfault.ResultSlice[ModelInfo] {
     _, file, line, _ := runtime.Caller(0)
     l.logger.Debug("fetching llama.cpp models",
         "func", "Models",
@@ -1262,7 +1262,7 @@ func (ls *LlamaSwapAdapter) UnloadModel(context stdctx.Context, modelId string) 
 }
 
 // Models returns configured models from swap config
-func (ls *LlamaSwapAdapter) Models(context stdctx.Context) appfault.Result[[]ModelInfo] {
+func (ls *LlamaSwapAdapter) Models(context stdctx.Context) appfault.ResultSlice[ModelInfo] {
     models := make([]ModelInfo, 0, len(ls.swapConfig.Models))
     for alias := range ls.swapConfig.Models {
         models = append(models, ModelInfo{
@@ -1443,7 +1443,7 @@ func (r *Registry) findProviderWithModel(context stdctx.Context, modelId string)
 }
 
 // AllModels returns models from all providers
-func (r *Registry) AllModels(context stdctx.Context) appfault.Result[[]ModelInfo] {
+func (r *Registry) AllModels(context stdctx.Context) appfault.ResultSlice[ModelInfo] {
     r.mu.RLock()
     defer r.mu.RUnlock()
     

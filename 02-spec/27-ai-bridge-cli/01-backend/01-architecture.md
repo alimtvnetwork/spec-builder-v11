@@ -109,7 +109,7 @@ type BackendAdapter interface {
     GenerateStream(context stdctx.Context, req *NormalizedRequest) appfault.Result[<-chan StreamChunk]
     
     // Model management
-    ListModels(context stdctx.Context) appfault.Result[[]ModelInfo]
+    ListModels(context stdctx.Context) appfault.ResultSlice[ModelInfo]
     LoadModel(context stdctx.Context, modelId string) *appfault.AppError
     UnloadModel(context stdctx.Context, modelId string) *appfault.AppError
 }

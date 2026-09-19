@@ -281,7 +281,7 @@ func (e *ContextFetcher) FetchContextNeeds(context stdctx.Context, needs []Conte
     return appfault.Ok(result)
 }
 
-func (e *ContextFetcher) fetchSingleNeed(context stdctx.Context, need ContextNeed) appfault.Result[[]RAGChunk] {
+func (e *ContextFetcher) fetchSingleNeed(context stdctx.Context, need ContextNeed) appfault.ResultSlice[RAGChunk] {
     switch need.Type {
     case ContextTypeWebSearch:
         return e.executeWebSearch(context, need)

@@ -708,7 +708,7 @@ func (p *HtmlParser) RequiresApi() bool { return false }
 ### Google Search Parser
 
 ```go
-func (p *HtmlParser) SearchGoogle(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
+func (p *HtmlParser) SearchGoogle(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     searchUrl := p.buildGoogleUrl(query, opts.MaxResults)
     
     docResult := p.fetchAndParse(context, searchUrl)
@@ -754,7 +754,7 @@ func (p *HtmlParser) buildGoogleUrl(query string, maxResults int) string {
 ```go
 // parseWithSelectors extracts results using the provided selectors
 func (p *HTMLParser) parseWithSelectors(doc *goquery.Document, sel selectors.EngineSelectors, maxResults int) []Result {
-    var results []Result
+    var results []SearchResult
     position := 0
     
     doc.Find(sel.Results).Each(func(i int, s *goquery.Selection) {
@@ -804,7 +804,7 @@ func (p *HTMLParser) parseWithSelectors(doc *goquery.Document, sel selectors.Eng
         }
         
         position++
-        results = append(results, Result{
+        results = append(results, SearchSearchResult{
             Title:       title,
             Description: description,
             URL:         href,
@@ -819,7 +819,7 @@ func (p *HTMLParser) parseWithSelectors(doc *goquery.Document, sel selectors.Eng
 ### DuckDuckGo Parser
 
 ```go
-func (p *HtmlParser) SearchDuckDuckGo(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
+func (p *HtmlParser) SearchDuckDuckGo(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     searchUrl := p.buildDdgUrl(query)
     
     docResult := p.fetchAndParse(context, searchUrl)
@@ -885,7 +885,7 @@ func (p *HtmlParser) extractDdgUrl(ddgUrl string) string {
 ### Bing Parser
 
 ```go
-func (p *HtmlParser) SearchBing(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
+func (p *HtmlParser) SearchBing(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     searchUrl := p.buildBingUrl(query, opts.MaxResults)
     
     docResult := p.fetchAndParse(context, searchUrl)

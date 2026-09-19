@@ -459,7 +459,7 @@ func run(config Config) Result {
     return result
 }
 
-func scanDirectory(dir string) appfault.Result[[]IndexEntry] {
+func scanDirectory(dir string) appfault.ResultSlice[IndexEntry] {
     var entries []IndexEntry
     // Scan and parse directory contents
     return entries, nil

@@ -172,7 +172,7 @@ func (g *CodeGenerator) Generate(req GenerationRequest) appfault.Result[*Generat
 ### Prompt Building
 
 ```go
-func (g *CodeGenerator) generateComponent(req GenerationRequest, comp Component) appfault.Result[[]GeneratedFile] {
+func (g *CodeGenerator) generateComponent(req GenerationRequest, comp Component) appfault.ResultSlice[GeneratedFile] {
     // 1. Build RAG context
     context, err := g.ragService.BuildContext(comp.Description, ContextOptions{
         TopK: 5,
@@ -282,7 +282,7 @@ Generate complete, production-ready code following all WordPress and PHP best pr
 ## Response Parsing
 
 ```go
-func (g *CodeGenerator) parseResponse(response string, comp Component) appfault.Result[[]GeneratedFile] {
+func (g *CodeGenerator) parseResponse(response string, comp Component) appfault.ResultSlice[GeneratedFile] {
     var files []GeneratedFile
     
     // Match code blocks with file paths

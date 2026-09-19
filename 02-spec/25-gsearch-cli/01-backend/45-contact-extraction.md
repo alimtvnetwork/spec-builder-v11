@@ -306,7 +306,7 @@ var contactLinkPatterns = []*regexp.Regexp{
     regexp.MustCompile(`(?i)support`),
 }
 
-func (f *ContactPageFinder) FindContactPages(context stdctx.Context, baseUrl string) appfault.Result[[]string] {
+func (f *ContactPageFinder) FindContactPages(context stdctx.Context, baseUrl string) appfault.ResultSlice[string] {
     pages := []string{baseUrl}
     
     // Parse base URL

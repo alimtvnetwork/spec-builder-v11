@@ -93,9 +93,9 @@ type VectorSearchService interface {
     RemoveByArtifact(context stdctx.Context, artifactId string) *appfault.AppError
     
     // Searching
-    SearchSemantic(context stdctx.Context, queryEmbedding []float32, limit int) appfault.Result[[]ChunkScore]
-    SearchKeyword(context stdctx.Context, query string, limit int) appfault.Result[[]ChunkScore]
-    SearchHybrid(context stdctx.Context, queryEmbedding []float32, queryText string, limit int) appfault.Result[[]ChunkScore]
+    SearchSemantic(context stdctx.Context, queryEmbedding []float32, limit int) appfault.ResultSlice[ChunkScore]
+    SearchKeyword(context stdctx.Context, query string, limit int) appfault.ResultSlice[ChunkScore]
+    SearchHybrid(context stdctx.Context, queryEmbedding []float32, queryText string, limit int) appfault.ResultSlice[ChunkScore]
     
     // Maintenance
     ReindexProject(context stdctx.Context, projectId string) *appfault.AppError
@@ -374,7 +374,7 @@ func (v *VectorSearchServiceImpl) SearchSemantic(
     context stdctx.Context, 
     queryEmbedding []float32, 
     limit int,
-) appfault.Result[[]ChunkScore] {
+) appfault.ResultSlice[ChunkScore] {
     if !v.vssLoaded {
         return nil, appfault.New(
             ErrVssNotAvailable,
@@ -436,7 +436,7 @@ func (v *VectorSearchServiceImpl) SearchKeyword(
     context stdctx.Context,
     query string,
     limit int,
-) appfault.Result[[]ChunkScore] {
+) appfault.ResultSlice[ChunkScore] {
     if limit <= 0 {
         limit = v.config.DefaultLimit
     }
@@ -541,7 +541,7 @@ func (v *VectorSearchServiceImpl) SearchHybrid(
     queryEmbedding []float32,
     queryText string,
     limit int,
-) appfault.Result[[]ChunkScore] {
+) appfault.ResultSlice[ChunkScore] {
     if limit <= 0 {
         limit = v.config.DefaultLimit
     }
@@ -680,7 +680,7 @@ func (v *VectorSearchServiceImpl) SearchHybridWeighted(
     queryEmbedding []float32,
     queryText string,
     limit int,
-) appfault.Result[[]ChunkScore] {
+) appfault.ResultSlice[ChunkScore] {
     fetchLimit := limit * 2
     
     semanticScores, _ := v.SearchSemantic(context, queryEmbedding, fetchLimit)
@@ -868,7 +868,7 @@ func (r *RAGService) RetrieveContext(
     projectId string,
     query string,
     limit int,
-) appfault.Result[[]RetrievedChunk] {
+) appfault.ResultSlice[RetrievedChunk] {
     // 1. Generate query embedding
     queryEmbedding, err := r.embeddingGen.Generate(context, query)
     if err != nil {

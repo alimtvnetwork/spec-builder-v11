@@ -241,7 +241,7 @@ func (c *AssetCopier) copyMatchingFiles(op AssetOperation, result *CopyResult) *
 ### Pattern Support
 
 ```go
-func (c *AssetCopier) getFilesToCopy(op AssetOperation) appfault.Result[[]string] {
+func (c *AssetCopier) getFilesToCopy(op AssetOperation) appfault.ResultSlice[string] {
     var files []string
     
     err := filepath.Walk(op.Source, func(path string, info os.FileInfo, err error) error {

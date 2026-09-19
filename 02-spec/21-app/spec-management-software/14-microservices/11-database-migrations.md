@@ -620,7 +620,7 @@ type MigrationRunner interface {
     Version(context stdctx.Context, db *sql.DB) appfault.Result[string]
     
     // List pending migrations
-    Pending(context stdctx.Context, db *sql.DB, dbType string) appfault.Result[[]Migration]
+    Pending(context stdctx.Context, db *sql.DB, dbType string) appfault.ResultSlice[Migration]
 }
 
 type Migration struct {

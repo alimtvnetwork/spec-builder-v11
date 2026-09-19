@@ -1271,7 +1271,7 @@ func (b *DAGBuilder) actionToStepType(action string) step_type.Variant {
 // ScheduleWaves returns execution waves using Kahn's algorithm.
 // Each wave contains tasks that can execute in parallel.
 // Tasks in wave N+1 depend on at least one task in wave N or earlier.
-func (dag *TaskDAG) ScheduleWaves() appfault.Result[[]ExecutionWave] {
+func (dag *TaskDAG) ScheduleWaves() appfault.ResultSlice[ExecutionWave] {
     // Build adjacency and in-degree maps
     inDegree := map[string]int{}
     children := map[string][]string{}

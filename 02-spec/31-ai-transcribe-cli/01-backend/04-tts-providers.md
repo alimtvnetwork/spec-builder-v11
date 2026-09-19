@@ -33,7 +33,7 @@ type TTSProvider interface {
     SynthesizeStream(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[<-chan *AudioChunk]
     
     // Voice management
-    ListVoices() appfault.Result[[]Voice]
+    ListVoices() appfault.ResultSlice[Voice]
     GetVoice(voiceId string) appfault.Result[Voice]
     CloneVoice(context context.Context, name string, samples [][]byte) appfault.Result[Voice]
     DeleteVoice(voiceId string) *appfault.AppError
@@ -346,7 +346,7 @@ func (xp *XTTSProvider) CloneVoice(context context.Context, name string, samples
     })
 }
 
-func (xp *XTTSProvider) ListVoices() appfault.Result[[]Voice] {
+func (xp *XTTSProvider) ListVoices() appfault.ResultSlice[Voice] {
     xp.mu.RLock()
     defer xp.mu.RUnlock()
     
@@ -458,7 +458,7 @@ func (ep *ElevenLabsProvider) Initialize(context context.Context, config *Provid
     return nil
 }
 
-func (ep *ElevenLabsProvider) fetchVoices(context context.Context) appfault.Result[[]Voice] {
+func (ep *ElevenLabsProvider) fetchVoices(context context.Context) appfault.ResultSlice[Voice] {
     req, _ := http.NewRequestWithContext(context, httpmethodtype.Get.HttpVerb(),
         ep.config.Endpoint+"/v1/voices", nil)
     req.Header.Set("xi-api-key", ep.config.ApiKey)
@@ -753,7 +753,7 @@ func (ep *ElevenLabsProvider) CloneVoice(context context.Context, name string, s
     })
 }
 
-func (ep *ElevenLabsProvider) ListVoices() appfault.Result[[]Voice] {
+func (ep *ElevenLabsProvider) ListVoices() appfault.ResultSlice[Voice] {
     ep.mu.RLock()
     defer ep.mu.RUnlock()
 
@@ -958,7 +958,7 @@ func (ap *AzureTtsProvider) getOutputFormat(opts *SynthesizeOptions) string {
     }
 }
 
-func (ap *AzureTtsProvider) fetchVoices(context context.Context) appfault.Result[[]Voice] {
+func (ap *AzureTtsProvider) fetchVoices(context context.Context) appfault.ResultSlice[Voice] {
     endpoint := fmt.Sprintf("https://%s.tts.speech.microsoft.com/cognitiveservices/voices/list",
         ap.config.Region)
     
@@ -1001,7 +1001,7 @@ func (ap *AzureTtsProvider) fetchVoices(context context.Context) appfault.Result
     return appfault.Ok(voices)
 }
 
-func (ap *AzureTtsProvider) ListVoices() appfault.Result[[]Voice] {
+func (ap *AzureTtsProvider) ListVoices() appfault.ResultSlice[Voice] {
     ap.mu.RLock()
     defer ap.mu.RUnlock()
 

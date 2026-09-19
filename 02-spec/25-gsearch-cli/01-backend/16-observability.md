@@ -619,7 +619,7 @@ import (
 var tracer = otel.Tracer("gosearch/search")
 
 // Execute performs a search with tracing
-func (e *SearchEngine) Execute(searchContext context.Context, query string) appfault.Result[[]Result] {
+func (e *SearchEngine) Execute(searchContext context.Context, query string) SearchResultSlice {
     searchContext, span := tracer.Start(searchContext, "search.execute",
         trace.WithAttributes(
             attribute.String("search.query", query),
@@ -656,7 +656,7 @@ func (e *SearchEngine) Execute(searchContext context.Context, query string) appf
 }
 
 // executeSearch performs the actual search request
-func (e *SearchEngine) executeSearch(searchContext context.Context, query string) appfault.Result[[]Result] {
+func (e *SearchEngine) executeSearch(searchContext context.Context, query string) SearchResultSlice {
     searchContext, span := tracer.Start(searchContext, "search.engine.request",
         trace.WithAttributes(
             attribute.String("search.engine", e.Name()),

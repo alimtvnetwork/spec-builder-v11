@@ -482,7 +482,7 @@ func (s *Service) TranscribeStream(
 	})
 }
 
-func (s *Service) convertToWav(data []byte, format string) appfault.Result[[]byte] {
+func (s *Service) convertToWav(data []byte, format string) appfault.ResultSlice[byte] {
 	if format == "wav" || format == "pcm" {
 		return appfault.Ok(data)
 	}

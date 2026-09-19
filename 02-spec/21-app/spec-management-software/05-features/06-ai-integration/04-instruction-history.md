@@ -139,10 +139,10 @@ type InstructionHistoryService interface {
     GetInstructionImpact(context stdctx.Context, instructionId string) appfault.Result[*InstructionImpact]
     
     // Get all changes for a specific file
-    GetFileHistory(context stdctx.Context, fileId string, limit int) appfault.Result[[]FileChange]
+    GetFileHistory(context stdctx.Context, fileId string, limit int) appfault.ResultSlice[FileChange]
     
     // Get changes within time range
-    GetChangesByTimeRange(context stdctx.Context, projectId string, from, to time.Time) appfault.Result[[]FileChange]
+    GetChangesByTimeRange(context stdctx.Context, projectId string, from, to time.Time) appfault.ResultSlice[FileChange]
     
     // Get instruction that last modified a file
     GetLastModifyingInstruction(context stdctx.Context, fileId string) appfault.Result[*Instruction]

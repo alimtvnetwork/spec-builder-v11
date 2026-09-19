@@ -235,13 +235,13 @@ Content must be embedding-friendly:
 ```go
 type RAGValidator interface {
     // Validate single artifact
-    ValidateArtifact(context stdctx.Context, filePath string) appfault.Result[[]Finding]
+    ValidateArtifact(context stdctx.Context, filePath string) appfault.ResultSlice[Finding]
     
     // Validate all artifacts in project
-    ValidateAllArtifacts(context stdctx.Context, projectPath string) appfault.Result[[]Finding]
+    ValidateAllArtifacts(context stdctx.Context, projectPath string) appfault.ResultSlice[Finding]
     
     // Check frontmatter completeness
-    ValidateFrontmatter(content []byte) appfault.Result[[]Finding]
+    ValidateFrontmatter(content []byte) appfault.ResultSlice[Finding]
     
     // Analyze chunk boundaries
     AnalyzeChunkBoundaries(content []byte) appfault.Result[*ChunkAnalysis]
@@ -609,10 +609,10 @@ type ConsistencyService interface {
     GetLatestReport(context stdctx.Context, projectId string) appfault.Result[*ConsistencyReport]
     
     // Get report history
-    GetReportHistory(context stdctx.Context, projectId string, limit int) appfault.Result[[]ConsistencyReport]
+    GetReportHistory(context stdctx.Context, projectId string, limit int) appfault.ResultSlice[ConsistencyReport]
     
     // Preview auto-fixes for a report
-    PreviewFixes(context stdctx.Context, reportId string) appfault.Result[[]AutoFix]
+    PreviewFixes(context stdctx.Context, reportId string) appfault.ResultSlice[AutoFix]
     
     // Apply selected fixes
     ApplyFixes(context stdctx.Context, reportId string, fixIds []string, dryRun bool) appfault.Result[*FixResult]
@@ -623,15 +623,15 @@ type ConsistencyService interface {
 
 type LinkValidator interface {
     ValidateLink(context stdctx.Context, sourceFile, targetPath string) appfault.Result[*LinkValidation]
-    ValidateAllLinks(context stdctx.Context, projectPath string) appfault.Result[[]LinkValidation]
+    ValidateAllLinks(context stdctx.Context, projectPath string) appfault.ResultSlice[LinkValidation]
 }
 
 type SchemaValidator interface {
-    ValidateSchemaAlignment(context stdctx.Context, schemaPath, apiPath string) appfault.Result[[]Finding]
+    ValidateSchemaAlignment(context stdctx.Context, schemaPath, apiPath string) appfault.ResultSlice[Finding]
 }
 
 type TerminologyValidator interface {
-    ValidateTerms(context stdctx.Context, glossaryPath, targetPath string) appfault.Result[[]Finding]
+    ValidateTerms(context stdctx.Context, glossaryPath, targetPath string) appfault.ResultSlice[Finding]
 }
 ```
 

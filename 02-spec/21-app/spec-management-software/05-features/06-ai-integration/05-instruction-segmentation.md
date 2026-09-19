@@ -179,7 +179,7 @@ func NewSegmentationParser(tokenCounter TokenCounter, config SegmentationConfig)
 }
 
 // Parse splits instruction content into sections
-func (p *SegmentationParser) Parse(context stdctx.Context, content string) appfault.Result[[]ParsedSection] {
+func (p *SegmentationParser) Parse(context stdctx.Context, content string) appfault.ResultSlice[ParsedSection] {
     lines := strings.Split(content, "\n")
     sections := make([]ParsedSection, 0)
     
@@ -578,7 +578,7 @@ func (r *DependencyResolver) breakCycles(graph *DependencyGraph) *DependencyGrap
 }
 
 // TopologicalSort returns execution order respecting dependencies
-func (g *DependencyGraph) TopologicalSort() appfault.Result[[]int] {
+func (g *DependencyGraph) TopologicalSort() appfault.ResultSlice[int] {
     inDegree := make(map[int]int)
     for i := range g.segments {
         inDegree[i] = 0

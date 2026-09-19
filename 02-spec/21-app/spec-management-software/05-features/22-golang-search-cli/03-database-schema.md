@@ -201,7 +201,7 @@ func (p *PageContent) BeforeCreate(tx *gorm.DB) error {
 }
 
 // Helper to get keywords as slice
-func (p *PageContent) GetKeywords() appfault.Result[[]string] {
+func (p *PageContent) GetKeywords() appfault.ResultSlice[string] {
     var keywords []string
     if p.Keywords == "" {
         return appfault.Ok(keywords)
@@ -385,7 +385,7 @@ const (
 )
 
 // GetEncryptionKey retrieves and validates the encryption key from environment
-func GetEncryptionKey() appfault.Result[[]byte] {
+func GetEncryptionKey() appfault.ResultSlice[byte] {
     keyHex := os.Getenv(EnvTokenKey)
     if keyHex == "" {
         return appfault.Fail[[]byte](
@@ -838,7 +838,7 @@ func (db *DB) GetOAuthToken(provider OAuthProvider) appfault.Result[*OAuthToken]
 ### List All Tokens
 
 ```go
-func (db *DB) ListOAuthTokens() appfault.Result[[]OAuthToken] {
+func (db *DB) ListOAuthTokens() appfault.ResultSlice[OAuthToken] {
     var tokens []OAuthToken
     if err := db.Find(&tokens).Error; err != nil {
         return appfault.Fail[[]OAuthToken](
@@ -975,7 +975,7 @@ func (db *DB) UpdateSearchStatus(id string, status SearchStatus, resultCount int
 ### Get Results with Page Content
 
 ```go
-func (db *DB) GetResultsWithContent(searchId string) appfault.Result[[]SearchResult] {
+func (db *DB) GetResultsWithContent(searchId string) appfault.ResultSlice[SearchResult] {
     var results []SearchResult
     err := db.Preload("PageContent").
         Where("search_request_id = ?", searchId).
@@ -1021,7 +1021,7 @@ func (db *DB) CheckCache(keywords, engine string) appfault.Result[*CacheEntry] {
 ### Get Nested Search Tree
 
 ```go
-func (db *DB) GetNestedSearchTree(rootId string, maxDepth int) appfault.Result[[]NestedSearch] {
+func (db *DB) GetNestedSearchTree(rootId string, maxDepth int) appfault.ResultSlice[NestedSearch] {
     var nested []NestedSearch
     err := db.Where("parent_search_id = ? AND depth <= ?", rootId, maxDepth).
         Preload("ChildSearch").

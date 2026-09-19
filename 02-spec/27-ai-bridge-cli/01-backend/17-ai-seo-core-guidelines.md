@@ -227,7 +227,7 @@ type ValidationDataService struct {
     cache sync.Map
 }
 
-func (s *ValidationDataService) GetSeoStringArray(key SeoKey) appfault.Result[[]string] {
+func (s *ValidationDataService) GetSeoStringArray(key SeoKey) appfault.ResultSlice[string] {
     cacheKey := string(CategorySeo) + ":" + string(key)
     // EXEMPTED: typed accessor internal — cache stores known []string values (§7.2)
     if cached, ok := s.cache.Load(cacheKey); ok {

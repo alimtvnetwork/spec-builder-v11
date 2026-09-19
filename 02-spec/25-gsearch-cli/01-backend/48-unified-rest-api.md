@@ -657,7 +657,7 @@ func RegisterSwagger(router *gin.Engine, cfg ApiConfig) {
 }
 
 // GenerateOpenApiSpec creates spec from route definitions
-func GenerateOpenApiSpec(router *gin.Engine) appfault.Result[[]byte] {
+func GenerateOpenApiSpec(router *gin.Engine) appfault.ResultSlice[byte] {
     spec := openapi3.T{
         OpenAPI: "3.1.0",
         Info: &openapi3.Info{

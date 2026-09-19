@@ -77,7 +77,7 @@ The modernization was executed across five sequential, bounded waves:
 
 #### Wave 4: Enum Body Synchronization (26 Enums)
 - In `25-gsearch-cli` and `35-wp-plugin-builder`, resolved internal body mismatches where `func Parse(...) appfault.Result[Variant]` previously returned `return Variant(i), nil` or `return Invalid, appfault.New(...)`.
-- Standardized `ParseMultiple(s string) appfault.Result[[]Variant]` to properly propagate monadic errors via `.HasError()` and `.AppError()`, returning `appfault.Ok(variants)`.
+- Standardized `ParseMultiple(s string) appfault.ResultSlice[Variant]` to properly propagate monadic errors via `.HasError()` and `.AppError()`, returning `appfault.Ok(variants)`.
 
 #### Wave 5: Monadic Result Body Remediation (5 Files)
 - Modernized domain service methods in `36-wp-seo-publish-cli` (`05-variable-system.md`, `06-split-db-schema.md`, `09-import-export.md`) and `60-ai-research` (`01-guide.md`, `05-guide.md`):

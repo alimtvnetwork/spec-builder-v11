@@ -235,7 +235,7 @@ type TokenCounter interface {
     Count(text string) appfault.Result[int]
     
     // CountBatch counts tokens for multiple texts
-    CountBatch(texts []string) appfault.Result[[]int]
+    CountBatch(texts []string) appfault.ResultSlice[int]
     
     // CountMessages counts tokens for chat message format
     CountMessages(messages []ChatMessage) appfault.Result[int]
@@ -350,7 +350,7 @@ func (t *TokenCounterImpl) countTokensHeuristic(text string) int {
 }
 
 // CountBatch counts tokens for multiple texts efficiently
-func (t *TokenCounterImpl) CountBatch(texts []string) appfault.Result[[]int] {
+func (t *TokenCounterImpl) CountBatch(texts []string) appfault.ResultSlice[int] {
     results := make([]int, len(texts))
     
     for i, text := range texts {
@@ -1141,7 +1141,7 @@ func (h *OverflowHandler) handleSegment(
 
 // ContentSummarizer interface for LLM-based summarization
 type ContentSummarizer interface {
-    Summarize(context stdctx.Context, blocks []ContextBlock, targetTokens int) appfault.Result[[]ContextBlock]
+    Summarize(context stdctx.Context, blocks []ContextBlock, targetTokens int) appfault.ResultSlice[ContextBlock]
 }
 ```
 

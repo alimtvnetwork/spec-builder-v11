@@ -238,7 +238,7 @@ type GitAdapter interface {
     // Commit operations
     Commit(files []string, message string) appfault.Result[string]
     GetCommit(sha string) appfault.Result[Commit]
-    GetCommitHistory(path string, limit int) appfault.Result[[]Commit]
+    GetCommitHistory(path string, limit int) appfault.ResultSlice[Commit]
     
     // Diff operations
     DiffCommits(from, to string) appfault.Result[DiffResult]
@@ -250,12 +250,12 @@ type GitAdapter interface {
     MergeBranch(source, target string) appfault.Result[MergeResult]
     
     // Blob operations
-    GetBlob(sha string) appfault.Result[[]byte]
-    GetBlobAtCommit(path, commitSha string) appfault.Result[[]byte]
+    GetBlob(sha string) appfault.ResultSlice[byte]
+    GetBlobAtCommit(path, commitSha string) appfault.ResultSlice[byte]
     
     // Tag operations (for snapshots)
     CreateTag(name, commitSha, message string) *appfault.AppError
-    ListTags() appfault.Result[[]Tag]
+    ListTags() appfault.ResultSlice[Tag]
     GetTaggedCommit(tagName string) appfault.Result[string]
 }
 ```

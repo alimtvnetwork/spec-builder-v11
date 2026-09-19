@@ -82,7 +82,7 @@ func (b *BingSearch) IsAvailable() bool {
 ### Search Execution
 
 ```go
-func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
+func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOptions) SearchResultSlice {
     if !b.quota.CanMakeRequest() {
         return appfault.Fail[[]Result](
             appfault.New(
@@ -185,10 +185,10 @@ type BingWebResult struct {
 
 ```go
 func (b *BingSearch) parseResults(resp BingSearchResponse) []Result {
-    var results []Result
+    var results []SearchResult
     
     for i, item := range resp.WebPages.Value {
-        results = append(results, Result{
+        results = append(results, SearchSearchResult{
             Title:       item.Name,
             Description: item.Snippet,
             Url:         item.Url,
@@ -240,7 +240,7 @@ type BingSearchOptions struct {
     Site       string // Limit to specific site
 }
 
-func (b *BingSearch) SearchAdvanced(context stdctx.Context, query string, opts BingSearchOptions) appfault.Result[[]Result] {
+func (b *BingSearch) SearchAdvanced(context stdctx.Context, query string, opts BingSearchOptions) SearchResultSlice {
     params := url.Values{}
     params.Set("q", b.buildAdvancedQuery(query, opts))
     params.Set("count", fmt.Sprintf("%d", opts.MaxResults))

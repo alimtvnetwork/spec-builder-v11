@@ -214,7 +214,7 @@ func NewEmbeddingService(db *db.DB, apiKey string) *EmbeddingService {
 }
 
 // EmbedDocument chunks and embeds a document
-func (s *EmbeddingService) EmbedDocument(context stdctx.Context, doc Document) appfault.Result[[]EmbeddedChunk] {
+func (s *EmbeddingService) EmbedDocument(context stdctx.Context, doc Document) appfault.ResultSlice[EmbeddedChunk] {
 	// Chunk the content
 	chunks := s.chunkText(doc.Content)
 	
@@ -331,7 +331,7 @@ func (s *EmbeddingService) generateEmbeddings(context stdctx.Context, texts []st
 }
 
 // EmbedQuery embeds a single query for search
-func (s *EmbeddingService) EmbedQuery(context stdctx.Context, query string) appfault.Result[[]float64] {
+func (s *EmbeddingService) EmbedQuery(context stdctx.Context, query string) appfault.ResultSlice[float64] {
 	embeddings, err := s.generateEmbeddings(context, []string{query})
 	if err != nil {
 		return nil, err
@@ -398,7 +398,7 @@ type SearchOptions struct {
 }
 
 // Search finds relevant chunks for a query
-func (s *SearchService) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]SearchResult] {
+func (s *SearchService) Search(context stdctx.Context, query string, opts SearchOptions) appfault.ResultSlice[SearchResult] {
 	// Embed the query
 	queryEmbedding, err := s.embedding.EmbedQuery(context, query)
 	if err != nil {
@@ -437,7 +437,7 @@ func (s *SearchService) Search(context stdctx.Context, query string, opts Search
 	return results, nil
 }
 
-func (s *SearchService) getCandidateChunks(context stdctx.Context, opts SearchOptions) appfault.Result[[]EmbeddedChunk] {
+func (s *SearchService) getCandidateChunks(context stdctx.Context, opts SearchOptions) appfault.ResultSlice[EmbeddedChunk] {
 	query := `
 		SELECT id, project_id, source_id, source_type, content, chunk_index, total_chunks,
 			   title, path, share_id, embedding, embedding_model, created_at, updated_at
@@ -982,7 +982,7 @@ func (w *IndexingWorker) indexSharedMemories(context stdctx.Context) {
 	}
 }
 
-func (w *IndexingWorker) getFilesNeedingIndexing(context stdctx.Context) appfault.Result[[]FileInfo] {
+func (w *IndexingWorker) getFilesNeedingIndexing(context stdctx.Context) appfault.ResultSlice[FileInfo] {
 	// Find files where hash changed or not indexed
 	rows, err := w.db.QueryContext(context, `
 		SELECT f.project_id, f.path, f.name, f.hash

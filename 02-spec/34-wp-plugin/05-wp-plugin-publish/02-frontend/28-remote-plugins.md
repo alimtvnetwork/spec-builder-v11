@@ -241,7 +241,7 @@ For detailed errors, the error is captured to the global error store with full c
 
 ```go
 // Get all plugins from remote site
-func (c *Client) ListPlugins() appfault.Result[[]PluginInfo]
+func (c *Client) ListPlugins() appfault.ResultSlice[PluginInfo]
 
 // Enable a plugin
 func (c *Client) EnablePlugin(slug string) *appfault.AppError
@@ -257,7 +257,7 @@ func (c *Client) DeletePlugin(slug string) *appfault.AppError
 
 ```go
 // Proxy methods that handle site lookup and client creation
-func (s *Service) GetRemotePlugins(siteId int64) appfault.Result[[]wordpress.PluginInfo]
+func (s *Service) GetRemotePlugins(siteId int64) appfault.ResultSlice[wordpress.PluginInfo]
 func (s *Service) EnableRemotePlugin(siteId int64, slug string) *appfault.AppError
 func (s *Service) DisableRemotePlugin(siteId int64, slug string) *appfault.AppError
 func (s *Service) DeleteRemotePlugin(siteId int64, slug string) error

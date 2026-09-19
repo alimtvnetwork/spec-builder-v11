@@ -2031,7 +2031,7 @@ func (c *LoopController) Execute(
     config LoopConfig,
     input block.BlockInput,
     callback block.StreamCallback,
-) appfault.Result[[]BlockOutputData] {
+) appfault.ResultSlice[BlockOutputData] {
     _, file, line, _ := runtime.Caller(0)
     
     maxConcurrency := config.MaxConcurrency
@@ -2070,7 +2070,7 @@ func (c *LoopController) executeForEach(
     input block.BlockInput,
     callback block.StreamCallback,
     maxConcurrency int,
-) appfault.Result[[]BlockOutputData] {
+) appfault.ResultSlice[BlockOutputData] {
     _, file, line, _ := runtime.Caller(0)
     
     // Get collection from input data — use json.RawMessage for arbitrary collection items
@@ -2222,7 +2222,7 @@ type Bridge struct {
 type CheckpointRepository interface {
     Create(context stdctx.Context, checkpoint model.Checkpoint) *appfault.AppError
     GetLatest(context stdctx.Context, executionId string) appfault.Result[model.Checkpoint]
-    List(context stdctx.Context, executionId string) appfault.Result[[]model.Checkpoint]
+    List(context stdctx.Context, executionId string) appfault.ResultSlice[model.Checkpoint]
 }
 
 // NewBridge creates a new RES bridge

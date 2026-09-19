@@ -365,7 +365,7 @@ func (db *DB) UpdateCacheValidity(keyHash string, valid bool) *appfault.AppError
     return nil
 }
 
-func (db *DB) FindCacheEntriesByKeyword(keyword string) appfault.Result[[]models.CacheEntry] {
+func (db *DB) FindCacheEntriesByKeyword(keyword string) appfault.ResultSlice[models.CacheEntry] {
     var entries []models.CacheEntry
     pattern := "%" + keyword + "%"
     if err := db.Where("keywords LIKE ?", pattern).Find(&entries).Error; err != nil {

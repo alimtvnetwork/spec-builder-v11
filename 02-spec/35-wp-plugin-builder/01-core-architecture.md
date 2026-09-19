@@ -157,7 +157,7 @@ type RAGVector struct {
 }
 
 func (r *RAGService) Index(content string, source string) *appfault.AppError
-func (r *RAGService) Query(prompt string, topK int) appfault.Result[[]RAGResult]
+func (r *RAGService) Query(prompt string, topK int) appfault.ResultSlice[RAGResult]
 func (r *RAGService) ImportPreset(path string) *appfault.AppError
 ```
 
@@ -208,7 +208,7 @@ type AIRequest struct {
 }
 
 func (c *AIBridgeClient) Generate(req AIRequest) appfault.Result[string]
-func (c *AIBridgeClient) Embed(text string) appfault.Result[[]float32]
+func (c *AIBridgeClient) Embed(text string) appfault.ResultSlice[float32]
 func (c *AIBridgeClient) Stream(req AIRequest, handler StreamHandler) *appfault.AppError
 ```
 

@@ -366,7 +366,7 @@ func (sp *SpecParser) extractPRDSection(content, sectionName string) string {
 ## Zip Processing
 
 ```go
-func (sp *SpecParser) extractAndReadZip(path string) appfault.Result[[]SpecFile] {
+func (sp *SpecParser) extractAndReadZip(path string) appfault.ResultSlice[SpecFile] {
     // Create temp directory
     tempDir, err := pathutil.MkdirTemp("", "wpb-spec-*")
     if err != nil {
@@ -383,7 +383,7 @@ func (sp *SpecParser) extractAndReadZip(path string) appfault.Result[[]SpecFile]
     return sp.readFolder(tempDir)
 }
 
-func (sp *SpecParser) readFolder(path string) appfault.Result[[]SpecFile] {
+func (sp *SpecParser) readFolder(path string) appfault.ResultSlice[SpecFile] {
     var files []SpecFile
     
     err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {

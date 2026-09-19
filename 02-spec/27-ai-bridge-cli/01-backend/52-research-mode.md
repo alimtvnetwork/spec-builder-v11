@@ -276,19 +276,19 @@ type ResearchService interface {
     GetStatus(context stdctx.Context, id string) appfault.Result[*ResearchStatus]
     GetResult(context stdctx.Context, id string) appfault.Result[*ResearchResult]
     Cancel(context stdctx.Context, id string) *appfault.AppError
-    List(context stdctx.Context, sessionId string, opts ListOptions) appfault.Result[[]Research]
+    List(context stdctx.Context, sessionId string, opts ListOptions) appfault.ResultSlice[Research]
 }
 
 type ResearchPlanner interface {
     AnalyzeQuery(query string) appfault.Result[*QueryAnalysis]
-    GenerateSubtasks(analysis *QueryAnalysis, config SourceConfig) appfault.Result[[]ResearchSubtask]
+    GenerateSubtasks(analysis *QueryAnalysis, config SourceConfig) appfault.ResultSlice[ResearchSubtask]
     EstimateTokenBudget(subtasks []ResearchSubtask, lengthConfig OutputLengthConfig) appfault.Result[int]
 }
 
 type ResearchGatherer interface {
     ExecuteSubtasks(context stdctx.Context, subtasks []ResearchSubtask) appfault.Result[<-chan SubtaskResult]
-    FetchSources(context stdctx.Context, urls []string) appfault.Result[[]SourceContent]
-    QueryRag(context stdctx.Context, query string, limit int) appfault.Result[[]RagChunk]
+    FetchSources(context stdctx.Context, urls []string) appfault.ResultSlice[SourceContent]
+    QueryRag(context stdctx.Context, query string, limit int) appfault.ResultSlice[RagChunk]
 }
 
 // CitatedContent holds content with its citations after processing

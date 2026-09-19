@@ -480,7 +480,7 @@ func (m *DbManager) GetOrCreateDb(projectSlug, dbType, entityId string) appfault
 }
 
 // ListDatabases returns all databases for a project
-func (m *DbManager) ListDatabases(projectSlug string) appfault.Result[[]Database] {
+func (m *DbManager) ListDatabases(projectSlug string) appfault.ResultSlice[Database] {
     query := `
         SELECT d.id, d.project_id, d.type, d.entity_id, d.path, 
                d.size_bytes, d.record_count, d.status, d.created_at, d.updated_at

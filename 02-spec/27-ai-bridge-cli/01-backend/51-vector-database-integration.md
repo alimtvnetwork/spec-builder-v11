@@ -47,7 +47,7 @@ type VectorStore interface {
     // Collection management
     CreateCollection(context stdctx.Context, name string, config CollectionConfig) *appfault.AppError
     DeleteCollection(context stdctx.Context, name string) *appfault.AppError
-    ListCollections(context stdctx.Context) appfault.Result[[]CollectionInfo]
+    ListCollections(context stdctx.Context) appfault.ResultSlice[CollectionInfo]
     
     // Document operations
     AddDocuments(context stdctx.Context, collection string, docs []Document) *appfault.AppError
@@ -56,7 +56,7 @@ type VectorStore interface {
     
     // Search operations
     Query(context stdctx.Context, collection string, query QueryRequest) appfault.Result[QueryResult]
-    QueryMultiple(context stdctx.Context, queries []MultiQueryRequest) appfault.Result[[]QueryResult]
+    QueryMultiple(context stdctx.Context, queries []MultiQueryRequest) appfault.ResultSlice[QueryResult]
     
     // Persistence
     Persist(context stdctx.Context) *appfault.AppError
@@ -197,7 +197,7 @@ type MetadataFilter struct {
 // EmbeddingProvider generates vector embeddings
 type EmbeddingProvider interface {
     // Generate embedding for single text
-    Embed(context stdctx.Context, text string) appfault.Result[[]float32]
+    Embed(context stdctx.Context, text string) appfault.ResultSlice[float32]
     
     // Batch embedding generation
     EmbedBatch(context stdctx.Context, texts []string) appfault.Result[[][]float32]
@@ -351,7 +351,7 @@ type OllamaEmbedOptions struct {
 }
 
 // Embed generates embedding via Ollama
-func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) appfault.Result[[]float32] {
+func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) appfault.ResultSlice[float32] {
     start := time.Now()
     
     req := OllamaEmbedRequest{

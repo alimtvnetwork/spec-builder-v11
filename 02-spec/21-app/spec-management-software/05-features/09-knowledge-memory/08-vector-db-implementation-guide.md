@@ -277,7 +277,7 @@ func (v *VectorSearchService) SearchHybrid(
     queryEmbedding []float32,
     queryText string,
     limit int,
-) appfault.Result[[]ChunkScore] {
+) appfault.ResultSlice[ChunkScore] {
     if limit <= 0 {
         limit = v.config.DefaultLimit
     }
@@ -293,7 +293,7 @@ func (v *VectorSearchService) SearchHybrid(
 }
 
 // SearchSemantic performs vector similarity search
-func (v *VectorSearchService) SearchSemantic(context stdctx.Context, queryEmbed []float32, limit int) appfault.Result[[]ChunkScore] {
+func (v *VectorSearchService) SearchSemantic(context stdctx.Context, queryEmbed []float32, limit int) appfault.ResultSlice[ChunkScore] {
     if !v.vssLoaded {
         return nil, appfault.New(
             ErrVssNotAvailable,
@@ -335,7 +335,7 @@ func (v *VectorSearchService) SearchSemantic(context stdctx.Context, queryEmbed 
 }
 
 // SearchKeyword performs FTS5 search
-func (v *VectorSearchService) SearchKeyword(context stdctx.Context, query string, limit int) appfault.Result[[]ChunkScore] {
+func (v *VectorSearchService) SearchKeyword(context stdctx.Context, query string, limit int) appfault.ResultSlice[ChunkScore] {
     var results []struct {
         ChunkId       string  `gorm:"column:chunk_id"`
         SectionAnchor string  `gorm:"column:section_anchor"`
@@ -772,7 +772,7 @@ func NewSegmentationParser(counter *TokenCounter, config SegmentationConfig) *Se
 }
 
 // Parse splits instruction into sections
-func (p *SegmentationParser) Parse(context stdctx.Context, content string) appfault.Result[[]ParsedSection] {
+func (p *SegmentationParser) Parse(context stdctx.Context, content string) appfault.ResultSlice[ParsedSection] {
     lines := strings.Split(content, "\n")
     sections := make([]ParsedSection, 0)
 
@@ -921,7 +921,7 @@ func NewDependencyResolver(rules []KeywordRule) *DependencyResolver {
 }
 
 // TopologicalSort returns execution order
-func (r *DependencyResolver) TopologicalSort(sections []ParsedSection) appfault.Result[[]int] {
+func (r *DependencyResolver) TopologicalSort(sections []ParsedSection) appfault.ResultSlice[int] {
     n := len(sections)
     adjacency := make(map[int][]int)
     inDegree := make([]int, n)
