@@ -141,7 +141,7 @@ session, err := sessionService.GetSession(sessionId string) appfault.Result[Sess
 logs, err := sessionService.GetSessionLogs(sessionId string) appfault.Result[string]
 
 // List recent sessions
-sessions, err := sessionService.ListSessions(limit int) appfault.Result[[]*SessionSummary]
+sessions, err := sessionService.ListSessions(limit int) appfault.ResultSlice[*SessionSummary]
 
 // Delete a session
 err := sessionService.DeleteSession(sessionId string) error

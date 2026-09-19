@@ -489,10 +489,10 @@ type CommandRegistry interface {
     GetByName(name string) appfault.Result[*Command]
     
     // Match finds commands matching the input text
-    Match(input string) appfault.Result[[]*Command]
+    Match(input string) appfault.ResultSlice[*Command]
     
     // List returns all registered commands
-    List(filter *CommandFilter) appfault.Result[[]*Command]
+    List(filter *CommandFilter) appfault.ResultSlice[*Command]
     
     // LoadBuiltIn loads all built-in commands
     LoadBuiltIn() *appfault.AppError
@@ -512,10 +512,10 @@ type CommandFilter struct {
 // ParallelFetcher handles concurrent URL and file fetching
 type ParallelFetcher interface {
     // FetchUrls fetches multiple URLs concurrently
-    FetchUrls(context stdctx.Context, urls []string, opts *FetchOptions) appfault.Result[[]*FetchResult]
+    FetchUrls(context stdctx.Context, urls []string, opts *FetchOptions) appfault.ResultSlice[*FetchResult]
     
     // FetchFiles reads multiple files concurrently
-    FetchFiles(context stdctx.Context, paths []string, opts *FileOptions) appfault.Result[[]*FileResult]
+    FetchFiles(context stdctx.Context, paths []string, opts *FileOptions) appfault.ResultSlice[*FileResult]
 }
 
 // FetchOptions configures URL fetching
