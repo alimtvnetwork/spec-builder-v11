@@ -81,7 +81,7 @@ func (r *Retriever) Retrieve(
     query string,
     sessionId string,
     config RetrievalConfig,
-) appfault.ResultSlice[RetrievalResult] {
+) RetrievalResultSlice {
     // Step 1: Extract keywords
     keywords := r.ExtractKeywords(query)
 

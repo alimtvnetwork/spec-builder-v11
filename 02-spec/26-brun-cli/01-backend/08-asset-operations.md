@@ -212,7 +212,7 @@ func (c *AssetCopier) executeOperation(op AssetOperation) appfault.Result[CopyRe
 ### Pattern Support
 
 ```go
-func (c *AssetCopier) getFilesToCopy(op AssetOperation) appfault.ResultSlice[string] {
+func (c *AssetCopier) getFilesToCopy(op AssetOperation) StringSlice {
     var files []string
     
     err := filepath.Walk(op.Source, func(path string, info os.FileInfo, err error) error {

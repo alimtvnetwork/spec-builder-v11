@@ -212,11 +212,11 @@ CREATE INDEX IdxExecutionsStatus ON ScheduleExecutions(Status);
 type SchedulerService interface {
     Create(context stdctx.Context, req CreateScheduleRequest) appfault.Result[*Schedule]
     Get(context stdctx.Context, id string) appfault.Result[*Schedule]
-    List(context stdctx.Context, opts ListOptions) appfault.ResultSlice[Schedule]
+    List(context stdctx.Context, opts ListOptions) ScheduleSlice
     Update(context stdctx.Context, id string, req UpdateScheduleRequest) appfault.Result[*Schedule]
     Delete(context stdctx.Context, id string) *appfault.AppError
     RunNow(context stdctx.Context, id string) appfault.Result[*ScheduleExecution]
-    GetHistory(context stdctx.Context, id string, opts ListOptions) appfault.ResultSlice[ScheduleExecution]
+    GetHistory(context stdctx.Context, id string, opts ListOptions) ScheduleExecutionSlice
     Start() *appfault.AppError
     Stop() *appfault.AppError
 }

@@ -98,13 +98,13 @@ import (
 type Service interface {
 	// Publishing
 	Publish(context stdctx.Context, pluginId, siteId int64, opts PublishOptions) appfault.Result[*PublishResult]
-	PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) appfault.ResultSlice[PublishResult]
+	PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) PublishResultSlice
 
 	// Packaging
 	CreatePackage(context stdctx.Context, pluginId int64, files []string) appfault.Result[*PackageInfo]
 
 	// History
-	GetHistory(context stdctx.Context, pluginId int64, siteId *int64) appfault.ResultSlice[PublishResult]
+	GetHistory(context stdctx.Context, pluginId int64, siteId *int64) PublishResultSlice
 
 	// Rollback
 	Rollback(context stdctx.Context, pluginId, siteId, backupId int64) appfault.Result[*PublishResult]
@@ -349,7 +349,7 @@ func (s *serviceImpl) failPublish(result *PublishResult, stage string, err error
 	return appfault.Fail[PublishResult](appfault.Wrap(err, appfault.ErrPublishFailed, stage))
 }
 
-func (s *serviceImpl) PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) appfault.ResultSlice[PublishResult] {
+func (s *serviceImpl) PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) PublishResultSlice {
 	mappings, err := s.pluginService.GetMappings(context, pluginId)
 	if err != nil {
 		return nil, err
@@ -364,7 +364,7 @@ func (s *serviceImpl) PublishToAll(context stdctx.Context, pluginId int64, opts 
 	return results, nil
 }
 
-func (s *serviceImpl) GetHistory(context stdctx.Context, pluginId int64, siteId *int64) appfault.ResultSlice[PublishResult] {
+func (s *serviceImpl) GetHistory(context stdctx.Context, pluginId int64, siteId *int64) PublishResultSlice {
 	// TODO: Query publish history from database
 	return []PublishResult{}, nil
 }

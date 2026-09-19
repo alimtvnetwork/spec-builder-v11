@@ -572,7 +572,7 @@ func (s *CheckerService) calculateSummary(
 func (s *CheckerService) findOrphans(
 	context stdctx.Context,
 	files []models.FileInfo,
-) appfault.ResultSlice[models.ConsistencyIssue] {
+) ConsistencyIssueSlice {
 	// Build a set of all referenced files
 	referenced := make(map[string]bool)
 	
@@ -681,7 +681,7 @@ func (s *Scanner) ScanDirectory(
 	context stdctx.Context,
 	rootPath string,
 	config *models.ScanConfig,
-) appfault.ResultSlice[models.FileInfo] {
+) FileInfoSlice {
 	var files []models.FileInfo
 
 	err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
@@ -937,7 +937,7 @@ func (v *LinkValidator) ValidateAll(
 	context stdctx.Context,
 	files []models.FileInfo,
 	rootPath string,
-) appfault.ResultSlice[models.ConsistencyIssue] {
+) ConsistencyIssueSlice {
 	var issues []models.ConsistencyIssue
 
 	// Pre-populate heading cache
@@ -1246,7 +1246,7 @@ func (v *NamingValidator) ValidateAll(
 	context stdctx.Context,
 	files []models.FileInfo,
 	rootPath string,
-) appfault.ResultSlice[models.ConsistencyIssue] {
+) ConsistencyIssueSlice {
 	var issues []models.ConsistencyIssue
 	checkedDirs := make(map[string]bool)
 
@@ -1365,7 +1365,7 @@ func NewDuplicateFinder() *DuplicateFinder {
 func (d *DuplicateFinder) FindAll(
 	context stdctx.Context,
 	files []models.FileInfo,
-) appfault.ResultSlice[models.ConsistencyIssue] {
+) ConsistencyIssueSlice {
 	var issues []models.ConsistencyIssue
 
 	// Collect all definitions
@@ -1559,7 +1559,7 @@ func (c *CompletenessChecker) registerPatterns() {
 func (c *CompletenessChecker) CheckAll(
 	context stdctx.Context,
 	files []models.FileInfo,
-) appfault.ResultSlice[models.ConsistencyIssue] {
+) ConsistencyIssueSlice {
 	var issues []models.ConsistencyIssue
 
 	for _, file := range files {
@@ -1942,7 +1942,7 @@ func (r *ConsistencyRepo) GetReportHistory(
 	context stdctx.Context,
 	projectId string,
 	limit int,
-) appfault.ResultSlice[models.ConsistencyReport] {
+) ConsistencyReportSlice {
 	rows, err := r.db.QueryContext(context, `
 		SELECT Id, ProjectId, Status, Score, Grade, 
 		       SummaryJson, FindingsJson, DurationMs,

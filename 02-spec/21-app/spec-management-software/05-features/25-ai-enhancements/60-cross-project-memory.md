@@ -326,7 +326,7 @@ func (s *ShareService) Share(context stdctx.Context, req ShareRequest) appfault.
 }
 
 // GetSharedMemories returns all memories shared TO a project
-func (s *ShareService) GetSharedMemories(context stdctx.Context, projectId string) appfault.ResultSlice[MemoryShare] {
+func (s *ShareService) GetSharedMemories(context stdctx.Context, projectId string) MemoryShareSlice {
 	rows, err := s.db.QueryContext(context, `
 		SELECT id, source_project_id, target_project_id, memory_type, memory_path, 
 		       memory_name, permissions, sync_status, shared_by, shared_at, last_synced_at

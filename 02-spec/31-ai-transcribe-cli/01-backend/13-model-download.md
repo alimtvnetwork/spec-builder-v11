@@ -86,7 +86,7 @@ type ModelDownloader interface {
     GetModel(context stdctx.Context, modelId string) appfault.Result[Model]
     
     // ListModels returns available models
-    ListModels(modelType ModelType) appfault.ResultSlice[ModelInfo]
+    ListModels(modelType ModelType) ModelInfoSlice
     
     // DeleteModel removes a cached model
     DeleteModel(modelId string) *appfault.AppError
@@ -223,9 +223,9 @@ func (d *modelDownloader) Download(context stdctx.Context, modelId string, opts 
 // ModelRegistry provides model metadata
 type ModelRegistry interface {
     GetModelInfo(modelId string) appfault.Result[ModelInfo]
-    ListAvailable(modelType ModelType) appfault.ResultSlice[ModelInfo]
-    CheckUpdates(installed []string) appfault.ResultSlice[UpdateInfo]
-    GetMirrors(modelId string) appfault.ResultSlice[MirrorInfo]
+    ListAvailable(modelType ModelType) ModelInfoSlice
+    CheckUpdates(installed []string) UpdateInfoSlice
+    GetMirrors(modelId string) MirrorInfoSlice
 }
 
 type ModelInfo struct {

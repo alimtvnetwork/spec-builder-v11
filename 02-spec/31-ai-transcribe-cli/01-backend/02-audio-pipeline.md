@@ -384,7 +384,7 @@ type EncoderConfig struct {
     Quality    int    // 0-10 for variable bitrate
 }
 
-func (ae *AudioEncoder) Encode(chunk *AudioChunk) appfault.ResultSlice[byte] {
+func (ae *AudioEncoder) Encode(chunk *AudioChunk) ByteSlice {
     switch ae.format {
     case "pcm":
         return chunk.Data, nil
@@ -406,7 +406,7 @@ func (ae *AudioEncoder) Encode(chunk *AudioChunk) appfault.ResultSlice[byte] {
     }
 }
 
-func (ae *AudioEncoder) encodeOpus(chunk *AudioChunk) appfault.ResultSlice[byte] {
+func (ae *AudioEncoder) encodeOpus(chunk *AudioChunk) ByteSlice {
     encoder, err := opus.NewEncoder(ae.sampleRate, 1, opus.AppVoIP)
     if err != nil {
         return nil, err

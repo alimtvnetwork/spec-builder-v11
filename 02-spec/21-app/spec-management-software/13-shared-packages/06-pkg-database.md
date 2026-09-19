@@ -474,7 +474,7 @@ type Migration struct {
 
 // MigrationSource provides migrations
 type MigrationSource interface {
-    Migrations() appfault.ResultSlice[Migration]
+    Migrations() MigrationSlice
 }
 
 // EmbedSource loads migrations from embedded files
@@ -484,7 +484,7 @@ type EmbedSource struct {
 }
 
 // Migrations loads migrations from embedded filesystem
-func (s *EmbedSource) Migrations() appfault.ResultSlice[Migration] {
+func (s *EmbedSource) Migrations() MigrationSlice {
     var migrations []Migration
     
     entries, err := fs.ReadDir(s.FS, s.Dir)
@@ -642,7 +642,7 @@ func (m *Migrator) Rollback(context stdctx.Context, n int) error {
 }
 
 // Status returns the status of all migrations
-func (m *Migrator) Status(context stdctx.Context) appfault.ResultSlice[Migration] {
+func (m *Migrator) Status(context stdctx.Context) MigrationSlice {
     migrations, err := m.source.Migrations()
     if err != nil {
         return nil, err

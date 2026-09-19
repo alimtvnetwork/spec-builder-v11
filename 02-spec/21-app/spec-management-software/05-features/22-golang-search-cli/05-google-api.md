@@ -221,7 +221,7 @@ type SearchAnalytics struct {
     Position    float64
 }
 
-func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startDate, endDate string) appfault.ResultSlice[SearchAnalytics] {
+func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startDate, endDate string) SearchAnalyticsSlice {
     req := &searchconsole.SearchAnalyticsQueryRequest{
         StartDate:  startDate,
         EndDate:    endDate,

@@ -176,7 +176,7 @@ type MatchResult struct {
     Score       float64
 }
 
-func (tm *TaskMatcher) FindReusableCode(requestTags []string, minOverlap int) appfault.ResultSlice[MatchResult] {
+func (tm *TaskMatcher) FindReusableCode(requestTags []string, minOverlap int) MatchResultSlice {
     if len(requestTags) == 0 {
         return nil, nil
     }

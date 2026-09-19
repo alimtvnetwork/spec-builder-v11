@@ -167,7 +167,7 @@ func (c *Chunker) Chunk(text string) []Chunk {
 ### Via AI Bridge
 
 ```go
-func (r *RAGService) Embed(text string) appfault.ResultSlice[float32] {
+func (r *RAGService) Embed(text string) Float32Slice {
     resp, err := r.aiBridge.Embed(AIEmbedRequest{
         Input: text,
         Model: r.config.EmbeddingModel,
@@ -221,7 +221,7 @@ func (v *VectorStore) Insert(vec RAGVector) error {
     return v.db.Create(&vec).Error
 }
 
-func (v *VectorStore) Search(query []float32, topK int, minScore float64) appfault.ResultSlice[RAGResult] {
+func (v *VectorStore) Search(query []float32, topK int, minScore float64) RAGResultSlice {
     queryBlob := serializeFloat32(query)
     
     // ORM EXCEPTION: db.Raw() required — sqlite-vec cosine similarity
@@ -354,7 +354,7 @@ func (r *RAGService) ImportPreset(path string) appfault.Result[*Preset] {
 ### Context Retrieval
 
 ```go
-func (r *RAGService) Query(prompt string, topK int) appfault.ResultSlice[RAGResult] {
+func (r *RAGService) Query(prompt string, topK int) RAGResultSlice {
     // 1. Embed the query
     queryVec, err := r.Embed(prompt)
     if err != nil {

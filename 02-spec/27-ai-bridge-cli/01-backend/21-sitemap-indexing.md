@@ -310,7 +310,7 @@ type FoundLink struct {
 func (s *InternalLinkService) FindLinksForKeywords(
     keywords []string,
     config *LinkFinderConfig,
-) appfault.ResultSlice[FoundLink] {
+) FoundLinkSlice {
     var links []FoundLink
     generatedCount := 0
     

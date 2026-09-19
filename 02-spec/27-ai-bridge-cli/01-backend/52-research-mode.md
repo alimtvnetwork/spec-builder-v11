@@ -276,19 +276,19 @@ type ResearchService interface {
     GetStatus(context stdctx.Context, id string) appfault.Result[*ResearchStatus]
     GetResult(context stdctx.Context, id string) appfault.Result[*ResearchResult]
     Cancel(context stdctx.Context, id string) *appfault.AppError
-    List(context stdctx.Context, sessionId string, opts ListOptions) appfault.ResultSlice[Research]
+    List(context stdctx.Context, sessionId string, opts ListOptions) ResearchSlice
 }
 
 type ResearchPlanner interface {
     AnalyzeQuery(query string) appfault.Result[*QueryAnalysis]
-    GenerateSubtasks(analysis *QueryAnalysis, config SourceConfig) appfault.ResultSlice[ResearchSubtask]
+    GenerateSubtasks(analysis *QueryAnalysis, config SourceConfig) ResearchSubtaskSlice
     EstimateTokenBudget(subtasks []ResearchSubtask, lengthConfig OutputLengthConfig) appfault.Result[int]
 }
 
 type ResearchGatherer interface {
     ExecuteSubtasks(context stdctx.Context, subtasks []ResearchSubtask) appfault.Result[<-chan SubtaskResult]
-    FetchSources(context stdctx.Context, urls []string) appfault.ResultSlice[SourceContent]
-    QueryRag(context stdctx.Context, query string, limit int) appfault.ResultSlice[RagChunk]
+    FetchSources(context stdctx.Context, urls []string) SourceContentSlice
+    QueryRag(context stdctx.Context, query string, limit int) RagChunkSlice
 }
 
 // CitatedContent holds content with its citations after processing

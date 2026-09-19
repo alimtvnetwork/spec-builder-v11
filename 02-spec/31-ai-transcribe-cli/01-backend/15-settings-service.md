@@ -64,12 +64,12 @@ type SettingsService interface {
     GetFloat(category ConfigCategory, key string) appfault.Result[float64]
     GetInt(category ConfigCategory, key string) appfault.Result[int]
     GetBool(category ConfigCategory, key string) appfault.Result[bool]
-    GetStringSlice(category ConfigCategory, key string) appfault.ResultSlice[string]
+    GetStringSlice(category ConfigCategory, key string) StringSlice
     Update(category ConfigCategory, key string, value any) *appfault.AppError
     ResetToDefault(category ConfigCategory, key string) *appfault.AppError
     ResetCategoryToDefault(category ConfigCategory) *appfault.AppError
     SeedFromFile(filepath string) *appfault.AppError
-    GetByCategory(category ConfigCategory) appfault.ResultSlice[Setting]
+    GetByCategory(category ConfigCategory) SettingSlice
     InvalidateCache() *appfault.AppError
 }
 ```

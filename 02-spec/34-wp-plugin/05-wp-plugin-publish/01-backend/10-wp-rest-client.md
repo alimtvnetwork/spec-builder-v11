@@ -30,7 +30,7 @@ type Client interface {
     GetSiteInfo(context stdctx.Context, url, username, password string) appfault.Result[*SiteInfo]
     
     // Plugin operations
-    ListPlugins(context stdctx.Context, url, username, password string) appfault.ResultSlice[Plugin]
+    ListPlugins(context stdctx.Context, url, username, password string) PluginSlice
     GetPlugin(context stdctx.Context, url, username, password, slug string) appfault.Result[*Plugin]
     ActivatePlugin(context stdctx.Context, url, username, password, slug string) *appfault.AppError
     DeactivatePlugin(context stdctx.Context, url, username, password, slug string) *appfault.AppError
@@ -40,7 +40,7 @@ type Client interface {
     UploadPlugin(context stdctx.Context, url, username, password string, zipPath string) appfault.Result[*UploadResult]
     
     // Plugin files (if supported by a companion plugin)
-    GetPluginFiles(context stdctx.Context, url, username, password, slug string) appfault.ResultSlice[RemoteFile]
+    GetPluginFiles(context stdctx.Context, url, username, password, slug string) RemoteFileSlice
     UploadPluginFile(context stdctx.Context, url, username, password, slug, filePath string, content []byte) *appfault.AppError
     
     // Health check
@@ -339,7 +339,7 @@ import (
     "wp-plugin-publish/pkg/appfault"
 )
 
-func (c *clientImpl) ListPlugins(context stdctx.Context, url, username, password string) appfault.ResultSlice[Plugin] {
+func (c *clientImpl) ListPlugins(context stdctx.Context, url, username, password string) PluginSlice {
     c.log.Debug("Listing plugins", "url", url)
     
     url = strings.TrimSuffix(url, "/")
@@ -589,7 +589,7 @@ func (c *clientImpl) UploadPlugin(context stdctx.Context, url, username, passwor
 }
 
 // GetPluginFiles requires a companion WP plugin to expose file information
-func (c *clientImpl) GetPluginFiles(context stdctx.Context, url, username, password, slug string) appfault.ResultSlice[RemoteFile] {
+func (c *clientImpl) GetPluginFiles(context stdctx.Context, url, username, password, slug string) RemoteFileSlice {
     c.log.Debug("Getting plugin files", "url", url, "slug", slug)
     
     // This requires a custom endpoint - the standard WP REST API doesn't expose plugin files

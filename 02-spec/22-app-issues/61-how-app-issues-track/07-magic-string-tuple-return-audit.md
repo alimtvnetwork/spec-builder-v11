@@ -81,7 +81,7 @@ Per memory `architecture/coding-standards/function-design`: Every function must 
 | Sub-violation | Description | ~Count |
 |---------------|-------------|--------|
 | `(*Type, error)` — raw `error` | Must be `*appfault.AppError` | ~1,250 |
-| `([]Type, error)` — slice + raw error | Must be `appfault.ResultSlice[Type]` | ~48 |
+| `([]Type, error)` — slice + raw error | Must be `TypeSlice` | ~48 |
 | `(string, error)` — primitive + raw error | Must be `appfault.Result[string]` | ~30 |
 
 ### Required fix pattern

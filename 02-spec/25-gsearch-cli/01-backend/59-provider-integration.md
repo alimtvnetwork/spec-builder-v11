@@ -62,7 +62,7 @@ type Provider interface {
     Search(context stdctx.Context, req *SearchRequest) appfault.Result[*SearchResponse]
     
     // SearchParallel executes multiple searches in parallel
-    SearchParallel(context stdctx.Context, reqs []*SearchRequest) appfault.ResultSlice[*SearchResponse]
+    SearchParallel(context stdctx.Context, reqs []*SearchRequest) SearchResponseSlice
     
     // HealthCheck verifies provider connectivity
     HealthCheck(context stdctx.Context) *appfault.AppError
@@ -278,7 +278,7 @@ func (p *SerpApiProvider) Search(context stdctx.Context, req *serpProvider.Searc
     return appfault.Ok(p.convertToUnified(req, &serpResp, time.Since(startTime)))
 }
 
-func (p *SerpApiProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) appfault.ResultSlice[*serpProvider.SearchResponse] {
+func (p *SerpApiProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) SearchResponseSlice {
     results := make([]*serpProvider.SearchResponse, len(reqs))
     var wg sync.WaitGroup
     errChan := make(chan *appfault.AppError, len(reqs))
@@ -475,7 +475,7 @@ func (p *MapsScraperProvider) Search(context stdctx.Context, req *serpProvider.S
     return appfault.Ok(response)
 }
 
-func (p *MapsScraperProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) appfault.ResultSlice[*serpProvider.SearchResponse] {
+func (p *MapsScraperProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) SearchResponseSlice {
     // Maps scraper already supports internal concurrency
     results := make([]*serpProvider.SearchResponse, len(reqs))
     var wg sync.WaitGroup
@@ -752,7 +752,7 @@ func (p *CollyProvider) Search(context stdctx.Context, req *serpProvider.SearchR
     return appfault.Ok(response)
 }
 
-func (p *CollyProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) appfault.ResultSlice[*serpProvider.SearchResponse] {
+func (p *CollyProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) SearchResponseSlice {
     results := make([]*serpProvider.SearchResponse, len(reqs))
     var wg sync.WaitGroup
     errChan := make(chan *appfault.AppError, len(reqs))

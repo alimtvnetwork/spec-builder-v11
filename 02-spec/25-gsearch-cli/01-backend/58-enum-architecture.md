@@ -322,7 +322,7 @@ func Parse(s string) appfault.Result[Variant] {
     ))
 }
 
-func ParseMultiple(s string) appfault.ResultSlice[Variant] {
+func ParseMultiple(s string) VariantSlice {
     if s == "" {
         return appfault.Ok([]Variant{})
     }

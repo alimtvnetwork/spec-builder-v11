@@ -509,7 +509,7 @@ func NewFTSEngine(db *sql.DB, logger *logging.Logger) *FTSEngine {
 }
 
 // Search performs FTS5 search
-func (e *FTSEngine) Search(context stdctx.Context, req model.SearchRequest) appfault.ResultSlice[model.SearchResult] {
+func (e *FTSEngine) Search(context stdctx.Context, req model.SearchRequest) SearchResultSlice {
     _, file, line, _ := runtime.Caller(0)
     start := time.Now()
     
@@ -648,7 +648,7 @@ func NewVSSEngine(db *sql.DB, embeddingClient *EmbeddingService, logger *logging
 }
 
 // Search performs vector similarity search
-func (e *VSSEngine) Search(context stdctx.Context, req model.SearchRequest) appfault.ResultSlice[model.SearchResult] {
+func (e *VSSEngine) Search(context stdctx.Context, req model.SearchRequest) SearchResultSlice {
     _, file, line, _ := runtime.Caller(0)
     start := time.Now()
     
@@ -1157,7 +1157,7 @@ func NewEmbeddingService(aiBridgeUrl, modelName string, dimensions int, logger *
 }
 
 // GenerateEmbedding generates embedding for a single text
-func (s *EmbeddingService) GenerateEmbedding(context stdctx.Context, text string) appfault.ResultSlice[float32] {
+func (s *EmbeddingService) GenerateEmbedding(context stdctx.Context, text string) Float32Slice {
     embeddings, err := s.GenerateEmbeddings(context, []string{text})
     if err != nil {
         return nil, err
@@ -1310,7 +1310,7 @@ type RagPipeline struct {
 
 // ChunkRepository interface for chunk access
 type ChunkRepository interface {
-    GetRecentChunks(context stdctx.Context, projectId types.ProjectId, limit int) appfault.ResultSlice[model.Chunk]
+    GetRecentChunks(context stdctx.Context, projectId types.ProjectId, limit int) ChunkSlice
     GetChunkById(context stdctx.Context, chunkId types.ChunkId) appfault.Result[model.Chunk]
 }
 

@@ -272,7 +272,7 @@ func (m *MockTokenCounter) Count(text string) appfault.Result[int] {
     return int(float64(len(text)) / m.CharsPerToken), nil
 }
 
-func (m *MockTokenCounter) CountBatch(texts []string) appfault.ResultSlice[int] {
+func (m *MockTokenCounter) CountBatch(texts []string) IntSlice {
     results := make([]int, len(texts))
     for i, text := range texts {
         count, _ := m.Count(text)
@@ -348,7 +348,7 @@ func (m *MockAIService) Summarize(context stdctx.Context, content string, maxTok
     return "### Summary\n" + strings.Join(words, " "), nil
 }
 
-func (m *MockAIService) Embed(context stdctx.Context, text string) appfault.ResultSlice[float32] {
+func (m *MockAIService) Embed(context stdctx.Context, text string) Float32Slice {
     m.mu.Lock()
     m.CallCount["embed"]++
     m.mu.Unlock()

@@ -132,7 +132,7 @@ type SettingsService interface {
     GetFloat(category ConfigCategory, key string) appfault.Result[float64]
     GetInt(category ConfigCategory, key string) appfault.Result[int]
     GetBool(category ConfigCategory, key string) appfault.Result[bool]
-    GetStringSlice(category ConfigCategory, key string) appfault.ResultSlice[string]
+    GetStringSlice(category ConfigCategory, key string) StringSlice
     GetMap(category ConfigCategory, key string) appfault.Result[map[string]string]
     
     // Mutation methods (strongly typed value container)
@@ -144,7 +144,7 @@ type SettingsService interface {
     SeedFromFile(filepath string) error
     
     // Query methods
-    GetByCategory(category ConfigCategory) appfault.ResultSlice[Setting]
+    GetByCategory(category ConfigCategory) SettingSlice
     GetCategoryVersion(category ConfigCategory) appfault.Result[string]
     
     // Cache management

@@ -119,7 +119,7 @@ func (v *VectorSearchService) Initialize() error {
 func (v *VectorSearchService) SearchSimilar(
     queryEmbedding []float32, 
     limit int,
-) appfault.ResultSlice[ChunkScore] {
+) ChunkScoreSlice {
     // Convert to blob format
     blob := embedToBlob(queryEmbedding)
     

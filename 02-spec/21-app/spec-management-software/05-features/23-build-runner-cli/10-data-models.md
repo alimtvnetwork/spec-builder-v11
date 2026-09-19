@@ -201,7 +201,7 @@ func (r *BuildRunRepository) GetByRunId(runId string) appfault.Result[BuildRun] 
     return appfault.Ok(run)
 }
 
-func (r *BuildRunRepository) GetRecent(limit int) appfault.ResultSlice[BuildRun] {
+func (r *BuildRunRepository) GetRecent(limit int) BuildRunSlice {
     var runs []BuildRun
     err := r.db.Preload("Errors").
         Order("CreatedAt DESC").
@@ -215,7 +215,7 @@ func (r *BuildRunRepository) GetRecent(limit int) appfault.ResultSlice[BuildRun]
     return appfault.Ok(runs)
 }
 
-func (r *BuildRunRepository) GetByProfile(profileName string, limit int) appfault.ResultSlice[BuildRun] {
+func (r *BuildRunRepository) GetByProfile(profileName string, limit int) BuildRunSlice {
     var runs []BuildRun
     err := r.db.Where("ProfileName = ?", profileName).
         Order("CreatedAt DESC").
@@ -229,7 +229,7 @@ func (r *BuildRunRepository) GetByProfile(profileName string, limit int) appfaul
     return appfault.Ok(runs)
 }
 
-func (r *BuildRunRepository) GetFailedRuns(since time.Time) appfault.ResultSlice[BuildRun] {
+func (r *BuildRunRepository) GetFailedRuns(since time.Time) BuildRunSlice {
     var runs []BuildRun
     err := r.db.Preload("Errors").
         Where("IsSuccess = ? AND CreatedAt > ?", false, since).

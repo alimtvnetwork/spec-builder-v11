@@ -108,10 +108,10 @@ type Service interface {
 	// Sync checking
 	CheckSync(context stdctx.Context, pluginId, siteId int64) appfault.Result[*SyncResult]
 	CheckAllSites(context stdctx.Context, pluginId int64) appfault.Result[*BatchSyncResult]
-	CheckAllPlugins(context stdctx.Context) appfault.ResultSlice[SyncResult]
+	CheckAllPlugins(context stdctx.Context) SyncResultSlice
 
 	// File change management
-	GetFileChanges(context stdctx.Context, pluginId, siteId int64) appfault.ResultSlice[models.FileChange]
+	GetFileChanges(context stdctx.Context, pluginId, siteId int64) FileChangeSlice
 	RecordFileChange(context stdctx.Context, change *models.FileChange) *appfault.AppError
 	MarkSynced(context stdctx.Context, pluginId, siteId int64, files []string) *appfault.AppError
 	ClearChanges(context stdctx.Context, pluginId int64) *appfault.AppError
@@ -316,7 +316,7 @@ func (s *serviceImpl) CheckAllSites(context stdctx.Context, pluginId int64) appf
 	return batch, nil
 }
 
-func (s *serviceImpl) CheckAllPlugins(context stdctx.Context) appfault.ResultSlice[SyncResult] {
+func (s *serviceImpl) CheckAllPlugins(context stdctx.Context) SyncResultSlice {
 	s.log.Info("Checking sync for all plugins")
 
 	// Get all mappings
@@ -427,7 +427,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *serviceImpl) GetFileChanges(context stdctx.Context, pluginId, siteId int64) appfault.ResultSlice[models.FileChange] {
+func (s *serviceImpl) GetFileChanges(context stdctx.Context, pluginId, siteId int64) FileChangeSlice {
 	var changes []models.FileChange
 	if err := s.db.GormDb().WithContext(context).
 		Where("PluginId = ? AND SyncedAt IS NULL", pluginId).

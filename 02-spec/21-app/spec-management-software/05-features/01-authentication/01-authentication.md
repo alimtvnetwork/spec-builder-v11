@@ -178,7 +178,7 @@ Salts are generated using `crypto/rand` which provides cryptographically secure 
 
 ```go
 // GenerateSalt creates a cryptographically secure random salt
-func GenerateSalt(length int) appfault.ResultSlice[byte] {
+func GenerateSalt(length int) ByteSlice {
     salt := make([]byte, length)
     _, err := rand.Read(salt)
     if err != nil {

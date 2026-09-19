@@ -29,8 +29,8 @@ import (
 
 type Service interface {
     // CRUD operations
-    List(context stdctx.Context) appfault.ResultSlice[models.Plugin]
-    ListBySite(context stdctx.Context, siteId int64) appfault.ResultSlice[models.Plugin]
+    List(context stdctx.Context) PluginSlice
+    ListBySite(context stdctx.Context, siteId int64) PluginSlice
     GetById(context stdctx.Context, id int64) appfault.Result[*models.Plugin]
     Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Plugin]
     Update(context stdctx.Context, id int64, input UpdateInput) appfault.Result[*models.Plugin]
@@ -46,7 +46,7 @@ type Service interface {
     
     // Watcher management
     SetWatching(context stdctx.Context, id int64, watching bool) *appfault.AppError
-    GetWatchedPlugins(context stdctx.Context) appfault.ResultSlice[models.Plugin]
+    GetWatchedPlugins(context stdctx.Context) PluginSlice
     
     // Status
     UpdateLastPublished(context stdctx.Context, id int64) *appfault.AppError
@@ -183,7 +183,7 @@ import (
     "gorm.io/gorm"
 )
 
-func (s *serviceImpl) List(context stdctx.Context) appfault.ResultSlice[models.Plugin] {
+func (s *serviceImpl) List(context stdctx.Context) PluginSlice {
     s.log.Debug("Listing all plugins")
     
     var plugins []models.Plugin
@@ -196,7 +196,7 @@ func (s *serviceImpl) List(context stdctx.Context) appfault.ResultSlice[models.P
     return plugins, nil
 }
 
-func (s *serviceImpl) ListBySite(context stdctx.Context, siteId int64) appfault.ResultSlice[models.Plugin] {
+func (s *serviceImpl) ListBySite(context stdctx.Context, siteId int64) PluginSlice {
     s.log.Debug("Listing plugins by site", "siteId", siteId)
     
     var plugins []models.Plugin
@@ -625,7 +625,7 @@ func (s *serviceImpl) SetWatching(context stdctx.Context, id int64, watching boo
     return nil
 }
 
-func (s *serviceImpl) GetWatchedPlugins(context stdctx.Context) appfault.ResultSlice[models.Plugin] {
+func (s *serviceImpl) GetWatchedPlugins(context stdctx.Context) PluginSlice {
     s.log.Debug("Getting watched plugins")
     
     var plugins []models.Plugin

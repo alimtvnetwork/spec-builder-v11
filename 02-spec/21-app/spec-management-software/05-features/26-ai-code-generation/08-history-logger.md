@@ -294,7 +294,7 @@ func (hl *HistoryLogger) CalculateChecksumWithSize(filePath string) appfault.Res
 ### History Queries
 
 ```go
-func (hl *HistoryLogger) GetTaskHistory(taskId uint) appfault.ResultSlice[LogEntry] {
+func (hl *HistoryLogger) GetTaskHistory(taskId uint) LogEntrySlice {
     var dbEntries []FilesystemHistory
     
     err := hl.db.
@@ -325,7 +325,7 @@ func (hl *HistoryLogger) GetTaskHistory(taskId uint) appfault.ResultSlice[LogEnt
     return entries, nil
 }
 
-func (hl *HistoryLogger) GetOperationsByPath(path string) appfault.ResultSlice[LogEntry] {
+func (hl *HistoryLogger) GetOperationsByPath(path string) LogEntrySlice {
     var dbEntries []FilesystemHistory
     
     err := hl.db.
@@ -341,7 +341,7 @@ func (hl *HistoryLogger) GetOperationsByPath(path string) appfault.ResultSlice[L
     return nil, nil
 }
 
-func (hl *HistoryLogger) GetFailedOperations(since time.Time) appfault.ResultSlice[LogEntry] {
+func (hl *HistoryLogger) GetFailedOperations(since time.Time) LogEntrySlice {
     var dbEntries []FilesystemHistory
     
     err := hl.db.

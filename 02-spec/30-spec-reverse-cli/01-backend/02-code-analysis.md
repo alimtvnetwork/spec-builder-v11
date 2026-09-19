@@ -69,7 +69,7 @@ type DiscoveredFile struct {
     ModTime      time.Time
 }
 
-func (d *FileDiscovery) Discover() appfault.ResultSlice[DiscoveredFile] {
+func (d *FileDiscovery) Discover() DiscoveredFileSlice {
     var files []DiscoveredFile
     
     err := filepath.WalkDir(d.RootPath, func(path string, entry os.DirEntry, err error) error {

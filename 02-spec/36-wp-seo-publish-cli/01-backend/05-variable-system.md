@@ -412,7 +412,7 @@ type ExportRequest struct {
     Format    variablesourcetype.Variant       // → internal/enums/variablesourcetype/
 }
 
-func (s *VariableService) Export(req ExportRequest) appfault.ResultSlice[byte] {
+func (s *VariableService) Export(req ExportRequest) ByteSlice {
     variables, err := s.db.GetVariables(req.Scope, req.WebsiteId)
     if err != nil {
         return nil, err

@@ -189,7 +189,7 @@ go get github.com/stretchr/testify@v1.9.0
 ```go
 // internal/parser/parser.go
 type Parser interface {
-    Parse(html string) appfault.ResultSlice[SearchResult]
+    Parse(html string) SearchResultSlice
     IsBlocked(html string) bool
     GetEngineName() string
 }
@@ -328,7 +328,7 @@ func (s *Switcher) SelectMethod() appfault.Result[SearchMethod] {
 
 **Concurrency Pattern:**
 ```go
-func (o *Orchestrator) SearchConcurrent(keywords []string) appfault.ResultSlice[SearchResult] {
+func (o *Orchestrator) SearchConcurrent(keywords []string) SearchResultSlice {
     resultsChan := make(chan KeywordResult, len(keywords))
     sem := make(chan struct{}, o.config.MaxConcurrency)
     

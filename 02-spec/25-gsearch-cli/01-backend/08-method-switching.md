@@ -598,7 +598,7 @@ type (
     }
 
     // SearchResultSlice is the canonical single reusable result envelope for search results.
-    SearchResultSlice = appfault.ResultSlice[SearchResult]
+    SearchResultSlice = SearchResultSlice
 )
 ```
 

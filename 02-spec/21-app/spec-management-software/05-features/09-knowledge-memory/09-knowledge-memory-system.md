@@ -773,7 +773,7 @@ func (i *SpecIngester) IngestSpec(context stdctx.Context) error {
     return nil
 }
 
-func (i *SpecIngester) discoverFiles() appfault.ResultSlice[string] {
+func (i *SpecIngester) discoverFiles() StringSlice {
     var files []string
     
     err := filepath.WalkDir(i.config.SpecPath, func(path string, d fs.DirEntry, err error) error {

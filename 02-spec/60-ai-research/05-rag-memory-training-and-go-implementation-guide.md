@@ -187,7 +187,7 @@ func (vm *VectorMemory) Retrieve(
     query string,
     topK int,
     filters map[string]string,
-) appfault.ResultSlice[chromem.Result] {
+) ChromemResultSlice {
     ctx := context.Background()
 
     return vm.collection.Query(
@@ -228,7 +228,7 @@ func (vm *VectorMemory) RetrieveSimilarConversations(
     query string,
     userID string,
     topK int,
-) appfault.ResultSlice[chromem.Result] {
+) ChromemResultSlice {
 
     filters := map[string]string{
         "user_id": userID,
@@ -661,7 +661,7 @@ func (em *EntityMemory) SearchEntities(
     query string,
     entityType EntityType,
     topK int,
-) appfault.ResultSlice[Entity] {
+) EntitySlice {
 
     filters := map[string]string{}
     if entityType != "" {
@@ -871,7 +871,7 @@ func (sm *SemanticMemory) Query(
     query string,
     memoryType string, // "fact", "procedure", "concept", or "all"
     topK int,
-) appfault.ResultSlice[chromem.Result] {
+) ChromemResultSlice {
 
     var allResults []chromem.Result
 
@@ -1094,7 +1094,7 @@ func (em *EpisodicMemory) RetrieveSimilarEpisodes(
     currentContext string,
     userID string,
     topK int,
-) appfault.ResultSlice[Episode] {
+) EpisodeSlice {
 
     filters := map[string]string{
         "user_id": userID,
@@ -1138,7 +1138,7 @@ func (em *EpisodicMemory) RetrieveSimilarEpisodes(
 func (em *EpisodicMemory) GetEpisodesByTimeRange(
     userID string,
     startTime, endTime time.Time,
-) appfault.ResultSlice[Episode] {
+) EpisodeSlice {
 
     rows, err := em.db.Query(`
         SELECT id, start_time, end_time, user_id, session_id,

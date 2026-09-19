@@ -205,7 +205,7 @@ type SpecAnalyzer struct {
     specReader SpecReader
 }
 
-func (a *SpecAnalyzer) Analyze(specRefs []string) appfault.ResultSlice[PlannedFile] {
+func (a *SpecAnalyzer) Analyze(specRefs []string) PlannedFileSlice {
     var files []PlannedFile
     
     for _, ref := range specRefs {

@@ -437,7 +437,7 @@ type PaaExtractor struct {
     depth   int
 }
 
-func (e *PaaExtractor) Extract(context stdctx.Context, query string) appfault.ResultSlice[Faq] {
+func (e *PaaExtractor) Extract(context stdctx.Context, query string) FaqSlice {
     faqs := []Faq{}
     seen := make(map[string]bool)
     
@@ -566,7 +566,7 @@ type FAQSchemaExtractor struct {
     httpClient *http.Client
 }
 
-func (e *FAQSchemaExtractor) ExtractFromUrl(context stdctx.Context, targetUrl string) appfault.ResultSlice[FAQ] {
+func (e *FAQSchemaExtractor) ExtractFromUrl(context stdctx.Context, targetUrl string) FAQSlice {
     // Fetch page
     resp, err := e.httpClient.Get(targetUrl)
     if err != nil {
@@ -678,7 +678,7 @@ type AnswerEnricher struct {
     engines            []string
 }
 
-func (e *AnswerEnricher) EnrichFaqs(context stdctx.Context, faqs []Faq) appfault.ResultSlice[Faq] {
+func (e *AnswerEnricher) EnrichFaqs(context stdctx.Context, faqs []Faq) FaqSlice {
     enriched := make([]Faq, len(faqs))
     copy(enriched, faqs)
     

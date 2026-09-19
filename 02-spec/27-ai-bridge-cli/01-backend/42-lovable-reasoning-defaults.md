@@ -267,7 +267,7 @@ type UnderstandingCheck struct {
 }
  
  // GenerateQuestions creates questions with sample answers
- func GenerateQuestions(prompt string, context []RAGChunk) appfault.ResultSlice[ClarifyingQuestion] {
+ func GenerateQuestions(prompt string, context []RAGChunk) ClarifyingQuestionSlice {
      questions := []ClarifyingQuestion{}
      
      // Analyze prompt for ambiguities

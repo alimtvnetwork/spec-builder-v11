@@ -458,7 +458,7 @@ func (s *ShareService) CreateShare(context stdctx.Context, req CreateShareReques
 }
 
 // GetSharesForProject returns all shares where project is target
-func (s *ShareService) GetSharesForProject(context stdctx.Context, projectId string) appfault.ResultSlice[MemoryShare] {
+func (s *ShareService) GetSharesForProject(context stdctx.Context, projectId string) MemoryShareSlice {
 	query := `
 		SELECT * FROM memory_shares 
 		WHERE target_project_id = ? AND status = 'active'
@@ -478,7 +478,7 @@ func (s *ShareService) GetSharesForProject(context stdctx.Context, projectId str
 }
 
 // GetSharesFromProject returns all shares where project is source
-func (s *ShareService) GetSharesFromProject(context stdctx.Context, projectId string) appfault.ResultSlice[MemoryShare] {
+func (s *ShareService) GetSharesFromProject(context stdctx.Context, projectId string) MemoryShareSlice {
 	query := `
 		SELECT * FROM memory_shares 
 		WHERE source_project_id = ? AND status != 'revoked'

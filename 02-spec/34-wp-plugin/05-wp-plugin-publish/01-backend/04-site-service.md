@@ -29,7 +29,7 @@ import (
 
 type Service interface {
     // CRUD operations
-    List(context stdctx.Context) appfault.ResultSlice[models.Site]
+    List(context stdctx.Context) SiteSlice
     GetById(context stdctx.Context, id int64) appfault.Result[*models.Site]
     GetByUrl(context stdctx.Context, url string) appfault.Result[*models.Site]
     Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Site]
@@ -162,7 +162,7 @@ import (
     "gorm.io/gorm"
 )
 
-func (s *serviceImpl) List(context stdctx.Context) appfault.ResultSlice[models.Site] {
+func (s *serviceImpl) List(context stdctx.Context) SiteSlice {
     s.log.Debug("Listing all sites")
     
     var sites []models.Site

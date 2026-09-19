@@ -50,7 +50,7 @@ type SettingsService interface {
     SetWithCategory(key, value, category string) *appfault.AppError
     
     // Bulk operations
-    GetByCategory(category string) appfault.ResultSlice[Setting]
+    GetByCategory(category string) SettingSlice
     SeedFromConfig(configPath string) *appfault.AppError
     
     // Cache management

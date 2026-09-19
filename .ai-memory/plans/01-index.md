@@ -35,3 +35,4 @@
 | [03-spec-builder-restructure-and-sync.md](./completed/03-spec-builder-restructure-and-sync.md) | 2026-09-19 | System-wide | Spec restructuring (02-spec), toolchain sync, and UI compatibility |
 | [04-spec-audit-and-error-management-modernization.md](./completed/04-spec-audit-and-error-management-modernization.md) | 2026-09-19 | Folders 21–60 (290 files) | Spec audit & error management modernization to canonical `appfault` architecture |
 | [05-compact-type-extraction-and-ai-audit.md](./completed/05-compact-type-extraction-and-ai-audit.md) | 2026-09-19 | Repository-wide (133 files) | Compact type extraction (`SearchResultSlice`), `ResultSlice[T]` conversion, and AI perspective audit |
+| [06-compact-type-extraction-and-ai-audit-enhancement.md](./completed/06-compact-type-extraction-and-ai-audit-enhancement.md) | 2026-09-19 | Folders 21–60 (174 files) | Repository-wide compact type extraction (340+ signatures), elimination of generic brackets, and AI audit v2.0 |

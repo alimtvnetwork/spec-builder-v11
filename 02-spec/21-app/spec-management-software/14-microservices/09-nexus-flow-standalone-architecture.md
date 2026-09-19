@@ -883,7 +883,7 @@ type PrerequisiteConfig struct {
     Runtimes []RuntimeType // Required runtimes
 }
 
-func (e *Engine) CheckPrerequisites(config PrerequisiteConfig) appfault.ResultSlice[PrerequisiteCheck] {
+func (e *Engine) CheckPrerequisites(config PrerequisiteConfig) PrerequisiteCheckSlice {
     if !config.Enabled {
         return nil, nil
     }
@@ -1039,7 +1039,7 @@ type SearchResult struct {
     PublishedAt time.Time `json:",omitempty"`
 }
 
-func (c *GSearchClient) Search(context stdctx.Context, query SearchQuery) appfault.ResultSlice[SearchResult] {
+func (c *GSearchClient) Search(context stdctx.Context, query SearchQuery) SearchResultSlice {
     args := []string{
         "search",
         "--query", query.Query,

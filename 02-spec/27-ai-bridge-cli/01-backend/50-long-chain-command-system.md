@@ -489,10 +489,10 @@ type CommandRegistry interface {
     GetByName(name string) appfault.Result[*Command]
     
     // Match finds commands matching the input text
-    Match(input string) appfault.ResultSlice[*Command]
+    Match(input string) CommandSlice
     
     // List returns all registered commands
-    List(filter *CommandFilter) appfault.ResultSlice[*Command]
+    List(filter *CommandFilter) CommandSlice
     
     // LoadBuiltIn loads all built-in commands
     LoadBuiltIn() *appfault.AppError
@@ -512,10 +512,10 @@ type CommandFilter struct {
 // ParallelFetcher handles concurrent URL and file fetching
 type ParallelFetcher interface {
     // FetchUrls fetches multiple URLs concurrently
-    FetchUrls(context stdctx.Context, urls []string, opts *FetchOptions) appfault.ResultSlice[*FetchResult]
+    FetchUrls(context stdctx.Context, urls []string, opts *FetchOptions) FetchResultSlice
     
     // FetchFiles reads multiple files concurrently
-    FetchFiles(context stdctx.Context, paths []string, opts *FileOptions) appfault.ResultSlice[*FileResult]
+    FetchFiles(context stdctx.Context, paths []string, opts *FileOptions) FileResultSlice
 }
 
 // FetchOptions configures URL fetching
@@ -1271,7 +1271,7 @@ func (b *DAGBuilder) actionToStepType(action string) step_type.Variant {
 // ScheduleWaves returns execution waves using Kahn's algorithm.
 // Each wave contains tasks that can execute in parallel.
 // Tasks in wave N+1 depend on at least one task in wave N or earlier.
-func (dag *TaskDAG) ScheduleWaves() appfault.ResultSlice[ExecutionWave] {
+func (dag *TaskDAG) ScheduleWaves() ExecutionWaveSlice {
     // Build adjacency and in-degree maps
     inDegree := map[string]int{}
     children := map[string][]string{}

@@ -488,7 +488,7 @@ func (w *SyncWorker) runSyncCycle(context stdctx.Context) {
 	}
 }
 
-func (w *SyncWorker) getAutoSyncShares(context stdctx.Context) appfault.ResultSlice[ShareWithSyncInfo] {
+func (w *SyncWorker) getAutoSyncShares(context stdctx.Context) ShareWithSyncInfoSlice {
 	rows, err := w.db.QueryContext(context, `
 		SELECT 
 			ms.id, ms.source_project_id, ms.target_project_id, ms.resource_path,

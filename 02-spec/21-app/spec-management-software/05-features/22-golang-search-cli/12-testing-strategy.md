@@ -1797,7 +1797,7 @@ type FixtureInfo struct {
 }
 
 // LoadFixture loads a fixture file from the embedded filesystem
-func LoadFixture(path string) appfault.ResultSlice[byte] {
+func LoadFixture(path string) ByteSlice {
     data, err := FixtureFS.ReadFile(filepath.Join("fixtures", path))
     if err != nil {
         return appfault.Fail[[]byte](err)

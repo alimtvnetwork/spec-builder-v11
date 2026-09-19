@@ -200,7 +200,7 @@ func NewYouTubeSearchService(config *YouTubeConfig) appfault.Result[YouTubeSearc
     })
 }
 
-func (s *YouTubeSearchService) Search(query string) appfault.ResultSlice[YouTubeResult] {
+func (s *YouTubeSearchService) Search(query string) YouTubeResultSlice {
     // Check cache first
     cacheKey := s.buildCacheKey(query)
     // EXEMPTED: typed accessor internal — cache stores known []YouTubeResult values (§7.2)
@@ -312,7 +312,7 @@ func NewRedditSearchService(config *RedditConfig) *RedditSearchService {
     }
 }
 
-func (s *RedditSearchService) Search(query string) appfault.ResultSlice[RedditResult] {
+func (s *RedditSearchService) Search(query string) RedditResultSlice {
     // Ensure valid auth token
     if authErr := s.ensureAuth(); authErr != nil {
         return appfault.Fail[[]RedditResult](authErr)
@@ -643,7 +643,7 @@ type MediumSearchService struct {
     cache      *CacheService
 }
 
-func (s *MediumSearchService) Search(query string) appfault.ResultSlice[MediumResult] {
+func (s *MediumSearchService) Search(query string) MediumResultSlice {
     cacheKey := s.buildCacheKey(query)
     // EXEMPTED: typed accessor internal — cache stores known []MediumResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
@@ -744,7 +744,7 @@ type LinkedInSearchService struct {
     cache      *CacheService
 }
 
-func (s *LinkedInSearchService) SearchPosts(query string) appfault.ResultSlice[LinkedInPostResult] {
+func (s *LinkedInSearchService) SearchPosts(query string) LinkedInPostResultSlice {
     cacheKey := s.buildCacheKey("posts", query)
     // EXEMPTED: typed accessor internal — cache stores known []LinkedInPostResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
@@ -775,7 +775,7 @@ func (s *LinkedInSearchService) SearchPosts(query string) appfault.ResultSlice[L
     return appfault.Ok(results)
 }
 
-func (s *LinkedInSearchService) SearchCompanies(query string) appfault.ResultSlice[LinkedInCompanyResult] {
+func (s *LinkedInSearchService) SearchCompanies(query string) LinkedInCompanyResultSlice {
     cacheKey := s.buildCacheKey("companies", query)
     // EXEMPTED: typed accessor internal — cache stores known []LinkedInCompanyResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
@@ -877,7 +877,7 @@ func (e *YouTubeDeepExtractor) ExtractVideo(videoUrl string) appfault.Result[You
 }
 
 // ExtractBatch processes multiple videos in parallel
-func (e *YouTubeDeepExtractor) ExtractBatch(videoUrls []string) appfault.ResultSlice[YouTubeResult] {
+func (e *YouTubeDeepExtractor) ExtractBatch(videoUrls []string) YouTubeResultSlice {
     results := make([]YouTubeResult, 0, len(videoUrls))
     var mu sync.Mutex
     

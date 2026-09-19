@@ -1099,7 +1099,7 @@ type TopPagesResponse struct {
     } `json:"pages"`
 }
 
-func FetchTopPages(domain string, limit int) appfault.ResultSlice[string] {
+func FetchTopPages(domain string, limit int) StringSlice {
     params := url.Values{}
     params.Set("target", domain)
     params.Set("mode", "domain")

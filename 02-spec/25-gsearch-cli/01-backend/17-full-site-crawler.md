@@ -922,7 +922,7 @@ func NewSitemapParser(normalizer *UrlNormalizer) *SitemapParser {
 }
 
 // Parse fetches and parses a sitemap, handling both index and urlset formats
-func (p *SitemapParser) Parse(sitemapUrl string) appfault.ResultSlice[string] {
+func (p *SitemapParser) Parse(sitemapUrl string) StringSlice {
     resp, err := p.client.Get(sitemapUrl)
     if err != nil {
         return appfault.Fail[[]string](
@@ -969,7 +969,7 @@ func (p *SitemapParser) Parse(sitemapUrl string) appfault.ResultSlice[string] {
     return appfault.Ok(urls)
 }
 
-func (p *SitemapParser) parseIndex(index SitemapIndex) appfault.ResultSlice[string] {
+func (p *SitemapParser) parseIndex(index SitemapIndex) StringSlice {
     var allUrls []string
     
     for _, sitemap := range index.Sitemaps {

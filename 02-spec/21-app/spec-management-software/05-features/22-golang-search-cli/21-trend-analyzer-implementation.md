@@ -177,7 +177,7 @@ type SettingsService interface {
     ResetToDefault(category, key string) error
     
     // GetCategory retrieves all settings in a category
-    GetCategory(category string) appfault.ResultSlice[Setting]
+    GetCategory(category string) SettingSlice
     
     // SeedFromFile processes a seed JSON file
     SeedFromFile(filePath string) error
@@ -472,7 +472,7 @@ type JobCollector struct {
 }
 
 type JobScraper interface {
-    Scrape(context stdctx.Context, query string) appfault.ResultSlice[JobPosting]
+    Scrape(context stdctx.Context, query string) JobPostingSlice
     Source() string
 }
 

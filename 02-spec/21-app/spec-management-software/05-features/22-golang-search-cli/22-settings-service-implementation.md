@@ -115,7 +115,7 @@ type SettingsService interface {
     GetFloat(category ConfigCategory, key string) appfault.Result[float64]
     GetInt(category ConfigCategory, key string) appfault.Result[int]
     GetBool(category ConfigCategory, key string) appfault.Result[bool]
-    GetStringSlice(category ConfigCategory, key string) appfault.ResultSlice[string]
+    GetStringSlice(category ConfigCategory, key string) StringSlice
     GetMap(category ConfigCategory, key string) appfault.Result[SettingMap]
     
     // Mutation methods — uses SettingValue union type (see strong-typing-mandate)
@@ -129,8 +129,8 @@ type SettingsService interface {
     ForceReseed(category ConfigCategory) *appfault.AppError
     
     // Query methods
-    GetByCategory(category ConfigCategory) appfault.ResultSlice[Setting]
-    GetAllCategories() appfault.ResultSlice[ConfigCategory]
+    GetByCategory(category ConfigCategory) SettingSlice
+    GetAllCategories() ConfigCategorySlice
     GetCategoryVersion(category ConfigCategory) appfault.Result[string]
     
     // Export methods
@@ -368,7 +368,7 @@ func (ss *SettingsServiceImpl) GetBool(category ConfigCategory, key string) appf
 // Errors:
 // - ErrSettingNotFound: Key doesn't exist
 // - ErrTypeMismatch: Value is not an array
-func (ss *SettingsServiceImpl) GetStringSlice(category ConfigCategory, key string) appfault.ResultSlice[string]
+func (ss *SettingsServiceImpl) GetStringSlice(category ConfigCategory, key string) StringSlice
 ```
 
 ### GetMap Method
@@ -527,7 +527,7 @@ func (ss *SettingsServiceImpl) ForceReseed(category ConfigCategory) error
 //
 // Errors:
 // - ErrCategoryNotFound: Category doesn't exist
-func (ss *SettingsServiceImpl) GetByCategory(category ConfigCategory) appfault.ResultSlice[Setting]
+func (ss *SettingsServiceImpl) GetByCategory(category ConfigCategory) SettingSlice
 ```
 
 ### ExportCategory Method

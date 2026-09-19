@@ -133,7 +133,7 @@ type SettingsService interface {
     GetFloat(category configcategorytype.Type, key string) appfault.Result[float64]
     GetInt(category configcategorytype.Type, key string) appfault.Result[int]
     GetBool(category configcategorytype.Type, key string) appfault.Result[bool]
-    GetStringSlice(category configcategorytype.Type, key string) appfault.ResultSlice[string]
+    GetStringSlice(category configcategorytype.Type, key string) StringSlice
     GetMap(category configcategorytype.Type, key string) appfault.Result[map[string]string]
     
     // Mutation methods (strongly typed value container)
@@ -146,7 +146,7 @@ type SettingsService interface {
     ForceReseed(category configcategorytype.Type) *appfault.AppError
     
     // Query methods
-    GetByCategory(category configcategorytype.Type) appfault.ResultSlice[Setting]
+    GetByCategory(category configcategorytype.Type) SettingSlice
     GetCategoryVersion(category configcategorytype.Type) appfault.Result[string]
     
     // Cache management

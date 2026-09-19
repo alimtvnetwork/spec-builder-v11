@@ -194,7 +194,7 @@ func (c *WordPressClient) CreateCategory(cat Category) appfault.Result[*Category
     return appfault.Ok(&result)
 }
 
-func (c *WordPressClient) GetCategories() appfault.ResultSlice[Category] {
+func (c *WordPressClient) GetCategories() CategorySlice {
     resp := c.doRequest(httpmethod.Get, "/categories?per_page=100", nil)
     if resp.HasError() {
         return appfault.Fail[[]Category](resp.Error())
@@ -433,7 +433,7 @@ func (c *WordPressClient) CreateTag(tag Tag) appfault.Result[*Tag] {
     return appfault.Ok(&result)
 }
 
-func (c *WordPressClient) GetTags() appfault.ResultSlice[Tag] {
+func (c *WordPressClient) GetTags() TagSlice {
     resp := c.doRequest(httpmethod.Get, "/tags?per_page=100", nil)
     if resp.HasError() {
         return appfault.Fail[[]Tag](resp.Error())
