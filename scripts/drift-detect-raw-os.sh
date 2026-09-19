@@ -11,10 +11,10 @@ LABEL_INE="CAT-5 (os.IsNotExist)"
 COUNT_OS=$(grep -rn -E "os\.(Remove|Stat|MkdirAll|WriteFile|ReadFile|Rename|RemoveAll|Open)\b" \
   --include="*.md" \
   ./spec/ 2>/dev/null \
-  | grep -v "spec/22-how-app-issues-track/" \
-  | grep -v "spec/23-coding-guidelines/" \
-  | grep -v "spec/25-golang-standards/" \
-  | grep -v "spec/30-generic-enforce/" \
+  | grep -v "02-spec/22-how-app-issues-track/" \
+  | grep -v "02-spec/23-coding-guidelines/" \
+  | grep -v "02-spec/25-golang-standards/" \
+  | grep -v "02-spec/30-generic-enforce/" \
   | grep -v "// drift-exempt:" \
   | grep -v "❌" \
   | wc -l)
@@ -22,10 +22,10 @@ COUNT_OS=$(grep -rn -E "os\.(Remove|Stat|MkdirAll|WriteFile|ReadFile|Rename|Remo
 COUNT_INE=$(grep -rn "os\.IsNotExist" \
   --include="*.md" \
   ./spec/ 2>/dev/null \
-  | grep -v "spec/22-how-app-issues-track/" \
-  | grep -v "spec/23-coding-guidelines/" \
-  | grep -v "spec/25-golang-standards/" \
-  | grep -v "spec/30-generic-enforce/" \
+  | grep -v "02-spec/22-how-app-issues-track/" \
+  | grep -v "02-spec/23-coding-guidelines/" \
+  | grep -v "02-spec/25-golang-standards/" \
+  | grep -v "02-spec/30-generic-enforce/" \
   | grep -v "// drift-exempt:" \
   | grep -v "❌" \
   | wc -l)

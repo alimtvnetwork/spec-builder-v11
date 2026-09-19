@@ -1,6 +1,6 @@
 # Coding Guidelines Rule
 
-> **Source:** `spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines.md`  
+> **Source:** `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines.md`  
 > **Scope:** Cross-language (PHP, Go, TypeScript)
 
 ---

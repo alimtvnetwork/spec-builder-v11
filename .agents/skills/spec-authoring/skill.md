@@ -5,7 +5,7 @@ description: Author and validate specification modules conforming to repository 
 
 # Spec Authoring Skill
 
-Follows `spec/05-spec-authoring-guide/` standards:
+Follows `02-spec/05-spec-authoring-guide/` standards:
 
 1. **Folder Naming:** `NN-kebab-case/` with zero collisions.
 2. **Mandatory Files:**

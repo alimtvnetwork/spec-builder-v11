@@ -6,6 +6,11 @@
 KEYS_FILE="pkg/settings/keys.go"
 SEED_FILE="config.seed.json"
 
+if [ ! -f "$KEYS_FILE" ] && [ ! -f "$SEED_FILE" ]; then
+  echo "ℹ️  RISK-003: Neither $KEYS_FILE nor $SEED_FILE found — skipping"
+  exit 0
+fi
+
 if [ ! -f "$KEYS_FILE" ]; then
   echo "⚠️  Keys file not found: $KEYS_FILE"
   exit 1

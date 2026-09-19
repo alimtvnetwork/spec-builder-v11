@@ -1,0 +1,341 @@
+{
+  "title": "AI Bridge Error Code Index",
+  "description": "Machine-readable index of all AI Bridge (AB) error codes. Range: 9000-9999, 19000-19049.",
+  "version": "1.0.0",
+  "generated": "2026-02-28",
+  "source": "02-spec/22-ai-bridge-cli/01-backend/05-error-codes.md",
+  "project": "AB",
+  "ranges": [
+    { "min": 9000, "max": 9999 },
+    { "min": 19000, "max": 19049 }
+  ],
+  "categories": [
+    {
+      "name": "General/Startup",
+      "range": { "min": 9000, "max": 9099 },
+      "codes": [
+        { "code": 9000, "constant": "ErrConfigNotFound", "description": "Configuration file not found", "retryable": false },
+        { "code": 9001, "constant": "ErrConfigInvalid", "description": "Configuration file is invalid", "retryable": false },
+        { "code": 9002, "constant": "ErrConfigMissingRequired", "description": "Required configuration field missing", "retryable": false },
+        { "code": 9010, "constant": "ErrDaemonAlreadyRunning", "description": "Daemon is already running", "retryable": false },
+        { "code": 9011, "constant": "ErrDaemonNotRunning", "description": "Daemon is not running", "retryable": false },
+        { "code": 9012, "constant": "ErrDaemonStartFailed", "description": "Failed to start daemon", "retryable": false },
+        { "code": 9013, "constant": "ErrDaemonStopFailed", "description": "Failed to stop daemon", "retryable": false },
+        { "code": 9020, "constant": "ErrPortInUse", "description": "Daemon port is already in use", "retryable": false },
+        { "code": 9021, "constant": "ErrPermissionDenied", "description": "Insufficient permissions", "retryable": false }
+      ]
+    },
+    {
+      "name": "Input Parsing",
+      "range": { "min": 9100, "max": 9199 },
+      "codes": [
+        { "code": 9100, "constant": "ErrUnsupportedFormat", "description": "Input format not supported", "retryable": false },
+        { "code": 9101, "constant": "ErrJsonParseFailed", "description": "Failed to parse JSON", "retryable": false },
+        { "code": 9102, "constant": "ErrJsonValidationFailed", "description": "JSON schema validation failed", "retryable": false },
+        { "code": 9110, "constant": "ErrYamlParseFailed", "description": "Failed to parse YAML", "retryable": false },
+        { "code": 9111, "constant": "ErrYamlEmpty", "description": "YAML document is empty", "retryable": false },
+        { "code": 9120, "constant": "ErrMarkdownParseFailed", "description": "Failed to parse Markdown", "retryable": false },
+        { "code": 9121, "constant": "ErrMarkdownMissingFrontmatter", "description": "Markdown missing frontmatter", "retryable": false },
+        { "code": 9130, "constant": "ErrCsvParseFailed", "description": "Failed to parse CSV", "retryable": false },
+        { "code": 9131, "constant": "ErrCsvRequiresConfig", "description": "CSV requires companion config", "retryable": false },
+        { "code": 9132, "constant": "ErrCsvEmpty", "description": "CSV has no data rows", "retryable": false },
+        { "code": 9140, "constant": "ErrVariableNotFound", "description": "Template variable not resolved", "retryable": false },
+        { "code": 9141, "constant": "ErrVariableTypeMismatch", "description": "Variable type mismatch", "retryable": false }
+      ]
+    },
+    {
+      "name": "Backend Connection",
+      "range": { "min": 9200, "max": 9299 },
+      "codes": [
+        { "code": 9200, "constant": "ErrNoBackendAvailable", "description": "No LLM backend is available", "retryable": true },
+        { "code": 9201, "constant": "ErrBackendConnectionFailed", "description": "Failed to connect to backend", "retryable": true },
+        { "code": 9202, "constant": "ErrBackendTimeout", "description": "Backend connection timed out", "retryable": true },
+        { "code": 9210, "constant": "ErrOllamaNotRunning", "description": "Ollama server not running", "retryable": false },
+        { "code": 9211, "constant": "ErrOllamaModelNotFound", "description": "Model not found in Ollama", "retryable": false },
+        { "code": 9212, "constant": "ErrOllamaModelLoadFailed", "description": "Failed to load Ollama model", "retryable": false },
+        { "code": 9220, "constant": "ErrLlamaCppNotRunning", "description": "llama.cpp server not running", "retryable": false },
+        { "code": 9221, "constant": "ErrLlamaCppModelNotFound", "description": "Model file not found", "retryable": false },
+        { "code": 9222, "constant": "ErrLlamaCppModelLoadFailed", "description": "Failed to load llama.cpp model", "retryable": false },
+        { "code": 9230, "constant": "ErrBackendHealthCheckFailed", "description": "Backend health check failed", "retryable": true },
+        { "code": 9231, "constant": "ErrBackendOverloaded", "description": "Backend is overloaded", "retryable": true }
+      ]
+    },
+    {
+      "name": "RAG Configuration",
+      "range": { "min": 9300, "max": 9310 },
+      "codes": [
+        { "code": 9301, "constant": "ErrRagChunkSizeInvalid", "description": "Chunk size outside valid range (256-8192)", "retryable": false },
+        { "code": 9302, "constant": "ErrRagChunkSizeNotMultiple", "description": "Chunk size not multiple of 256", "retryable": false },
+        { "code": 9303, "constant": "ErrRagOverlapTooLarge", "description": "Chunk overlap exceeds 25% of chunk size", "retryable": false },
+        { "code": 9304, "constant": "ErrRagContextBudgetInvalid", "description": "Context token budget outside range", "retryable": false },
+        { "code": 9305, "constant": "ErrRagEmbeddingModelInvalid", "description": "Embedding model not supported", "retryable": false },
+        { "code": 9306, "constant": "ErrRagSimilarityThresholdInvalid", "description": "Similarity threshold outside range", "retryable": false },
+        { "code": 9307, "constant": "ErrRagTopKInvalid", "description": "TopK outside valid range (1-50)", "retryable": false },
+        { "code": 9308, "constant": "ErrRagConfigLoadFailed", "description": "Failed to load RAG configuration", "retryable": false },
+        { "code": 9309, "constant": "ErrRagConfigSaveFailed", "description": "Failed to save RAG configuration", "retryable": false },
+        { "code": 9310, "constant": "ErrRagConfigSourceConflict", "description": "Conflicting config from multiple sources", "retryable": false }
+      ]
+    },
+    {
+      "name": "Request Processing",
+      "range": { "min": 9311, "max": 9319 },
+      "codes": [
+        { "code": 9311, "constant": "ErrRequestInvalid", "description": "Request is invalid", "retryable": false },
+        { "code": 9312, "constant": "ErrRequestTooLarge", "description": "Request exceeds size limit", "retryable": false },
+        { "code": 9313, "constant": "ErrContextTooLong", "description": "Context exceeds model limit", "retryable": false }
+      ]
+    },
+    {
+      "name": "Model & Generation",
+      "range": { "min": 9320, "max": 9339 },
+      "codes": [
+        { "code": 9320, "constant": "ErrModelCategoryInvalid", "description": "Invalid model category", "retryable": false },
+        { "code": 9321, "constant": "ErrModelNotFound", "description": "Specified model not found", "retryable": true },
+        { "code": 9322, "constant": "ErrModelNotLoaded", "description": "Model not currently loaded", "retryable": false },
+        { "code": 9330, "constant": "ErrGenerationFailed", "description": "Text generation failed", "retryable": false },
+        { "code": 9331, "constant": "ErrGenerationTimeout", "description": "Generation timed out", "retryable": false },
+        { "code": 9332, "constant": "ErrGenerationCancelled", "description": "Generation was cancelled", "retryable": false },
+        { "code": 9335, "constant": "ErrBatchItemFailed", "description": "Batch item processing failed", "retryable": false },
+        { "code": 9336, "constant": "ErrBatchPartialFailure", "description": "Some batch items failed", "retryable": false }
+      ]
+    },
+    {
+      "name": "Response Handling",
+      "range": { "min": 9400, "max": 9499 },
+      "codes": [
+        { "code": 9400, "constant": "ErrResponseInvalid", "description": "Invalid response from backend", "retryable": false },
+        { "code": 9401, "constant": "ErrResponseParseFailed", "description": "Failed to parse backend response", "retryable": false },
+        { "code": 9410, "constant": "ErrStreamInterrupted", "description": "Streaming was interrupted", "retryable": true },
+        { "code": 9411, "constant": "ErrStreamTimeout", "description": "Streaming timed out", "retryable": true },
+        { "code": 9420, "constant": "ErrOutputFormatFailed", "description": "Failed to format output", "retryable": false },
+        { "code": 9421, "constant": "ErrOutputWriteFailed", "description": "Failed to write output file", "retryable": false }
+      ]
+    },
+    {
+      "name": "AI SEO FAQ Generation",
+      "range": { "min": 9541, "max": 9553 },
+      "codes": [
+        { "code": 9541, "constant": "ErrFaqTrainingFailed", "description": "Training data ingestion failed", "retryable": false },
+        { "code": 9542, "constant": "ErrFaqCompanyNotFound", "description": "No training data for company", "retryable": false },
+        { "code": 9543, "constant": "ErrFaqRagRetrievalFailed", "description": "Failed to retrieve from RAG", "retryable": false },
+        { "code": 9544, "constant": "ErrFaqGenerationFailed", "description": "AI generation failed", "retryable": false },
+        { "code": 9545, "constant": "ErrFaqWordLimitExceeded", "description": "FAQ exceeds word limit", "retryable": false },
+        { "code": 9546, "constant": "ErrFaqSentenceTooLong", "description": "Sentence exceeds 18 words", "retryable": false },
+        { "code": 9547, "constant": "ErrFaqTransitionMissing", "description": "Sentence missing transition word", "retryable": false },
+        { "code": 9548, "constant": "ErrFaqParagraphCountInvalid", "description": "Must have exactly 3 paragraphs", "retryable": false },
+        { "code": 9549, "constant": "ErrFaqAnswerFirstMissing", "description": "Answer not in first 2 sentences", "retryable": false },
+        { "code": 9550, "constant": "ErrFaqCompanyMentionMissing", "description": "Company not in first 2 sentences", "retryable": false },
+        { "code": 9551, "constant": "ErrFaqTransitionDensityLow", "description": "Below 40% transition density", "retryable": false },
+        { "code": 9552, "constant": "ErrFaqOutputFormatUnsupported", "description": "Requested format not supported", "retryable": false },
+        { "code": 9553, "constant": "ErrFaqSessionNotFound", "description": "FAQ session not found", "retryable": false }
+      ]
+    },
+    {
+      "name": "AI SEO Paragraph Generation",
+      "range": { "min": 9561, "max": 9575 },
+      "codes": [
+        { "code": 9561, "constant": "ErrParaTrainingFailed", "description": "Training data ingestion failed", "retryable": false },
+        { "code": 9562, "constant": "ErrParaCompanyNotFound", "description": "No training data for company", "retryable": false },
+        { "code": 9563, "constant": "ErrParaRagRetrievalFailed", "description": "Failed to retrieve from RAG", "retryable": false },
+        { "code": 9564, "constant": "ErrParaGenerationFailed", "description": "AI generation failed", "retryable": false },
+        { "code": 9565, "constant": "ErrParaWordLimitExceeded", "description": "Paragraph exceeds word limit", "retryable": false },
+        { "code": 9566, "constant": "ErrParaWordLimitBelow", "description": "Paragraph below minimum words", "retryable": false },
+        { "code": 9567, "constant": "ErrParaSentenceTooLong", "description": "Sentence exceeds word limit", "retryable": false },
+        { "code": 9568, "constant": "ErrParaTransitionMissing", "description": "Sentence missing transition word", "retryable": false },
+        { "code": 9569, "constant": "ErrParaConsecutiveStart", "description": "Consecutive sentences same start", "retryable": false },
+        { "code": 9570, "constant": "ErrParaHyphenDetected", "description": "Hyphen found in content", "retryable": false },
+        { "code": 9571, "constant": "ErrParaLinkCountLow", "description": "Below minimum links per paragraph", "retryable": false },
+        { "code": 9572, "constant": "ErrParaSitemapFailed", "description": "Sitemap fetch/parse failed", "retryable": false },
+        { "code": 9573, "constant": "ErrParaSlugGenerationFailed", "description": "Slug generation failed", "retryable": false },
+        { "code": 9574, "constant": "ErrParaOutputFormatUnsupported", "description": "Requested format not supported", "retryable": false },
+        { "code": 9575, "constant": "ErrParaContentTypeUnknown", "description": "Unknown content type", "retryable": false }
+      ]
+    },
+    {
+      "name": "AI SEO Blog Post Generation",
+      "range": { "min": 9576, "max": 9595 },
+      "codes": [
+        { "code": 9576, "constant": "ErrBlogTrainingFailed", "description": "Training data ingestion failed", "retryable": false },
+        { "code": 9577, "constant": "ErrBlogCompanyNotFound", "description": "No training data for company", "retryable": false },
+        { "code": 9578, "constant": "ErrBlogSessionNotFound", "description": "Blog session not found", "retryable": false },
+        { "code": 9579, "constant": "ErrBlogOutlineFailed", "description": "Outline generation failed", "retryable": false },
+        { "code": 9580, "constant": "ErrBlogGsearchFailed", "description": "GSearch integration failed", "retryable": false },
+        { "code": 9581, "constant": "ErrBlogPaaFailed", "description": "PAA extraction failed", "retryable": false },
+        { "code": 9582, "constant": "ErrBlogCompetitorScrapeFailed", "description": "Competitor heading scrape failed", "retryable": false },
+        { "code": 9583, "constant": "ErrBlogGenerationFailed", "description": "Blog content generation failed", "retryable": false },
+        { "code": 9584, "constant": "ErrBlogSectionFailed", "description": "Individual section failed", "retryable": false },
+        { "code": 9585, "constant": "ErrBlogParaCallFailed", "description": "Internal paragraph generator call failed", "retryable": false },
+        { "code": 9586, "constant": "ErrBlogFaqBlendFailed", "description": "FAQ blending failed", "retryable": false },
+        { "code": 9587, "constant": "ErrBlogQuoteInjectionFailed", "description": "Quotation injection failed", "retryable": false },
+        { "code": 9588, "constant": "ErrBlogCoherenceValidationFailed", "description": "Coherence check failed", "retryable": false },
+        { "code": 9589, "constant": "ErrBlogHeaderValidationFailed", "description": "Header requirements not met", "retryable": false },
+        { "code": 9590, "constant": "ErrBlogCategoryInvalid", "description": "Invalid blog category", "retryable": false },
+        { "code": 9591, "constant": "ErrBlogRegistryFailed", "description": "Blog registry operation failed", "retryable": false },
+        { "code": 9592, "constant": "ErrBlogSchemaGenerationFailed", "description": "Schema markup failed", "retryable": false },
+        { "code": 9593, "constant": "ErrBlogTocGenerationFailed", "description": "Table of contents failed", "retryable": false },
+        { "code": 9594, "constant": "ErrBlogOutputFormatUnsupported", "description": "Requested format not supported", "retryable": false },
+        { "code": 9595, "constant": "ErrBlogOutlineRequired", "description": "Outline missing for generate", "retryable": false }
+      ]
+    },
+    {
+      "name": "Revision System",
+      "range": { "min": 9700, "max": 9709 },
+      "codes": [
+        { "code": 9700, "constant": "ErrRevisionNotFound", "description": "Version does not exist", "retryable": false },
+        { "code": 9701, "constant": "ErrRevisionCreateFailed", "description": "Failed to create revision", "retryable": false },
+        { "code": 9702, "constant": "ErrFeedbackInvalid", "description": "Feedback text empty or too long", "retryable": false },
+        { "code": 9703, "constant": "ErrSelectionOutOfBounds", "description": "Inline selection exceeds content length", "retryable": false },
+        { "code": 9704, "constant": "ErrRollbackFailed", "description": "Could not activate specified version", "retryable": false },
+        { "code": 9705, "constant": "ErrDiffComputeFailed", "description": "Error computing version diff", "retryable": false },
+        { "code": 9706, "constant": "ErrVersionPinned", "description": "Cannot modify pinned version", "retryable": false },
+        { "code": 9707, "constant": "ErrRegenerationInProgress", "description": "Another regeneration is running", "retryable": false },
+        { "code": 9708, "constant": "ErrContentHashDuplicate", "description": "Identical content already exists", "retryable": false },
+        { "code": 9709, "constant": "ErrMaxVersionsExceeded", "description": "Too many versions for content", "retryable": false }
+      ]
+    },
+    {
+      "name": "Suggestions System",
+      "range": { "min": 9710, "max": 9719 },
+      "codes": [
+        { "code": 9710, "constant": "ErrSuggestionNotFound", "description": "Suggestion ID does not exist", "retryable": false },
+        { "code": 9711, "constant": "ErrSuggestionNotActionable", "description": "Cannot accept informational suggestion", "retryable": false },
+        { "code": 9712, "constant": "ErrSuggestionAlreadyProcessed", "description": "Already accepted or dismissed", "retryable": false },
+        { "code": 9713, "constant": "ErrSuggestionCreateFailed", "description": "Failed to save suggestion", "retryable": false },
+        { "code": 9714, "constant": "ErrRegistrySyncFailed", "description": "Failed to sync with global registry", "retryable": false },
+        { "code": 9715, "constant": "ErrSuggestionLimitExceeded", "description": "Too many suggestions in session", "retryable": false }
+      ]
+    },
+    {
+      "name": "RAG Session Memory",
+      "range": { "min": 9800, "max": 9809 },
+      "codes": [
+        { "code": 9800, "constant": "ErrRagMemoryLoadFailed", "description": "Failed to load RAG memory on session start", "retryable": false },
+        { "code": 9801, "constant": "ErrRagMemoryThresholdExceeded", "description": "Memory size exceeds critical threshold", "retryable": false },
+        { "code": 9802, "constant": "ErrRagArchiveFailed", "description": "Failed to archive old chunks", "retryable": false },
+        { "code": 9803, "constant": "ErrRagSessionNotFound", "description": "Session ID does not exist", "retryable": false },
+        { "code": 9804, "constant": "ErrRagChunkLimitExceeded", "description": "Too many chunks in session", "retryable": false },
+        { "code": 9805, "constant": "ErrRagFreshSessionFailed", "description": "Failed to start fresh session", "retryable": false }
+      ]
+    },
+    {
+      "name": "Adaptive Reasoning",
+      "range": { "min": 9820, "max": 9829 },
+      "codes": [
+        { "code": 9820, "constant": "ErrReasoningModeInvalid", "description": "Unknown reasoning mode specified", "retryable": false },
+        { "code": 9821, "constant": "ErrReasoningTimeout", "description": "Reasoning stage timed out", "retryable": false },
+        { "code": 9822, "constant": "ErrContextFetchFailed", "description": "Failed to fetch required context", "retryable": false },
+        { "code": 9823, "constant": "ErrGsearchUnavailable", "description": "GSearch CLI not available for web search", "retryable": false },
+        { "code": 9824, "constant": "ErrQuestionLimitExceeded", "description": "Too many questions in response", "retryable": false },
+        { "code": 9825, "constant": "ErrWebsocketQueueFull", "description": "Request queue capacity exceeded", "retryable": false },
+        { "code": 9826, "constant": "ErrWebsocketResumeFailed", "description": "Failed to resume after reconnection", "retryable": false }
+      ]
+    },
+    {
+      "name": "WebSocket Connection Manager",
+      "range": { "min": 9830, "max": 9839 },
+      "codes": [
+        { "code": 9830, "constant": "ErrWsConnectionFailed", "description": "Initial WebSocket connection failed", "retryable": false },
+        { "code": 9831, "constant": "ErrWsConnectionLost", "description": "Connection dropped unexpectedly", "retryable": false },
+        { "code": 9832, "constant": "ErrWsReconnectFailed", "description": "Reconnection attempt failed", "retryable": false },
+        { "code": 9833, "constant": "ErrWsMaxRetries", "description": "Max retry attempts exceeded", "retryable": false },
+        { "code": 9834, "constant": "ErrWsQueueFull", "description": "Message queue at capacity", "retryable": false },
+        { "code": 9835, "constant": "ErrWsMessageExpired", "description": "Queued message TTL exceeded", "retryable": false },
+        { "code": 9836, "constant": "ErrWsSendFailed", "description": "Message send failed", "retryable": false },
+        { "code": 9837, "constant": "ErrWsAuthRequired", "description": "Authentication needed for connection", "retryable": false },
+        { "code": 9838, "constant": "ErrWsHeartbeatTimeout", "description": "Pong not received in time", "retryable": false },
+        { "code": 9839, "constant": "ErrWsInvalidState", "description": "Operation invalid in current state", "retryable": false }
+      ]
+    },
+    {
+      "name": "GSearch Context Integration",
+      "range": { "min": 9840, "max": 9849 },
+      "codes": [
+        { "code": 9840, "constant": "ErrContextDetectionFailed", "description": "Failed to analyze prompt for context needs", "retryable": false },
+        { "code": 9841, "constant": "ErrGSearchNotAvailable", "description": "GSearch CLI not found or not executable", "retryable": false },
+        { "code": 9842, "constant": "ErrGSearchTimeout", "description": "GSearch CLI execution timed out", "retryable": false },
+        { "code": 9843, "constant": "ErrGSearchContextFetchFailed", "description": "Failed to fetch required context", "retryable": false },
+        { "code": 9844, "constant": "ErrContextCacheCorrupt", "description": "Context cache database corrupted", "retryable": false },
+        { "code": 9845, "constant": "ErrTokenBudgetExceeded", "description": "Context exceeds token budget", "retryable": false },
+        { "code": 9846, "constant": "ErrChunkConversionFailed", "description": "Failed to convert search result to chunk", "retryable": false },
+        { "code": 9847, "constant": "ErrContextPriorityConflict", "description": "Conflicting priority assignments", "retryable": false }
+      ]
+    },
+    {
+      "name": "Research Mode",
+      "range": { "min": 9848, "max": 9849 },
+      "codes": [
+        { "code": 9848, "constant": "ErrResearchModeUnavailable", "description": "Research mode requires GSearch", "retryable": false },
+        { "code": 9849, "constant": "ErrResearchContextEmpty", "description": "Research returned no usable results", "retryable": false }
+      ]
+    },
+    {
+      "name": "Rubric Validation",
+      "range": { "min": 9900, "max": 9905 },
+      "codes": [
+        { "code": 9900, "constant": "ErrRubricJudgeFailed", "description": "Judge model call failed", "retryable": false },
+        { "code": 9901, "constant": "ErrRubricMaxRetries", "description": "Max retry attempts exhausted", "retryable": false },
+        { "code": 9902, "constant": "ErrRubricParseFailed", "description": "Could not parse judge scores", "retryable": false },
+        { "code": 9903, "constant": "ErrRubricProfileUnknown", "description": "Unknown rubric profile requested", "retryable": false },
+        { "code": 9904, "constant": "ErrRubricDimensionUnknown", "description": "Unknown rubric dimension", "retryable": false },
+        { "code": 9905, "constant": "ErrRubricThresholdInvalid", "description": "Threshold value out of range", "retryable": false }
+      ]
+    },
+    {
+      "name": "Memory Retrieval",
+      "range": { "min": 9910, "max": 9916 },
+      "codes": [
+        { "code": 9910, "constant": "ErrRetrievalFailed", "description": "Complete retrieval pipeline failed", "retryable": false },
+        { "code": 9911, "constant": "ErrTagPrefilterFailed", "description": "Tag pre-filtering step failed", "retryable": false },
+        { "code": 9912, "constant": "ErrVectorSearchFailed", "description": "Vector similarity computation failed", "retryable": false },
+        { "code": 9913, "constant": "ErrLinkTraversalFailed", "description": "Link graph traversal failed", "retryable": false },
+        { "code": 9914, "constant": "ErrTokenBudgetExceeded", "description": "Retrieved context exceeds token budget", "retryable": false },
+        { "code": 9915, "constant": "ErrEmbeddingFailed", "description": "Query embedding generation failed", "retryable": false },
+        { "code": 9916, "constant": "ErrKeywordExtractionFailed", "description": "Failed to extract keywords from query", "retryable": false }
+      ]
+    },
+    {
+      "name": "RAG Reindexing",
+      "range": { "min": 9920, "max": 9927 },
+      "codes": [
+        { "code": 9920, "constant": "ErrReindexSourceNotFound", "description": "Source path does not exist", "retryable": false },
+        { "code": 9921, "constant": "ErrReindexPermissionDenied", "description": "Cannot read source files", "retryable": false },
+        { "code": 9922, "constant": "ErrReindexEmbeddingFailed", "description": "Embedding generation failed", "retryable": false },
+        { "code": 9923, "constant": "ErrReindexDbError", "description": "Database write error", "retryable": false },
+        { "code": 9924, "constant": "ErrReindexCancelled", "description": "Job was cancelled", "retryable": false },
+        { "code": 9925, "constant": "ErrReindexTimeout", "description": "Job exceeded timeout", "retryable": true },
+        { "code": 9926, "constant": "ErrReindexOom", "description": "Out of memory during embedding", "retryable": false },
+        { "code": 9927, "constant": "ErrReindexInvalidOptions", "description": "Invalid re-index options", "retryable": false }
+      ]
+    },
+    {
+      "name": "Vector DB Integration",
+      "range": { "min": 9990, "max": 9999 },
+      "codes": [
+        { "code": 9990, "constant": "ErrVectorDbInitFailed", "description": "Vector database initialization failed", "retryable": false },
+        { "code": 9991, "constant": "ErrVectorDbQueryFailed", "description": "Vector similarity query failed", "retryable": false },
+        { "code": 9992, "constant": "ErrVectorDbStoreFailed", "description": "Failed to store vector embedding", "retryable": false },
+        { "code": 9993, "constant": "ErrEmbeddingGenerationFailed", "description": "Ollama embedding generation failed", "retryable": false },
+        { "code": 9994, "constant": "ErrEmbeddingModelNotFound", "description": "Embedding model not available", "retryable": false },
+        { "code": 9995, "constant": "ErrVectorCollectionNotFound", "description": "Vector collection does not exist", "retryable": false }
+      ]
+    },
+    {
+      "name": "Lovable Reasoning",
+      "range": { "min": 19000, "max": 19049 },
+      "codes": [
+        { "code": 19000, "constant": "ErrReasoningRequired", "description": "Reasoning step was bypassed incorrectly", "retryable": false },
+        { "code": 19001, "constant": "ErrSampleAnswersMissing", "description": "Question generated without sample answers", "retryable": false },
+        { "code": 19002, "constant": "ErrUnderstandingNotConfirmed", "description": "Task executed without understanding check", "retryable": false },
+        { "code": 19003, "constant": "ErrInvalidQuestionFormat", "description": "Question does not meet format requirements", "retryable": false },
+        { "code": 19004, "constant": "ErrTooFewOptions", "description": "Question has fewer than minimum options", "retryable": false },
+        { "code": 19005, "constant": "ErrTooManyOptions", "description": "Question has more than maximum options", "retryable": false }
+      ]
+    }
+  ],
+  "stats": {
+    "totalCodes": 189,
+    "totalCategories": 22,
+    "retryableCodes": 9,
+    "rangeUtilization": "189/1050 (18.0%)"
+  }
+}

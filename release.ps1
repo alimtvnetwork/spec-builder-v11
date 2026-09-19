@@ -38,7 +38,7 @@ $stagingDir   = "$distDir/coding-guidelines-v$version"
 $archiveBase  = "coding-guidelines-v$version"
 
 # ── Validate ─────────────────────────────────────────────────────
-$requiredPaths = @("spec", "src", "package.json", "README.md")
+$requiredPaths = @("02-spec", "src", "package.json", "README.md")
 foreach ($p in $requiredPaths) {
     if (-not (Test-Path $p)) {
         Write-Err "Missing required path: $p"
@@ -71,7 +71,7 @@ if (Test-Path $stagingDir) { Remove-Item $stagingDir -Recurse -Force }
 New-Item -ItemType Directory -Path $stagingDir -Force | Out-Null
 
 Write-Step "Copying spec tree..."
-Copy-Item -Path "spec" -Destination "$stagingDir/spec" -Recurse
+Copy-Item -Path "02-spec" -Destination "$stagingDir/spec" -Recurse
 
 if (Test-Path "scripts")        { Copy-Item -Path "scripts" -Destination "$stagingDir/scripts" -Recurse }
 if (Test-Path "install.sh")     { Copy-Item "install.sh"     "$stagingDir/install.sh" }

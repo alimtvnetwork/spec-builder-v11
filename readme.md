@@ -317,7 +317,7 @@ RELEASE_VERSION=3.16.0 bash release.sh
 - **Filesystem:** no raw `os.Stat`/`file_exists` — use `pathutil` / `PathHelper`.
 - **Types:** `any` and `unknown` are banned.
 
-Full rules live under `spec/03-coding-guidelines/` and `.lovable/memories/constraints/`.
+Full rules live under `02-spec/03-coding-guidelines/` and `.lovable/memories/constraints/`.
 
 ---
 
@@ -325,7 +325,7 @@ Full rules live under `spec/03-coding-guidelines/` and `.lovable/memories/constr
 
 1. **Plan before execute** — produce a reliability risk report before any non-trivial change.
 2. **Update `98-changelog.md` and `99-consistency-report.md`** in the affected module.
-3. **Maintain `spec/00-overview.md`** when modules are added, renamed, or renumbered.
+3. **Maintain `02-spec/00-overview.md`** when modules are added, renamed, or renumbered.
 4. **Bump the version** in `package.json` (minor for features, patch for fixes).
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full workflow, changelog rules, and version-bump policy.

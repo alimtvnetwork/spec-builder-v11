@@ -1,0 +1,145 @@
+{
+  "title": "SM Code Generation System Error Code Index",
+  "description": "Machine-readable index of all Spec Management Code Generation System (SM-CG) error codes. Range: 16000-16799.",
+  "version": "1.0.0",
+  "generated": "2026-02-28",
+  "source": "02-spec/11-spec-management-software/05-features/24-code-generation-system/16-error-codes.md",
+  "project": "SM-CG",
+  "range": { "min": 16000, "max": 16799 },
+  "reassignedFrom": "12000-12799",
+  "categories": [
+    {
+      "name": "General",
+      "range": { "min": 16000, "max": 16099 },
+      "codes": [
+        { "code": 16000, "constant": "ErrCodegenUnknown", "http": 500, "description": "Unknown code generation error", "retryable": false },
+        { "code": 16001, "constant": "ErrCodegenNotEnabled", "http": 403, "description": "Code generation not enabled for project", "retryable": false },
+        { "code": 16002, "constant": "ErrCodegenRunNotFound", "http": 404, "description": "Generation run not found", "retryable": false },
+        { "code": 16003, "constant": "ErrCodegenRunAlreadyCompleted", "http": 400, "description": "Generation run already completed", "retryable": false },
+        { "code": 16004, "constant": "ErrCodegenRunCancelled", "http": 400, "description": "Generation run was cancelled", "retryable": false },
+        { "code": 16005, "constant": "ErrCodegenProjectLocked", "http": 423, "description": "Project has another generation in progress", "retryable": true },
+        { "code": 16006, "constant": "ErrCodegenTimeout", "http": 504, "description": "Generation timed out", "retryable": true },
+        { "code": 16007, "constant": "ErrCodegenCancelledByUser", "http": 400, "description": "Generation cancelled by user", "retryable": false }
+      ]
+    },
+    {
+      "name": "Guidelines",
+      "range": { "min": 16100, "max": 16199 },
+      "codes": [
+        { "code": 16100, "constant": "ErrGuidelineNotFound", "http": 404, "description": "Guideline not found", "retryable": false },
+        { "code": 16101, "constant": "ErrGuidelineInvalidLevel", "http": 400, "description": "Invalid guideline level", "retryable": false },
+        { "code": 16102, "constant": "ErrGuidelineParseFailed", "http": 500, "description": "Failed to parse guideline sections", "retryable": false },
+        { "code": 16103, "constant": "ErrGuidelineResolutionFailed", "http": 500, "description": "Failed to resolve guidelines", "retryable": true },
+        { "code": 16104, "constant": "ErrGuidelineCircularRef", "http": 400, "description": "Circular reference in guidelines", "retryable": false },
+        { "code": 16105, "constant": "ErrGuidelineLanguageUnsupported", "http": 400, "description": "Language not supported", "retryable": false },
+        { "code": 16106, "constant": "ErrGuidelineDuplicateName", "http": 409, "description": "Guideline name already exists", "retryable": false },
+        { "code": 16107, "constant": "ErrGuidelineContentEmpty", "http": 400, "description": "Guideline content is empty", "retryable": false },
+        { "code": 16108, "constant": "ErrGuidelineVersionConflict", "http": 409, "description": "Guideline version conflict", "retryable": true }
+      ]
+    },
+    {
+      "name": "Planning",
+      "range": { "min": 16200, "max": 16299 },
+      "codes": [
+        { "code": 16200, "constant": "ErrPlanGenerationFailed", "http": 500, "description": "Failed to generate plan", "retryable": true },
+        { "code": 16201, "constant": "ErrPlanNoSpecs", "http": 400, "description": "No specifications provided", "retryable": false },
+        { "code": 16202, "constant": "ErrPlanSpecNotFound", "http": 404, "description": "Referenced specification not found", "retryable": false },
+        { "code": 16203, "constant": "ErrPlanSpecParseFailed", "http": 400, "description": "Failed to parse specification", "retryable": false },
+        { "code": 16204, "constant": "ErrPlanNoFiles", "http": 400, "description": "No files to generate from specs", "retryable": false },
+        { "code": 16205, "constant": "ErrPlanCircularDependency", "http": 400, "description": "Circular dependency in file plan", "retryable": false },
+        { "code": 16206, "constant": "ErrPlanDependencyResolutionFailed", "http": 500, "description": "Failed to resolve dependencies", "retryable": true },
+        { "code": 16207, "constant": "ErrPlanTooLarge", "http": 400, "description": "Plan exceeds maximum file count", "retryable": false },
+        { "code": 16208, "constant": "ErrPlanInvalidLanguage", "http": 400, "description": "Invalid target language specified", "retryable": false }
+      ]
+    },
+    {
+      "name": "Execution",
+      "range": { "min": 16300, "max": 16399 },
+      "codes": [
+        { "code": 16300, "constant": "ErrExecModelSelectFailed", "http": 500, "description": "Failed to select coding model", "retryable": true },
+        { "code": 16301, "constant": "ErrExecGenerationFailed", "http": 500, "description": "Code generation failed", "retryable": true },
+        { "code": 16302, "constant": "ErrExecWriteFailed", "http": 500, "description": "Failed to write generated file", "retryable": true },
+        { "code": 16303, "constant": "ErrExecBatchTimeout", "http": 504, "description": "Batch execution timeout", "retryable": true },
+        { "code": 16304, "constant": "ErrExecCircularDependency", "http": 400, "description": "Circular dependency detected", "retryable": false },
+        { "code": 16305, "constant": "ErrExecNoWorkers", "http": 503, "description": "No workers available", "retryable": true },
+        { "code": 16306, "constant": "ErrExecContextTooLarge", "http": 400, "description": "Context exceeds model limit", "retryable": false },
+        { "code": 16307, "constant": "ErrExecModelUnavailable", "http": 503, "description": "Coding model unavailable", "retryable": true },
+        { "code": 16308, "constant": "ErrExecModelTimeout", "http": 504, "description": "Model response timeout", "retryable": true },
+        { "code": 16309, "constant": "ErrExecInvalidResponse", "http": 500, "description": "Invalid model response format", "retryable": true },
+        { "code": 16310, "constant": "ErrExecCodeExtractionFailed", "http": 500, "description": "Failed to extract code from response", "retryable": true },
+        { "code": 16311, "constant": "ErrExecPathInvalid", "http": 400, "description": "Invalid file path in plan", "retryable": false },
+        { "code": 16312, "constant": "ErrExecPathTraversal", "http": 403, "description": "Path traversal attempt detected", "retryable": false }
+      ]
+    },
+    {
+      "name": "Git",
+      "range": { "min": 16400, "max": 16499 },
+      "codes": [
+        { "code": 16400, "constant": "ErrCodegenGitInitFailed", "http": 500, "description": "Failed to initialize repository", "retryable": true },
+        { "code": 16401, "constant": "ErrCodegenGitCommitFailed", "http": 500, "description": "Failed to commit changes", "retryable": true },
+        { "code": 16402, "constant": "ErrCodegenGitPushFailed", "http": 500, "description": "Failed to push to remote", "retryable": true },
+        { "code": 16403, "constant": "ErrCodegenGitPullFailed", "http": 500, "description": "Failed to pull from remote", "retryable": true },
+        { "code": 16404, "constant": "ErrCodegenGitConflict", "http": 409, "description": "Merge conflict detected", "retryable": false },
+        { "code": 16405, "constant": "ErrCodegenGitNoRemote", "http": 400, "description": "No remote configured", "retryable": false },
+        { "code": 16406, "constant": "ErrCodegenOauthNotConnected", "http": 401, "description": "OAuth not connected for provider", "retryable": false },
+        { "code": 16407, "constant": "ErrCodegenOauthTokenExpired", "http": 401, "description": "OAuth token expired", "retryable": true },
+        { "code": 16408, "constant": "ErrCodegenOauthRefreshFailed", "http": 500, "description": "Failed to refresh OAuth token", "retryable": true },
+        { "code": 16409, "constant": "ErrCodegenGitRepoCreateFailed", "http": 500, "description": "Failed to create remote repository", "retryable": true },
+        { "code": 16410, "constant": "ErrCodegenGitRepoNotFound", "http": 404, "description": "Remote repository not found", "retryable": false },
+        { "code": 16411, "constant": "ErrCodegenGitPermissionDenied", "http": 403, "description": "Git permission denied", "retryable": false },
+        { "code": 16412, "constant": "ErrCodegenGitStashFailed", "http": 500, "description": "Failed to stash changes", "retryable": true },
+        { "code": 16413, "constant": "ErrCodegenGitStashPopFailed", "http": 500, "description": "Failed to apply stashed changes", "retryable": true },
+        { "code": 16414, "constant": "ErrCodegenOauthStateMismatch", "http": 400, "description": "OAuth state mismatch", "retryable": false },
+        { "code": 16415, "constant": "ErrCodegenOauthProviderError", "http": 502, "description": "OAuth provider error", "retryable": true }
+      ]
+    },
+    {
+      "name": "Build",
+      "range": { "min": 16500, "max": 16599 },
+      "codes": [
+        { "code": 16500, "constant": "ErrBuildVerificationFailed", "http": 500, "description": "Build verification failed", "retryable": false },
+        { "code": 16501, "constant": "ErrBuildBrunNotFound", "http": 500, "description": "brun CLI not found", "retryable": false },
+        { "code": 16502, "constant": "ErrBuildBrunTimeout", "http": 504, "description": "brun execution timeout", "retryable": true },
+        { "code": 16503, "constant": "ErrBuildParseFailed", "http": 500, "description": "Failed to parse build output", "retryable": false },
+        { "code": 16504, "constant": "ErrBuildFixFailed", "http": 500, "description": "AI fix loop exhausted", "retryable": false },
+        { "code": 16505, "constant": "ErrBuildLanguageUnsupported", "http": 400, "description": "Language not supported by brun", "retryable": false },
+        { "code": 16506, "constant": "ErrBuildWorkspaceInvalid", "http": 400, "description": "Invalid build workspace", "retryable": false },
+        { "code": 16507, "constant": "ErrBuildDependenciesMissing", "http": 400, "description": "Build dependencies missing", "retryable": false },
+        { "code": 16508, "constant": "ErrBuildConfigInvalid", "http": 400, "description": "Invalid build configuration", "retryable": false }
+      ]
+    },
+    {
+      "name": "Credits",
+      "range": { "min": 16600, "max": 16699 },
+      "codes": [
+        { "code": 16600, "constant": "ErrCreditsInsufficient", "http": 402, "description": "Insufficient credits for operation", "retryable": false },
+        { "code": 16601, "constant": "ErrCreditsEstimationFailed", "http": 500, "description": "Failed to estimate credit cost", "retryable": true },
+        { "code": 16602, "constant": "ErrCreditsTransactionFailed", "http": 500, "description": "Failed to record transaction", "retryable": true },
+        { "code": 16603, "constant": "ErrCreditsPlanNotFound", "http": 404, "description": "Credit plan not found", "retryable": false },
+        { "code": 16604, "constant": "ErrCreditsPurchaseFailed", "http": 500, "description": "Credit purchase failed", "retryable": true },
+        { "code": 16605, "constant": "ErrCreditsNegativeBalance", "http": 400, "description": "Balance would be negative", "retryable": false },
+        { "code": 16606, "constant": "ErrCreditsUserNotFound", "http": 404, "description": "User credits not found", "retryable": false },
+        { "code": 16607, "constant": "ErrCreditsAlreadyRefunded", "http": 400, "description": "Transaction already refunded", "retryable": false }
+      ]
+    },
+    {
+      "name": "Repository Structure",
+      "range": { "min": 16700, "max": 16799 },
+      "codes": [
+        { "code": 16700, "constant": "ErrRepoCreateDirFailed", "http": 500, "description": "Failed to create directory", "retryable": true },
+        { "code": 16701, "constant": "ErrRepoTemplateFailed", "http": 500, "description": "Failed to generate template file", "retryable": true },
+        { "code": 16702, "constant": "ErrRepoInvalidStructure", "http": 400, "description": "Invalid custom structure", "retryable": false },
+        { "code": 16703, "constant": "ErrRepoCopySpecFailed", "http": 500, "description": "Failed to copy specification", "retryable": true },
+        { "code": 16704, "constant": "ErrRepoPathExists", "http": 409, "description": "Repository path already exists", "retryable": false },
+        { "code": 16705, "constant": "ErrRepoRootNotConfigured", "http": 500, "description": "Repository root not configured", "retryable": false },
+        { "code": 16706, "constant": "ErrRepoPermissionDenied", "http": 403, "description": "Repository permission denied", "retryable": false }
+      ]
+    }
+  ],
+  "stats": {
+    "totalCodes": 79,
+    "totalCategories": 8,
+    "retryableCodes": 32,
+    "rangeUtilization": "79/800 (9.9%)"
+  }
+}

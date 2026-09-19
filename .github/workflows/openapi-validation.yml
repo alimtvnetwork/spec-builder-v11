@@ -30,19 +30,19 @@ jobs:
         run: npm ci
 
       - name: Validate GSearch BI Suite OpenAPI
-        run: npx @redocly/cli lint spec/08-gsearch-cli/01-backend/openapi-bi-suite.yaml --format=github-actions
+        run: npx @redocly/cli lint 02-spec/08-gsearch-cli/01-backend/openapi-bi-suite.yaml --format=github-actions
         continue-on-error: false
 
       - name: Validate BRun CLI OpenAPI
-        run: npx @redocly/cli lint spec/09-brun-cli/01-backend/openapi-brun.yaml --format=github-actions
+        run: npx @redocly/cli lint 02-spec/09-brun-cli/01-backend/openapi-brun.yaml --format=github-actions
         continue-on-error: false
 
       - name: Validate AI Bridge CLI OpenAPI
-        run: npx @redocly/cli lint spec/10-ai-bridge-cli/01-backend/10-openapi-spec.md --format=github-actions
+        run: npx @redocly/cli lint 02-spec/10-ai-bridge-cli/01-backend/10-openapi-spec.md --format=github-actions
         continue-on-error: true
 
       - name: Validate Nexus Flow CLI OpenAPI
-        run: npx @redocly/cli lint spec/11-nexus-flow-cli/01-backend/03-openapi-spec.yaml --format=github-actions
+        run: npx @redocly/cli lint 02-spec/11-nexus-flow-cli/01-backend/03-openapi-spec.yaml --format=github-actions
         continue-on-error: true
 
       - name: Summary

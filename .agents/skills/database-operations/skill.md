@@ -5,7 +5,7 @@ description: Execute and specify relational database models and operations using
 
 # Database Operations Skill
 
-Follows `spec/06-split-db-architecture/` and `.lovable/memories/standards/`:
+Follows `02-spec/06-split-db-architecture/` and `.lovable/memories/standards/`:
 
 1. **4-Tier Split DB Architecture:**
    - `system.db`: Read-only seeded data from embedded JSON

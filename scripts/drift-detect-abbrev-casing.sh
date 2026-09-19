@@ -6,7 +6,7 @@
 #
 # Exempt: Go stdlib (MarshalJSON, ServeHTTP), framework (ShouldBindJSON),
 #   proper nouns (OpenAPI, DuckDB, ChromaDB, MongoDB, IndexedDB, TailwindCSS, cURL),
-#   external libraries (chromem.NewDB, RocksDB), research docs (spec/16-ai-research/),
+#   external libraries (chromem.NewDB, RocksDB), research docs (02-spec/16-ai-research/),
 #   Mermaid diagrams, test data strings, SCREAMING_SNAKE env vars,
 #   guideline/issue/enforcement directories, ❌ anti-pattern markers.
 #
@@ -18,13 +18,13 @@ LABEL="CAT-7 (abbreviation casing)"
 COUNT=$(grep -rn -P '(?<=[a-z])(ID|URL|API|JSON|HTTP|HTML|LLM|DB)(?=[A-Z\s\(\)\{\},;:]|$)' \
   --include="*.md" \
   ./spec/ 2>/dev/null \
-  | grep -v "spec/22-how-app-issues-track/" \
-  | grep -v "spec/23-coding-guidelines/" \
-  | grep -v "spec/25-golang-standards/" \
-  | grep -v "spec/30-generic-enforce/" \
-  | grep -v "spec/99-archive/" \
-  | grep -v "spec/16-ai-research/" \
-  | grep -v "spec/02-spec-management-software/10-research/" \
+  | grep -v "02-spec/22-how-app-issues-track/" \
+  | grep -v "02-spec/23-coding-guidelines/" \
+  | grep -v "02-spec/25-golang-standards/" \
+  | grep -v "02-spec/30-generic-enforce/" \
+  | grep -v "02-spec/99-archive/" \
+  | grep -v "02-spec/16-ai-research/" \
+  | grep -v "02-spec/02-spec-management-software/10-research/" \
   | grep -v "// drift-exempt:" \
   | grep -v "// EXEMPTED:" \
   | grep -v "❌" \
@@ -46,13 +46,13 @@ if [ "$COUNT" -gt "$BASELINE" ]; then
   grep -rn -P '(?<=[a-z])(ID|URL|API|JSON|HTTP|HTML|LLM|DB)(?=[A-Z\s\(\)\{\},;:]|$)' \
     --include="*.md" \
     ./spec/ 2>/dev/null \
-    | grep -v "spec/22-how-app-issues-track/" \
-    | grep -v "spec/23-coding-guidelines/" \
-    | grep -v "spec/25-golang-standards/" \
-    | grep -v "spec/30-generic-enforce/" \
-    | grep -v "spec/99-archive/" \
-    | grep -v "spec/16-ai-research/" \
-    | grep -v "spec/02-spec-management-software/10-research/" \
+    | grep -v "02-spec/22-how-app-issues-track/" \
+    | grep -v "02-spec/23-coding-guidelines/" \
+    | grep -v "02-spec/25-golang-standards/" \
+    | grep -v "02-spec/30-generic-enforce/" \
+    | grep -v "02-spec/99-archive/" \
+    | grep -v "02-spec/16-ai-research/" \
+    | grep -v "02-spec/02-spec-management-software/10-research/" \
     | grep -v "// drift-exempt:" \
     | grep -v "// EXEMPTED:" \
     | grep -v "❌" \

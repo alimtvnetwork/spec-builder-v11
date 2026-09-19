@@ -282,8 +282,8 @@ graph TB
     end
 
     subgraph "Specification Documents"
-        S1["pkg/database Operations<br/>spec/11-spec-management-software/<br/>13-shared-packages/06-pkg-database-operations.md"]
-        S2["Split DB Architecture<br/>spec/06-split-db-architecture/<br/>00-overview.md"]
+        S1["pkg/database Operations<br/>02-spec/11-spec-management-software/<br/>13-shared-packages/06-pkg-database-operations.md"]
+        S2["Split DB Architecture<br/>02-spec/06-split-db-architecture/<br/>00-overview.md"]
     end
 
     subgraph "Go CLI Tools (Compliant)"
@@ -336,7 +336,7 @@ graph TB
 <presentation-mermaid>
 graph TB
     subgraph "Core Specification"
-        SEED["🌱 Seedable Config Architecture<br/>spec/07-seedable-config-architecture/<br/>00-overview.md"]
+        SEED["🌱 Seedable Config Architecture<br/>02-spec/07-seedable-config-architecture/<br/>00-overview.md"]
     end
 
     subgraph "Memory Files"
@@ -364,7 +364,7 @@ graph TB
     end
 
     subgraph "Shared Architecture"
-        SA["Shared CLI Frontend<br/>spec/03-shared-cli-frontend/"]
+        SA["Shared CLI Frontend<br/>02-spec/03-shared-cli-frontend/"]
     end
 
     SEED --> SM1

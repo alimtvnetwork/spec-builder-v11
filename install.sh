@@ -17,7 +17,7 @@ REPO="${REPO:-alimtvnetwork/coding-guidelines-v15}"
 BRANCH="${BRANCH:-main}"
 VERSION=""
 DEST="."
-FOLDERS=("spec" "scripts" ".lovable/memories")
+FOLDERS=("02-spec" "scripts" ".lovable/memories")
 DRY_RUN=false
 LIST_VERSIONS=false
 

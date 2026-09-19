@@ -11,9 +11,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "validate:errors": "node spec/07-error-code-registry/scripts/detect-collisions.mjs",
+    "validate:errors": "node 02-spec/03-error-manage/03-error-code-registry/08-linter-scripts/detect-collisions.mjs",
     "prepare": "husky install",
-    "report:errors": "node spec/07-error-code-registry/scripts/generate-utilization-report.mjs"
+    "report:errors": "node 02-spec/03-error-manage/03-error-code-registry/08-linter-scripts/generate-utilization-report.mjs"
   },
   "dependencies": {
     "@radix-ui/react-tooltip": "^1.2.7",

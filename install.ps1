@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Download spec/memories/scripts from the coding-guidelines repo.
+    Download 02-spec/memories/scripts from the coding-guidelines repo.
 
 .DESCRIPTION
     Power-user flags:
@@ -25,7 +25,7 @@ param(
     [string]$Branch       = "main",
     [string]$Version      = "",
     [string]$Dest         = "",
-    [string[]]$Folders    = @("spec", "scripts", ".lovable/memories"),
+    [string[]]$Folders    = @("02-spec", "scripts", ".lovable/memories"),
     [switch]$DryRun,
     [switch]$Force,
     [switch]$ListVersions

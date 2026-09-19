@@ -114,7 +114,7 @@ const ModuleGrid = () => {
         <p className="text-sm text-muted-foreground leading-relaxed">
           ~1,399 spec-level Go code example violations (tuple-return signatures + HTTP method magic strings across 7 CLIs) — intentionally deferred until Go backend implementation begins.
           <span className="ml-1 font-mono text-[10px] text-muted-foreground/50">
-            See: spec/61-how-app-issues-track/07-magic-string-tuple-return-audit.md
+            See: 02-spec/61-how-app-issues-track/07-magic-string-tuple-return-audit.md
           </span>
         </p>
       </div>

@@ -32,11 +32,11 @@ export interface SpecFolderLike {
 }
 
 // Discover every spec markdown file at build time. Keys look like:
-//   "/spec/09-code-block-system/00-overview.md"
+//   "/02-spec/09-code-block-system/00-overview.md"
 const discoveredSpecPaths = Object.keys(
-  import.meta.glob("/spec/**/*.md", { query: "?raw", import: "default" }),
+  import.meta.glob(["/02-spec/**/*.md", "/spec/**/*.md"], { query: "?raw", import: "default" }),
 )
-  .map((key) => key.replace(/^\//, "")) // -> "spec/09-code-block-system/00-overview.md"
+  .map((key) => key.replace(/^\//, "")) // -> "02-spec/09-code-block-system/00-overview.md"
   .sort();
 
 const formatLabel = (slug: string): string =>
@@ -54,12 +54,12 @@ const formatFileName = (filename: string, includeNumberPrefix: boolean): string 
 };
 
 const inferCategory = (folderName: string): SpecFolderLike["category"] => {
-  if (folderName.startsWith("30-") || folderName.startsWith("31-") || folderName.startsWith("32-") || folderName.startsWith("33-")) return "wordpress";
-  if (folderName.startsWith("20-") || folderName.startsWith("21-") || folderName.startsWith("22-") || folderName.startsWith("23-") || folderName.startsWith("24-") || folderName.startsWith("25-") || folderName.startsWith("26-") || folderName.startsWith("27-") || folderName.startsWith("28-")) return "cli";
-  if (folderName.startsWith("02-") || folderName.startsWith("05-")) return "standards";
-  if (folderName.startsWith("08-")) return "enforcement";
-  if (folderName.startsWith("06-") || folderName.startsWith("07-") || folderName.startsWith("10-") || folderName.startsWith("11-")) return "core";
-  if (folderName.startsWith("50-") || folderName.startsWith("51-") || folderName.startsWith("52-") || folderName.startsWith("53-") || folderName.startsWith("60-") || folderName.startsWith("61-")) return "utilities";
+  if (folderName.startsWith("30-") || folderName.startsWith("31-") || folderName.startsWith("32-") || folderName.startsWith("33-") || folderName.startsWith("34-") || folderName.startsWith("35-") || folderName.startsWith("36-") || folderName.startsWith("37-") || folderName.startsWith("18-")) return "wordpress";
+  if (folderName.startsWith("20-") || folderName.startsWith("21-") || folderName.startsWith("22-") || folderName.startsWith("23-") || folderName.startsWith("24-") || folderName.startsWith("25-") || folderName.startsWith("26-") || folderName.startsWith("27-") || folderName.startsWith("28-") || folderName.startsWith("29-") || folderName.startsWith("13-")) return "cli";
+  if (folderName.startsWith("02-") || folderName.startsWith("05-") || folderName.startsWith("01-")) return "standards";
+  if (folderName.startsWith("08-") || folderName.startsWith("17-")) return "enforcement";
+  if (folderName.startsWith("03-") || folderName.startsWith("04-") || folderName.startsWith("06-") || folderName.startsWith("07-") || folderName.startsWith("09-") || folderName.startsWith("10-") || folderName.startsWith("11-") || folderName.startsWith("12-") || folderName.startsWith("14-") || folderName.startsWith("15-") || folderName.startsWith("16-") || folderName.startsWith("19-") || folderName.startsWith("21-")) return "core";
+  if (folderName.startsWith("40-") || folderName.startsWith("41-") || folderName.startsWith("42-") || folderName.startsWith("50-") || folderName.startsWith("51-") || folderName.startsWith("52-") || folderName.startsWith("53-") || folderName.startsWith("60-") || folderName.startsWith("61-")) return "utilities";
   return "foundation";
 };
 
@@ -131,7 +131,7 @@ export function augmentSpecFolders<T extends SpecFolderLike>(
   const seenNewFolders = new Set<string>();
   for (const [folderPath, files] of discoveredByFolder) {
     if (folderByPath.has(folderPath)) continue;
-    if (folderPath === "spec") continue; // root files handled by curated "root" entry
+    if (folderPath === "02-spec" || folderPath === "02-spec") continue; // root files handled by curated "root" entry
     if (seenNewFolders.has(folderPath)) continue;
     seenNewFolders.add(folderPath);
 

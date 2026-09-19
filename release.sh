@@ -11,7 +11,7 @@ set -euo pipefail
 
 REPO="alimtvnetwork/coding-guidelines-v15"
 RELEASE_VERSION_INPUT="${RELEASE_VERSION:-}"
-REQUIRED_PATHS=("spec" "src" "package.json" "README.md")
+REQUIRED_PATHS=("02-spec" "src" "package.json" "README.md")
 
 step() { printf '\033[0;36m▸ %s\033[0m\n' "$1"; }
 ok()   { printf '\033[0;32m✅ %s\033[0m\n' "$1"; }

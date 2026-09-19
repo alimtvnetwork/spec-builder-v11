@@ -9,11 +9,11 @@ LABEL="CAT-3 (tuple returns)"
 COUNT=$(grep -rn -E "\) \((\*?[A-Z][a-zA-Z]+,\s*error|error)\)" \
   --include="*.md" \
   ./spec/ 2>/dev/null \
-  | grep -v "spec/22-how-app-issues-track/" \
-  | grep -v "spec/23-coding-guidelines/" \
-  | grep -v "spec/25-golang-standards/" \
-  | grep -v "spec/30-generic-enforce/" \
-  | grep -v "spec/99-archive/" \
+  | grep -v "02-spec/22-how-app-issues-track/" \
+  | grep -v "02-spec/23-coding-guidelines/" \
+  | grep -v "02-spec/25-golang-standards/" \
+  | grep -v "02-spec/30-generic-enforce/" \
+  | grep -v "02-spec/99-archive/" \
   | grep -v "// drift-exempt:" \
   | grep -v "❌" \
   | grep -v "99-consistency-report" \

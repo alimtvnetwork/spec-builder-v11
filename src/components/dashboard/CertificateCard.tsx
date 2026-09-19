@@ -46,7 +46,7 @@ const certificates: CertificateData[] = [
       { label: "Categories", value: "9" },
     ],
     description: "Project-wide code standards enforcement across context naming, error handling, return signatures, filesystem access, boolean logic, type safety, abbreviation casing, and structural consistency.",
-    location: "spec/validation-reports/05-completion-certificate-issue-18.md",
+    location: "02-spec/validation-reports/05-completion-certificate-issue-18.md",
     relatedCategories: ["standards", "enforcement", "foundation"],
     details: {
       scope: "1,164 files across 9 categories",
@@ -68,7 +68,7 @@ const certificates: CertificateData[] = [
       { label: "Health Score", value: `${dashboardData.HealthScore}/100` },
     ],
     description: "Full specification tree validation — cross-reference integrity, consistency report accuracy, and master index health dashboard refresh to v30.0.0 baseline.",
-    location: "spec/validation-reports/14-audit-certificate-2026-03-18.md",
+    location: "02-spec/validation-reports/14-audit-certificate-2026-03-18.md",
     relatedCategories: ["foundation", "core"],
     details: {
       scope: `${dashboardData.SpecFiles.toLocaleString()} markdown files across ${dashboardData.TotalModules} modules`,

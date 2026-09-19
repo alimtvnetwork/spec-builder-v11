@@ -1,0 +1,225 @@
+{
+  "title": "AI Transcribe CLI Error Code Index",
+  "description": "Machine-readable index of all AI Transcribe CLI (AIT) error codes. Range: 14000-14499.",
+  "version": "1.0.0",
+  "generated": "2026-02-28",
+  "source": "02-spec/26-ai-transcribe-cli/01-backend/10-error-codes.md",
+  "project": "AIT",
+  "range": { "min": 14000, "max": 14499 },
+  "categories": [
+    {
+      "name": "General",
+      "range": { "min": 14000, "max": 14049 },
+      "codes": [
+        { "code": 14000, "constant": "ErrTranscribeGeneral", "http": 500, "description": "Internal server error", "retryable": false },
+        { "code": 14001, "constant": "ErrTranscribeConfigLoad", "http": 500, "description": "Failed to load configuration", "retryable": false },
+        { "code": 14002, "constant": "ErrTranscribeConfigInvalid", "http": 400, "description": "Invalid configuration", "retryable": false },
+        { "code": 14003, "constant": "ErrTranscribeDbInit", "http": 500, "description": "Database initialization failed", "retryable": false },
+        { "code": 14004, "constant": "ErrTranscribeDbQuery", "http": 500, "description": "Database query failed", "retryable": false },
+        { "code": 14005, "constant": "ErrTranscribeDbWrite", "http": 500, "description": "Database write failed", "retryable": false },
+        { "code": 14010, "constant": "ErrTranscribeUnavailable", "http": 503, "description": "Service unavailable", "retryable": true },
+        { "code": 14011, "constant": "ErrTranscribeRateLimited", "http": 429, "description": "Rate limit exceeded", "retryable": true },
+        { "code": 14012, "constant": "ErrTranscribeQuotaExceeded", "http": 429, "description": "Usage quota exceeded", "retryable": false },
+        { "code": 14020, "constant": "ErrTranscribeAuthRequired", "http": 401, "description": "Authentication required", "retryable": false },
+        { "code": 14021, "constant": "ErrTranscribeAuthInvalid", "http": 401, "description": "Invalid authentication", "retryable": false },
+        { "code": 14022, "constant": "ErrTranscribeAuthForbidden", "http": 403, "description": "Access forbidden", "retryable": false },
+        { "code": 14030, "constant": "ErrTranscribeModelNotFound", "http": 404, "description": "Model not found", "retryable": false },
+        { "code": 14031, "constant": "ErrTranscribeModelLoad", "http": 500, "description": "Model load failed", "retryable": false },
+        { "code": 14032, "constant": "ErrTranscribeModelNotReady", "http": 503, "description": "Model not ready", "retryable": true },
+        { "code": 14033, "constant": "ErrTranscribeModelInference", "http": 500, "description": "Model inference failed", "retryable": false }
+      ]
+    },
+    {
+      "name": "Audio Pipeline",
+      "range": { "min": 14050, "max": 14099 },
+      "codes": [
+        { "code": 14050, "constant": "ErrAudioGeneral", "http": 500, "description": "Audio processing error", "retryable": false },
+        { "code": 14051, "constant": "ErrAudioCaptureFailed", "http": 500, "description": "Audio capture failed", "retryable": false },
+        { "code": 14052, "constant": "ErrAudioDeviceNotFound", "http": 404, "description": "Audio device not found", "retryable": false },
+        { "code": 14053, "constant": "ErrAudioDeviceBusy", "http": 409, "description": "Audio device busy", "retryable": true },
+        { "code": 14060, "constant": "ErrAudioFormatUnsupported", "http": 400, "description": "Unsupported audio format", "retryable": false },
+        { "code": 14061, "constant": "ErrAudioSampleRateInvalid", "http": 400, "description": "Invalid sample rate", "retryable": false },
+        { "code": 14062, "constant": "ErrAudioChannelsInvalid", "http": 400, "description": "Invalid channel count", "retryable": false },
+        { "code": 14063, "constant": "ErrAudioBitDepthInvalid", "http": 400, "description": "Invalid bit depth", "retryable": false },
+        { "code": 14070, "constant": "ErrAudioEncodeFailed", "http": 500, "description": "Audio encoding failed", "retryable": false },
+        { "code": 14071, "constant": "ErrAudioDecodeFailed", "http": 400, "description": "Audio decoding failed", "retryable": false },
+        { "code": 14072, "constant": "ErrAudioConversionFailed", "http": 500, "description": "Audio conversion failed", "retryable": false },
+        { "code": 14080, "constant": "ErrAudioTooShort", "http": 400, "description": "Audio too short", "retryable": false },
+        { "code": 14081, "constant": "ErrAudioTooLong", "http": 400, "description": "Audio too long", "retryable": false },
+        { "code": 14082, "constant": "ErrAudioSilent", "http": 400, "description": "Audio is silent", "retryable": false },
+        { "code": 14083, "constant": "ErrAudioCorrupted", "http": 400, "description": "Audio data corrupted", "retryable": false },
+        { "code": 14090, "constant": "ErrVadFailed", "http": 500, "description": "VAD processing failed", "retryable": false },
+        { "code": 14091, "constant": "ErrVadModelNotLoaded", "http": 500, "description": "VAD model not loaded", "retryable": false },
+        { "code": 14095, "constant": "ErrBufferOverflow", "http": 500, "description": "Audio buffer overflow", "retryable": false },
+        { "code": 14096, "constant": "ErrBufferUnderflow", "http": 500, "description": "Audio buffer underflow", "retryable": false }
+      ]
+    },
+    {
+      "name": "STT",
+      "range": { "min": 14100, "max": 14149 },
+      "codes": [
+        { "code": 14100, "constant": "ErrSttGeneral", "http": 500, "description": "Transcription error", "retryable": false },
+        { "code": 14101, "constant": "ErrSttProviderUnavailable", "http": 503, "description": "STT provider unavailable", "retryable": true },
+        { "code": 14102, "constant": "ErrSttProviderFailed", "http": 502, "description": "STT provider failed", "retryable": true },
+        { "code": 14103, "constant": "ErrSttTranscriptionFailed", "http": 500, "description": "Transcription failed", "retryable": false },
+        { "code": 14104, "constant": "ErrSttStreamFailed", "http": 500, "description": "Streaming transcription failed", "retryable": false },
+        { "code": 14105, "constant": "ErrSttLanguageUnsupported", "http": 400, "description": "Language not supported", "retryable": false },
+        { "code": 14106, "constant": "ErrSttLanguageDetectFailed", "http": 500, "description": "Language detection failed", "retryable": false },
+        { "code": 14110, "constant": "ErrWhisperNotLoaded", "http": 500, "description": "Whisper model not loaded", "retryable": false },
+        { "code": 14111, "constant": "ErrWhisperModelInvalid", "http": 400, "description": "Invalid Whisper model", "retryable": false },
+        { "code": 14112, "constant": "ErrWhisperProcessing", "http": 500, "description": "Whisper processing error", "retryable": false },
+        { "code": 14113, "constant": "ErrWhisperOom", "http": 500, "description": "Whisper out of memory", "retryable": false },
+        { "code": 14120, "constant": "ErrOpenaiSttConnection", "http": 502, "description": "OpenAI connection failed", "retryable": true },
+        { "code": 14121, "constant": "ErrOpenaiSttAuth", "http": 401, "description": "OpenAI authentication failed", "retryable": false },
+        { "code": 14122, "constant": "ErrOpenaiSttRateLimit", "http": 429, "description": "OpenAI rate limited", "retryable": true },
+        { "code": 14123, "constant": "ErrOpenaiSttTimeout", "http": 504, "description": "OpenAI request timeout", "retryable": true },
+        { "code": 14130, "constant": "ErrElevenlabsSttConnection", "http": 502, "description": "ElevenLabs connection failed", "retryable": true },
+        { "code": 14131, "constant": "ErrElevenlabsSttAuth", "http": 401, "description": "ElevenLabs auth failed", "retryable": false },
+        { "code": 14132, "constant": "ErrElevenlabsSttRateLimit", "http": 429, "description": "ElevenLabs rate limited", "retryable": true },
+        { "code": 14133, "constant": "ErrElevenlabsSttQuota", "http": 429, "description": "ElevenLabs quota exceeded", "retryable": false },
+        { "code": 14140, "constant": "ErrDiarizationFailed", "http": 500, "description": "Speaker diarization failed", "retryable": false },
+        { "code": 14141, "constant": "ErrTimestampingFailed", "http": 500, "description": "Word timestamping failed", "retryable": false }
+      ]
+    },
+    {
+      "name": "TTS",
+      "range": { "min": 14150, "max": 14199 },
+      "codes": [
+        { "code": 14150, "constant": "ErrTtsGeneral", "http": 500, "description": "Synthesis error", "retryable": false },
+        { "code": 14151, "constant": "ErrTtsProviderUnavailable", "http": 503, "description": "TTS provider unavailable", "retryable": true },
+        { "code": 14152, "constant": "ErrTtsProviderFailed", "http": 502, "description": "TTS provider failed", "retryable": true },
+        { "code": 14153, "constant": "ErrTtsSynthesisFailed", "http": 500, "description": "Speech synthesis failed", "retryable": false },
+        { "code": 14154, "constant": "ErrTtsStreamFailed", "http": 500, "description": "Streaming synthesis failed", "retryable": false },
+        { "code": 14155, "constant": "ErrTtsVoiceNotFound", "http": 404, "description": "Voice not found", "retryable": false },
+        { "code": 14156, "constant": "ErrTtsVoiceUnavailable", "http": 503, "description": "Voice unavailable", "retryable": true },
+        { "code": 14157, "constant": "ErrTtsTextTooLong", "http": 400, "description": "Text too long", "retryable": false },
+        { "code": 14158, "constant": "ErrTtsTextEmpty", "http": 400, "description": "Text is empty", "retryable": false },
+        { "code": 14159, "constant": "ErrTtsLanguageUnsupported", "http": 400, "description": "Language not supported", "retryable": false },
+        { "code": 14160, "constant": "ErrXttsNotLoaded", "http": 500, "description": "XTTS model not loaded", "retryable": false },
+        { "code": 14161, "constant": "ErrXttsModelInvalid", "http": 400, "description": "Invalid XTTS model", "retryable": false },
+        { "code": 14162, "constant": "ErrXttsProcessing", "http": 500, "description": "XTTS processing error", "retryable": false },
+        { "code": 14163, "constant": "ErrXttsOom", "http": 500, "description": "XTTS out of memory", "retryable": false },
+        { "code": 14170, "constant": "ErrElevenlabsTtsConnection", "http": 502, "description": "ElevenLabs TTS connection failed", "retryable": true },
+        { "code": 14171, "constant": "ErrElevenlabsTtsAuth", "http": 401, "description": "ElevenLabs TTS auth failed", "retryable": false },
+        { "code": 14172, "constant": "ErrElevenlabsTtsRateLimit", "http": 429, "description": "ElevenLabs TTS rate limited", "retryable": true },
+        { "code": 14180, "constant": "ErrAzureTtsConnection", "http": 502, "description": "Azure TTS connection failed", "retryable": true },
+        { "code": 14181, "constant": "ErrAzureTtsAuth", "http": 401, "description": "Azure TTS auth failed", "retryable": false },
+        { "code": 14182, "constant": "ErrAzureTtsRegion", "http": 400, "description": "Invalid Azure region", "retryable": false }
+      ]
+    },
+    {
+      "name": "Voice Commands",
+      "range": { "min": 14200, "max": 14249 },
+      "codes": [
+        { "code": 14200, "constant": "ErrCmdGeneral", "http": 500, "description": "Voice command error", "retryable": false },
+        { "code": 14201, "constant": "ErrCmdNotFound", "http": 404, "description": "Command not found", "retryable": false },
+        { "code": 14202, "constant": "ErrCmdDisabled", "http": 400, "description": "Command is disabled", "retryable": false },
+        { "code": 14203, "constant": "ErrCmdExecution", "http": 500, "description": "Command execution failed", "retryable": false },
+        { "code": 14204, "constant": "ErrCmdWebhook", "http": 502, "description": "Webhook call failed", "retryable": true },
+        { "code": 14205, "constant": "ErrCmdPattern", "http": 400, "description": "Invalid command pattern", "retryable": false },
+        { "code": 14206, "constant": "ErrCmdLimit", "http": 429, "description": "Max custom commands reached", "retryable": false },
+        { "code": 14207, "constant": "ErrCmdTimeout", "http": 504, "description": "Command timeout", "retryable": true },
+        { "code": 14210, "constant": "ErrWakeWordFailed", "http": 500, "description": "Wake word detection failed", "retryable": false },
+        { "code": 14211, "constant": "ErrWakeWordNotLoaded", "http": 500, "description": "Wake word model not loaded", "retryable": false },
+        { "code": 14220, "constant": "ErrGrammarLoadFailed", "http": 500, "description": "Grammar load failed", "retryable": false },
+        { "code": 14221, "constant": "ErrGrammarInvalid", "http": 400, "description": "Invalid grammar rule", "retryable": false }
+      ]
+    },
+    {
+      "name": "Voice Cloning",
+      "range": { "min": 14250, "max": 14299 },
+      "codes": [
+        { "code": 14250, "constant": "ErrCloneSampleShort", "http": 400, "description": "Audio sample too short", "retryable": false },
+        { "code": 14251, "constant": "ErrCloneSampleLong", "http": 400, "description": "Audio sample too long", "retryable": false },
+        { "code": 14252, "constant": "ErrCloneQuality", "http": 400, "description": "Poor audio quality", "retryable": false },
+        { "code": 14253, "constant": "ErrCloneFormat", "http": 400, "description": "Unsupported audio format", "retryable": false },
+        { "code": 14254, "constant": "ErrCloneTraining", "http": 500, "description": "Voice training failed", "retryable": false },
+        { "code": 14255, "constant": "ErrCloneLimit", "http": 429, "description": "Maximum voices reached", "retryable": false },
+        { "code": 14256, "constant": "ErrCloneProvider", "http": 502, "description": "Provider cloning error", "retryable": true },
+        { "code": 14257, "constant": "ErrVoiceNotFound", "http": 404, "description": "Cloned voice not found", "retryable": false },
+        { "code": 14260, "constant": "ErrCloneEmbedding", "http": 500, "description": "Voice embedding failed", "retryable": false },
+        { "code": 14261, "constant": "ErrCloneConsent", "http": 400, "description": "Missing consent", "retryable": false }
+      ]
+    },
+    {
+      "name": "Realtime/WebSocket",
+      "range": { "min": 14300, "max": 14349 },
+      "codes": [
+        { "code": 14300, "constant": "ErrWsGeneral", "http": 500, "description": "WebSocket error", "retryable": false },
+        { "code": 14301, "constant": "ErrWsConnectionFailed", "http": 500, "description": "WebSocket connection failed", "retryable": true },
+        { "code": 14302, "constant": "ErrWsConnectionClosed", "http": 410, "description": "WebSocket connection closed", "retryable": false },
+        { "code": 14303, "constant": "ErrWsMessageInvalid", "http": 400, "description": "Invalid WebSocket message", "retryable": false },
+        { "code": 14304, "constant": "ErrWsMessageTooLarge", "http": 413, "description": "Message too large", "retryable": false },
+        { "code": 14305, "constant": "ErrWsRateLimit", "http": 429, "description": "WebSocket rate limited", "retryable": true },
+        { "code": 14310, "constant": "ErrRealtimeSessionInvalid", "http": 400, "description": "Invalid session state", "retryable": false },
+        { "code": 14311, "constant": "ErrRealtimeNotConfigured", "http": 400, "description": "Session not configured", "retryable": false },
+        { "code": 14312, "constant": "ErrRealtimeBufferFull", "http": 429, "description": "Audio buffer full", "retryable": true },
+        { "code": 14320, "constant": "ErrRealtimeTurnTimeout", "http": 504, "description": "Turn detection timeout", "retryable": false },
+        { "code": 14321, "constant": "ErrRealtimeInterrupt", "http": 400, "description": "Interrupted", "retryable": false },
+        { "code": 14330, "constant": "ErrProviderSwitchFailed", "http": 500, "description": "Provider switch failed", "retryable": false },
+        { "code": 14331, "constant": "ErrReconnectFailed", "http": 500, "description": "Reconnection failed", "retryable": true }
+      ]
+    },
+    {
+      "name": "Session Management",
+      "range": { "min": 14350, "max": 14399 },
+      "codes": [
+        { "code": 14350, "constant": "ErrSessionGeneral", "http": 500, "description": "Session error", "retryable": false },
+        { "code": 14351, "constant": "ErrSessionNotFound", "http": 404, "description": "Session not found", "retryable": false },
+        { "code": 14352, "constant": "ErrSessionExpired", "http": 410, "description": "Session expired", "retryable": false },
+        { "code": 14353, "constant": "ErrSessionLimitReached", "http": 429, "description": "Session limit reached", "retryable": false },
+        { "code": 14360, "constant": "ErrTranscriptNotFound", "http": 404, "description": "Transcript not found", "retryable": false },
+        { "code": 14361, "constant": "ErrTranscriptExportFailed", "http": 500, "description": "Transcript export failed", "retryable": false },
+        { "code": 14362, "constant": "ErrTranscriptFormat", "http": 400, "description": "Invalid transcript format", "retryable": false }
+      ]
+    },
+    {
+      "name": "Configuration",
+      "range": { "min": 14400, "max": 14449 },
+      "codes": [
+        { "code": 14400, "constant": "ErrConfigGeneral", "http": 500, "description": "Configuration error", "retryable": false },
+        { "code": 14401, "constant": "ErrConfigFileNotFound", "http": 404, "description": "Config file not found", "retryable": false },
+        { "code": 14402, "constant": "ErrConfigParse", "http": 500, "description": "Config parse error", "retryable": false },
+        { "code": 14403, "constant": "ErrConfigValidation", "http": 400, "description": "Config validation failed", "retryable": false },
+        { "code": 14404, "constant": "ErrConfigMissingKey", "http": 400, "description": "Missing required config", "retryable": false },
+        { "code": 14410, "constant": "ErrConfigProvider", "http": 400, "description": "Invalid provider config", "retryable": false },
+        { "code": 14411, "constant": "ErrConfigAudio", "http": 400, "description": "Invalid audio config", "retryable": false },
+        { "code": 14412, "constant": "ErrConfigApiKey", "http": 400, "description": "Missing API key", "retryable": false }
+      ]
+    },
+    {
+      "name": "Provider",
+      "range": { "min": 14450, "max": 14499 },
+      "codes": [
+        { "code": 14450, "constant": "ErrProviderGeneral", "http": 500, "description": "Provider error", "retryable": false },
+        { "code": 14451, "constant": "ErrProviderNotConfigured", "http": 400, "description": "Provider not configured", "retryable": false },
+        { "code": 14452, "constant": "ErrProviderInitFailed", "http": 500, "description": "Provider init failed", "retryable": false },
+        { "code": 14453, "constant": "ErrProviderHealthCheck", "http": 503, "description": "Provider health check failed", "retryable": true },
+        { "code": 14460, "constant": "ErrProviderFallback", "http": 503, "description": "All providers failed", "retryable": false },
+        { "code": 14461, "constant": "ErrProviderMismatch", "http": 400, "description": "Provider mismatch", "retryable": false }
+      ]
+    },
+    {
+      "name": "Model Download",
+      "range": { "min": 14470, "max": 14489 },
+      "source": "02-spec/26-ai-transcribe-cli/01-backend/13-model-download.md",
+      "codes": [
+        { "code": 14470, "constant": "ErrModelNotFound", "description": "Model ID not in registry", "retryable": false },
+        { "code": 14471, "constant": "ErrDownloadFailed", "description": "Network or server error", "retryable": true },
+        { "code": 14472, "constant": "ErrChecksumMismatch", "description": "Downloaded file corrupted", "retryable": true },
+        { "code": 14473, "constant": "ErrInsufficientSpace", "description": "Not enough disk space", "retryable": false },
+        { "code": 14474, "constant": "ErrInsufficientVram", "description": "Not enough GPU memory", "retryable": false },
+        { "code": 14475, "constant": "ErrExtractionFailed", "description": "Failed to extract archive", "retryable": false },
+        { "code": 14476, "constant": "ErrModelLocked", "description": "Model in use, cannot delete", "retryable": false },
+        { "code": 14477, "constant": "ErrMirrorExhausted", "description": "All mirrors failed", "retryable": false },
+        { "code": 14478, "constant": "ErrCacheCorrupted", "description": "Cache manifest invalid", "retryable": false }
+      ]
+    }
+  ],
+  "stats": {
+    "totalCodes": 141,
+    "totalCategories": 11,
+    "retryableCodes": 27,
+    "rangeUtilization": "141/500 (28.2%)"
+  }
+}

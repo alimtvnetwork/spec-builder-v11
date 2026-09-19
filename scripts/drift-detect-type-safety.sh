@@ -11,10 +11,10 @@ LABEL_MAP="CAT-8b (map[string]any)"
 COUNT_IFACE=$(grep -rn "interface{}" \
   --include="*.md" \
   ./spec/ 2>/dev/null \
-  | grep -v "spec/22-how-app-issues-track/" \
-  | grep -v "spec/23-coding-guidelines/" \
-  | grep -v "spec/25-golang-standards/" \
-  | grep -v "spec/30-generic-enforce/" \
+  | grep -v "02-spec/22-how-app-issues-track/" \
+  | grep -v "02-spec/23-coding-guidelines/" \
+  | grep -v "02-spec/25-golang-standards/" \
+  | grep -v "02-spec/30-generic-enforce/" \
   | grep -v "// drift-exempt:" \
   | grep -v "// ALLOWED:" \
   | grep -v "// EXEMPTED:" \
@@ -24,10 +24,10 @@ COUNT_IFACE=$(grep -rn "interface{}" \
 COUNT_MAP=$(grep -rn 'map\[string\]any' \
   --include="*.md" \
   ./spec/ 2>/dev/null \
-  | grep -v "spec/22-how-app-issues-track/" \
-  | grep -v "spec/23-coding-guidelines/" \
-  | grep -v "spec/25-golang-standards/" \
-  | grep -v "spec/30-generic-enforce/" \
+  | grep -v "02-spec/22-how-app-issues-track/" \
+  | grep -v "02-spec/23-coding-guidelines/" \
+  | grep -v "02-spec/25-golang-standards/" \
+  | grep -v "02-spec/30-generic-enforce/" \
   | grep -v "// drift-exempt:" \
   | grep -v "// ALLOWED:" \
   | grep -v "// EXEMPTED:" \

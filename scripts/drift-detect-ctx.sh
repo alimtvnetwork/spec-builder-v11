@@ -9,10 +9,10 @@ LABEL="CAT-1 (ctx abbreviation)"
 COUNT=$(grep -rn "ctx context\.Context" \
   --include="*.md" \
   ./spec/ 2>/dev/null \
-  | grep -v "spec/22-how-app-issues-track/" \
-  | grep -v "spec/23-coding-guidelines/" \
-  | grep -v "spec/25-golang-standards/" \
-  | grep -v "spec/30-generic-enforce/" \
+  | grep -v "02-spec/22-how-app-issues-track/" \
+  | grep -v "02-spec/23-coding-guidelines/" \
+  | grep -v "02-spec/25-golang-standards/" \
+  | grep -v "02-spec/30-generic-enforce/" \
   | grep -v "// drift-exempt:" \
   | grep -v "❌" \
   | wc -l)

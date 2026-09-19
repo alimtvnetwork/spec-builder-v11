@@ -5,7 +5,7 @@ description: Diagnose, resolve, and document root cause analysis (RCA) records a
 
 # Error Resolution Skill
 
-Follows `spec/04-error-resolution/` and `.ai-memory/issues/` protocols:
+Follows `02-spec/04-error-resolution/` and `.ai-memory/issues/` protocols:
 
 1. **RCA Structure:**
    - Error description & symptoms

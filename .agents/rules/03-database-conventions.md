@@ -1,6 +1,6 @@
 # Database Conventions Rule
 
-> **Source:** `spec/02-coding-guidelines/01-cross-language/07-database-naming.md` and `.lovable/memories/standards/database-operation-wrapper.md`  
+> **Source:** `02-spec/02-coding-guidelines/01-cross-language/07-database-naming.md` and `.lovable/memories/standards/database-operation-wrapper.md`  
 > **Scope:** Cross-language & Database Layer
 
 ---

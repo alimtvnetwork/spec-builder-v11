@@ -8,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
-const SPEC_DIR = path.join(ROOT, "spec");
+const SPEC_DIR = path.join(ROOT, "02-spec");
 const MEMORIES_DIR = path.join(ROOT, ".lovable", "memories");
 const OUTPUT_DIR = path.join(ROOT, "src", "generated");
 const OUTPUT_FILE = path.join(OUTPUT_DIR, "dashboard-data.json");

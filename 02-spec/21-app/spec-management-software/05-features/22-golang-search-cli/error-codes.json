@@ -1,0 +1,196 @@
+{
+  "title": "SM-GS Ecosystem Remap Error Code Index",
+  "description": "Ecosystem-remapped index of GSearch CLI (GS) error codes. Maps local GS codes (1xxx-12xxx) to ecosystem range SM-GS 18000-18249.",
+  "version": "1.0.0",
+  "generated": "2026-02-28",
+  "source": "02-spec/20-gsearch-cli/error-codes.json",
+  "project": "SM-GS",
+  "range": { "min": 18000, "max": 18249 },
+  "remappedFrom": "GS local 1xxx-12xxx",
+  "note": "GSearch uses local codes internally within the Go binary. This index provides the ecosystem-mapped integers for cross-module tooling. Mapping: localRange base → ecosystem base, sequential offset preserved.",
+  "categories": [
+    {
+      "name": "Validation",
+      "localRange": "1xxx",
+      "range": { "min": 18001, "max": 18012 },
+      "codes": [
+        { "code": 18001, "localCode": 1001, "constant": "ErrInvalidQuery", "description": "Empty or malformed search query", "retryable": false },
+        { "code": 18002, "localCode": 1002, "constant": "ErrInvalidConfigPath", "description": "Config file path not found", "retryable": false },
+        { "code": 18003, "localCode": 1003, "constant": "ErrInvalidConfigFormat", "description": "Config file is not valid JSON", "retryable": false },
+        { "code": 18004, "localCode": 1004, "constant": "ErrInvalidConfigSchema", "description": "Config fails JSON schema validation", "retryable": false },
+        { "code": 18005, "localCode": 1005, "constant": "ErrInvalidOutputFormat", "description": "Unknown output format specified", "retryable": false },
+        { "code": 18006, "localCode": 1006, "constant": "ErrInvalidEngine", "description": "Unknown search engine specified", "retryable": false },
+        { "code": 18007, "localCode": 1007, "constant": "ErrInvalidMethod", "description": "Unknown retrieval method specified", "retryable": false },
+        { "code": 18008, "localCode": 1008, "constant": "ErrInvalidWeightRange", "description": "Weight value outside 0.0-1.0 range", "retryable": false },
+        { "code": 18009, "localCode": 1009, "constant": "ErrInvalidWeightSum", "description": "Weights do not sum to 1.0", "retryable": false },
+        { "code": 18010, "localCode": 1010, "constant": "ErrInvalidDuration", "description": "Invalid duration format", "retryable": false },
+        { "code": 18011, "localCode": 1011, "constant": "ErrInvalidDepth", "description": "Nested search depth out of range", "retryable": false },
+        { "code": 18012, "localCode": 1012, "constant": "ErrInvalidLimit", "description": "Results limit out of range", "retryable": false }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "localRange": "2xxx",
+      "range": { "min": 18021, "max": 18029 },
+      "codes": [
+        { "code": 18021, "localCode": 2001, "constant": "ErrAuthKeyMissing", "description": "Required API key not configured", "retryable": false },
+        { "code": 18022, "localCode": 2002, "constant": "ErrAuthKeyInvalid", "description": "API key rejected by service", "retryable": false },
+        { "code": 18023, "localCode": 2003, "constant": "ErrAuthTokenMissing", "description": "OAuth access token not found", "retryable": false },
+        { "code": 18024, "localCode": 2004, "constant": "ErrAuthTokenExpired", "description": "OAuth token expired, refresh required", "retryable": true },
+        { "code": 18025, "localCode": 2005, "constant": "ErrAuthTokenRevoked", "description": "OAuth token revoked by user/admin", "retryable": false },
+        { "code": 18026, "localCode": 2006, "constant": "ErrAuthRefreshFailed", "description": "OAuth token refresh failed", "retryable": true },
+        { "code": 18027, "localCode": 2007, "constant": "ErrAuthScopeInsufficient", "description": "OAuth token lacks required scopes", "retryable": false },
+        { "code": 18028, "localCode": 2008, "constant": "ErrAuthCseIdMissing", "description": "Google Custom Search Engine ID missing", "retryable": false },
+        { "code": 18029, "localCode": 2009, "constant": "ErrAuthCseIdInvalid", "description": "Google CSE ID rejected", "retryable": false }
+      ]
+    },
+    {
+      "name": "Database",
+      "localRange": "3xxx",
+      "range": { "min": 18041, "max": 18051 },
+      "codes": [
+        { "code": 18041, "localCode": 3001, "constant": "ErrDbOpen", "description": "Cannot open SQLite database file", "retryable": true },
+        { "code": 18042, "localCode": 3002, "constant": "ErrDbCreate", "description": "Cannot create database file", "retryable": false },
+        { "code": 18043, "localCode": 3003, "constant": "ErrDbPermission", "description": "Insufficient permissions on database", "retryable": false },
+        { "code": 18044, "localCode": 3004, "constant": "ErrDbMigrationFailed", "description": "Database migration failed", "retryable": false },
+        { "code": 18045, "localCode": 3005, "constant": "ErrDbMigrationDirty", "description": "Migration in dirty state", "retryable": false },
+        { "code": 18046, "localCode": 3006, "constant": "ErrDbQueryFailed", "description": "SQL query execution failed", "retryable": true },
+        { "code": 18047, "localCode": 3007, "constant": "ErrDbRecordNotFound", "description": "Requested record does not exist", "retryable": false },
+        { "code": 18048, "localCode": 3008, "constant": "ErrDbConstraint", "description": "Unique/foreign key constraint violation", "retryable": false },
+        { "code": 18049, "localCode": 3009, "constant": "ErrDbLocked", "description": "Database locked by another process", "retryable": true },
+        { "code": 18050, "localCode": 3010, "constant": "ErrDbCorruption", "description": "Database file corrupted", "retryable": false },
+        { "code": 18051, "localCode": 3011, "constant": "ErrDbTransaction", "description": "Transaction commit/rollback failed", "retryable": true }
+      ]
+    },
+    {
+      "name": "Network",
+      "localRange": "4xxx",
+      "range": { "min": 18061, "max": 18073 },
+      "codes": [
+        { "code": 18061, "localCode": 4001, "constant": "ErrHttpTimeout", "description": "HTTP request timed out", "retryable": true },
+        { "code": 18062, "localCode": 4002, "constant": "ErrHttpDns", "description": "DNS resolution failed", "retryable": true },
+        { "code": 18063, "localCode": 4003, "constant": "ErrHttpTls", "description": "TLS handshake failed", "retryable": true },
+        { "code": 18064, "localCode": 4004, "constant": "ErrHttpConnection", "description": "TCP connection failed", "retryable": true },
+        { "code": 18065, "localCode": 4005, "constant": "ErrHttpReset", "description": "Connection reset by peer", "retryable": true },
+        { "code": 18066, "localCode": 4006, "constant": "ErrHttpStatus4xx", "description": "HTTP 4xx client error", "retryable": false },
+        { "code": 18067, "localCode": 4007, "constant": "ErrHttpStatus5xx", "description": "HTTP 5xx server error", "retryable": true },
+        { "code": 18068, "localCode": 4008, "constant": "ErrRateLimited", "description": "Rate limited (HTTP 429)", "retryable": true },
+        { "code": 18069, "localCode": 4009, "constant": "ErrProxyAuth", "description": "Proxy authentication failed", "retryable": false },
+        { "code": 18070, "localCode": 4010, "constant": "ErrProxyConnection", "description": "Proxy connection failed", "retryable": true },
+        { "code": 18071, "localCode": 4011, "constant": "ErrProxyTimeout", "description": "Proxy request timed out", "retryable": true },
+        { "code": 18072, "localCode": 4012, "constant": "ErrRedirectLoop", "description": "Too many HTTP redirects", "retryable": false },
+        { "code": 18073, "localCode": 4013, "constant": "ErrResponseTooLarge", "description": "Response body exceeds limit", "retryable": false }
+      ]
+    },
+    {
+      "name": "Blocking",
+      "localRange": "5xxx",
+      "range": { "min": 18081, "max": 18088 },
+      "codes": [
+        { "code": 18081, "localCode": 5001, "constant": "ErrBlockedCaptcha", "description": "CAPTCHA challenge detected", "retryable": false },
+        { "code": 18082, "localCode": 5002, "constant": "ErrBlockedIp", "description": "IP address blocked by service", "retryable": false },
+        { "code": 18083, "localCode": 5003, "constant": "ErrBlockedUserAgent", "description": "User-Agent rejected", "retryable": false },
+        { "code": 18084, "localCode": 5004, "constant": "ErrBlockedRegion", "description": "Request blocked for region", "retryable": false },
+        { "code": 18085, "localCode": 5005, "constant": "ErrMethodCooldown", "description": "Search method in cooldown period", "retryable": true },
+        { "code": 18086, "localCode": 5006, "constant": "ErrAllMethodsBlocked", "description": "All search methods blocked", "retryable": true },
+        { "code": 18087, "localCode": 5007, "constant": "ErrEngineUnavailable", "description": "Search engine temporarily unavailable", "retryable": true },
+        { "code": 18088, "localCode": 5008, "constant": "ErrBotDetection", "description": "Bot/automation detection triggered", "retryable": false }
+      ]
+    },
+    {
+      "name": "Quota",
+      "localRange": "6xxx",
+      "range": { "min": 18101, "max": 18106 },
+      "codes": [
+        { "code": 18101, "localCode": 6001, "constant": "ErrQuotaDaily", "description": "Daily API quota exceeded", "retryable": false },
+        { "code": 18102, "localCode": 6002, "constant": "ErrQuotaMonthly", "description": "Monthly API quota exceeded", "retryable": false },
+        { "code": 18103, "localCode": 6003, "constant": "ErrQuotaPerSecond", "description": "Requests per second limit hit", "retryable": true },
+        { "code": 18104, "localCode": 6004, "constant": "ErrQuotaPerMinute", "description": "Requests per minute limit hit", "retryable": true },
+        { "code": 18105, "localCode": 6005, "constant": "ErrQuotaBilling", "description": "Billing quota exceeded", "retryable": false },
+        { "code": 18106, "localCode": 6006, "constant": "ErrQuotaUser", "description": "Per-user quota exceeded", "retryable": false }
+      ]
+    },
+    {
+      "name": "Parser",
+      "localRange": "7xxx",
+      "range": { "min": 18111, "max": 18118 },
+      "codes": [
+        { "code": 18111, "localCode": 7001, "constant": "ErrParseHtml", "description": "HTML document parsing failed", "retryable": true },
+        { "code": 18112, "localCode": 7002, "constant": "ErrParseJson", "description": "JSON response parsing failed", "retryable": true },
+        { "code": 18113, "localCode": 7003, "constant": "ErrSelectorNotFound", "description": "CSS selector matched nothing", "retryable": true },
+        { "code": 18114, "localCode": 7004, "constant": "ErrSelectorInvalid", "description": "Invalid CSS selector syntax", "retryable": false },
+        { "code": 18115, "localCode": 7005, "constant": "ErrSelectorVersion", "description": "Selector version mismatch", "retryable": true },
+        { "code": 18116, "localCode": 7006, "constant": "ErrEmptyResults", "description": "No results found (informational)", "retryable": false },
+        { "code": 18117, "localCode": 7007, "constant": "ErrMalformedUrl", "description": "Cannot parse extracted URL", "retryable": false },
+        { "code": 18118, "localCode": 7008, "constant": "ErrEncoding", "description": "Character encoding error", "retryable": true }
+      ]
+    },
+    {
+      "name": "Cache",
+      "localRange": "8xxx",
+      "range": { "min": 18121, "max": 18125 },
+      "codes": [
+        { "code": 18121, "localCode": 8001, "constant": "ErrCacheMiss", "description": "Cache entry not found", "retryable": false },
+        { "code": 18122, "localCode": 8002, "constant": "ErrCacheExpired", "description": "Cache entry expired", "retryable": false },
+        { "code": 18123, "localCode": 8003, "constant": "ErrCacheCorrupt", "description": "Cache entry corrupted", "retryable": false },
+        { "code": 18124, "localCode": 8004, "constant": "ErrCacheWrite", "description": "Failed to write cache entry", "retryable": true },
+        { "code": 18125, "localCode": 8005, "constant": "ErrCacheCleanup", "description": "Cache cleanup failed", "retryable": true }
+      ]
+    },
+    {
+      "name": "Export",
+      "localRange": "9xxx",
+      "range": { "min": 18131, "max": 18135 },
+      "codes": [
+        { "code": 18131, "localCode": 9001, "constant": "ErrExportPath", "description": "Export path not accessible", "retryable": false },
+        { "code": 18132, "localCode": 9002, "constant": "ErrExportPermission", "description": "Insufficient write permissions", "retryable": false },
+        { "code": 18133, "localCode": 9003, "constant": "ErrExportFormat", "description": "Invalid export format specified", "retryable": false },
+        { "code": 18134, "localCode": 9004, "constant": "ErrExportSerialize", "description": "Failed to serialize export data", "retryable": false },
+        { "code": 18135, "localCode": 9005, "constant": "ErrExportDiskFull", "description": "Insufficient disk space", "retryable": false }
+      ]
+    },
+    {
+      "name": "Resource",
+      "localRange": "10xxx",
+      "range": { "min": 18141, "max": 18145 },
+      "codes": [
+        { "code": 18141, "localCode": 10001, "constant": "ErrResourceTimeout", "description": "Resource acquisition timeout", "retryable": true },
+        { "code": 18142, "localCode": 10002, "constant": "ErrResourceGoroutineLimit", "description": "Maximum goroutines reached", "retryable": true },
+        { "code": 18143, "localCode": 10003, "constant": "ErrResourceMemory", "description": "Memory limit exceeded", "retryable": true },
+        { "code": 18144, "localCode": 10004, "constant": "ErrResourceFileDescriptors", "description": "File descriptor limit reached", "retryable": true },
+        { "code": 18145, "localCode": 10005, "constant": "ErrShutdownTimeout", "description": "Graceful shutdown timed out", "retryable": false }
+      ]
+    },
+    {
+      "name": "Configuration",
+      "localRange": "11xxx",
+      "range": { "min": 18151, "max": 18155 },
+      "codes": [
+        { "code": 18151, "localCode": 11001, "constant": "ErrConfigReload", "description": "Configuration reload failed", "retryable": true },
+        { "code": 18152, "localCode": 11002, "constant": "ErrConfigEnvMissing", "description": "Required environment variable missing", "retryable": false },
+        { "code": 18153, "localCode": 11003, "constant": "ErrConfigEnvInvalid", "description": "Environment variable invalid format", "retryable": false },
+        { "code": 18154, "localCode": 11004, "constant": "ErrSelectorFileMissing", "description": "Selector registry file not found", "retryable": false },
+        { "code": 18155, "localCode": 11005, "constant": "ErrSelectorFileInvalid", "description": "Selector registry validation failed", "retryable": false }
+      ]
+    },
+    {
+      "name": "Encryption",
+      "localRange": "12xxx",
+      "range": { "min": 18161, "max": 18165 },
+      "codes": [
+        { "code": 18161, "localCode": 12001, "constant": "ErrEncryptKeyMissing", "description": "Encryption key not configured", "retryable": false },
+        { "code": 18162, "localCode": 12002, "constant": "ErrEncryptKeyInvalid", "description": "Encryption key invalid format", "retryable": false },
+        { "code": 18163, "localCode": 12003, "constant": "ErrEncryptFailed", "description": "Encryption operation failed", "retryable": false },
+        { "code": 18164, "localCode": 12004, "constant": "ErrDecryptFailed", "description": "Decryption operation failed", "retryable": false },
+        { "code": 18165, "localCode": 12005, "constant": "ErrDecryptCorrupted", "description": "Ciphertext appears corrupted", "retryable": false }
+      ]
+    }
+  ],
+  "stats": {
+    "totalCodes": 92,
+    "totalCategories": 12,
+    "retryableCodes": 32,
+    "rangeUtilization": "92/250 (36.8%)",
+    "note": "Movie Search codes (76xx) remain in GS ecosystem range (7xxx) and are not remapped here. Only local 1xxx-12xxx codes are mapped."
+  }
+}

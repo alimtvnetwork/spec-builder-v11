@@ -1,6 +1,6 @@
 # Boolean Principles Rule
 
-> **Source:** `spec/02-coding-guidelines/01-cross-language/02-boolean-principles.md`  
+> **Source:** `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles.md`  
 > **Scope:** Cross-language (PHP, Go, TypeScript)
 
 ---

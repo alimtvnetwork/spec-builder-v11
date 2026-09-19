@@ -45,7 +45,7 @@ For AI agents: surface the plan to the user and wait for explicit approval befor
 - Make the smallest possible diff that satisfies the plan.
 - Don't bundle unrelated cleanups — file them as separate PRs.
 - Keep `spec/` changes and `src/` (dashboard) changes in **separate commits**, ideally separate PRs.
-- Follow the conventions in [`spec/03-coding-guidelines/`](./spec/03-coding-guidelines/) and the per-language rules surfaced in `.lovable/memories/architecture/coding-standards/`.
+- Follow the conventions in [`02-spec/03-coding-guidelines/`](./02-spec/03-coding-guidelines/) and the per-language rules surfaced in `.lovable/memories/architecture/coding-standards/`.
 
 ### 3. Update governance artifacts
 
@@ -53,7 +53,7 @@ For **every** change that adds, renames, removes, or materially edits a file ins
 
 - **`<module>/98-changelog.md`** — append a dated entry. See [Changelog Rules](#-changelog-rules) below.
 - **`<module>/99-consistency-report.md`** — re-run / hand-update so cross-references and file inventory match reality.
-- **`spec/00-overview.md`** — only when modules are added, removed, or renumbered.
+- **`02-spec/00-overview.md`** — only when modules are added, removed, or renumbered.
 - **`.lovable/memory/index.md`** — only when a new long-lived rule, constraint, or feature memory is introduced.
 
 ### 4. Verify
@@ -85,7 +85,7 @@ The repository uses **two layers** of changelogs.
 
 ### Per-module `98-changelog.md`
 
-Lives inside each spec module directory (e.g. `spec/09-code-block-system/98-changelog.md`).
+Lives inside each spec module directory (e.g. `02-spec/09-code-block-system/98-changelog.md`).
 
 - One entry per dated change to that module.
 - Format:

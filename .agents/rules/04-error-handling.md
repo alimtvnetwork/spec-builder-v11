@@ -1,6 +1,6 @@
 # Error Handling Rule
 
-> **Source:** `spec/04-error-resolution/` & `spec/01-general-spec/01-foundation/02-error-management-foundation.md`  
+> **Source:** `02-spec/04-error-resolution/` & `02-spec/01-general-spec/01-foundation/02-error-management-foundation.md`  
 > **Scope:** Cross-language
 
 ---
