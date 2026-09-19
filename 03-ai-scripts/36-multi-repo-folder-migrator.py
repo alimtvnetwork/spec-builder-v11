@@ -131,7 +131,7 @@ def migrate_single_repo(repo_path: Path) -> bool:
     print(f"Updated {num_changed} files with new .ai-memory paths.")
 
     # 5. Check and migrate spec -> 02-spec if spec exists
-    spec_dir = repo_path / "02-spec"
+    spec_dir = repo_path / "spec"
     if spec_dir.exists() and spec_dir.is_dir():
         print("Step 5: Migrating spec -> 02-spec using 25-repo-migrator.py...")
         migrator_script = Path("d:/work/coding-guidelines/03-ai-scripts/25-repo-migrator.py")

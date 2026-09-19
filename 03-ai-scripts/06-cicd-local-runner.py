@@ -951,7 +951,7 @@ def filter_jobs_for_changed_files(all_jobs: dict[str, list[str]]) -> dict[str, l
         filtered_jobs: dict[str, list[str]] = {}
         for name, cmd in all_jobs.items():
             name_lower = name.lower()
-            if "markdown" in name_lower or "02-spec" in name_lower or "link" in name_lower:
+            if "markdown" in name_lower or "spec" in name_lower or "link" in name_lower:
                 if has_md:
                     filtered_jobs[name] = cmd
             elif "go " in name_lower or "golang" in name_lower:

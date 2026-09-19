@@ -52,7 +52,7 @@ The `.ai-memory/` folder, specs, and codebase can be massive. To process this in
        - `gitmap find-files-startswith` (alias `ffs`) `<prefix>`: Prefix filename search (e.g. `gitmap ffs "what-"`).
        - `gitmap find-files-endswith` (alias `ffe`) `<suffix>`: Suffix filename search (e.g. `gitmap ffe "avoid.md"`).
      - **File Reading & Content Inspection:**
-       - `gitmap cat <filepath>`: Stream raw file content directly to stdout without touching disk (e.g. `gitmap cat .ai-memory/what-to-read.md`, `gitmap cat 02-02-spec/01-index.md`, `gitmap cat readme.md`).
+       - `gitmap cat <filepath>`: Stream raw file content directly to stdout without touching disk (e.g. `gitmap cat .ai-memory/what-to-read.md`, `gitmap cat 02-spec/01-index.md`, `gitmap cat readme.md`).
      - **Repository Status & Changelog Context:**
        - `gitmap status` (alias `st`): Display branch state, clean/dirty working tree, and ahead/behind counts (e.g. `gitmap status`).
        - `gitmap changelog` (alias `cl`) `[--latest]`: Read concise release notes and version history (e.g. `gitmap changelog --latest`, `gitmap cl v2.24.0`).
@@ -91,7 +91,7 @@ Walk `.ai-memory/` recursively. Every file matters. Missing files are noted, not
 | 9 | `.ai-memory/plans/completed/` | Recent history, skim only |
 | 10 | `.ai-memory/plans/subtasks/xx-<slug>/` | Depth files linked from a parent plan |
 | 11 | `.ai-memory/suggestions.md` | Ideas not yet approved |
-| 12 | `.ai-memory/02-spec/commands/` | User commands and conventions, `xx-<slug>.md` |
+| 12 | `.ai-memory/spec/commands/` | User commands and conventions, `xx-<slug>.md` |
 | 13 | `.ai-memory/issues/` | General bugs and regressions |
 | 14 | `.ai-memory/cicd-issues/` | CI/CD-specific failures. Read ALL of these before any code change so you do not repeat the same mistakes. |
 | 15 | `.ai-memory/ambiguous-questions/01-new-ambiguity/` | Open questions currently blocking work. If any exist, surface them in the completion block, do NOT guess past them. |
@@ -231,7 +231,7 @@ Then stop. No next-step suggestions, no exploratory questions.
 - [ ] Read `.ai-memory/memory/01-index.md` and every file it points at
 - [ ] Read `.ai-memory/plans/01-index.md` and every file in `pending/`
 - [ ] Skimmed `.ai-memory/plans/completed/` for recent history
-- [ ] Read every file in `.ai-memory/02-spec/commands/`
+- [ ] Read every file in `.ai-memory/spec/commands/`
 - [ ] Read every file in `.ai-memory/issues/` and `.ai-memory/cicd-issues/`
 - [ ] Read every file in `.ai-memory/ambiguous-questions/01-new-ambiguity/` and `02-ambiguity-resolved/`
 - [ ] Read `02-spec/17-consolidated-guidelines/` in numeric order (or noted missing)

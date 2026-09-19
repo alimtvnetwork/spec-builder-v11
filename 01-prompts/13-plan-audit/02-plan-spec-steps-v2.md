@@ -232,7 +232,7 @@ link that file from the plan's `## Context`. Chat is not storage.
 
 | Input                                                | File                                          |
 | ---------------------------------------------------- | --------------------------------------------- |
-| Command, convention, "always do X", new CLI          | `.ai-memory/02-spec/commands/01-<slug>.md`         |
+| Command, convention, "always do X", new CLI          | `.ai-memory/spec/commands/01-<slug>.md`         |
 | Bug, regression, broken behavior                    | `.ai-memory/issues/01-<slug>.md`                |
 | CI/CD-specific failure                               | `.ai-memory/cicd-issues/01-<slug>.md`           |
 | Institutional knowledge (pattern, decision)          | `.ai-memory/memory/` + update `.ai-memory/memory/01-index.md` |
@@ -343,7 +343,7 @@ match this exactly:
 .ai-memory/ambiguous-questions/02-ambiguity-resolved/01-<slug>.md
 .ai-memory/issues/01-<slug>.md
 .ai-memory/cicd-issues/01-<slug>.md
-.ai-memory/02-spec/commands/01-<slug>.md
+.ai-memory/spec/commands/01-<slug>.md
 02-spec/25-app-spec-audit/NN-audit-<yyyy-mm-dd>-v<N>.md
 ```
 

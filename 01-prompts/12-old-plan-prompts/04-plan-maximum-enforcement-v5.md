@@ -73,7 +73,7 @@ Route user input into the correct file BEFORE writing the plan, then link it fro
 
 | Input                                                   | File                                          |
 | ------------------------------------------------------- | --------------------------------------------- |
-| Command, new convention, "always do X", new CLI         | `.ai-memory/02-spec/commands/01-<slug>.md`         |
+| Command, new convention, "always do X", new CLI         | `.ai-memory/spec/commands/01-<slug>.md`         |
 | Bug, regression, broken behavior                        | `.ai-memory/issues/01-<slug>.md`                |
 | CI/CD-specific failure                                  | `.ai-memory/cicd-issues/01-<slug>.md`           |
 | Institutional knowledge (pattern, convention, decision) | `.ai-memory/memory/` + update `.ai-memory/memory/01-index.md` |

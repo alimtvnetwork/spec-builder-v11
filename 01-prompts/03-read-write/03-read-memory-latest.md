@@ -97,7 +97,7 @@ The `.ai-memory/`, `02-spec/`, and knowledge base folders can be massive. To pro
 >      - **File Reading & Content Inspection:**
 >        - `gitmap cat <filepath>`: Stream raw file content directly to stdout without touching disk.
 >          - Example: `gitmap cat .ai-memory/what-to-read.md` (read authoritative reading sequence)
->          - Example: `gitmap cat 02-02-spec/01-index.md` (read spec index directly)
+>          - Example: `gitmap cat 02-spec/01-index.md` (read spec index directly)
 >          - Example: `gitmap cat readme.md` (read project identity and guidelines)
 >      - **Repository Status & Changelog Context:**
 >        - `gitmap status` (alias `st`): Display branch state, clean/dirty working tree, and ahead/behind counts.
@@ -383,7 +383,7 @@ New info discovered
 ├─ Idea, not yet approved?
 │   YES → .ai-memory/suggestions.md
 ├─ New user command / convention?
-│   YES → .ai-memory/02-spec/commands/01-<slug>.md
+│   YES → .ai-memory/spec/commands/01-<slug>.md
 ├─ Bug / regression?
 │   YES → .ai-memory/issues/01-<slug>.md   (or .ai-memory/cicd-issues/ if CI/CD)
 ├─ New or changed plan?
@@ -454,7 +454,7 @@ Then stop. No next-step suggestions, no exploratory questions.
 6. [ ] /learn `.ai-memory/memory/01-index.md` and every file it points at.
 7. [ ] /learn `.ai-memory/plans/01-index.md`, every file in `pending/` (sequenced as `01-`, `02-`), and all active subtasks.
 8. [ ] Skimmed `.ai-memory/plans/completed/` for recent history.
-9. [ ] /learn every file in `.ai-memory/02-spec/commands/`.
+9. [ ] /learn every file in `.ai-memory/spec/commands/`.
 10. [ ] /learn every file in `.ai-memory/issues/` and `.ai-memory/cicd-issues/`.
 11. [ ] /learn every file in `.ai-memory/ambiguous-questions/01-new-ambiguity/` and `02-ambiguity-resolved/`.
 12. [ ] Scanned for broken links or missing docs and surfaced them under open ambiguities.
