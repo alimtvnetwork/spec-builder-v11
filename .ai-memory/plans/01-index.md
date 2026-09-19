@@ -1,7 +1,7 @@
 # Master Plans Index
 
-> **Directory:** `.lovable/plans/`  
-> **Status:** 5 Active Pending Plans, 2 Subtasks, 2 Completed Archives
+> **Directory:** `.ai-memory/plans/`  
+> **Status:** 5 Active Pending Plans, 2 Subtasks, 3 Completed Archives
 
 ---
 
@@ -32,3 +32,4 @@
 |------|----------------|-------|-------------|
 | [01-axios-version-control-specs.md](./completed/01-axios-version-control-specs.md) | 2026-04-01 | 6 files | Strict pinning policy & drift detection specs |
 | [02-code-block-toolbar-redesign.md](./completed/02-code-block-toolbar-redesign.md) | 2026-04-19 | UI + spec | Discrete-pill pattern with Poppins button labels |
+| [03-spec-builder-restructure-and-sync.md](./completed/03-spec-builder-restructure-and-sync.md) | 2026-09-19 | System-wide | Spec restructuring (02-spec), toolchain sync, and UI compatibility |
