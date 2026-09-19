@@ -417,7 +417,7 @@ func runPipeline(cmd *cobra.Command, args []string) error {
     return nil
 }
 
-func parseInput(input string, target *PipelineInput) *apperror.AppError {
+func parseInput(input string, target *PipelineInput) *appfault.AppError {
     // Try as file path first
     isExists := pathutil.Exists(input)
     if isExists {
@@ -427,7 +427,7 @@ func parseInput(input string, target *PipelineInput) *apperror.AppError {
         }
         unmarshalErr := json.Unmarshal(data, target)
         if unmarshalErr != nil {
-            return apperror.Wrap(unmarshalErr, apperror.ErrInputParse, "unmarshal pipeline input").
+            return appfault.Wrap(unmarshalErr, appfault.ErrInputParse, "unmarshal pipeline input").
                 WithPath(input)
         }
         return nil
@@ -436,15 +436,15 @@ func parseInput(input string, target *PipelineInput) *apperror.AppError {
     // Try as JSON string
     unmarshalErr := json.Unmarshal([]byte(input), target)
     if unmarshalErr != nil {
-        return apperror.Wrap(unmarshalErr, apperror.ErrInputParse, "unmarshal pipeline input from string")
+        return appfault.Wrap(unmarshalErr, appfault.ErrInputParse, "unmarshal pipeline input from string")
     }
     return nil
 }
 
-func writeOutput(path string, result *model.ExecutionResult) *apperror.AppError {
+func writeOutput(path string, result *model.ExecutionResult) *appfault.AppError {
     data, marshalErr := json.MarshalIndent(result, "", "  ")
     if marshalErr != nil {
-        return apperror.Wrap(marshalErr, apperror.ErrOutputWrite, "marshal execution result")
+        return appfault.Wrap(marshalErr, appfault.ErrOutputWrite, "marshal execution result")
     }
     writeErr := pathutil.WriteFile(path, data, 0644)
     if writeErr != nil {
@@ -1098,16 +1098,16 @@ type Block interface {
     Type() BlockType
     
     // Validate validates block configuration
-    Validate() *apperror.AppError
+    Validate() *appfault.AppError
     
     // Execute runs the block
-    Execute(context stdctx.Context, input BlockInput) apperror.Result[BlockOutput]
+    Execute(context stdctx.Context, input BlockInput) appfault.Result[BlockOutput]
     
     // SupportsStreaming returns true if block supports streaming output
     SupportsStreaming() bool
     
     // ExecuteStreaming runs the block with streaming callbacks
-    ExecuteStreaming(context stdctx.Context, input BlockInput, callback StreamCallback) apperror.Result[BlockOutput]
+    ExecuteStreaming(context stdctx.Context, input BlockInput, callback StreamCallback) appfault.Result[BlockOutput]
 }
 
 // BlockInput contains input data for block execution
@@ -1218,7 +1218,7 @@ type Registry struct {
 }
 
 // BlockFactory creates new block instances
-type BlockFactory func(config BlockConfig) apperror.Result[Block]
+type BlockFactory func(config BlockConfig) appfault.Result[Block]
 
 // NewRegistry creates a new block registry
 func NewRegistry(logger *logging.Logger) *Registry {
@@ -1262,7 +1262,7 @@ func (r *Registry) Register(blockType BlockType, factory BlockFactory) {
 }
 
 // Create creates a new block instance
-func (r *Registry) Create(config BlockConfig) apperror.Result[Block] {
+func (r *Registry) Create(config BlockConfig) appfault.Result[Block] {
     _, file, line, _ := runtime.Caller(0)
     
     r.mu.RLock()
@@ -1342,7 +1342,7 @@ type PromptSettings struct {
 }
 
 // NewPromptBlock creates a new prompt block
-func NewPromptBlock(config BlockConfig) apperror.Result[Block] {
+func NewPromptBlock(config BlockConfig) appfault.Result[Block] {
     _, file, line, _ := runtime.Caller(0)
     
     settings, err := parsePromptSettings(config.Settings)
@@ -1396,7 +1396,7 @@ func (b *PromptBlock) SupportsStreaming() bool {
     return true
 }
 
-func (b *PromptBlock) Execute(context stdctx.Context, input BlockInput) apperror.Result[BlockOutput] {
+func (b *PromptBlock) Execute(context stdctx.Context, input BlockInput) appfault.Result[BlockOutput] {
     _, file, line, _ := runtime.Caller(0)
     
     settings, _ := parsePromptSettings(b.config.Settings)
@@ -1450,7 +1450,7 @@ func (b *PromptBlock) Execute(context stdctx.Context, input BlockInput) apperror
     }, nil
 }
 
-func (b *PromptBlock) ExecuteStreaming(context stdctx.Context, input BlockInput, callback StreamCallback) apperror.Result[BlockOutput] {
+func (b *PromptBlock) ExecuteStreaming(context stdctx.Context, input BlockInput, callback StreamCallback) appfault.Result[BlockOutput] {
     _, file, line, _ := runtime.Caller(0)
     
     settings, _ := parsePromptSettings(b.config.Settings)
@@ -1540,7 +1540,7 @@ type SearchSettings struct {
     IncludeRag  bool
 }
 
-func NewSearchBlock(config BlockConfig) apperror.Result[Block] {
+func NewSearchBlock(config BlockConfig) appfault.Result[Block] {
     return &SearchBlock{
         config: config,
         logger: logging.Default(),
@@ -1551,7 +1551,7 @@ func (b *SearchBlock) Type() BlockType {
     return BlockTypeSearch
 }
 
-func (b *SearchBlock) Validate() *apperror.AppError {
+func (b *SearchBlock) Validate() *appfault.AppError {
     settings, err := parseSearchSettings(b.config.Settings)
     if err != nil {
         return err
@@ -1573,7 +1573,7 @@ func (b *SearchBlock) SupportsStreaming() bool {
     return false
 }
 
-func (b *SearchBlock) Execute(context stdctx.Context, input BlockInput) apperror.Result[BlockOutput] {
+func (b *SearchBlock) Execute(context stdctx.Context, input BlockInput) appfault.Result[BlockOutput] {
     _, file, line, _ := runtime.Caller(0)
     
     settings, _ := parseSearchSettings(b.config.Settings)
@@ -1627,7 +1627,7 @@ func (b *SearchBlock) Execute(context stdctx.Context, input BlockInput) apperror
     }, nil
 }
 
-func (b *SearchBlock) ExecuteStreaming(context stdctx.Context, input BlockInput, callback StreamCallback) apperror.Result[BlockOutput] {
+func (b *SearchBlock) ExecuteStreaming(context stdctx.Context, input BlockInput, callback StreamCallback) appfault.Result[BlockOutput] {
     return b.Execute(context, input)
 }
 ```
@@ -1664,7 +1664,7 @@ type CodeGenSettings struct {
     MaxTokens   int
 }
 
-func NewCodeGenBlock(config BlockConfig) apperror.Result[Block] {
+func NewCodeGenBlock(config BlockConfig) appfault.Result[Block] {
     return &CodeGenBlock{
         config: config,
         logger: logging.Default(),
@@ -1675,7 +1675,7 @@ func (b *CodeGenBlock) Type() BlockType {
     return BlockTypeCodeGen
 }
 
-func (b *CodeGenBlock) Validate() *apperror.AppError {
+func (b *CodeGenBlock) Validate() *appfault.AppError {
     settings, err := parseCodeGenSettings(b.config.Settings)
     if err != nil {
         return err
@@ -1697,7 +1697,7 @@ func (b *CodeGenBlock) SupportsStreaming() bool {
     return true
 }
 
-func (b *CodeGenBlock) Execute(context stdctx.Context, input BlockInput) apperror.Result[BlockOutput] {
+func (b *CodeGenBlock) Execute(context stdctx.Context, input BlockInput) appfault.Result[BlockOutput] {
     _, file, line, _ := runtime.Caller(0)
     
     settings, _ := parseCodeGenSettings(b.config.Settings)
@@ -1741,7 +1741,7 @@ func (b *CodeGenBlock) Execute(context stdctx.Context, input BlockInput) apperro
     }, nil
 }
 
-func (b *CodeGenBlock) ExecuteStreaming(context stdctx.Context, input BlockInput, callback StreamCallback) apperror.Result[BlockOutput] {
+func (b *CodeGenBlock) ExecuteStreaming(context stdctx.Context, input BlockInput, callback StreamCallback) appfault.Result[BlockOutput] {
     // Similar to Prompt block streaming
     return b.Execute(context, input)
 }
@@ -1874,7 +1874,7 @@ type BranchCondition struct {
 }
 
 // NewBranchController creates a new branch controller
-func NewBranchController(logger *logging.Logger) apperror.Result[BranchController] {
+func NewBranchController(logger *logging.Logger) appfault.Result[BranchController] {
     _, file, line, _ := runtime.Caller(0)
     
     env, err := cel.NewEnv(
@@ -1902,7 +1902,7 @@ func NewBranchController(logger *logging.Logger) apperror.Result[BranchControlle
 }
 
 // Evaluate evaluates conditions and returns the target block ID
-func (c *BranchController) Evaluate(context stdctx.Context, config BranchConfig, data BlockOutputData) apperror.Result[string] {
+func (c *BranchController) Evaluate(context stdctx.Context, config BranchConfig, data BlockOutputData) appfault.Result[string] {
     _, file, line, _ := runtime.Caller(0)
     
     // Sort conditions by priority
@@ -2024,7 +2024,7 @@ func (c *LoopController) Execute(
     config LoopConfig,
     input block.BlockInput,
     callback block.StreamCallback,
-) apperror.Result[[]BlockOutputData] {
+) appfault.Result[[]BlockOutputData] {
     _, file, line, _ := runtime.Caller(0)
     
     maxConcurrency := config.MaxConcurrency
@@ -2063,7 +2063,7 @@ func (c *LoopController) executeForEach(
     input block.BlockInput,
     callback block.StreamCallback,
     maxConcurrency int,
-) apperror.Result[[]BlockOutputData] {
+) appfault.Result[[]BlockOutputData] {
     _, file, line, _ := runtime.Caller(0)
     
     // Get collection from input data
@@ -2144,7 +2144,7 @@ func (c *LoopController) executeBlocks(
     blockIds []string,
     input block.BlockInput,
     callback block.StreamCallback,
-) apperror.Result[BlockOutputData] {
+) appfault.Result[BlockOutputData] {
     data := input.Data
     
     for _, blockId := range blockIds {
@@ -2204,9 +2204,9 @@ type Bridge struct {
 
 // CheckpointRepository handles checkpoint persistence
 type CheckpointRepository interface {
-    Create(context stdctx.Context, checkpoint model.Checkpoint) *apperror.AppError
-    GetLatest(context stdctx.Context, executionId string) apperror.Result[model.Checkpoint]
-    List(context stdctx.Context, executionId string) apperror.Result[[]model.Checkpoint]
+    Create(context stdctx.Context, checkpoint model.Checkpoint) *appfault.AppError
+    GetLatest(context stdctx.Context, executionId string) appfault.Result[model.Checkpoint]
+    List(context stdctx.Context, executionId string) appfault.Result[[]model.Checkpoint]
 }
 
 // NewBridge creates a new RES bridge
@@ -2236,7 +2236,7 @@ func (b *Bridge) ExecuteWithResilience(
     blk block.Block,
     input block.BlockInput,
     config ResilienceConfig,
-) apperror.Result[block.BlockOutput] {
+) appfault.Result[block.BlockOutput] {
     _, file, line, _ := runtime.Caller(0)
     
     b.logger.Debug("Executing with resilience",
@@ -2339,7 +2339,7 @@ func (b *Bridge) executeWithConsensus(
     context stdctx.Context,
     blk block.Block,
     input block.BlockInput,
-) apperror.Result[block.BlockOutput] {
+) appfault.Result[block.BlockOutput] {
     _, file, line, _ := runtime.Caller(0)
     
     b.logger.Info("Executing with multi-model consensus",
@@ -2363,7 +2363,7 @@ func (b *Bridge) escalateToHuman(
     context stdctx.Context,
     input block.BlockInput,
     originalErr error,
-) apperror.Result[block.BlockOutput] {
+) appfault.Result[block.BlockOutput] {
     _, file, line, _ := runtime.Caller(0)
     
     b.logger.Info("Escalating to human",

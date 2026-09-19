@@ -120,8 +120,8 @@ type NormalizationConfig struct {
 }
 
 // LoadNormalizationConfig retrieves config from Root DB
-func LoadNormalizationConfig(settings SettingsService) apperror.Result[NormalizationConfig] {
-    return apperror.Ok(NormalizationConfig{
+func LoadNormalizationConfig(settings SettingsService) appfault.Result[NormalizationConfig] {
+    return appfault.Ok(NormalizationConfig{
         QualityTokens:   settings.GetStringArray(MovieKeyQualityTokens),
         EncodingTokens:  settings.GetStringArray(MovieKeyEncodingTokens),
         SourceTokens:    settings.GetStringArray(MovieKeySourceTokens),
@@ -383,7 +383,7 @@ ids, err := client.Search.IDLookup("tt12637874", trakt.IDTypeIMDB)
 ```go
 import "github.com/gocolly/colly/v2"
 
-func ScrapeImdb(imdbId string) apperror.Result[ImdbData] {
+func ScrapeImdb(imdbId string) appfault.Result[ImdbData] {
     c := colly.NewCollector()
     
     var data ImdbData
@@ -393,7 +393,7 @@ func ScrapeImdb(imdbId string) apperror.Result[ImdbData] {
     })
     
     c.Visit("https://www.imdb.com/title/" + imdbId)
-    return apperror.Ok(data)
+    return appfault.Ok(data)
 }
 ```
 
@@ -410,10 +410,10 @@ import "context"
 // Provider interface for all movie data sources
 type Provider interface {
     Name() string
-    Search(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]MediaResult]
-    GetMovie(context stdctx.Context, id string) apperror.Result[*MovieDetails]
-    GetTVShow(context stdctx.Context, id string) apperror.Result[*TVShowDetails]
-    GetEpisode(context stdctx.Context, showId string, season, episode int) apperror.Result[*EpisodeDetails]
+    Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]MediaResult]
+    GetMovie(context stdctx.Context, id string) appfault.Result[*MovieDetails]
+    GetTVShow(context stdctx.Context, id string) appfault.Result[*TVShowDetails]
+    GetEpisode(context stdctx.Context, showId string, season, episode int) appfault.Result[*EpisodeDetails]
     SupportsFeature(feature ProviderFeature) bool
 }
 
@@ -449,7 +449,7 @@ type Orchestrator struct {
 }
 
 // SearchAll queries multiple providers in parallel
-func (o *Orchestrator) SearchAll(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]MediaResult] {
+func (o *Orchestrator) SearchAll(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]MediaResult] {
     if !o.parallel {
         return o.searchSequential(context, query, opts)
     }

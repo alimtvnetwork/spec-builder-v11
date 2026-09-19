@@ -521,7 +521,7 @@ import (
     "net/http"
 
     utls "github.com/refraction-networking/utls"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // TLSProfileId maps human-readable profile names to utls ClientHelloIDs
@@ -558,10 +558,10 @@ func DefaultTLSConfig() TLSConfig {
 }
 
 // NewUTLSTransport creates an http.Transport with browser-mimicking TLS fingerprint
-func NewUTLSTransport(config TLSConfig, proxyUrl string) (*http.Transport, *apperror.AppError) {
+func NewUTLSTransport(config TLSConfig, proxyUrl string) (*http.Transport, *appfault.AppError) {
     helloId, ok := TLSProfileId[config.Profile]
     if !ok {
-        return nil, apperror.New(5200, "unknown TLS profile: "+config.Profile)
+        return nil, appfault.New(5200, "unknown TLS profile: "+config.Profile)
     }
     
     transport := &http.Transport{
@@ -598,7 +598,7 @@ func NewUTLSTransport(config TLSConfig, proxyUrl string) (*http.Transport, *appe
     if proxyUrl != "" {
         proxyParsed, err := url.Parse(proxyUrl)
         if err != nil {
-            return nil, apperror.Wrap(err, 5201, "invalid proxy URL for TLS transport")
+            return nil, appfault.Wrap(err, 5201, "invalid proxy URL for TLS transport")
         }
         transport.Proxy = http.ProxyUrl(proxyParsed)
     }
@@ -657,7 +657,7 @@ import (
     "time"
 
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // PersistentCookie wraps http.Cookie with persistence metadata
@@ -701,7 +701,7 @@ func DefaultCookiePersistenceConfig() CookiePersistenceConfig {
 }
 
 // NewCookiePersistence creates a persistence store, loading existing cookies from disk
-func NewCookiePersistence(config CookiePersistenceConfig) apperror.Result[*CookiePersistence] {
+func NewCookiePersistence(config CookiePersistenceConfig) appfault.Result[*CookiePersistence] {
     cp := &CookiePersistence{
         storagePath: config.StoragePath,
         cookies:     make(map[string][]PersistentCookie),
@@ -720,7 +720,7 @@ func NewCookiePersistence(config CookiePersistenceConfig) apperror.Result[*Cooki
     // Cleanup expired cookies on load
     cp.cleanupExpired()
     
-    return apperror.Ok(cp)
+    return appfault.Ok(cp)
 }
 
 // StoreCookies persists cookies from an HTTP response
@@ -802,39 +802,39 @@ func (cp *CookiePersistence) GetCookies(domain string, proxyIP string) []*http.C
 }
 
 // SaveToDisk writes the cookie store to an encrypted JSON file
-func (cp *CookiePersistence) SaveToDisk() *apperror.AppError {
+func (cp *CookiePersistence) SaveToDisk() *appfault.AppError {
     cp.mu.RLock()
     data, err := json.MarshalIndent(cp.cookies, "", "  ")
     cp.mu.RUnlock()
     
     if err != nil {
-        return apperror.Wrap(err, 5210, "failed to marshal cookie store")
+        return appfault.Wrap(err, 5210, "failed to marshal cookie store")
     }
     
     // Encrypt if key is set
     if len(cp.encryptKey) > 0 {
         encrypted, encErr := encryptAES256(data, cp.encryptKey)
         if encErr != nil {
-            return apperror.Wrap(encErr, 5211, "failed to encrypt cookie store")
+            return appfault.Wrap(encErr, 5211, "failed to encrypt cookie store")
         }
         data = encrypted
     }
     
     dir := filepath.Dir(cp.storagePath)
     if mkErr := pathutil.MkdirAll(dir, 0700); mkErr != nil {
-        return apperror.Wrap(mkErr, 5212, "failed to create cookie storage directory")
+        return appfault.Wrap(mkErr, 5212, "failed to create cookie storage directory")
     }
     
     filePath := filepath.Join(cp.storagePath, "cookies.json")
     if writeErr := pathutil.WriteFile(filePath, data, 0600); writeErr != nil {
-        return apperror.Wrap(writeErr, 5213, "failed to write cookie file")
+        return appfault.Wrap(writeErr, 5213, "failed to write cookie file")
     }
     
     return nil
 }
 
 // loadFromDisk reads the cookie store from disk
-func (cp *CookiePersistence) loadFromDisk() *apperror.AppError {
+func (cp *CookiePersistence) loadFromDisk() *appfault.AppError {
     filePath := filepath.Join(cp.storagePath, "cookies.json")
     data, err := pathutil.ReadFile(filePath)
     if err != nil {
@@ -1076,7 +1076,7 @@ import (
     "github.com/go-rod/rod/lib/launcher"
     "github.com/go-rod/rod/lib/proto"
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // ScraperConfig configures the stealth scraper
@@ -1129,14 +1129,14 @@ type StealthScraper struct {
 }
 
 // NewStealthScraper creates and launches a stealth browser instance
-func NewStealthScraper(config ScraperConfig) apperror.Result[*StealthScraper] {
+func NewStealthScraper(config ScraperConfig) appfault.Result[*StealthScraper] {
     // Generate a fingerprint profile for this session
     profile := GenerateProfile("chrome_120")
     
     // Initialize cookie persistence
     cookieStore, cookieErr := NewCookiePersistence(config.Cookies)
     if cookieErr != nil {
-        return apperror.Fail[*StealthScraper](cookieErr)
+        return appfault.Fail[*StealthScraper](cookieErr)
     }
     
     // Launch browser
@@ -1151,17 +1151,17 @@ func NewStealthScraper(config ScraperConfig) apperror.Result[*StealthScraper] {
     
     controlUrl, launchErr := l.Launch()
     if launchErr != nil {
-        return apperror.Fail[*StealthScraper](
-            apperror.Wrap(launchErr, 5220, "failed to launch stealth browser"))
+        return appfault.Fail[*StealthScraper](
+            appfault.Wrap(launchErr, 5220, "failed to launch stealth browser"))
     }
     
     browser := rod.New().ControlUrl(controlUrl)
     if connErr := browser.Connect(); connErr != nil {
-        return apperror.Fail[*StealthScraper](
-            apperror.Wrap(connErr, 5221, "failed to connect to browser"))
+        return appfault.Fail[*StealthScraper](
+            appfault.Wrap(connErr, 5221, "failed to connect to browser"))
     }
     
-    return apperror.Ok(&StealthScraper{
+    return appfault.Ok(&StealthScraper{
         config:     config,
         browser:    browser,
         profile:    profile,
@@ -1171,10 +1171,10 @@ func NewStealthScraper(config ScraperConfig) apperror.Result[*StealthScraper] {
 }
 
 // Scrape navigates to a URL with full fingerprint evasion and returns HTML
-func (ss *StealthScraper) Scrape(context stdctx.Context, targetUrl string, engine string) apperror.Result[string] {
+func (ss *StealthScraper) Scrape(context stdctx.Context, targetUrl string, engine string) appfault.Result[string] {
     page, err := ss.browser.Page(proto.TargetCreateTarget{URL: "about:blank"})
     if err != nil {
-        return apperror.Fail[string](apperror.Wrap(err, 5222, "failed to create browser page"))
+        return appfault.Fail[string](appfault.Wrap(err, 5222, "failed to create browser page"))
     }
     defer page.Close()
     
@@ -1197,7 +1197,7 @@ func (ss *StealthScraper) Scrape(context stdctx.Context, targetUrl string, engin
         page.Timeout(ss.config.NavigationTimeout).MustNavigate(targetUrl).MustWaitStable()
     })
     if navigateErr != nil {
-        return apperror.Fail[string](apperror.Wrap(navigateErr, 5223, "navigation failed: "+targetUrl))
+        return appfault.Fail[string](appfault.Wrap(navigateErr, 5223, "navigation failed: "+targetUrl))
     }
     
     // Simulate human-like delay (200-800ms random)
@@ -1206,7 +1206,7 @@ func (ss *StealthScraper) Scrape(context stdctx.Context, targetUrl string, engin
     // Extract page HTML
     html, htmlErr := page.HTML()
     if htmlErr != nil {
-        return apperror.Fail[string](apperror.Wrap(htmlErr, 5224, "failed to extract HTML"))
+        return appfault.Fail[string](appfault.Wrap(htmlErr, 5224, "failed to extract HTML"))
     }
     
     // Capture and persist cookies from this session
@@ -1218,11 +1218,11 @@ func (ss *StealthScraper) Scrape(context stdctx.Context, targetUrl string, engin
         Int("htmlLen", len(html)).
         Msg("Stealth scrape completed")
     
-    return apperror.Ok(html)
+    return appfault.Ok(html)
 }
 
 // Close shuts down the browser and saves cookies
-func (ss *StealthScraper) Close() *apperror.AppError {
+func (ss *StealthScraper) Close() *appfault.AppError {
     if ss.cookies != nil {
         if err := ss.cookies.SaveToDisk(); err != nil {
             log.Warn().Err(err).Msg("Failed to save cookies on close")

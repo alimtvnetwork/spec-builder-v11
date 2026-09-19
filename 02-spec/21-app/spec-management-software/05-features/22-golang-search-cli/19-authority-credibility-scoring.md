@@ -338,17 +338,17 @@ type CredibilityResult struct {
     Confidence float64
 }
 
-func (cc *CredibilityClassifier) Classify(source Source, checks CredibilityChecks) apperror.Result[CredibilityResult] {
+func (cc *CredibilityClassifier) Classify(source Source, checks CredibilityChecks) appfault.Result[CredibilityResult] {
     // Get thresholds from settings
     thresholds, err := cc.settings.GetMap("credibility_thresholds", "thresholds")
     if err != nil {
-        return apperror.Fail[CredibilityResult](err)
+        return appfault.Fail[CredibilityResult](err)
     }
     
     // Get check weights from settings
     weights, err := cc.settings.GetMap("credibility_thresholds", "check_weights")
     if err != nil {
-        return apperror.Fail[CredibilityResult](err)
+        return appfault.Fail[CredibilityResult](err)
     }
     
     // Calculate weighted score
@@ -380,7 +380,7 @@ func (cc *CredibilityClassifier) Classify(source Source, checks CredibilityCheck
         level = CredibilityHigh
     }
     
-    return apperror.Ok(CredibilityResult{
+    return appfault.Ok(CredibilityResult{
         Level:      level,
         Score:      totalScore,
         Checks:     checks,
@@ -475,21 +475,21 @@ type ConfidenceDetails struct {
     ContradictionPresence float64
 }
 
-func (ca *ConfidenceAnalyzer) AnalyzeConfidence(sources []Source) apperror.Result[ConfidenceMetrics] {
+func (ca *ConfidenceAnalyzer) AnalyzeConfidence(sources []Source) appfault.Result[ConfidenceMetrics] {
     // Get weight formula from settings (Seedable Config)
     weights, err := ca.settings.GetMap("confidence_metrics", "weight_formula")
     if err != nil {
-        return apperror.Fail[ConfidenceMetrics](err)
+        return appfault.Fail[ConfidenceMetrics](err)
     }
     
     thresholds, err := ca.settings.GetMap("confidence_metrics", "thresholds")
     if err != nil {
-        return apperror.Fail[ConfidenceMetrics](err)
+        return appfault.Fail[ConfidenceMetrics](err)
     }
     
     warnings, err := ca.settings.GetMap("confidence_metrics", "warnings")
     if err != nil {
-        return apperror.Fail[ConfidenceMetrics](err)
+        return appfault.Fail[ConfidenceMetrics](err)
     }
     
     // Calculate individual metrics
@@ -532,7 +532,7 @@ func (ca *ConfidenceAnalyzer) AnalyzeConfidence(sources []Source) apperror.Resul
         warning = warnings["moderate_confidence_message"].(string)
     }
     
-    return apperror.Ok(ConfidenceMetrics{
+    return appfault.Ok(ConfidenceMetrics{
         Score:               overallConfidence,
         Details:             details,
         Warning:             warning,

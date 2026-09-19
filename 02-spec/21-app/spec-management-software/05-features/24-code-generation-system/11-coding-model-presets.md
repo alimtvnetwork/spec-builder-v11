@@ -154,7 +154,7 @@ type ModelSelectionContext struct {
 // 6. System default for category (coding1)
 // 7. Fallback to writing model
 
-func (s *ModelSelector) SelectModel(ctx ModelSelectionContext) apperror.Result[CodingModelPreset] {
+func (s *ModelSelector) SelectModel(ctx ModelSelectionContext) appfault.Result[CodingModelPreset] {
     // Build category list to check
     categories := s.buildCategoryList(ctx)
     
@@ -162,24 +162,24 @@ func (s *ModelSelector) SelectModel(ctx ModelSelectionContext) apperror.Result[C
         // Check project override
         if ctx.ProjectId != "" {
             if preset := s.projectOverride.Get(ctx.ProjectId, category); preset != nil {
-                return apperror.Ok(*preset)
+                return appfault.Ok(*preset)
             }
         }
         
         // Check user preference
         if ctx.UserId != "" {
             if preset := s.userPrefRepo.Get(ctx.UserId, category); preset != nil {
-                return apperror.Ok(*preset)
+                return appfault.Ok(*preset)
             }
         }
         
         // Check system default
         if preset := s.presetRepo.GetDefault(category); preset != nil {
-            return apperror.Ok(*preset)
+            return appfault.Ok(*preset)
         }
     }
     
-    return apperror.FailNew[CodingModelPreset](
+    return appfault.FailNew[CodingModelPreset](
         "E8200",
         "no model found for selection context",
     )

@@ -265,11 +265,11 @@ type MemoryShare struct {
 }
 
 // Share creates a new memory share between projects
-func (s *ShareService) Share(context stdctx.Context, req ShareRequest) apperror.Result[MemoryShare] {
+func (s *ShareService) Share(context stdctx.Context, req ShareRequest) appfault.Result[MemoryShare] {
 	// Validate source exists
 	exists, err := s.files.Exists(context, req.SourceProjectId, req.MemoryPath)
 	if err != nil || !exists {
-		return apperror.FailNew[MemoryShare](
+		return appfault.FailNew[MemoryShare](
 			"E9200",
 			fmt.Sprintf("source path does not exist: %s", req.MemoryPath),
 		)
@@ -278,7 +278,7 @@ func (s *ShareService) Share(context stdctx.Context, req ShareRequest) apperror.
 	// Check for existing share
 	existing, _ := s.getExistingShare(context, req.SourceProjectId, req.TargetProjectId, req.MemoryPath)
 	if existing != nil {
-		return apperror.FailNew[MemoryShare](
+		return appfault.FailNew[MemoryShare](
 			"E9200",
 			"share already exists",
 		)
@@ -307,7 +307,7 @@ func (s *ShareService) Share(context stdctx.Context, req ShareRequest) apperror.
 	   share.SharedBy, share.SharedAt)
 	
 	if err != nil {
-		return apperror.FailWrap[MemoryShare](
+		return appfault.FailWrap[MemoryShare](
 			err,
 			"E9201",
 			"failed to create share",
@@ -322,11 +322,11 @@ func (s *ShareService) Share(context stdctx.Context, req ShareRequest) apperror.
 		}
 	}
 	
-	return apperror.Ok(*share)
+	return appfault.Ok(*share)
 }
 
 // GetSharedMemories returns all memories shared TO a project
-func (s *ShareService) GetSharedMemories(context stdctx.Context, projectId string) apperror.Result[[]MemoryShare] {
+func (s *ShareService) GetSharedMemories(context stdctx.Context, projectId string) appfault.Result[[]MemoryShare] {
 	rows, err := s.db.QueryContext(context, `
 		SELECT id, source_project_id, target_project_id, memory_type, memory_path, 
 		       memory_name, permissions, sync_status, shared_by, shared_at, last_synced_at
@@ -336,7 +336,7 @@ func (s *ShareService) GetSharedMemories(context stdctx.Context, projectId strin
 	`, projectId)
 	
 	if err != nil {
-		return apperror.FailWrap[[]MemoryShare](
+		return appfault.FailWrap[[]MemoryShare](
 			err,
 			"E9202",
 			"failed to query shared memories",
@@ -360,11 +360,11 @@ func (s *ShareService) GetSharedMemories(context stdctx.Context, projectId strin
 		shares = append(shares, share)
 	}
 	
-	return apperror.Ok(shares)
+	return appfault.Ok(shares)
 }
 
 // GetSharedContent retrieves the actual content of a shared memory
-func (s *ShareService) GetSharedContent(context stdctx.Context, shareId string) apperror.Result[string] {
+func (s *ShareService) GetSharedContent(context stdctx.Context, shareId string) appfault.Result[string] {
 	// First try cache
 	var content string
 	err := s.db.QueryRowContext(context, `
@@ -372,7 +372,7 @@ func (s *ShareService) GetSharedContent(context stdctx.Context, shareId string) 
 	`, shareId).Scan(&content)
 	
 	if err == nil {
-		return apperror.Ok(content)
+		return appfault.Ok(content)
 	}
 	
 	// Get share details
@@ -383,7 +383,7 @@ func (s *ShareService) GetSharedContent(context stdctx.Context, shareId string) 
 	`, shareId).Scan(&share.SourceProjectId, &share.MemoryPath, &share.MemoryType)
 	
 	if err != nil {
-		return apperror.FailNew[string](
+		return appfault.FailNew[string](
 			"E9203",
 			"share not found",
 		)
@@ -393,26 +393,26 @@ func (s *ShareService) GetSharedContent(context stdctx.Context, shareId string) 
 	if share.MemoryType == "folder" {
 		folderContent, err := s.files.GetFolderContents(context, share.SourceProjectId, share.MemoryPath)
 		if err != nil {
-			return apperror.FailWrap[string](
+			return appfault.FailWrap[string](
 				err,
 				"E9203",
 				"failed to get folder contents",
 			)
 		}
 
-		return apperror.Ok(folderContent)
+		return appfault.Ok(folderContent)
 	}
 
 	fileContent, err := s.files.GetFileContent(context, share.SourceProjectId, share.MemoryPath)
 	if err != nil {
-		return apperror.FailWrap[string](
+		return appfault.FailWrap[string](
 			err,
 			"E9203",
 			"failed to get file content",
 		)
 	}
 
-	return apperror.Ok(fileContent)
+	return appfault.Ok(fileContent)
 }
 
 // Revoke removes a memory share

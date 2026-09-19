@@ -214,7 +214,7 @@ Create a language-specific guideline.
   "Language": "go",
   "Name": "Go Error Wrapping",
   "Category": "error_handling",
-  "Content": "Use apperror.Wrap with error codes...",
+  "Content": "Use appfault.Wrap with error codes...",
   "ExtendsRule": "error_handling",
   "OverrideKey": "error_messages"
 }

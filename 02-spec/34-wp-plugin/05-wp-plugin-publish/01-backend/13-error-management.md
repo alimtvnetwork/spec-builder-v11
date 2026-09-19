@@ -26,8 +26,8 @@ Error management is a critical aspect of WP Plugin Publish. All errors must be:
 ### Definition
 
 ```go
-// pkg/apperror/error.go
-package apperror
+// pkg/appfault/error.go
+package appfault
 
 import (
     "fmt"
@@ -130,8 +130,8 @@ func newWithSkip(code, message string, cause error, skip int) *AppError {
 ## Stack Trace Capture
 
 ```go
-// pkg/apperror/stack.go
-package apperror
+// pkg/appfault/stack.go
+package appfault
 
 import (
     "fmt"
@@ -198,8 +198,8 @@ Categories:
 ### Code Definitions
 
 ```go
-// pkg/apperror/codes.go
-package apperror
+// pkg/appfault/codes.go
+package appfault
 
 // Configuration errors (E1xxx)
 const (
@@ -282,7 +282,7 @@ import (
     "encoding/json"
     
     "wp-plugin-publish/internal/models"
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
     
     "gorm.io/gorm"
 )
@@ -295,7 +295,7 @@ func NewDbWriter(db *gorm.DB) *DBWriter {
     return &DBWriter{db: db}
 }
 
-func (w *DBWriter) Write(err *apperror.AppError) error {
+func (w *DBWriter) Write(err *appfault.AppError) error {
     contextJson, _ := json.Marshal(err.Context)
     
     errorLog := models.ErrorLog{
@@ -339,10 +339,10 @@ type Error struct {
 }
 
 func WriteError(w http.ResponseWriter, err error) {
-    appErr, ok := err.(*apperror.AppError)
+    appErr, ok := err.(*appfault.AppError)
     if !ok {
-        appErr = apperror.Wrap(
-            err, apperror.ErrInternal, "unexpected error",
+        appErr = appfault.Wrap(
+            err, appfault.ErrInternal, "unexpected error",
         )
     }
     
@@ -395,7 +395,7 @@ import (
     "runtime/debug"
     
     "wp-plugin-publish/internal/logger"
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
 )
 
 func Recovery(log *logger.Logger) func(http.Handler) http.Handler {
@@ -403,8 +403,8 @@ func Recovery(log *logger.Logger) func(http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
             defer func() {
                 if rec := recover(); rec != nil {
-                    err := apperror.New(
-                        apperror.ErrPanic, fmt.Sprintf("panic: %v", rec),
+                    err := appfault.New(
+                        appfault.ErrPanic, fmt.Sprintf("panic: %v", rec),
                     )
                     err.StackTrace = string(debug.Stack())
                     
@@ -577,8 +577,8 @@ Stack Trace:
 ```go
 // ✅ Wrap errors with context
 if err := db.Query(...); err != nil {
-    return apperror.Wrap(
-        err, apperror.ErrDatabaseQuery, "failed to fetch sites",
+    return appfault.Wrap(
+        err, appfault.ErrDatabaseQuery, "failed to fetch sites",
     ).
         WithContext("limit", limit).
         WithContext("offset", offset)
@@ -586,16 +586,16 @@ if err := db.Query(...); err != nil {
 
 // ✅ Use specific error codes
 if site == nil {
-    return apperror.New(
-        apperror.ErrNotFound, "site not found",
+    return appfault.New(
+        appfault.ErrNotFound, "site not found",
     ).
         WithContext("siteId", siteId)
 }
 
 // ✅ Validate early
 if url == "" {
-    return apperror.New(
-        apperror.ErrValidationEmpty, "site URL is required",
+    return appfault.New(
+        appfault.ErrValidationEmpty, "site URL is required",
     )
 }
 
@@ -610,7 +610,7 @@ s.broadcastProgress(pluginId, siteId, "packaging", 30, "Building package...")
 result, _ := doSomething()  // Never ignore errors
 
 // ❌ Don't use generic messages
-return apperror.New(ErrOperationFailed, "error occurred")  // Too vague
+return appfault.New(ErrOperationFailed, "error occurred")  // Too vague
 
 // ❌ Don't log and return
 log.Error(err)

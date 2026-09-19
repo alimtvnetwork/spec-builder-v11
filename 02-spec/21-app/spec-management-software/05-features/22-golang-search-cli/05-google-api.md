@@ -41,7 +41,7 @@ import (
     
     "google.golang.org/api/customsearch/v1"
     "google.golang.org/api/option"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 type GoogleCustomSearch struct {
@@ -51,20 +51,20 @@ type GoogleCustomSearch struct {
     quota   *QuotaTracker
 }
 
-func NewGoogleCustomSearch(apiKey, cx string, dailyQuota int) apperror.Result[*GoogleCustomSearch] {
+func NewGoogleCustomSearch(apiKey, cx string, dailyQuota int) appfault.Result[*GoogleCustomSearch] {
     context := stdctx.Background()
     
     service, err := customsearch.NewService(context, option.WithApiKey(apiKey))
     if err != nil {
-        return apperror.Fail[*GoogleCustomSearch](
-            apperror.Wrap(
+        return appfault.Fail[*GoogleCustomSearch](
+            appfault.Wrap(
                 err,
                 "create service",
             ),
         )
     }
     
-    return apperror.OK(&GoogleCustomSearch{
+    return appfault.Ok(&GoogleCustomSearch{
         service: service,
         apiKey:  apiKey,
         cx:      cx,
@@ -84,10 +84,10 @@ func (g *GoogleCustomSearch) IsAvailable() bool {
 ### Search Implementation
 
 ```go
-func (g *GoogleCustomSearch) Search(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]Result] {
+func (g *GoogleCustomSearch) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
     if !g.quota.CanMakeRequest() {
-        return apperror.Fail[[]Result](
-            apperror.New(
+        return appfault.Fail[[]Result](
+            appfault.New(
                 "Google Custom Search quota exhausted",
             ),
         )
@@ -100,12 +100,12 @@ func (g *GoogleCustomSearch) Search(context stdctx.Context, query string, opts S
     
     resp, err := call.Context(context).Do()
     if err != nil {
-        return apperror.Fail[[]Result](g.handleError(err))
+        return appfault.Fail[[]Result](g.handleError(err))
     }
     
     g.quota.RecordRequest()
     
-    return apperror.OK(g.parseResults(resp))
+    return appfault.Ok(g.parseResults(resp))
 }
 
 func (g *GoogleCustomSearch) parseResults(resp *customsearch.Search) []Result {
@@ -123,23 +123,23 @@ func (g *GoogleCustomSearch) parseResults(resp *customsearch.Search) []Result {
     return results
 }
 
-func (g *GoogleCustomSearch) handleError(err error) *apperror.AppError {
+func (g *GoogleCustomSearch) handleError(err error) *appfault.AppError {
     errStr := err.Error()
     
     if strings.Contains(errStr, "403") || strings.Contains(errStr, "quota") {
         g.quota.MarkExhausted()
-        return apperror.New(
+        return appfault.New(
             "Google Custom Search quota exhausted",
         )
     }
     
     if strings.Contains(errStr, "429") {
-        return apperror.New(
+        return appfault.New(
             "rate limited (429)",
         )
     }
     
-    return apperror.Wrap(
+    return appfault.Wrap(
         err,
         "network error",
     )
@@ -158,14 +158,14 @@ type GoogleSearchConsole struct {
     siteUrl string
 }
 
-func NewGoogleSearchConsole(credentialsPath, siteUrl string) apperror.Result[*GoogleSearchConsole] {
+func NewGoogleSearchConsole(credentialsPath, siteUrl string) appfault.Result[*GoogleSearchConsole] {
     context := stdctx.Background()
     
     // Read credentials file
     creds, err := pathutil.ReadFile(credentialsPath)
     if err != nil {
-        return apperror.Fail[*GoogleSearchConsole](
-            apperror.Wrap(
+        return appfault.Fail[*GoogleSearchConsole](
+            appfault.Wrap(
                 err,
                 "read credentials",
             ),
@@ -175,8 +175,8 @@ func NewGoogleSearchConsole(credentialsPath, siteUrl string) apperror.Result[*Go
     // Create JWT config
     config, err := google.JwtConfigFromJson(creds, searchconsole.WebmastersReadonlyScope)
     if err != nil {
-        return apperror.Fail[*GoogleSearchConsole](
-            apperror.Wrap(
+        return appfault.Fail[*GoogleSearchConsole](
+            appfault.Wrap(
                 err,
                 "create config",
             ),
@@ -187,15 +187,15 @@ func NewGoogleSearchConsole(credentialsPath, siteUrl string) apperror.Result[*Go
     
     service, err := searchconsole.NewService(context, option.WithHttpClient(client))
     if err != nil {
-        return apperror.Fail[*GoogleSearchConsole](
-            apperror.Wrap(
+        return appfault.Fail[*GoogleSearchConsole](
+            appfault.Wrap(
                 err,
                 "create service",
             ),
         )
     }
     
-    return apperror.OK(&GoogleSearchConsole{
+    return appfault.Ok(&GoogleSearchConsole{
         service: service,
         siteUrl: siteUrl,
     })
@@ -221,7 +221,7 @@ type SearchAnalytics struct {
     Position    float64
 }
 
-func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startDate, endDate string) apperror.Result[[]SearchAnalytics] {
+func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startDate, endDate string) appfault.Result[[]SearchAnalytics] {
     req := &searchconsole.SearchAnalyticsQueryRequest{
         StartDate:  startDate,
         EndDate:    endDate,
@@ -231,8 +231,8 @@ func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startD
     
     resp, err := g.service.Searchanalytics.Query(g.siteUrl, req).Context(context).Do()
     if err != nil {
-        return apperror.Fail[[]SearchAnalytics](
-            apperror.Wrap(
+        return appfault.Fail[[]SearchAnalytics](
+            appfault.Wrap(
                 err,
                 "query analytics",
             ),
@@ -250,7 +250,7 @@ func (g *GoogleSearchConsole) GetKeywordAnalytics(context stdctx.Context, startD
         })
     }
     
-    return apperror.OK(analytics)
+    return appfault.Ok(analytics)
 }
 ```
 
@@ -344,10 +344,10 @@ func getNextMidnightUTC() time.Time {
 ## Error Types
 
 ```go
-// Error types are now handled via apperror.New/Wrap
+// Error types are now handled via appfault.New/Wrap
 // Example:
-// apperror.New("Google Custom Search quota exhausted")
-// apperror.Wrap(err, "create service")
+// appfault.New("Google Custom Search quota exhausted")
+// appfault.Wrap(err, "create service")
 ```
 
 ---

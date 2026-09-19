@@ -8,7 +8,7 @@
 
 ## Overview
 
-License Manager error codes occupy the **LM 15000–15999** range. All error constants use PascalCase with the `Err` prefix. All functions return `apperror.Result[T]` — tuple returns `(*T, error)` are forbidden.
+License Manager error codes occupy the **LM 15000–15999** range. All error constants use PascalCase with the `Err` prefix. All functions return `appfault.Result[T]` — tuple returns `(*T, error)` are forbidden.
 
 ---
 
@@ -91,12 +91,12 @@ License Manager error codes occupy the **LM 15000–15999** range. All error con
 
 ```go
 // ✅ Compliant — PascalCase with Err prefix
-var ErrLmLicenseNotFound = apperror.New(15201, "License key not found")
-var ErrLmSeatLimitReached = apperror.New(15204, "Maximum activations exceeded")
-var ErrLmTamperDetected = apperror.New(15301, "HMAC signature mismatch")
+var ErrLmLicenseNotFound = appfault.New(15201, "License key not found")
+var ErrLmSeatLimitReached = appfault.New(15204, "Maximum activations exceeded")
+var ErrLmTamperDetected = appfault.New(15301, "HMAC signature mismatch")
 
 // ❌ Forbidden — SCREAMING_SNAKE_CASE
-// var ERR_LM_LICENSE_NOT_FOUND = apperror.New(15201, "...")
+// var ERR_LM_LICENSE_NOT_FOUND = appfault.New(15201, "...")
 ```
 
 ---

@@ -196,18 +196,18 @@ type TrendAnalyzer struct {
 }
 
 // NewTrendAnalyzer creates analyzer with settings from DB
-func NewTrendAnalyzer(settings SettingsService) apperror.Result[TrendAnalyzer] {
+func NewTrendAnalyzer(settings SettingsService) appfault.Result[TrendAnalyzer] {
     analyzer := &TrendAnalyzer{settings: settings}
     
     if err := analyzer.loadWeights(); err != nil {
-        return apperror.FailWrap[TrendAnalyzer](
+        return appfault.FailWrap[TrendAnalyzer](
             err,
             "E6100",
             "loading trend weights",
         )
     }
     
-    return apperror.Ok(*analyzer)
+    return appfault.Ok(*analyzer)
 }
 
 // loadWeights retrieves current weights from settings

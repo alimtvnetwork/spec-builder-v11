@@ -656,7 +656,7 @@ type DatabaseManager struct {
     mu           sync.RWMutex
 }
 
-func NewDatabaseManager(rootPath, projectsPath string) apperror.Result[DatabaseManager] {
+func NewDatabaseManager(rootPath, projectsPath string) appfault.Result[DatabaseManager] {
     dm := &DatabaseManager{
         rootPath:     rootPath,
         projectsPath: projectsPath,
@@ -670,7 +670,7 @@ func NewDatabaseManager(rootPath, projectsPath string) apperror.Result[DatabaseM
     return dm, nil
 }
 
-func (dm *DatabaseManager) initRootDb() *apperror.AppError {
+func (dm *DatabaseManager) initRootDb() *appfault.AppError {
     dbPath := filepath.Join(dm.rootPath, "transcribe.db")
     
     db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
@@ -697,7 +697,7 @@ func (dm *DatabaseManager) initRootDb() *apperror.AppError {
     return nil
 }
 
-func (dm *DatabaseManager) GetProjectDb(projectId, conversationId string) apperror.Result[*gorm.DB] {
+func (dm *DatabaseManager) GetProjectDb(projectId, conversationId string) appfault.Result[*gorm.DB] {
     key := fmt.Sprintf("%s/%s", projectId, conversationId)
     
     // EXEMPTED: typed accessor internal — sync.Map stores known *gorm.DB values (§7.2)

@@ -180,7 +180,7 @@ func logOperation(entry HistoryEntry) {
     }
 }
 
-func calculateChecksum(filePath string) apperror.Result[string] {
+func calculateChecksum(filePath string) appfault.Result[string] {
     file, err := pathutil.Open(filePath)
     if err != nil {
         return "", err
@@ -198,7 +198,7 @@ func calculateChecksum(filePath string) apperror.Result[string] {
 func validatePath(basePath, targetPath string) error {
     absBase, err := filepath.Abs(basePath)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrInvalidPath,
             "invalid base path",
@@ -207,7 +207,7 @@ func validatePath(basePath, targetPath string) error {
 
     absTarget, err := filepath.Abs(targetPath)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrInvalidPath,
             "invalid target path",
@@ -217,7 +217,7 @@ func validatePath(basePath, targetPath string) error {
     // Security: Ensure path doesn't escape base directory
     rel, err := filepath.Rel(absBase, absTarget)
     if err != nil || len(rel) > 2 && rel[:2] == ".." {
-        return apperror.New(
+        return appfault.New(
             ErrPathEscape,
             "path escapes base directory: "+targetPath,
         )
@@ -459,7 +459,7 @@ func run(config Config) Result {
     return result
 }
 
-func scanDirectory(dir string) apperror.Result[[]IndexEntry] {
+func scanDirectory(dir string) appfault.Result[[]IndexEntry] {
     var entries []IndexEntry
     // Scan and parse directory contents
     return entries, nil

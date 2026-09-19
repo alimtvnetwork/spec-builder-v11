@@ -544,7 +544,7 @@ import (
 )
 
 // OpenAI completion function
-func askGPT(context, question string) apperror.Result[string] {
+func askGPT(context, question string) appfault.Result[string] {
     apiKey := os.Getenv("OPENAI_API_KEY")
 
     // ALLOWED: external OpenAI API — raw JSON payload requires dynamic typing
@@ -567,7 +567,7 @@ func askGPT(context, question string) apperror.Result[string] {
     client := &http.Client{}
     resp, err := client.Do(req)
     if err != nil {
-        return "", err
+        return appfault.FailWrap[string](err, ErrOpenAiRequestFailed, "failed to send openai request")
     }
     defer resp.Body.Close()
 
@@ -581,7 +581,7 @@ func askGPT(context, question string) apperror.Result[string] {
     message := choices[0].(map[string]interface{})["message"].(map[string]interface{})
     answer := message["content"].(string)
 
-    return answer, nil
+    return appfault.Ok(answer)
 }
 
 func main() {

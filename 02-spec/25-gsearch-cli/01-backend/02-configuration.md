@@ -305,7 +305,7 @@ import (
     "gsearch/internal/enums/outputformattype"
     "gsearch/internal/enums/proxytype"
     "gsearch/internal/enums/rotationstrategytype"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // Duration supports both string ("2s") and numeric (milliseconds) formats
@@ -326,7 +326,7 @@ func (d *Duration) UnmarshalJSON(data []byte) error {
     }
     var numVal float64
     if err := json.Unmarshal(data, &numVal); err != nil {
-        return apperror.New(
+        return appfault.New(
             "duration must be a string or number, got: " + string(data),
         )
     }
@@ -613,7 +613,7 @@ import (
     
     "github.com/rs/zerolog/log"
     "golang.org/x/net/proxy"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "gsearch/pkg/config"
 )
 
@@ -639,14 +639,14 @@ type ProxyEntry struct {
 }
 
 // NewProxyManager creates a new proxy manager
-func NewProxyManager(cfg config.ProxyConfig) apperror.Result[*ProxyManager] {
+func NewProxyManager(cfg config.ProxyConfig) appfault.Result[*ProxyManager] {
     pm := &ProxyManager{
         config:     cfg,
         healthStop: make(chan struct{}),
     }
     
     if !cfg.Enabled {
-        return apperror.OK(pm)
+        return appfault.Ok(pm)
     }
     
     // Initialize proxy list
@@ -654,8 +654,8 @@ func NewProxyManager(cfg config.ProxyConfig) apperror.Result[*ProxyManager] {
         for _, urlStr := range cfg.Rotation.Urls {
             entryResult := pm.parseProxyUrl(urlStr, cfg.Auth)
             if !entryResult.IsSuccess {
-                return apperror.Fail[*ProxyManager](
-                    apperror.Wrap(
+                return appfault.Fail[*ProxyManager](
+                    appfault.Wrap(
                         entryResult.Error,
                         "invalid proxy URL: "+urlStr,
                     ),
@@ -675,8 +675,8 @@ func NewProxyManager(cfg config.ProxyConfig) apperror.Result[*ProxyManager] {
     } else if cfg.Url != "" {
         entryResult := pm.parseProxyUrl(cfg.Url, cfg.Auth)
         if !entryResult.IsSuccess {
-            return apperror.Fail[*ProxyManager](
-                apperror.Wrap(
+            return appfault.Fail[*ProxyManager](
+                appfault.Wrap(
                     entryResult.Error,
                     "invalid proxy URL",
                 ),
@@ -690,15 +690,15 @@ func NewProxyManager(cfg config.ProxyConfig) apperror.Result[*ProxyManager] {
         go pm.healthCheckLoop()
     }
     
-    return apperror.OK(pm)
+    return appfault.Ok(pm)
 }
 
 // parseProxyUrl parses a proxy URL string
-func (pm *ProxyManager) parseProxyUrl(urlStr string, auth config.ProxyAuthConfig) apperror.Result[*ProxyEntry] {
+func (pm *ProxyManager) parseProxyUrl(urlStr string, auth config.ProxyAuthConfig) appfault.Result[*ProxyEntry] {
     parsed, err := url.Parse(urlStr)
     if err != nil {
-        return apperror.Fail[*ProxyEntry](
-            apperror.Wrap(
+        return appfault.Fail[*ProxyEntry](
+            appfault.Wrap(
                 err,
                 "parse proxy URL",
             ),
@@ -718,13 +718,13 @@ func (pm *ProxyManager) parseProxyUrl(urlStr string, auth config.ProxyAuthConfig
         entry.Auth = parsed.User
     }
     
-    return apperror.OK(entry)
+    return appfault.Ok(entry)
 }
 
 // GetProxy returns the next proxy based on rotation strategy
-func (pm *ProxyManager) GetProxy() apperror.Result[*url.URL] {
+func (pm *ProxyManager) GetProxy() appfault.Result[*url.URL] {
     if !pm.config.Enabled || len(pm.proxies) == 0 {
-        return apperror.OK[*url.URL](nil) // Direct connection
+        return appfault.Ok[*url.URL](nil) // Direct connection
     }
     
     pm.mu.RLock()
@@ -748,8 +748,8 @@ func (pm *ProxyManager) GetProxy() apperror.Result[*url.URL] {
     }
     
     if entry == nil {
-        return apperror.Fail[*url.URL](
-            apperror.New(
+        return appfault.Fail[*url.URL](
+            appfault.New(
                 "no healthy proxies available",
             ),
         )
@@ -766,7 +766,7 @@ func (pm *ProxyManager) GetProxy() apperror.Result[*url.URL] {
     entry.RequestCount++
     entry.mu.Unlock()
     
-    return apperror.OK(&proxyUrl)
+    return appfault.Ok(&proxyUrl)
 }
 
 // selectRoundRobin cycles through proxies sequentially
@@ -858,12 +858,12 @@ func (pm *ProxyManager) getHealthyProxies() []*ProxyEntry {
 }
 
 // GetProxyForEngine returns proxy for specific engine (with override support)
-func (pm *ProxyManager) GetProxyForEngine(engine string) apperror.Result[*url.URL] {
+func (pm *ProxyManager) GetProxyForEngine(engine string) appfault.Result[*url.URL] {
     if override, ok := pm.config.PerEngine[engine]; ok {
         parsed, err := url.Parse(override.Url)
         if err != nil {
-            return apperror.Fail[*url.URL](
-                apperror.Wrap(
+            return appfault.Fail[*url.URL](
+                appfault.Wrap(
                     err,
                     "parse engine proxy URL",
                 ),
@@ -874,14 +874,14 @@ func (pm *ProxyManager) GetProxyForEngine(engine string) apperror.Result[*url.UR
             parsed.User = url.UserPassword(override.Auth.Username, override.Auth.Password)
         }
         
-        return apperror.OK(parsed)
+        return appfault.Ok(parsed)
     }
     
     return pm.GetProxy()
 }
 
 // CreateHttpClient creates an HTTP client configured with proxy
-func (pm *ProxyManager) CreateHttpClient(timeout time.Duration) apperror.Result[http.Client] {
+func (pm *ProxyManager) CreateHttpClient(timeout time.Duration) appfault.Result[http.Client] {
     transport := &http.Transport{
         DialContext: (&net.Dialer{
             Timeout:   30 * time.Second,
@@ -901,7 +901,7 @@ func (pm *ProxyManager) CreateHttpClient(timeout time.Duration) apperror.Result[
         transport.Proxy = pm.proxyFunc
     }
     
-    return apperror.Ok(http.Client{
+    return appfault.Ok(http.Client{
         Transport: transport,
         Timeout:   timeout,
     })
@@ -944,7 +944,7 @@ func (pm *ProxyManager) detectEngine(host string) string {
 }
 
 // CreateSocks5Client creates an HTTP client with SOCKS5 proxy
-func (pm *ProxyManager) CreateSocks5Client(proxyUrl *url.URL, timeout time.Duration) apperror.Result[*http.Client] {
+func (pm *ProxyManager) CreateSocks5Client(proxyUrl *url.URL, timeout time.Duration) appfault.Result[*http.Client] {
     var auth *proxy.Auth
     if proxyUrl.User != nil {
         pass, _ := proxyUrl.User.Password()
@@ -956,8 +956,8 @@ func (pm *ProxyManager) CreateSocks5Client(proxyUrl *url.URL, timeout time.Durat
     
     dialer, err := proxy.SOCKS5("tcp", proxyUrl.Host, auth, proxy.Direct)
     if err != nil {
-        return apperror.Fail[*http.Client](
-            apperror.Wrap(
+        return appfault.Fail[*http.Client](
+            appfault.Wrap(
                 err,
                 "failed to create SOCKS5 dialer",
             ),
@@ -974,7 +974,7 @@ func (pm *ProxyManager) CreateSocks5Client(proxyUrl *url.URL, timeout time.Durat
         transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
     }
     
-    return apperror.OK(&http.Client{
+    return appfault.Ok(&http.Client{
         Transport: transport,
         Timeout:   timeout,
     })
@@ -1133,7 +1133,7 @@ import (
     "github.com/spf13/viper"
 )
 
-func Load(configPath string) apperror.Result[Config] {
+func Load(configPath string) appfault.Result[Config] {
     if configPath != "" {
         viper.SetConfigFile(configPath)
     } else {
@@ -1153,8 +1153,8 @@ func Load(configPath string) apperror.Result[Config] {
     // Read config file
     if err := viper.ReadInConfig(); err != nil {
         if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-            return apperror.Fail[Config](
-                apperror.Wrap(
+            return appfault.Fail[Config](
+                appfault.Wrap(
                     err,
                     "error reading config",
                 ),
@@ -1165,8 +1165,8 @@ func Load(configPath string) apperror.Result[Config] {
     
     var cfg Config
     if err := viper.Unmarshal(&cfg); err != nil {
-        return apperror.Fail[Config](
-            apperror.Wrap(
+        return appfault.Fail[Config](
+            appfault.Wrap(
                 err,
                 "error unmarshaling config",
             ),
@@ -1174,10 +1174,10 @@ func Load(configPath string) apperror.Result[Config] {
     }
     
     if validationErr := cfg.Validate(); validationErr != nil {
-        return apperror.Fail[Config](validationErr)
+        return appfault.Fail[Config](validationErr)
     }
     
-    return apperror.Ok(cfg)
+    return appfault.Ok(cfg)
 }
 
 func setDefaults() {
@@ -1267,31 +1267,31 @@ func setDefaults() {
 ## Validation
 
 ```go
-func (c *Config) Validate() *apperror.AppError {
+func (c *Config) Validate() *appfault.AppError {
     // Validate request delay
     if c.Search.RequestDelay.Duration < 500*time.Millisecond {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("search.requestDelay must be >= 500ms, got %v", c.Search.RequestDelay),
         )
     }
     
     // Validate concurrency
     if c.Search.MaxConcurrent < 1 || c.Search.MaxConcurrent > 20 {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("search.maxConcurrent must be 1-20, got %d", c.Search.MaxConcurrent),
         )
     }
     
     // Validate cache TTL
     if c.Cache.TTLDays < 1 {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("cache.ttlDays must be >= 1, got %d", c.Cache.TTLDays),
         )
     }
     
     // Validate nested depth
     if c.Nested.MaxDepth < 1 || c.Nested.MaxDepth > 5 {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("nested.maxDepth must be 1-5, got %d", c.Nested.MaxDepth),
         )
     }
@@ -1303,13 +1303,13 @@ func (c *Config) Validate() *apperror.AppError {
     
     // Validate backoff config
     if c.Backoff.Multiplier < 1.0 {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("backoff.multiplier must be >= 1.0, got %f", c.Backoff.Multiplier),
         )
     }
 
     if c.Backoff.Jitter < 0.0 || c.Backoff.Jitter > 1.0 {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("backoff.jitter must be 0.0-1.0, got %f", c.Backoff.Jitter),
         )
     }
@@ -1323,11 +1323,11 @@ func (c *Config) Validate() *apperror.AppError {
 }
 
 // ValidateWeights ensures all weights are 0.0-1.0 and sum to 1.0
-func (c *Config) ValidateWeights() *apperror.AppError {
+func (c *Config) ValidateWeights() *appfault.AppError {
     var total float64
     for method, weight := range c.Search.MethodWeights {
         if weight < 0.0 || weight > 1.0 {
-            return apperror.New(
+            return appfault.New(
                 fmt.Sprintf("weight for %s must be 0.0-1.0, got %f", method, weight),
             )
         }
@@ -1336,7 +1336,7 @@ func (c *Config) ValidateWeights() *apperror.AppError {
     
     // Allow small floating point tolerance
     if math.Abs(total-1.0) > 0.001 {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("search.methodWeights must sum to 1.0 (±0.001), got %f", total),
         )
     }
@@ -1345,7 +1345,7 @@ func (c *Config) ValidateWeights() *apperror.AppError {
 }
 
 // ValidateProxy validates proxy configuration
-func (c *Config) ValidateProxy() *apperror.AppError {
+func (c *Config) ValidateProxy() *appfault.AppError {
     if !c.Proxy.Enabled {
         return nil
     }
@@ -1355,7 +1355,7 @@ func (c *Config) ValidateProxy() *apperror.AppError {
         "http": true, "https": true, "socks5": true, "socks5h": true,
     }
     if !validTypes[c.Proxy.Type] {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("proxy.type must be http/https/socks5/socks5h, got %s", c.Proxy.Type),
         )
     }
@@ -1367,13 +1367,13 @@ func (c *Config) ValidateProxy() *apperror.AppError {
             "failover": true, "weighted": true,
         }
         if !validStrategies[c.Proxy.Rotation.Strategy] {
-            return apperror.New(
+            return appfault.New(
                 "proxy.rotation.strategy must be one of: round-robin, random, least-used, failover, weighted",
             )
         }
         
         if len(c.Proxy.Rotation.Urls) == 0 {
-            return apperror.New(
+            return appfault.New(
                 "proxy.rotation.urls must have at least one proxy when rotation is enabled",
             )
         }
@@ -1381,13 +1381,13 @@ func (c *Config) ValidateProxy() *apperror.AppError {
         // Validate weighted strategy has weights
         if c.Proxy.Rotation.Strategy == "weighted" {
             if len(c.Proxy.Rotation.Weights) == 0 {
-                return apperror.New(
+                return appfault.New(
                     "proxy.rotation.weights required for weighted strategy",
                 )
             }
         }
     } else if c.Proxy.Url == "" {
-        return apperror.New(
+        return appfault.New(
             "proxy.url required when proxy is enabled without rotation",
         )
     }

@@ -49,15 +49,15 @@ The License Manager follows a layered architecture with clear separation between
 Handles license lifecycle: creation, retrieval, renewal, and revocation.
 
 ```go
-// ✅ Compliant — uses apperror.Result[T]
-func (service *LicenseService) Generate(context context.Context, request GenerateLicenseRequest) apperror.Result[License] {
+// ✅ Compliant — uses appfault.Result[T]
+func (service *LicenseService) Generate(context context.Context, request GenerateLicenseRequest) appfault.Result[License] {
     // Validate request fields
     // Generate cryptographic key
     // Persist to database
     // Return License
 }
 
-func (service *LicenseService) Revoke(context context.Context, licenseId string) apperror.Result[bool] {
+func (service *LicenseService) Revoke(context context.Context, licenseId string) appfault.Result[bool] {
     // Verify license exists
     // Mark as revoked
     // Log revocation event
@@ -69,13 +69,13 @@ func (service *LicenseService) Revoke(context context.Context, licenseId string)
 Binds licenses to machine fingerprints with configurable seat limits.
 
 ```go
-func (service *ActivationService) Activate(context context.Context, licenseKey string, fingerprint MachineFingerprint) apperror.Result[Activation] {
+func (service *ActivationService) Activate(context context.Context, licenseKey string, fingerprint MachineFingerprint) appfault.Result[Activation] {
     // Validate license exists and is active
     // Check seat limit
     // Create activation record
 }
 
-func (service *ActivationService) Deactivate(context context.Context, activationId string) apperror.Result[bool] {
+func (service *ActivationService) Deactivate(context context.Context, activationId string) appfault.Result[bool] {
     // Remove activation binding
     // Free seat
 }
@@ -86,7 +86,7 @@ func (service *ActivationService) Deactivate(context context.Context, activation
 Verifies license validity with offline-first strategy.
 
 ```go
-func (service *ValidationService) Validate(context context.Context, licenseKey string) apperror.Result[ValidationResult] {
+func (service *ValidationService) Validate(context context.Context, licenseKey string) appfault.Result[ValidationResult] {
     // Check local cache first
     // Verify expiration
     // Verify activation status
@@ -99,7 +99,7 @@ func (service *ValidationService) Validate(context context.Context, licenseKey s
 Tracks feature usage against license limits.
 
 ```go
-func (service *MeteringService) RecordUsage(context context.Context, licenseKey string, featureKey string) apperror.Result[UsageRecord] {
+func (service *MeteringService) RecordUsage(context context.Context, licenseKey string, featureKey string) appfault.Result[UsageRecord] {
     // Increment usage counter
     // Check against limit
     // Return current usage

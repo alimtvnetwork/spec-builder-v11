@@ -354,7 +354,7 @@ type ConfigOverrides struct {
 }
 
 // LoadConfig loads configuration from file, environment, and defaults
-func LoadConfig(configPath string, cliOverrides ConfigOverrides) apperror.Result[*Config] {
+func LoadConfig(configPath string, cliOverrides ConfigOverrides) appfault.Result[*Config] {
     cfg := &Config{}
     
     // Step 1: Apply compiled defaults
@@ -363,8 +363,8 @@ func LoadConfig(configPath string, cliOverrides ConfigOverrides) apperror.Result
     // Step 2: Load from configuration file
     if configPath != "" {
         if err := loadFromFile(cfg, configPath); err != nil {
-            return apperror.Fail[*Config](
-                apperror.Wrap(
+            return appfault.Fail[*Config](
+                appfault.Wrap(
                     err,
                     ErrConfigLoad,
                     "loading config file",
@@ -378,8 +378,8 @@ func LoadConfig(configPath string, cliOverrides ConfigOverrides) apperror.Result
     
     // Step 4: Apply CLI overrides
     if err := applyOverrides(cfg, cliOverrides); err != nil {
-        return apperror.Fail[*Config](
-            apperror.Wrap(
+        return appfault.Fail[*Config](
+            appfault.Wrap(
                 err,
                 ErrConfigOverride,
                 "applying CLI overrides",
@@ -389,8 +389,8 @@ func LoadConfig(configPath string, cliOverrides ConfigOverrides) apperror.Result
     
     // Step 5: Validate configuration
     if err := cfg.Validate(); err != nil {
-        return apperror.Fail[*Config](
-            apperror.Wrap(
+        return appfault.Fail[*Config](
+            appfault.Wrap(
                 err,
                 ErrConfigValidation,
                 "validating config",
@@ -398,7 +398,7 @@ func LoadConfig(configPath string, cliOverrides ConfigOverrides) apperror.Result
         )
     }
     
-    return apperror.OK(cfg)
+    return appfault.Ok(cfg)
 }
 
 // Validate checks configuration for required fields and valid values
@@ -430,7 +430,7 @@ func (c *Config) Validate() error {
     }
     
     if len(errors) > 0 {
-        return apperror.New(
+        return appfault.New(
             ErrConfigValidation,
             "configuration errors: "+strings.Join(errors, "; "),
         )
@@ -784,7 +784,7 @@ type Checkpoint struct {
 // CheckpointManager handles checkpoint persistence
 type CheckpointManager interface {
     Save(context stdctx.Context, cp *Checkpoint) error
-    Load(context stdctx.Context, jobId string) apperror.Result[*Checkpoint]
+    Load(context stdctx.Context, jobId string) appfault.Result[*Checkpoint]
     Delete(context stdctx.Context, jobId string) error
 }
 ```
@@ -1093,7 +1093,7 @@ type Reporter struct {
     processed       int
     total           int
     currentPhase    string
-    lastError       *apperror.AppError
+    lastError       *appfault.AppError
     
     done            chan struct{}
 }
@@ -1285,7 +1285,7 @@ func buildProcessCommand(logger *zap.Logger) *cobra.Command {
                 },
             )
             if err != nil {
-                return apperror.Wrap(
+                return appfault.Wrap(
                     err,
                     ErrConfigLoad,
                     "loading configuration",
@@ -1299,7 +1299,7 @@ func buildProcessCommand(logger *zap.Logger) *cobra.Command {
             // Create and run processor
             processor, err := NewProcessor(cfg, logger, shutdownMgr)
             if err != nil {
-                return apperror.Wrap(
+                return appfault.Wrap(
                     err,
                     ErrProcessorCreate,
                     "creating processor",
@@ -1313,7 +1313,7 @@ func buildProcessCommand(logger *zap.Logger) *cobra.Command {
             
             // Process job
             if err := processor.ProcessJob(shutdownMgr.Context(), jobId); err != nil {
-                return apperror.Wrap(
+                return appfault.Wrap(
                     err,
                     ErrJobProcessing,
                     "processing job",

@@ -81,14 +81,14 @@ type ConfigService struct {
     db *sql.DB
 }
 
-func (s *ConfigService) GetLLaMAConfig(context stdctx.Context) apperror.Result[*LLaMAConfig] {
+func (s *ConfigService) GetLLaMAConfig(context stdctx.Context) appfault.Result[*LLaMAConfig] {
     config := &LLaMAConfig{}
     
     rows, err := s.db.QueryContext(context, `
         SELECT Key, Value FROM Config WHERE Key LIKE 'llama.%'
     `)
     if err != nil {
-        return apperror.FailWrap[*LLaMAConfig](
+        return appfault.FailWrap[*LLaMAConfig](
             err,
             "failed to query LLaMA config",
         )
@@ -121,7 +121,7 @@ func (s *ConfigService) GetLLaMAConfig(context stdctx.Context) apperror.Result[*
         }
     }
     
-    return apperror.Ok(config)
+    return appfault.Ok(config)
 }
 
 func (s *ConfigService) UpdateLLaMAConfig(context stdctx.Context, updates map[string]string) error {
@@ -150,16 +150,16 @@ func (s *ConfigService) UpdateLLaMAConfig(context stdctx.Context, updates map[st
     return tx.Commit()
 }
 
-func (s *ConfigService) ListAvailableModels(context stdctx.Context) apperror.Result[[]ModelInfo] {
+func (s *ConfigService) ListAvailableModels(context stdctx.Context) appfault.Result[[]ModelInfo] {
     configResult := s.GetLLaMAConfig(context)
     if configResult.HasError() {
-        return apperror.Fail[[]ModelInfo](configResult.Error())
+        return appfault.Fail[[]ModelInfo](configResult.Error())
     }
     config := configResult.Value()
     
     entries, err := pathutil.ReadDir(config.ModelsDir)
     if err != nil {
-        return apperror.FailWrap[[]ModelInfo](
+        return appfault.FailWrap[[]ModelInfo](
             err,
             "failed to read models directory",
         )
@@ -177,7 +177,7 @@ func (s *ConfigService) ListAvailableModels(context stdctx.Context) apperror.Res
         }
     }
     
-    return apperror.Ok(models)
+    return appfault.Ok(models)
 }
 
 type ModelInfo struct {
@@ -216,11 +216,11 @@ func NewModelRegistryService(db *sql.DB, configService *ConfigService) *ModelReg
 }
 
 // ScanModels discovers models from configured root paths
-func (s *ModelRegistryService) ScanModels(context stdctx.Context) apperror.Result[[]ModelInfo] {
+func (s *ModelRegistryService) ScanModels(context stdctx.Context) appfault.Result[[]ModelInfo] {
     // Get model root paths from config
     rootPaths, err := s.configService.GetConfigAsArray(context, "llama.models.rootPaths")
     if err != nil {
-        return apperror.FailWrap[[]ModelInfo](
+        return appfault.FailWrap[[]ModelInfo](
             err,
             "failed to get model root paths",
         )
@@ -255,7 +255,7 @@ func (s *ModelRegistryService) ScanModels(context stdctx.Context) apperror.Resul
         }
     }
     
-    return apperror.Ok(discovered)
+    return appfault.Ok(discovered)
 }
 
 // ModelCategory defines the 4 primary categories for model selection
@@ -305,7 +305,7 @@ func containsAny(s string, substrs ...string) bool {
 }
 
 // SyncRegistry updates database with discovered models
-func (s *ModelRegistryService) SyncRegistry(context stdctx.Context) *apperror.AppError {
+func (s *ModelRegistryService) SyncRegistry(context stdctx.Context) *appfault.AppError {
     scanResult := s.ScanModels(context)
     if scanResult.HasError() {
         return scanResult.Error()
@@ -328,18 +328,18 @@ func (s *ModelRegistryService) SyncRegistry(context stdctx.Context) *apperror.Ap
         `, uuid.NewString(), model.DisplayName, model.FileName, model.Category, model.ModelPath, model.FileSizeBytes)
         
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
-                apperror.ErrDbWrite,
+                appfault.ErrDbWrite,
                 "failed to sync model registry",
             )
         }
     }
     
     if err := tx.Commit(); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
-            apperror.ErrDbWrite,
+            appfault.ErrDbWrite,
             "failed to commit registry sync",
         )
     }
@@ -409,7 +409,7 @@ func (s *ModelRegistryService) ResolveModelByCategory(
     instructionOverrides *CategoryModelOverrides,
     projectId *string,
     userId string,
-) apperror.Result[*ModelInfo] {
+) appfault.Result[*ModelInfo] {
     
     // Priority 1: Per-instruction override
     if instructionOverrides != nil {
@@ -493,7 +493,7 @@ func (s *ModelRegistryService) getUserDefaultForCategory(user *User, category Mo
 }
 
 // GetFirstEnabledModelByCategory returns the first available model for a category
-func (s *ModelRegistryService) GetFirstEnabledModelByCategory(context stdctx.Context, category ModelCategory) apperror.Result[*ModelInfo] {
+func (s *ModelRegistryService) GetFirstEnabledModelByCategory(context stdctx.Context, category ModelCategory) appfault.Result[*ModelInfo] {
     row := s.db.QueryRowContext(context, `
         SELECT Id, DisplayName, FileName, ModelCategory, ModelPath, FileSizeBytes
         FROM ModelRegistry 
@@ -505,13 +505,13 @@ func (s *ModelRegistryService) GetFirstEnabledModelByCategory(context stdctx.Con
     var model ModelInfo
     err := row.Scan(&model.Id, &model.DisplayName, &model.FileName, &model.Category, &model.ModelPath, &model.FileSizeBytes)
     if err != nil {
-        return apperror.FailWrap[*ModelInfo](
+        return appfault.FailWrap[*ModelInfo](
             err,
             "no enabled model found for category",
         )
     }
 
-    return apperror.Ok(&model)
+    return appfault.Ok(&model)
 }
 ```
 
@@ -603,7 +603,7 @@ func (sm *SlotManager) InitializeSlots(context stdctx.Context) error {
 }
 
 // RequestModel ensures a model is loaded and returns its port
-func (sm *SlotManager) RequestModel(context stdctx.Context, modelId string) apperror.Result[int] {
+func (sm *SlotManager) RequestModel(context stdctx.Context, modelId string) appfault.Result[int] {
     sm.mutex.Lock()
     defer sm.mutex.Unlock()
     
@@ -621,26 +621,26 @@ func (sm *SlotManager) RequestModel(context stdctx.Context, modelId string) appe
         sm.db.ExecContext(context, `
             UPDATE ModelSlot SET LastAccessedAt = datetime('now') WHERE ModelId = ?
         `, modelId)
-        return apperror.Ok(existingSlot.Port)
+        return appfault.Ok(existingSlot.Port)
     }
     
     // Find available slot or evict LRU
     slotResult := sm.findOrEvictSlot(context)
     if slotResult.HasError() {
-        return apperror.Fail[int](slotResult.Error())
+        return appfault.Fail[int](slotResult.Error())
     }
     slot := slotResult.Value()
     
     // Load model into slot
     if err := sm.loadModelIntoSlot(context, modelId, slot); err != nil {
-        return apperror.Fail[int](err)
+        return appfault.Fail[int](err)
     }
     
-    return apperror.Ok(slot.Port)
+    return appfault.Ok(slot.Port)
 }
 
 // findOrEvictSlot finds an idle slot or evicts the least recently used
-func (sm *SlotManager) findOrEvictSlot(context stdctx.Context) apperror.Result[*ModelSlot] {
+func (sm *SlotManager) findOrEvictSlot(context stdctx.Context) appfault.Result[*ModelSlot] {
     maxConcurrent, _ := sm.configService.GetConfigAsInt(context, "llama.server.maxConcurrentModels")
     
     // Count active slots
@@ -656,7 +656,7 @@ func (sm *SlotManager) findOrEvictSlot(context stdctx.Context) apperror.Result[*
     `).Scan(&idleSlot.Id, &idleSlot.SlotIndex, &idleSlot.Port)
     
     if err == nil {
-        return apperror.Ok(&idleSlot)
+        return appfault.Ok(&idleSlot)
     }
     
     // No idle slots - check if we can evict
@@ -672,7 +672,7 @@ func (sm *SlotManager) findOrEvictSlot(context stdctx.Context) apperror.Result[*
         `).Scan(&lruSlot.Id, &lruSlot.SlotIndex, &lruSlot.Port, &lruSlot.ModelId, &lruSlot.ProcessId)
         
         if err != nil {
-            return apperror.FailWrap[*ModelSlot](
+            return appfault.FailWrap[*ModelSlot](
                 err,
                 "no available slots",
             )
@@ -680,14 +680,14 @@ func (sm *SlotManager) findOrEvictSlot(context stdctx.Context) apperror.Result[*
         
         // Evict the LRU model
         if err := sm.unloadSlot(context, &lruSlot); err != nil {
-            return apperror.Fail[*ModelSlot](err)
+            return appfault.Fail[*ModelSlot](err)
         }
         
-        return apperror.Ok(&lruSlot)
+        return appfault.Ok(&lruSlot)
     }
     
-    return apperror.FailNew[*ModelSlot](
-        apperror.ErrAllSlotsFull,
+    return appfault.FailNew[*ModelSlot](
+        appfault.ErrAllSlotsFull,
         "no available slots",
     )
 }
@@ -753,7 +753,7 @@ func (sm *SlotManager) loadModelIntoSlot(context stdctx.Context, modelId string,
 }
 
 // buildStartCommand constructs the shell command from template
-func (sm *SlotManager) buildStartCommand(context stdctx.Context, model *ModelInfo, port int) apperror.Result[*exec.Cmd] {
+func (sm *SlotManager) buildStartCommand(context stdctx.Context, model *ModelInfo, port int) appfault.Result[*exec.Cmd] {
     template, _ := sm.configService.GetConfig(context, "llama.server.shellCommandTemplate")
     executable, _ := sm.configService.GetConfig(context, "llama.server.executablePath")
     bindAddress, _ := sm.configService.GetConfig(context, "llama.server.bindAddress")
@@ -776,7 +776,7 @@ func (sm *SlotManager) buildStartCommand(context stdctx.Context, model *ModelInf
     cmdStr = strings.ReplaceAll(cmdStr, "{contextSize}", fmt.Sprintf("%d", contextSize))
     cmdStr = strings.ReplaceAll(cmdStr, "{gpuLayers}", fmt.Sprintf("%d", gpuLayers))
     
-    return apperror.Ok(exec.CommandContext(context, "sh", "-c", cmdStr))
+    return appfault.Ok(exec.CommandContext(context, "sh", "-c", cmdStr))
 }
 
 // unloadSlot gracefully stops a model and frees the slot
@@ -854,7 +854,7 @@ func (m *LLaMAManager) Start(context stdctx.Context, modelType string) error {
     case "reasoning":
         modelPath = filepath.Join(config.ModelsDir, config.ReasoningModel)
     default:
-        return apperror.New(
+        return appfault.New(
             ErrInvalidModelType,
             "unknown model type: "+modelType,
         )
@@ -872,7 +872,7 @@ func (m *LLaMAManager) Start(context stdctx.Context, modelType string) error {
     m.process = exec.CommandContext(context, config.ServerPath, args...)
     
     if err := m.process.Start(); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrServerStartTimeout,
             "failed to start llama server",
@@ -928,7 +928,7 @@ func (m *LLaMAManager) waitForReady(context stdctx.Context, host string, port in
         }
     }
     
-    return apperror.New(
+    return appfault.New(
         ErrServerStartTimeout,
         "llama server failed to start within timeout",
     )
@@ -974,10 +974,10 @@ func NewAIChainService(
 }
 
 // Stage 1: Voice Transcription
-func (s *AIChainService) TranscribeAudio(context stdctx.Context, audioData []byte) apperror.Result[*TranscriptionResult] {
+func (s *AIChainService) TranscribeAudio(context stdctx.Context, audioData []byte) appfault.Result[*TranscriptionResult] {
     configResult := s.configService.GetLLaMAConfig(context)
     if configResult.HasError() {
-        return apperror.Fail[*TranscriptionResult](configResult.Error())
+        return appfault.Fail[*TranscriptionResult](configResult.Error())
     }
     config := configResult.Value()
     
@@ -986,7 +986,7 @@ func (s *AIChainService) TranscribeAudio(context stdctx.Context, audioData []byt
     
     req, err := http.NewRequestWithContext(context, httpmethod.Post.String(), url, bytes.NewReader(audioData))
     if err != nil {
-        return apperror.FailWrap[*TranscriptionResult](
+        return appfault.FailWrap[*TranscriptionResult](
             err,
             "failed to create transcription request",
         )
@@ -995,7 +995,7 @@ func (s *AIChainService) TranscribeAudio(context stdctx.Context, audioData []byt
     
     resp, err := http.DefaultClient.Do(req)
     if err != nil {
-        return apperror.FailWrap[*TranscriptionResult](
+        return appfault.FailWrap[*TranscriptionResult](
             err,
             "transcription request failed",
         )
@@ -1004,18 +1004,18 @@ func (s *AIChainService) TranscribeAudio(context stdctx.Context, audioData []byt
     
     var result TranscriptionResult
     if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-        return apperror.FailWrap[*TranscriptionResult](
+        return appfault.FailWrap[*TranscriptionResult](
             err,
             "failed to decode transcription result",
         )
     }
     
-    return apperror.Ok(&result)
+    return appfault.Ok(&result)
 }
 
 // Stage 2: RAG Context Retrieval (NEW)
 // See: 16-rag-system.md for full retrieval pipeline
-func (s *AIChainService) RetrieveRAGContext(context stdctx.Context, projectId, queryText string) apperror.Result[*RAGContextResult] {
+func (s *AIChainService) RetrieveRAGContext(context stdctx.Context, projectId, queryText string) appfault.Result[*RAGContextResult] {
     // Retrieve relevant chunks from indexed artifacts
     session, err := s.ragService.Retrieve(context, &RetrieveRequest{
         ProjectId:      projectId,
@@ -1025,7 +1025,7 @@ func (s *AIChainService) RetrieveRAGContext(context stdctx.Context, projectId, q
         IncludeRecent:  true,
     })
     if err != nil {
-        return apperror.Fail[*RAGContextResult](err)
+        return appfault.Fail[*RAGContextResult](err)
     }
     
     // Format chunks for prompt injection
@@ -1039,7 +1039,7 @@ func (s *AIChainService) RetrieveRAGContext(context stdctx.Context, projectId, q
         ))
     }
     
-    return apperror.Ok(&RAGContextResult{
+    return appfault.Ok(&RAGContextResult{
         SessionId:    session.Id,
         ContextText:  strings.Join(contextParts, "\n\n---\n\n"),
         ChunkCount:   len(session.Chunks),
@@ -1048,7 +1048,7 @@ func (s *AIChainService) RetrieveRAGContext(context stdctx.Context, projectId, q
 }
 
 // Stage 3: Reasoning - Analyze and Generate Questions (with RAG context)
-func (s *AIChainService) AnalyzeIntent(context stdctx.Context, req *AnalyzeRequest) apperror.Result[*AnalyzeResult] {
+func (s *AIChainService) AnalyzeIntent(context stdctx.Context, req *AnalyzeRequest) appfault.Result[*AnalyzeResult] {
     config, _ := s.configService.GetLLaMAConfig(context)
     
     // Retrieve RAG context for grounded analysis
@@ -1062,22 +1062,22 @@ func (s *AIChainService) AnalyzeIntent(context stdctx.Context, req *AnalyzeReque
     
     responseResult := s.callLlm(context, config, prompt)
     if responseResult.IsError() {
-        return apperror.Fail[*AnalyzeResult](responseResult.Error())
+        return appfault.Fail[*AnalyzeResult](responseResult.Error())
     }
     
     result, parseErr := parseAnalysisResponse(responseResult.Value())
     if parseErr != nil {
-        return apperror.Fail[*AnalyzeResult](parseErr)
+        return appfault.Fail[*AnalyzeResult](parseErr)
     }
     
     result.RAGSessionId = ragCtx.SessionId
     result.RAGChunkCount = ragCtx.ChunkCount
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 // Stage 4: Generate Idea/Spec (with RAG context)
-func (s *AIChainService) GenerateSpec(context stdctx.Context, req *GenerateRequest) apperror.Result[*GenerateResult] {
+func (s *AIChainService) GenerateSpec(context stdctx.Context, req *GenerateRequest) appfault.Result[*GenerateResult] {
     config, _ := s.configService.GetLLaMAConfig(context)
     
     // Retrieve RAG context for grounded generation
@@ -1094,15 +1094,15 @@ func (s *AIChainService) GenerateSpec(context stdctx.Context, req *GenerateReque
     case "02-spec":
         prompt = buildSpecPromptWithRAG(req.Intent, req.Answers, req.ProjectContext, ragCtx.ContextText)
     default:
-        return apperror.FailNew[*GenerateResult](
-            apperror.ErrValidation,
+        return appfault.FailNew[*GenerateResult](
+            appfault.ErrValidation,
             fmt.Sprintf("unknown output type: %s", req.OutputType),
         )
     }
     
     responseResult := s.callLlm(context, config, prompt)
     if responseResult.IsError() {
-        return apperror.Fail[*GenerateResult](responseResult.Error())
+        return appfault.Fail[*GenerateResult](responseResult.Error())
     }
     response := responseResult.Value()
     
@@ -1115,13 +1115,13 @@ func (s *AIChainService) GenerateSpec(context stdctx.Context, req *GenerateReque
         UserId:       req.UserId,
     })
     if err != nil {
-        return apperror.Fail[*GenerateResult](err)
+        return appfault.Fail[*GenerateResult](err)
     }
     
     // Trigger RAG reindex for new artifact
     go s.ragService.TriggerReindex(stdctx.Background(), artifact.Id)
     
-    return apperror.Ok(&GenerateResult{
+    return appfault.Ok(&GenerateResult{
         Content:      response,
         OutputType:   req.OutputType,
         ArtifactId:   artifact.Id,
@@ -1252,7 +1252,7 @@ type TransportLogContext struct {
     Encoded string
 }
 
-func (s *AIChainService) callLlm(context stdctx.Context, config *LLaMAConfig, prompt string) apperror.Result[string] {
+func (s *AIChainService) callLlm(context stdctx.Context, config *LLaMAConfig, prompt string) appfault.Result[string] {
     url := fmt.Sprintf("http://%s:%d/completion", config.Host, config.Port)
     
     payload := LLaMACompletionRequest{
@@ -1265,13 +1265,13 @@ func (s *AIChainService) callLlm(context stdctx.Context, config *LLaMAConfig, pr
     body, _ := json.Marshal(payload)
     req, err := http.NewRequestWithContext(context, httpmethod.Post.String(), url, bytes.NewReader(body))
     if err != nil {
-        return apperror.Fail[string](err)
+        return appfault.Fail[string](err)
     }
     req.Header.Set("Content-Type", "application/json")
     
     resp, err := http.DefaultClient.Do(req)
     if err != nil {
-        return apperror.Fail[string](err)
+        return appfault.Fail[string](err)
     }
     defer resp.Body.Close()
     
@@ -1916,7 +1916,7 @@ type TransportFormatService struct {
     mdTemplates   map[string]*template.Template
 }
 
-func NewTransportFormatService(configService *ConfigService) apperror.Result[*TransportFormatService] {
+func NewTransportFormatService(configService *ConfigService) appfault.Result[*TransportFormatService] {
     context := stdctx.Background()
     
     format, _ := configService.GetConfig(context, "ai.transport.format")
@@ -1933,14 +1933,14 @@ func NewTransportFormatService(configService *ConfigService) apperror.Result[*Tr
     
     // Load Markdown templates
     if err := svc.loadMarkdownTemplates(); err != nil {
-        return apperror.Fail[*TransportFormatService](err)
+        return appfault.Fail[*TransportFormatService](err)
     }
     
-    return apperror.Ok(svc)
+    return appfault.Ok(svc)
 }
 
 // Encode serializes data to configured format
-func (s *TransportFormatService) Encode(envelope *TransportEnvelope) apperror.Result[[]byte] {
+func (s *TransportFormatService) Encode(envelope *TransportEnvelope) appfault.Result[[]byte] {
     switch s.format {
     case FormatJson:
         return s.encodeJson(envelope)
@@ -1975,44 +1975,44 @@ func (s *TransportFormatService) Decode(data []byte, envelope *TransportEnvelope
     }
 }
 
-func (s *TransportFormatService) encodeJson(envelope *TransportEnvelope) apperror.Result[[]byte] {
+func (s *TransportFormatService) encodeJson(envelope *TransportEnvelope) appfault.Result[[]byte] {
     if s.prettyPrint {
         data, err := json.MarshalIndent(envelope, "", "  ")
         if err != nil {
-            return apperror.Fail[[]byte](err)
+            return appfault.Fail[[]byte](err)
         }
 
-        return apperror.Ok(data)
+        return appfault.Ok(data)
     }
 
     data, err := json.Marshal(envelope)
     if err != nil {
-        return apperror.Fail[[]byte](err)
+        return appfault.Fail[[]byte](err)
     }
 
-    return apperror.Ok(data)
+    return appfault.Ok(data)
 }
 
-func (s *TransportFormatService) encodeYaml(envelope *TransportEnvelope) apperror.Result[[]byte] {
+func (s *TransportFormatService) encodeYaml(envelope *TransportEnvelope) appfault.Result[[]byte] {
     data, err := yaml.Marshal(envelope)
     if err != nil {
-        return apperror.Fail[[]byte](err)
+        return appfault.Fail[[]byte](err)
     }
 
-    return apperror.Ok(data)
+    return appfault.Ok(data)
 }
 
-func (s *TransportFormatService) encodeTOML(envelope *TransportEnvelope) apperror.Result[[]byte] {
+func (s *TransportFormatService) encodeTOML(envelope *TransportEnvelope) appfault.Result[[]byte] {
     var buf bytes.Buffer
     encoder := toml.NewEncoder(&buf)
     if err := encoder.Encode(envelope); err != nil {
-        return apperror.Fail[[]byte](err)
+        return appfault.Fail[[]byte](err)
     }
 
-    return apperror.Ok(buf.Bytes())
+    return appfault.Ok(buf.Bytes())
 }
 
-func (s *TransportFormatService) encodeMarkdown(envelope *TransportEnvelope) apperror.Result[[]byte] {
+func (s *TransportFormatService) encodeMarkdown(envelope *TransportEnvelope) appfault.Result[[]byte] {
     templateName, _ := s.configService.GetConfig(stdctx.Background(), "ai.transport.markdownTemplate")
     if templateName == "" {
         templateName = "default"
@@ -2025,16 +2025,16 @@ func (s *TransportFormatService) encodeMarkdown(envelope *TransportEnvelope) app
     
     var buf bytes.Buffer
     if err := tmpl.Execute(&buf, envelope); err != nil {
-        return apperror.Fail[[]byte](err)
+        return appfault.Fail[[]byte](err)
     }
 
-    return apperror.Ok(buf.Bytes())
+    return appfault.Ok(buf.Bytes())
 }
 
-func (s *TransportFormatService) encodeToFile(envelope *TransportEnvelope) apperror.Result[[]byte] {
+func (s *TransportFormatService) encodeToFile(envelope *TransportEnvelope) appfault.Result[[]byte] {
     // Ensure output directory exists
     if err := pathutil.EnsureDir(s.outputDir, 0755); err != nil {
-        return apperror.Fail[[]byte](err)
+        return appfault.Fail[[]byte](err)
     }
     
     // Generate filename: {requestId}_{direction}_{timestamp}.json
@@ -2048,15 +2048,15 @@ func (s *TransportFormatService) encodeToFile(envelope *TransportEnvelope) apper
     // Write JSON content to file
     content, err := json.MarshalIndent(envelope, "", "  ")
     if err != nil {
-        return apperror.Fail[[]byte](err)
+        return appfault.Fail[[]byte](err)
     }
     
     if err := pathutil.WriteFile(filepath, content, 0644); err != nil {
-        return apperror.Fail[[]byte](err)
+        return appfault.Fail[[]byte](err)
     }
     
     // Return file path reference
-    return apperror.Ok([]byte(filepath))
+    return appfault.Ok([]byte(filepath))
 }
 
 func (s *TransportFormatService) decodeFromFile(data []byte, envelope *TransportEnvelope) error {
@@ -2210,7 +2210,7 @@ func (s *TransportFormatService) SetFormat(context stdctx.Context, format Transp
 }
 
 // CleanupOldFiles removes transport files older than retention period
-func (s *TransportFormatService) CleanupOldFiles(context stdctx.Context) apperror.Result[int] {
+func (s *TransportFormatService) CleanupOldFiles(context stdctx.Context) appfault.Result[int] {
     retentionHours, _ := s.configService.GetConfigAsInt(context, "ai.transport.fileRetentionHours")
     if retentionHours == 0 {
         retentionHours = 24
@@ -2221,7 +2221,7 @@ func (s *TransportFormatService) CleanupOldFiles(context stdctx.Context) apperro
     
     entries, err := os.ReadDir(s.outputDir)
     if err != nil {
-        return apperror.Fail[int](err)
+        return appfault.Fail[int](err)
     }
     
     for _, entry := range entries {
@@ -2232,7 +2232,7 @@ func (s *TransportFormatService) CleanupOldFiles(context stdctx.Context) apperro
         }
     }
     
-    return apperror.Ok(deleted)
+    return appfault.Ok(deleted)
 }
 ```
 
@@ -2240,7 +2240,7 @@ func (s *TransportFormatService) CleanupOldFiles(context stdctx.Context) apperro
 
 ```go
 // Example: Using TransportFormatService in AI requests
-func (s *AIService) GenerateWithTransport(context stdctx.Context, req *AIRequest) apperror.Result[*AIResponse] {
+func (s *AIService) GenerateWithTransport(context stdctx.Context, req *AIRequest) appfault.Result[*AIResponse] {
     transportSvc := s.transportFormatService
     
     // Create request envelope
@@ -2262,7 +2262,7 @@ func (s *AIService) GenerateWithTransport(context stdctx.Context, req *AIRequest
     // Encode for logging/audit
     encodeResult := transportSvc.Encode(requestEnvelope)
     if encodeResult.IsError() {
-        return apperror.Fail[*AIResponse](encodeResult.Error())
+        return appfault.Fail[*AIResponse](encodeResult.Error())
     }
     encoded := encodeResult.Value()
 
@@ -2274,7 +2274,7 @@ func (s *AIService) GenerateWithTransport(context stdctx.Context, req *AIRequest
     // Execute AI call...
     response, err := s.executeAICall(context, req)
     if err != nil {
-        return apperror.Fail[*AIResponse](err)
+        return appfault.Fail[*AIResponse](err)
     }
     
     // Create response envelope
@@ -2298,7 +2298,7 @@ func (s *AIService) GenerateWithTransport(context stdctx.Context, req *AIRequest
         })
     }
     
-    return apperror.Ok(response)
+    return appfault.Ok(response)
 }
 ```
 

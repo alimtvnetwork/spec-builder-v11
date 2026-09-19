@@ -189,11 +189,11 @@ The system must decrypt passwords to authenticate with external WordPress REST A
 ### Implementation
 ```go
 // backend/internal/services/site/encryption.go
-func (s *Service) encryptPassword(plaintext string) apperror.Result[string] {
+func (s *Service) encryptPassword(plaintext string) appfault.Result[string] {
   // AES-256-GCM encryption with random nonce
 }
 
-func (s *Service) decryptPassword(ciphertext string) apperror.Result[string] {
+func (s *Service) decryptPassword(ciphertext string) appfault.Result[string] {
   // Decrypt for WordPress API authentication
 }
 ```

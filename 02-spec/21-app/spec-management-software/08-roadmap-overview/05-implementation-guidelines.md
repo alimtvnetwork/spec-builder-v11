@@ -239,7 +239,7 @@ This document provides AI-friendly implementation checklists broken into small, 
   )
 
   // NewDb opens a GORM-managed SQLite connection with WAL mode and foreign keys
-  func NewDb(path string) apperror.Result[*gorm.DB] {
+  func NewDb(path string) appfault.Result[*gorm.DB] {
       dsn := path + "?_foreign_keys=on&_journal_mode=WAL"
       db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{
           Logger: logger.Default.LogMode(logger.Warn),
@@ -285,7 +285,7 @@ This document provides AI-friendly implementation checklists broken into small, 
   )
 
   // Connect opens a GORM connection to SQLite
-  func Connect(dbPath string) apperror.Result[*gorm.DB] {
+  func Connect(dbPath string) appfault.Result[*gorm.DB] {
       db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
           Logger: logger.Default.LogMode(logger.Info),
       })
@@ -626,7 +626,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       LlamaServerPath string `json:"llama.server.path"`
   }
 
-  func Load() apperror.Result[Config] {
+  func Load() appfault.Result[Config] {
       cfg := &Config{
           // Defaults (tier 3)
           ServerPort:    8080,
@@ -706,7 +706,7 @@ This document provides AI-friendly implementation checklists broken into small, 
   )
 
   // HashPassword creates an Argon2id hash
-  func HashPassword(password string) apperror.Result[string] {
+  func HashPassword(password string) appfault.Result[string] {
       salt := make([]byte, saltLen)
       if _, err := rand.Read(salt); err != nil {
           return "", err
@@ -766,7 +766,7 @@ This document provides AI-friendly implementation checklists broken into small, 
   }
 
   // HashPasswordBcrypt for legacy support
-  func HashPasswordBcrypt(password string) apperror.Result[string] {
+  func HashPasswordBcrypt(password string) appfault.Result[string] {
       hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
       return string(hash), err
   }
@@ -827,7 +827,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       }
   }
 
-  func (j *JwtUtil) GenerateTokenPair(userId string) apperror.Result[TokenPair] {
+  func (j *JwtUtil) GenerateTokenPair(userId string) appfault.Result[TokenPair] {
       now := time.Now()
 
       // Access token
@@ -869,10 +869,10 @@ This document provides AI-friendly implementation checklists broken into small, 
       }, nil
   }
 
-  func (j *JWTUtil) ValidateToken(tokenStr string, expectedType TokenType) apperror.Result[Claims] {
+  func (j *JWTUtil) ValidateToken(tokenStr string, expectedType TokenType) appfault.Result[Claims] {
       token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) { // EXEMPTED: jwt library callback
           if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-              return nil, apperror.New(
+              return nil, appfault.New(
                   ErrUnexpectedSigningMethod,
                   "unexpected signing method",
               )
@@ -885,14 +885,14 @@ This document provides AI-friendly implementation checklists broken into small, 
 
       claims, ok := token.Claims.(*Claims)
       if !ok || !token.Valid {
-          return nil, apperror.New(
+          return nil, appfault.New(
               ErrInvalidToken,
               "invalid token",
           )
       }
 
       if claims.TokenType != expectedType {
-          return nil, apperror.New(
+          return nil, appfault.New(
               ErrWrongTokenType,
               "wrong token type",
           )
@@ -947,7 +947,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       return r.db.Create(user).Error
   }
 
-  func (r *UserRepo) GetById(id string) apperror.Result[models.User] {
+  func (r *UserRepo) GetById(id string) appfault.Result[models.User] {
       var user models.User
       err := r.db.First(&user, "id = ?", id).Error
       if err != nil {
@@ -956,7 +956,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       return &user, nil
   }
 
-  func (r *UserRepo) GetByUsername(username string) apperror.Result[models.User] {
+  func (r *UserRepo) GetByUsername(username string) appfault.Result[models.User] {
       var user models.User
       err := r.db.First(&user, "username = ?", username).Error
       if err != nil {
@@ -965,7 +965,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       return &user, nil
   }
 
-  func (r *UserRepo) GetByEmail(email string) apperror.Result[models.User] {
+  func (r *UserRepo) GetByEmail(email string) appfault.Result[models.User] {
       var user models.User
       err := r.db.First(&user, "email = ?", email).Error
       if err != nil {
@@ -1038,7 +1038,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       return r.db.Create(session).Error
   }
 
-  func (r *SessionRepo) GetByTokenHash(hash string) apperror.Result[models.Session] {
+  func (r *SessionRepo) GetByTokenHash(hash string) appfault.Result[models.Session] {
       var session models.Session
       err := r.db.
           Where("token_hash = ?", hash).
@@ -1066,7 +1066,7 @@ This document provides AI-friendly implementation checklists broken into small, 
           Update("revoked_at", now).Error
   }
 
-  func (r *SessionRepo) GetActiveSessions(userId string) apperror.Result[[]models.Session] {
+  func (r *SessionRepo) GetActiveSessions(userId string) appfault.Result[[]models.Session] {
       var sessions []models.Session
       now := time.Now().UTC()
       
@@ -1080,7 +1080,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       return sessions, err
   }
 
-  func (r *SessionRepo) CleanExpired() apperror.Result[int64] {
+  func (r *SessionRepo) CleanExpired() appfault.Result[int64] {
       now := time.Now().UTC()
       result := r.db.
           Where("expires_at < ?", now).
@@ -1103,7 +1103,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       return err
   }
 
-  func (r *SessionRepo) CleanExpired() apperror.Result[int64] {
+  func (r *SessionRepo) CleanExpired() appfault.Result[int64] {
       now := time.Now().UTC().Format(time.RFC3339)
       result, err := r.db.Exec(`DELETE FROM Session WHERE ExpiresAt < ?`, now)
       if err != nil {
@@ -1166,7 +1166,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       DisplayName string
   }
 
-  func (s *AuthService) Register(req RegisterRequest) apperror.Result[models.User] {
+  func (s *AuthService) Register(req RegisterRequest) appfault.Result[models.User] {
       // Check if user exists
       if existing, _ := s.userRepo.GetByUsername(req.Username); existing != nil {
           return nil, ErrUserExists
@@ -1201,7 +1201,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       Password string `binding:"required"`
   }
 
-  func (s *AuthService) Login(req LoginRequest, deviceInfo string) apperror.Result[LoginOutcome] {
+  func (s *AuthService) Login(req LoginRequest, deviceInfo string) appfault.Result[LoginOutcome] {
       // Find user
       user, err := s.userRepo.GetByUsername(req.Username)
       if err != nil {
@@ -1244,7 +1244,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       return s.sessionRepo.RevokeByTokenHash(hash)
   }
 
-  func (s *AuthService) Refresh(refreshToken string) apperror.Result[utils.TokenPair] {
+  func (s *AuthService) Refresh(refreshToken string) appfault.Result[utils.TokenPair] {
       // Validate refresh token
       claims, err := s.jwt.ValidateToken(refreshToken, utils.TokenTypeRefresh)
       if err != nil {
@@ -1279,7 +1279,7 @@ This document provides AI-friendly implementation checklists broken into small, 
       return tokens, nil
   }
 
-  func (s *AuthService) GetUser(userId string) apperror.Result[models.User] {
+  func (s *AuthService) GetUser(userId string) appfault.Result[models.User] {
       return s.userRepo.GetById(userId)
   }
   ```

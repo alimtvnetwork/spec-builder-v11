@@ -193,23 +193,23 @@ type TrendAnalyzer struct {
 }
 
 // NewTrendAnalyzer creates analyzer with settings from DB
-func NewTrendAnalyzer(settings SettingsService) apperror.Result[TrendAnalyzer] {
+func NewTrendAnalyzer(settings SettingsService) appfault.Result[TrendAnalyzer] {
     analyzer := TrendAnalyzer{settings: settings}
     
     if loadErr := analyzer.loadWeights(); loadErr != nil {
-        return apperror.Fail[TrendAnalyzer](
-            apperror.Wrap(
+        return appfault.Fail[TrendAnalyzer](
+            appfault.Wrap(
                 loadErr,
                 "loading trend weights",
             ),
         )
     }
     
-    return apperror.Ok(analyzer)
+    return appfault.Ok(analyzer)
 }
 
 // loadWeights retrieves current weights from settings using typed accessors
-func (a *TrendAnalyzer) loadWeights() *apperror.AppError {
+func (a *TrendAnalyzer) loadWeights() *appfault.AppError {
     compositeResult := GetTyped[CompositeWeights](a.settings, "trend_analysis", "composite_score_weights")
     if compositeResult.HasError() {
         return compositeResult.Error()

@@ -334,7 +334,7 @@ output:
 ### AI Bridge Error Recovery
 
 ```go
-func (e *Executor) executeGSearch(context stdctx.Context, call ToolCall) apperror.Result[ToolResult] {
+func (e *Executor) executeGSearch(context stdctx.Context, call ToolCall) appfault.Result[ToolResult] {
     var lastErr error
     
     for attempt := 0; attempt < e.config.RetryCount; attempt++ {
@@ -354,7 +354,7 @@ func (e *Executor) executeGSearch(context stdctx.Context, call ToolCall) apperro
             continue
             
         case 3: // No results
-            return apperror.Ok(ToolResult{
+            return appfault.Ok(ToolResult{
                 Success: true,
                 Data:    EmptySearchResult{Results: []SearchResultItem{}, Message: "No results found"},
             })
@@ -362,18 +362,18 @@ func (e *Executor) executeGSearch(context stdctx.Context, call ToolCall) apperro
         case 4: // Network error
             e.logger.Warn("gSearch network error, retrying", slog.Int("attempt", attempt))
             time.Sleep(time.Duration(attempt+1) * time.Second)
-            lastErr = apperror.New(7610, "network error: "+stderr)
+            lastErr = appfault.New(7610, "network error: "+stderr)
             continue
             
         case 5: // Auth error
-            return apperror.Fail[ToolResult](apperror.New(7611, "gSearch authentication failed: "+stderr))
+            return appfault.Fail[ToolResult](appfault.New(7611, "gSearch authentication failed: "+stderr))
             
         default:
-            lastErr = apperror.New(7612, fmt.Sprintf("gSearch failed with code %d: %s", exitCode, stderr))
+            lastErr = appfault.New(7612, fmt.Sprintf("gSearch failed with code %d: %s", exitCode, stderr))
         }
     }
     
-    return apperror.Fail[ToolResult](lastErr)
+    return appfault.Fail[ToolResult](lastErr)
 }
 ```
 

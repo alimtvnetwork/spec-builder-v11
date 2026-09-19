@@ -365,8 +365,8 @@ func IsRetryable(code int) bool {
 }
 
 // RetryWithBackoff executes operation with exponential backoff
-func RetryWithBackoff(context stdctx.Context, cfg RetryConfig, op func() *apperror.AppError) *apperror.AppError {
-    var lastErr *apperror.AppError
+func RetryWithBackoff(context stdctx.Context, cfg RetryConfig, op func() *appfault.AppError) *appfault.AppError {
+    var lastErr *appfault.AppError
     delay := cfg.InitialDelay
 
     for attempt := 1; attempt <= cfg.MaxAttempts; attempt++ {
@@ -387,7 +387,7 @@ func RetryWithBackoff(context stdctx.Context, cfg RetryConfig, op func() *apperr
         if attempt < cfg.MaxAttempts {
             select {
             case <-context.Done():
-                return apperror.Wrap(
+                return appfault.Wrap(
                     context.Err(),
                     ErrSeoRetryContextCancelled,
                     "retry cancelled by context",
@@ -401,7 +401,7 @@ func RetryWithBackoff(context stdctx.Context, cfg RetryConfig, op func() *apperr
         }
     }
 
-    return apperror.Wrap(
+    return appfault.Wrap(
         lastErr,
         ErrSeoRetryExhausted,
         "max retries exceeded after %d attempts",

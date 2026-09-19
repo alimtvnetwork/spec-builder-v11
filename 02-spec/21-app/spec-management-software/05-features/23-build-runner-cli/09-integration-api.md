@@ -25,7 +25,7 @@ Main application spawns brun as a subprocess and reads JSON output.
 
 ```go
 // In main application
-func (app *App) runBuildCheck(profile string) apperror.Result[BuildResult] {
+func (app *App) runBuildCheck(profile string) appfault.Result[BuildResult] {
     command := exec.Command("brun", "check",
         "--profile", profile,
         "--json",
@@ -47,13 +47,13 @@ func (app *App) runBuildCheck(profile string) apperror.Result[BuildResult] {
     parseErr := json.Unmarshal(output, &result)
 
     if parseErr != nil {
-        return apperror.FailWrap[BuildResult](
+        return appfault.FailWrap[BuildResult](
             parseErr,
             "failed to parse brun output",
         )
     }
 
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -64,7 +64,7 @@ Import brun as a Go library.
 ```go
 import "github.com/user/brun/pkg/runner"
 
-func (app *App) runBuildCheck(profile string) apperror.Result[runner.ExecutionResult] {
+func (app *App) runBuildCheck(profile string) appfault.Result[runner.ExecutionResult] {
     r := runner.New(runner.Config{
         ConfigPath: "./config.json",
     })
@@ -180,7 +180,7 @@ type BuildError struct {
 }
 
 // execute runs brun with given arguments and parses JSON output
-func (r *BrunRunner) execute(context context.Context, args ...string) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) execute(context context.Context, args ...string) appfault.Result[ExecutionResult] {
     args = append(args, "--json", "--config", r.configPath)
 
     timeoutContext, cancel := context.WithTimeout(context, r.timeout)
@@ -199,7 +199,7 @@ func (r *BrunRunner) execute(context context.Context, args ...string) apperror.R
     return r.parseExecutionOutput(timeoutContext, err, stdout, stderr)
 }
 
-func (r *BrunRunner) parseExecutionOutput(context context.Context, err error, stdout bytes.Buffer, stderr bytes.Buffer) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) parseExecutionOutput(context context.Context, err error, stdout bytes.Buffer, stderr bytes.Buffer) appfault.Result[ExecutionResult] {
     var result ExecutionResult
     hasOutput := stdout.Len() > 0
 
@@ -207,7 +207,7 @@ func (r *BrunRunner) parseExecutionOutput(context context.Context, err error, st
         parseErr := json.Unmarshal(stdout.Bytes(), &result)
 
         if parseErr != nil {
-            return apperror.FailWrap[ExecutionResult](
+            return appfault.FailWrap[ExecutionResult](
                 parseErr,
                 "failed to parse brun JSON output",
             )
@@ -215,17 +215,17 @@ func (r *BrunRunner) parseExecutionOutput(context context.Context, err error, st
     }
 
     if err == nil {
-        return apperror.Ok(result)
+        return appfault.Ok(result)
     }
 
     return r.handleExecutionError(context, err, result, stderr)
 }
 
-func (r *BrunRunner) handleExecutionError(context context.Context, err error, result ExecutionResult, stderr bytes.Buffer) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) handleExecutionError(context context.Context, err error, result ExecutionResult, stderr bytes.Buffer) appfault.Result[ExecutionResult] {
     isTimeout := context.Err() == context.DeadlineExceeded
 
     if isTimeout {
-        return apperror.FailNew[ExecutionResult](
+        return appfault.FailNew[ExecutionResult](
             ErrBrunRuntimeTimeout,
             "brun execution timed out after %v",
             r.timeout,
@@ -239,10 +239,10 @@ func (r *BrunRunner) handleExecutionError(context context.Context, err error, re
         hasResult := result.RunId != ""
 
         if hasResult {
-            return apperror.Ok(result)
+            return appfault.Ok(result)
         }
 
-        return apperror.FailNew[ExecutionResult](
+        return appfault.FailNew[ExecutionResult](
             ErrBrunRuntimeCrashed,
             "brun exited with code %d: %s",
             exitErr.ExitCode(),
@@ -250,7 +250,7 @@ func (r *BrunRunner) handleExecutionError(context context.Context, err error, re
         )
     }
 
-    return apperror.FailWrap[ExecutionResult](err, "failed to execute brun")
+    return appfault.FailWrap[ExecutionResult](err, "failed to execute brun")
 }
 ```
 
@@ -258,7 +258,7 @@ func (r *BrunRunner) handleExecutionError(context context.Context, err error, re
 
 ```go
 // Check runs build verification without producing artifacts
-func (r *BrunRunner) Check(context context.Context, opts CheckOptions) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) Check(context context.Context, opts CheckOptions) appfault.Result[ExecutionResult] {
     args := []string{"check"}
 
     hasProfile := opts.Profile != ""
@@ -304,7 +304,7 @@ type CheckOptions struct {
 }
 
 // Build executes a full build using a profile
-func (r *BrunRunner) Build(context context.Context, opts BuildOptions) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) Build(context context.Context, opts BuildOptions) appfault.Result[ExecutionResult] {
     args := []string{"build"}
 
     hasProfile := opts.Profile != ""
@@ -338,7 +338,7 @@ type BuildOptions struct {
 }
 
 // Run executes application with health check waiting
-func (r *BrunRunner) Run(context context.Context, opts RunOptions) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) Run(context context.Context, opts RunOptions) appfault.Result[ExecutionResult] {
     args := r.buildRunArgs(opts)
     return r.execute(context, args...)
 }
@@ -382,7 +382,7 @@ type RunOptions struct {
 }
 
 // Port checks port availability
-func (r *BrunRunner) Port(context context.Context, opts PortOptions) apperror.Result[PortResult] {
+func (r *BrunRunner) Port(context context.Context, opts PortOptions) appfault.Result[PortResult] {
     args := []string{"port"}
 
     hasCheck := opts.Check > 0
@@ -405,7 +405,7 @@ func (r *BrunRunner) Port(context context.Context, opts PortOptions) apperror.Re
     result := r.execute(context, args...)
 
     if result.HasError() {
-        return apperror.Fail[PortResult](result.Error())
+        return appfault.Fail[PortResult](result.Error())
     }
 
     portResult := PortResult{
@@ -413,7 +413,7 @@ func (r *BrunRunner) Port(context context.Context, opts PortOptions) apperror.Re
         IsAvailable:   result.Value().IsSuccess,
     }
 
-    return apperror.Ok(portResult)
+    return appfault.Ok(portResult)
 }
 
 type PortOptions struct {
@@ -467,37 +467,37 @@ import (
 )
 
 // ParseResultFromFile reads a brun result from a log file
-func ParseResultFromFile(path string) apperror.Result[ExecutionResult] {
+func ParseResultFromFile(path string) appfault.Result[ExecutionResult] {
     f, err := pathutil.Open(path)
 
     if err != nil {
-        return apperror.FailWrap[ExecutionResult](err, "failed to open result file")
+        return appfault.FailWrap[ExecutionResult](err, "failed to open result file")
     }
 
     defer f.Close()
     return ParseResultFromReader(f)
 }
 
-func ParseResultFromReader(r io.Reader) apperror.Result[ExecutionResult] {
+func ParseResultFromReader(r io.Reader) appfault.Result[ExecutionResult] {
     var result ExecutionResult
     err := json.NewDecoder(r).Decode(&result)
 
     if err != nil {
-        return apperror.FailWrap[ExecutionResult](err, "failed to decode result")
+        return appfault.FailWrap[ExecutionResult](err, "failed to decode result")
     }
 
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
-func ParseResultFromBytes(data []byte) apperror.Result[ExecutionResult] {
+func ParseResultFromBytes(data []byte) appfault.Result[ExecutionResult] {
     var result ExecutionResult
     err := json.Unmarshal(data, &result)
 
     if err != nil {
-        return apperror.FailWrap[ExecutionResult](err, "failed to unmarshal result")
+        return appfault.FailWrap[ExecutionResult](err, "failed to unmarshal result")
     }
 
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 // ErrorsToMap converts build errors to a file-grouped map for AI processing
@@ -559,7 +559,7 @@ const (
 type ExecutionOutcome struct {
     ExitCode exitcodetype.Variant
     Result   *ExecutionResult
-    Error    *apperror.AppError
+    Error    *appfault.AppError
 }
 
 func (o *ExecutionOutcome) IsRetryable() bool {
@@ -596,14 +596,14 @@ func NewExecutionOutcome(result *ExecutionResult) ExecutionOutcome {
     return ExecutionOutcome{
         ExitCode: exitcodetype.Variant(result.ExitCode),
         Result:   result,
-        Error: apperror.New(
+        Error: appfault.New(
             msg,
         ).WithSkip(1),
     }
 }
 
 // HandleResult processes execution result
-func HandleResult(result *ExecutionResult) *apperror.AppError {
+func HandleResult(result *ExecutionResult) *appfault.AppError {
     if result.IsSuccess {
         return nil
     }
@@ -646,7 +646,7 @@ func NewBuildService(brunPath, configPath string, aiSvc *ai.Service) *BuildServi
 }
 
 // BuildWithAutoFix attempts to build, using AI to fix errors automatically
-func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) *apperror.AppError {
+func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) *appfault.AppError {
     for attempt := 1; attempt <= s.maxRetry; attempt++ {
         log.Printf("Build attempt %d/%d for profile: %s", attempt, s.maxRetry, profile)
 
@@ -656,7 +656,7 @@ func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) 
             Tidy:    "run",
         })
         if err != nil {
-            return apperror.Wrap(err, "brun execution failed").WithSkip(1)
+            return appfault.Wrap(err, "brun execution failed").WithSkip(1)
         }
 
         // Step 2: Check success
@@ -670,7 +670,7 @@ func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) 
         hasNoErrors := len(result.Errors) == 0
 
         if hasNoErrors {
-            return apperror.New(
+            return appfault.New(
                 fmt.Sprintf("build failed but no errors captured (exit code: %d)", result.ExitCode),
             ).WithSkip(1)
         }
@@ -687,13 +687,13 @@ func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) 
             Language:    detectLanguage(profile),
         })
         if err != nil {
-            return apperror.Wrap(err, "AI fix generation failed").WithSkip(1)
+            return appfault.Wrap(err, "AI fix generation failed").WithSkip(1)
         }
 
         // Step 6: Apply fixes to filesystem
         for _, fix := range fixes {
             if err := applyFix(fix); err != nil {
-                return apperror.Wrap(err, "failed to apply fix to "+fix.File).WithSkip(1)
+                return appfault.Wrap(err, "failed to apply fix to "+fix.File).WithSkip(1)
             }
 
             log.Printf("Applied fix to %s", fix.File)
@@ -703,7 +703,7 @@ func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) 
         log.Printf("Fixes applied, retrying build...")
     }
 
-    return apperror.New(
+    return appfault.New(
         fmt.Sprintf("max retry attempts (%d) exceeded", s.maxRetry),
     ).WithSkip(1)
 }
@@ -713,10 +713,10 @@ func detectLanguage(profile string) string {
     return "go" // Simplified
 }
 
-func applyFix(fix ai.CodeFix) *apperror.AppError {
+func applyFix(fix ai.CodeFix) *appfault.AppError {
     // Write fix.Content to fix.File
     if err := pathutil.WriteFile(fix.File, []byte(fix.Content), 0644); err != nil {
-        return apperror.Wrap(err, "write fix file").WithSkip(1)
+        return appfault.Wrap(err, "write fix file").WithSkip(1)
     }
 
     return nil
@@ -775,12 +775,12 @@ type AIErrorFixer struct {
     fileWriter *FileWriter
 }
 
-func (f *AIErrorFixer) FixBuildErrors(context stdctx.Context, profile string) *apperror.AppError {
+func (f *AIErrorFixer) FixBuildErrors(context stdctx.Context, profile string) *appfault.AppError {
     for attempt := 0; attempt < f.maxRetries; attempt++ {
         // Run build check
         result, err := f.runner.Check(context, profile)
         if err != nil {
-            return apperror.Wrap(err, "build check failed").WithSkip(1)
+            return appfault.Wrap(err, "build check failed").WithSkip(1)
         }
 
         // Success - no errors
@@ -794,7 +794,7 @@ func (f *AIErrorFixer) FixBuildErrors(context stdctx.Context, profile string) *a
         hasNoErrors := len(result.Errors) == 0
 
         if hasNoErrors {
-            return apperror.New("build failed but no errors captured").WithSkip(1)
+            return appfault.New("build failed but no errors captured").WithSkip(1)
         }
 
         // Format errors for AI
@@ -803,18 +803,18 @@ func (f *AIErrorFixer) FixBuildErrors(context stdctx.Context, profile string) *a
         // Get AI fix
         fix, err := f.ai.GenerateFix(context, prompt)
         if err != nil {
-            return apperror.Wrap(err, "AI fix generation failed").WithSkip(1)
+            return appfault.Wrap(err, "AI fix generation failed").WithSkip(1)
         }
 
         // Apply fix
         if err := f.fileWriter.ApplyFix(fix); err != nil {
-            return apperror.Wrap(err, "failed to apply fix").WithSkip(1)
+            return appfault.Wrap(err, "failed to apply fix").WithSkip(1)
         }
 
         f.log.Info("Applied AI fix", "attempt", attempt+1, "errors", len(result.Errors))
     }
 
-    return apperror.New(
+    return appfault.New(
         fmt.Sprintf("max retries (%d) exceeded", f.maxRetries),
     ).WithSkip(1)
 }

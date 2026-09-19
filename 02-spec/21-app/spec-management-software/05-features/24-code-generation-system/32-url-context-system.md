@@ -346,7 +346,7 @@ func (s *URLContextService) StartCrawl(
     context stdctx.Context,
     domain string,
     config CrawlConfig,
-) apperror.Result[CrawlJob] {
+) appfault.Result[CrawlJob] {
     // Build gsearch command
     args := []string{"crawl", domain}
     
@@ -382,7 +382,7 @@ func (s *URLContextService) StartCrawl(
     }
     
     if err := s.db.Create(job).Error; err != nil {
-        return apperror.FailWrap[CrawlJob](
+        return appfault.FailWrap[CrawlJob](
             err,
             "E7600",
             "failed to create crawl job",
@@ -392,7 +392,7 @@ func (s *URLContextService) StartCrawl(
     // Start crawl in background
     go s.runCrawl(context, job, args)
     
-    return apperror.Ok(*job)
+    return appfault.Ok(*job)
 }
 
 // runCrawl executes gsearch crawl and streams progress
@@ -454,7 +454,7 @@ func (s *URLContextService) runCrawl(
 func (s *URLContextService) SearchSite(
     context stdctx.Context,
     req SiteSearchRequest,
-) apperror.Result[[]SiteSearchResult] {
+) appfault.Result[[]SiteSearchResult] {
     // Open site-specific database
     siteDb, err := s.openSiteDb(req.Domain)
     if err != nil {
@@ -473,7 +473,7 @@ func (s *URLContextService) vectorSearch(
     db *gorm.DB,
     query string,
     limit int,
-) apperror.Result[[]SiteSearchResult] {
+) appfault.Result[[]SiteSearchResult] {
     // Generate query embedding
     embedding, err := s.embedder.Embed(query)
     if err != nil {

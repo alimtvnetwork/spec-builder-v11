@@ -510,7 +510,7 @@ import (
     sdktrace "go.opentelemetry.io/otel/sdk/trace"
     semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
     "go.opentelemetry.io/otel/trace"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // TracerConfig holds tracing configuration
@@ -528,9 +528,9 @@ type TracerConfig struct {
 type ShutdownFunc func(stdctx.Context) error
 
 // InitTracer initializes OpenTelemetry tracing
-func InitTracer(cfg TracerConfig) apperror.Result[ShutdownFunc] {
+func InitTracer(cfg TracerConfig) appfault.Result[ShutdownFunc] {
     if !cfg.Enabled {
-        return apperror.OK[ShutdownFunc](func(context stdctx.Context) error { return nil })
+        return appfault.Ok[ShutdownFunc](func(context stdctx.Context) error { return nil })
     }
     
     context := stdctx.Background()
@@ -543,8 +543,8 @@ func InitTracer(cfg TracerConfig) apperror.Result[ShutdownFunc] {
         ),
     )
     if err != nil {
-        return apperror.Fail[ShutdownFunc](
-            apperror.Wrap(
+        return appfault.Fail[ShutdownFunc](
+            appfault.Wrap(
                 err,
                 "failed to create OTLP exporter",
             ),
@@ -559,8 +559,8 @@ func InitTracer(cfg TracerConfig) apperror.Result[ShutdownFunc] {
         ),
     )
     if err != nil {
-        return apperror.Fail[ShutdownFunc](
-            apperror.Wrap(
+        return appfault.Fail[ShutdownFunc](
+            appfault.Wrap(
                 err,
                 "failed to create resource",
             ),
@@ -579,7 +579,7 @@ func InitTracer(cfg TracerConfig) apperror.Result[ShutdownFunc] {
     
     otel.SetTracerProvider(tp)
     
-    return apperror.OK[ShutdownFunc](tp.Shutdown)
+    return appfault.Ok[ShutdownFunc](tp.Shutdown)
 }
 ```
 
@@ -608,13 +608,13 @@ import (
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/attribute"
     "go.opentelemetry.io/otel/codes"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 var tracer = otel.Tracer("gosearch/search")
 
 // Execute performs a search with tracing
-func (e *SearchEngine) Execute(context stdctx.Context, query string) apperror.Result[[]Result] {
+func (e *SearchEngine) Execute(context stdctx.Context, query string) appfault.Result[[]Result] {
     context, span := tracer.Start(context, "search.execute",
         trace.WithAttributes(
             attribute.String("search.query", query),
@@ -631,7 +631,7 @@ func (e *SearchEngine) Execute(context stdctx.Context, query string) apperror.Re
     
     if isHit {
         span.SetAttributes(attribute.Bool("search.cache_hit", true))
-        return apperror.OK(cached)
+        return appfault.Ok(cached)
     }
     
     // Execute search
@@ -651,7 +651,7 @@ func (e *SearchEngine) Execute(context stdctx.Context, query string) apperror.Re
 }
 
 // executeSearch performs the actual search request
-func (e *SearchEngine) executeSearch(context stdctx.Context, query string) apperror.Result[[]Result] {
+func (e *SearchEngine) executeSearch(context stdctx.Context, query string) appfault.Result[[]Result] {
     context, span := tracer.Start(context, "search.engine.request",
         trace.WithAttributes(
             attribute.String("search.engine", e.Name()),
@@ -664,8 +664,8 @@ func (e *SearchEngine) executeSearch(context stdctx.Context, query string) apper
     req, err := e.buildRequest(context, query)
     if err != nil {
         span.RecordError(err)
-        return apperror.Fail[[]Result](
-            apperror.Wrap(err, "build request"),
+        return appfault.Fail[[]Result](
+            appfault.Wrap(err, "build request"),
         )
     }
     
@@ -679,8 +679,8 @@ func (e *SearchEngine) executeSearch(context stdctx.Context, query string) apper
     if err != nil {
         span.RecordError(err)
         span.SetStatus(codes.Error, "request failed")
-        return apperror.Fail[[]Result](
-            apperror.Wrap(err, "request failed"),
+        return appfault.Fail[[]Result](
+            appfault.Wrap(err, "request failed"),
         )
     }
     defer resp.Body.Close()
@@ -742,7 +742,7 @@ type StandardFields struct {
 }
 
 // NewLogger creates a configured zap logger
-func NewLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
+func NewLogger(cfg LogConfig) appfault.Result[*zap.Logger] {
     var zapCfg zap.Config
     
     if cfg.Development {
@@ -754,8 +754,8 @@ func NewLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
     // Set level
     level, err := zapcore.ParseLevel(cfg.Level)
     if err != nil {
-        return apperror.Fail[*zap.Logger](
-            apperror.Wrap(
+        return appfault.Fail[*zap.Logger](
+            appfault.Wrap(
                 err,
                 "invalid log level",
             ),
@@ -778,12 +778,12 @@ func NewLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
     
     result, err := zapCfg.Build()
     if err != nil {
-        return apperror.Fail[*zap.Logger](
-            apperror.Wrap(err, "build logger"),
+        return appfault.Fail[*zap.Logger](
+            appfault.Wrap(err, "build logger"),
         )
     }
     
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 
 ### 5.2 Log Levels and Usage

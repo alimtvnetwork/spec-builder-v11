@@ -252,7 +252,7 @@ func (s *SettingsService) SeedFromFile() error {
     
     var seed SeedConfig
     if err := json.Unmarshal(data, &seed); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedParseFailed,
             "parse seed file",
@@ -274,12 +274,12 @@ func (s *SettingsService) SeedFromFile() error {
 }
 
 // GetString retrieves a string setting value
-func (s *SettingsService) GetString(category, key string) apperror.Result[string] {
+func (s *SettingsService) GetString(category, key string) appfault.Result[string] {
     var setting Setting
     err := s.db.Where("category = ? AND key = ?", category, key).First(&setting).Error
     if err != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(
+        return appfault.Fail[string](
+            appfault.Wrap(
                 err,
                 ErrSettingNotFound,
                 "setting not found",
@@ -289,8 +289,8 @@ func (s *SettingsService) GetString(category, key string) apperror.Result[string
     
     var sv SettingValue
     if err := json.Unmarshal([]byte(setting.Value), &sv); err != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(
+        return appfault.Fail[string](
+            appfault.Wrap(
                 err,
                 ErrSettingTypeMismatch,
                 "failed to unmarshal setting value",
@@ -298,99 +298,99 @@ func (s *SettingsService) GetString(category, key string) apperror.Result[string
         )
     }
     if sv.StringVal == nil {
-        return apperror.Fail[string](
-            apperror.New(
+        return appfault.Fail[string](
+            appfault.New(
                 ErrSettingTypeMismatch,
                 "setting is not a string",
             ).WithContext("category", category).
                 WithContext("key", key),
         )
     }
-    return apperror.Succeed(*sv.StringVal)
+    return appfault.Succeed(*sv.StringVal)
 }
 
 // GetInt retrieves an integer setting value
-func (s *SettingsService) GetInt(category, key string) apperror.Result[int] {
+func (s *SettingsService) GetInt(category, key string) appfault.Result[int] {
     var setting Setting
     err := s.db.Where("category = ? AND key = ?", category, key).First(&setting).Error
     if err != nil {
-        return apperror.Fail[int](
-            apperror.Wrap(err, ErrSettingNotFound, "setting not found"),
+        return appfault.Fail[int](
+            appfault.Wrap(err, ErrSettingNotFound, "setting not found"),
         )
     }
     
     var sv SettingValue
     if err := json.Unmarshal([]byte(setting.Value), &sv); err != nil {
-        return apperror.Fail[int](
-            apperror.Wrap(err, ErrSettingTypeMismatch, "failed to unmarshal setting value"),
+        return appfault.Fail[int](
+            appfault.Wrap(err, ErrSettingTypeMismatch, "failed to unmarshal setting value"),
         )
     }
     if sv.IntVal == nil {
-        return apperror.Fail[int](
-            apperror.New(
+        return appfault.Fail[int](
+            appfault.New(
                 ErrSettingTypeMismatch,
                 "setting is not an int",
             ).WithContext("category", category).
                 WithContext("key", key),
         )
     }
-    return apperror.Succeed(*sv.IntVal)
+    return appfault.Succeed(*sv.IntVal)
 }
 
 // GetFloat retrieves a float64 setting value
-func (s *SettingsService) GetFloat(category, key string) apperror.Result[float64] {
+func (s *SettingsService) GetFloat(category, key string) appfault.Result[float64] {
     var setting Setting
     err := s.db.Where("category = ? AND key = ?", category, key).First(&setting).Error
     if err != nil {
-        return apperror.Fail[float64](
-            apperror.Wrap(err, ErrSettingNotFound, "setting not found"),
+        return appfault.Fail[float64](
+            appfault.Wrap(err, ErrSettingNotFound, "setting not found"),
         )
     }
     
     var sv SettingValue
     if err := json.Unmarshal([]byte(setting.Value), &sv); err != nil {
-        return apperror.Fail[float64](
-            apperror.Wrap(err, ErrSettingTypeMismatch, "failed to unmarshal setting value"),
+        return appfault.Fail[float64](
+            appfault.Wrap(err, ErrSettingTypeMismatch, "failed to unmarshal setting value"),
         )
     }
     if sv.FloatVal == nil {
-        return apperror.Fail[float64](
-            apperror.New(
+        return appfault.Fail[float64](
+            appfault.New(
                 ErrSettingTypeMismatch,
                 "setting is not a float",
             ).WithContext("category", category).
                 WithContext("key", key),
         )
     }
-    return apperror.Succeed(*sv.FloatVal)
+    return appfault.Succeed(*sv.FloatVal)
 }
 
 // GetBool retrieves a boolean setting value
-func (s *SettingsService) GetBool(category, key string) apperror.Result[bool] {
+func (s *SettingsService) GetBool(category, key string) appfault.Result[bool] {
     var setting Setting
     err := s.db.Where("category = ? AND key = ?", category, key).First(&setting).Error
     if err != nil {
-        return apperror.Fail[bool](
-            apperror.Wrap(err, ErrSettingNotFound, "setting not found"),
+        return appfault.Fail[bool](
+            appfault.Wrap(err, ErrSettingNotFound, "setting not found"),
         )
     }
     
     var sv SettingValue
     if err := json.Unmarshal([]byte(setting.Value), &sv); err != nil {
-        return apperror.Fail[bool](
-            apperror.Wrap(err, ErrSettingTypeMismatch, "failed to unmarshal setting value"),
+        return appfault.Fail[bool](
+            appfault.Wrap(err, ErrSettingTypeMismatch, "failed to unmarshal setting value"),
         )
     }
     if sv.BoolVal == nil {
-        return apperror.Fail[bool](
-            apperror.New(
+        return appfault.Fail[bool](
+            appfault.New(
                 ErrSettingTypeMismatch,
                 "setting is not a bool",
             ).WithContext("category", category).
                 WithContext("key", key),
         )
     }
-    return apperror.Succeed(*sv.BoolVal)
+    return appfault.Succeed(*sv.BoolVal)
 }
 
 // Update saves a setting value using strongly-typed SettingValue
@@ -416,11 +416,11 @@ type SettingUpdate struct {
 }
 
 // GetAll returns all settings grouped by category using typed containers
-func (s *SettingsService) GetAll() apperror.Result[map[string]map[string]SettingValue] {
+func (s *SettingsService) GetAll() appfault.Result[map[string]map[string]SettingValue] {
     var settings []Setting
     if err := s.db.Find(&settings).Error; err != nil {
-        return apperror.Fail[map[string]map[string]SettingValue](
-            apperror.Wrap(err, ErrSettingNotFound, "failed to retrieve settings"),
+        return appfault.Fail[map[string]map[string]SettingValue](
+            appfault.Wrap(err, ErrSettingNotFound, "failed to retrieve settings"),
         )
     }
     
@@ -435,45 +435,45 @@ func (s *SettingsService) GetAll() apperror.Result[map[string]map[string]Setting
         result[setting.Category][setting.Key] = sv
     }
     
-    return apperror.Succeed(result)
+    return appfault.Succeed(result)
 }
 
 // GetTyped retrieves a setting and returns it as the specified concrete type.
 // Eliminates the need for interface{} by using Go generics.
-func GetTyped[T SettingConstraint](svc *SettingsService, category, key string) apperror.Result[T] {
+func GetTyped[T SettingConstraint](svc *SettingsService, category, key string) appfault.Result[T] {
     var zero T
     switch v := any(zero).(type) {
     case string:
         _ = v
         result := svc.GetString(category, key)
         if result.HasError() {
-            return apperror.Fail[T](result.Error())
+            return appfault.Fail[T](result.Error())
         }
-        return apperror.Succeed(any(result.Value()).(T))
+        return appfault.Succeed(any(result.Value()).(T))
     case int:
         _ = v
         result := svc.GetInt(category, key)
         if result.HasError() {
-            return apperror.Fail[T](result.Error())
+            return appfault.Fail[T](result.Error())
         }
-        return apperror.Succeed(any(result.Value()).(T))
+        return appfault.Succeed(any(result.Value()).(T))
     case float64:
         _ = v
         result := svc.GetFloat(category, key)
         if result.HasError() {
-            return apperror.Fail[T](result.Error())
+            return appfault.Fail[T](result.Error())
         }
-        return apperror.Succeed(any(result.Value()).(T))
+        return appfault.Succeed(any(result.Value()).(T))
     case bool:
         _ = v
         result := svc.GetBool(category, key)
         if result.HasError() {
-            return apperror.Fail[T](result.Error())
+            return appfault.Fail[T](result.Error())
         }
-        return apperror.Succeed(any(result.Value()).(T))
+        return appfault.Succeed(any(result.Value()).(T))
     default:
-        return apperror.Fail[T](
-            apperror.New(
+        return appfault.Fail[T](
+            appfault.New(
                 ErrSettingTypeUnsupported,
                 "unsupported setting type",
             ),

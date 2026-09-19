@@ -33,11 +33,11 @@ Nexus Flow CLI implements a standardized Golang `SettingsService` interface for 
 ```go
 type SettingsService interface {
     // Core accessors
-    GetString(key string) apperror.Result[string]
-    GetInt(key string) apperror.Result[int]
-    GetBool(key string) apperror.Result[bool]
-    GetDuration(key string) apperror.Result[time.Duration]
-    GetJson(key string, target json.Unmarshaler) *apperror.AppError
+    GetString(key string) appfault.Result[string]
+    GetInt(key string) appfault.Result[int]
+    GetBool(key string) appfault.Result[bool]
+    GetDuration(key string) appfault.Result[time.Duration]
+    GetJson(key string, target json.Unmarshaler) *appfault.AppError
     
     // Workflow-specific accessors
     GetWorkflowTimeout(workflowType string) time.Duration
@@ -46,16 +46,16 @@ type SettingsService interface {
     GetWebSocketConfig() WebSocketConfig
     
     // Setters
-    Set(key string, value string) *apperror.AppError
-    SetWithCategory(key, value, category string) *apperror.AppError
+    Set(key string, value string) *appfault.AppError
+    SetWithCategory(key, value, category string) *appfault.AppError
     
     // Bulk operations
-    GetByCategory(category string) apperror.Result[[]Setting]
-    SeedFromConfig(configPath string) *apperror.AppError
+    GetByCategory(category string) appfault.Result[[]Setting]
+    SeedFromConfig(configPath string) *appfault.AppError
     
     // Cache management
-    InvalidateCache() *apperror.AppError
-    RefreshCache() *apperror.AppError
+    InvalidateCache() *appfault.AppError
+    RefreshCache() *appfault.AppError
 }
 ```
 

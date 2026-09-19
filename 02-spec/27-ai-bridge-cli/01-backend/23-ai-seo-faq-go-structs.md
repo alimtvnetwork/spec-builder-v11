@@ -445,20 +445,20 @@ func (e *FaqError) Error() string {
 // Note: Named FaqServiceInterface to avoid conflict with FaqService struct
 type FaqServiceInterface interface {
     // Training
-    Train(req *FaqTrainRequest) apperror.Result[*FaqTrainResponse]
+    Train(req *FaqTrainRequest) appfault.Result[*FaqTrainResponse]
 
     // Generation
-    Generate(req *FaqGenerateRequest) apperror.Result[*FaqGenerateResponse]
-    GenerateSingle(company string, question string, sessionId string) apperror.Result[*FaqOutput]
+    Generate(req *FaqGenerateRequest) appfault.Result[*FaqGenerateResponse]
+    GenerateSingle(company string, question string, sessionId string) appfault.Result[*FaqOutput]
 
     // Sessions
-    GetSession(sessionId string) apperror.Result[*FaqSession]
-    ListSessions(company string) apperror.Result[[]FaqSession]
-    DeleteSession(sessionId string) *apperror.AppError
+    GetSession(sessionId string) appfault.Result[*FaqSession]
+    ListSessions(company string) appfault.Result[[]FaqSession]
+    DeleteSession(sessionId string) *appfault.AppError
 
     // RAG
-    GetTrainingInfo(company string) apperror.Result[*FaqTrainingRecord]
-    ClearTraining(company string) *apperror.AppError
+    GetTrainingInfo(company string) appfault.Result[*FaqTrainingRecord]
+    ClearTraining(company string) *appfault.AppError
 
     // Templates
     GetHtmlTemplates() []FaqHtmlTemplate
@@ -468,9 +468,9 @@ type FaqServiceInterface interface {
     ValidateContent(content string) *FaqValidationResult
 
     // Route DB Exploration (registered companies/sessions)
-    ListCompanies() apperror.Result[[]FaqCompanyRegistry]
-    GetCompany(companySlug string) apperror.Result[*FaqCompanyRegistry]
-    ListCompanySessions(companySlug string) apperror.Result[[]FaqSessionRegistry]
+    ListCompanies() appfault.Result[[]FaqCompanyRegistry]
+    GetCompany(companySlug string) appfault.Result[*FaqCompanyRegistry]
+    ListCompanySessions(companySlug string) appfault.Result[[]FaqSessionRegistry]
 }
 ```
 

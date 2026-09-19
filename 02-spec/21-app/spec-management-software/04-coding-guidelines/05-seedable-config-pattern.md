@@ -312,7 +312,7 @@ func (cs *ConfigSeeder) SeedIfNeeded(filename string) error {
     // Read seed file
     data, err := pathutil.ReadFile(filepath.Join(cs.seedDir, filename))
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedReadFileFailed,
             "read seed file",
@@ -321,7 +321,7 @@ func (cs *ConfigSeeder) SeedIfNeeded(filename string) error {
     
     var seedFile SeedFile
     if err := json.Unmarshal(data, &seedFile); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedParseFailed,
             "parse seed file",
@@ -406,7 +406,7 @@ type SettingsService struct {
     cache sync.Map
 }
 
-func (ss *SettingsService) Get(category, key string) apperror.Result[any] {
+func (ss *SettingsService) Get(category, key string) appfault.Result[any] {
     // Check cache first
     cacheKey := category + ":" + key
     if cached, ok := ss.cache.Load(cacheKey); ok {
@@ -429,7 +429,7 @@ func (ss *SettingsService) Get(category, key string) apperror.Result[any] {
 }
 
 // EXEMPTED: typed accessor internal — wraps untyped sync.Map cache (§7.2)
-func (ss *SettingsService) GetFloat(category, key string) apperror.Result[float64] {
+func (ss *SettingsService) GetFloat(category, key string) appfault.Result[float64] {
     value, err := ss.Get(category, key)
     if err != nil {
         return 0, err
@@ -437,7 +437,7 @@ func (ss *SettingsService) GetFloat(category, key string) apperror.Result[float6
     
     f, ok := value.(float64)
     if !ok {
-        return 0, apperror.New(
+        return 0, appfault.New(
             ErrTypeMismatch,
             "value is not a float64",
         )
@@ -446,7 +446,7 @@ func (ss *SettingsService) GetFloat(category, key string) apperror.Result[float6
 }
 
 // EXEMPTED: typed accessor internal — wraps untyped sync.Map cache (§7.2)
-func (ss *SettingsService) GetMap(category, key string) apperror.Result[map[string]any] {
+func (ss *SettingsService) GetMap(category, key string) appfault.Result[map[string]any] {
     value, err := ss.Get(category, key)
     if err != nil {
         return nil, err
@@ -454,7 +454,7 @@ func (ss *SettingsService) GetMap(category, key string) apperror.Result[map[stri
     
     m, ok := value.(map[string]interface{})
     if !ok {
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrTypeMismatch,
             "value is not a map",
         )

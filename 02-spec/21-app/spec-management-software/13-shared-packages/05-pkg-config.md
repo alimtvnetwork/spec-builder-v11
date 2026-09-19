@@ -263,7 +263,7 @@ func DefaultLoadOptions() LoadOptions {
 }
 
 // Load loads configuration from file and environment
-func Load(opts LoadOptions) apperror.Result[Config] {
+func Load(opts LoadOptions) appfault.Result[Config] {
     v := viper.New()
     
     // Set config file settings
@@ -326,7 +326,7 @@ func Load(opts LoadOptions) apperror.Result[Config] {
 }
 
 // LoadFromFile loads from a specific file path
-func LoadFromFile(path string) apperror.Result[Config] {
+func LoadFromFile(path string) appfault.Result[Config] {
     v := viper.New()
     v.SetConfigFile(path)
     

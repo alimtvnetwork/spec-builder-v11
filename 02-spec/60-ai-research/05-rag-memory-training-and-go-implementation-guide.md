@@ -136,7 +136,7 @@ type VectorMemory struct {
     embeddingFunc  chromem.EmbeddingFunc
 }
 
-func NewVectorMemory(collectionName string) apperror.Result[*VectorMemory] {
+func NewVectorMemory(collectionName string) appfault.Result[*VectorMemory] {
     ctx := context.Background()
     db := chromem.NewDB()
 
@@ -152,14 +152,14 @@ func NewVectorMemory(collectionName string) apperror.Result[*VectorMemory] {
         embeddingFunc,
     )
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[*VectorMemory](err, ErrCollectionCreateFailed, "failed to create collection")
     }
 
-    return &VectorMemory{
+    return appfault.Ok(&VectorMemory{
         db:            db,
         collection:    collection,
         embeddingFunc: embeddingFunc,
-    }, nil
+    })
 }
 
 // Store document in long-term memory
@@ -187,7 +187,7 @@ func (vm *VectorMemory) Retrieve(
     query string,
     topK int,
     filters map[string]string,
-) apperror.Result[[]chromem.Result] {
+) appfault.Result[[]chromem.Result] {
     ctx := context.Background()
 
     return vm.collection.Query(
@@ -228,7 +228,7 @@ func (vm *VectorMemory) RetrieveSimilarConversations(
     query string,
     userID string,
     topK int,
-) apperror.Result[[]chromem.Result] {
+) appfault.Result[[]chromem.Result] {
 
     filters := map[string]string{
         "user_id": userID,
@@ -541,7 +541,7 @@ func NewEntityMemory(db *sql.DB, vectorMem *VectorMemory, llm LLM) *EntityMemory
 // Extract entities from conversation using LLM
 func (em *EntityMemory) ExtractEntities(
     userID, conversationText string,
-) apperror.Result[ExtractedEntities] {
+) appfault.Result[ExtractedEntities] {
 
     // Use LLM to extract structured entities
     prompt := fmt.Sprintf(`
@@ -622,7 +622,7 @@ func (em *EntityMemory) StoreRelationship(rel Relationship) error {
 }
 
 // Get entity with relationships
-func (em *EntityMemory) GetEntityGraph(entityID string, depth int) apperror.Result[*EntityGraph] {
+func (em *EntityMemory) GetEntityGraph(entityID string, depth int) appfault.Result[*EntityGraph] {
     // Recursive query to get entity and related entities
     query := `
         WITH RECURSIVE entity_graph AS (
@@ -645,7 +645,7 @@ func (em *EntityMemory) GetEntityGraph(entityID string, depth int) apperror.Resu
 
     rows, err := em.db.Query(query, entityID, depth)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[*EntityGraph](err, ErrDatabaseQueryFailed, "failed to query entity graph")
     }
     defer rows.Close()
 
@@ -653,7 +653,7 @@ func (em *EntityMemory) GetEntityGraph(entityID string, depth int) apperror.Resu
     graph := &EntityGraph{}
     // ... parse rows into graph structure
 
-    return graph, nil
+    return appfault.Ok(graph)
 }
 
 // Semantic search for entities
@@ -661,7 +661,7 @@ func (em *EntityMemory) SearchEntities(
     query string,
     entityType EntityType,
     topK int,
-) apperror.Result[[]Entity] {
+) appfault.Result[[]Entity] {
 
     filters := map[string]string{}
     if entityType != "" {
@@ -799,7 +799,7 @@ type SemanticMemory struct {
     concepts   *VectorMemory // Conceptual understanding
 }
 
-func NewSemanticMemory() apperror.Result[*SemanticMemory] {
+func NewSemanticMemory() appfault.Result[*SemanticMemory] {
     facts, _ := NewVectorMemory("semantic-facts")
     procedures, _ := NewVectorMemory("semantic-procedures")
     concepts, _ := NewVectorMemory("semantic-concepts")
@@ -871,7 +871,7 @@ func (sm *SemanticMemory) Query(
     query string,
     memoryType string, // "fact", "procedure", "concept", or "all"
     topK int,
-) apperror.Result[[]chromem.Result] {
+) appfault.Result[[]chromem.Result] {
 
     var allResults []chromem.Result
 
@@ -1094,7 +1094,7 @@ func (em *EpisodicMemory) RetrieveSimilarEpisodes(
     currentContext string,
     userID string,
     topK int,
-) apperror.Result[[]Episode] {
+) appfault.Result[[]Episode] {
 
     filters := map[string]string{
         "user_id": userID,
@@ -1138,7 +1138,7 @@ func (em *EpisodicMemory) RetrieveSimilarEpisodes(
 func (em *EpisodicMemory) GetEpisodesByTimeRange(
     userID string,
     startTime, endTime time.Time,
-) apperror.Result[[]Episode] {
+) appfault.Result[[]Episode] {
 
     rows, err := em.db.Query(`
         SELECT id, start_time, end_time, user_id, session_id,
@@ -1291,13 +1291,13 @@ type AdvancedMemorySystem struct {
     llm        *openai.LLM
 }
 
-func NewAdvancedMemorySystem() apperror.Result[*AdvancedMemorySystem] {
+func NewAdvancedMemorySystem() appfault.Result[*AdvancedMemorySystem] {
     ctx := context.Background()
 
     // Initialize LLM
     llm, err := openai.New()
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[*AdvancedMemorySystem](err, ErrLlmInitFailed, "failed to initialize llm")
     }
 
     // Short-term: Keep last 20 messages
@@ -1309,21 +1309,21 @@ func NewAdvancedMemorySystem() apperror.Result[*AdvancedMemorySystem] {
         chroma.WithDistanceFunction("cosine"),
     )
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[*AdvancedMemorySystem](err, ErrChromaInitFailed, "failed to initialize chroma store")
     }
 
     longTerm := memory.NewVectorStoreRetrieverMemory(
         vectorstores.ToRetriever(chromaStore, 5), // Retrieve top 5
     )
 
-    return &AdvancedMemorySystem{
+    return appfault.Ok(&AdvancedMemorySystem{
         shortTerm: shortTerm,
         longTerm:  longTerm,
         llm:       llm,
-    }, nil
+    })
 }
 
-func (ams *AdvancedMemorySystem) ProcessQuery(context stdctx.Context, query string) apperror.Result[string] {
+func (ams *AdvancedMemorySystem) ProcessQuery(context stdctx.Context, query string) appfault.Result[string] {
     // 1. Get short-term memory (recent conversation)
     recentHistory, _ := ams.shortTerm.LoadMemoryVariables(context, nil)
 

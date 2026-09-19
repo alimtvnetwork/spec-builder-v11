@@ -129,29 +129,29 @@ func NewBoolValue(v bool) SettingValue {
 // All methods are strongly typed — no interface{} or any usage.
 type SettingsService interface {
     // Type-safe accessors (preferred)
-    GetString(category configcategorytype.Type, key string) apperror.Result[string]
-    GetFloat(category configcategorytype.Type, key string) apperror.Result[float64]
-    GetInt(category configcategorytype.Type, key string) apperror.Result[int]
-    GetBool(category configcategorytype.Type, key string) apperror.Result[bool]
-    GetStringSlice(category configcategorytype.Type, key string) apperror.Result[[]string]
-    GetMap(category configcategorytype.Type, key string) apperror.Result[map[string]string]
+    GetString(category configcategorytype.Type, key string) appfault.Result[string]
+    GetFloat(category configcategorytype.Type, key string) appfault.Result[float64]
+    GetInt(category configcategorytype.Type, key string) appfault.Result[int]
+    GetBool(category configcategorytype.Type, key string) appfault.Result[bool]
+    GetStringSlice(category configcategorytype.Type, key string) appfault.Result[[]string]
+    GetMap(category configcategorytype.Type, key string) appfault.Result[map[string]string]
     
     // Mutation methods (strongly typed value container)
-    Update(category configcategorytype.Type, key string, value SettingValue) *apperror.AppError
-    ResetToDefault(category configcategorytype.Type, key string) *apperror.AppError
-    ResetCategoryToDefault(category configcategorytype.Type) *apperror.AppError
+    Update(category configcategorytype.Type, key string, value SettingValue) *appfault.AppError
+    ResetToDefault(category configcategorytype.Type, key string) *appfault.AppError
+    ResetCategoryToDefault(category configcategorytype.Type) *appfault.AppError
     
     // Seeding methods
-    SeedFromFile(filepath string) *apperror.AppError
-    ForceReseed(category configcategorytype.Type) *apperror.AppError
+    SeedFromFile(filepath string) *appfault.AppError
+    ForceReseed(category configcategorytype.Type) *appfault.AppError
     
     // Query methods
-    GetByCategory(category configcategorytype.Type) apperror.Result[[]Setting]
-    GetCategoryVersion(category configcategorytype.Type) apperror.Result[string]
+    GetByCategory(category configcategorytype.Type) appfault.Result[[]Setting]
+    GetCategoryVersion(category configcategorytype.Type) appfault.Result[string]
     
     // Cache management
-    InvalidateCache() *apperror.AppError
-    WarmCache() *apperror.AppError
+    InvalidateCache() *appfault.AppError
+    WarmCache() *appfault.AppError
 }
 ```
 
@@ -161,48 +161,48 @@ type SettingsService interface {
 // GetTyped retrieves a setting and returns it as the specified concrete type.
 // Eliminates the need for interface{} by using Go generics.
 // Uses typecast.CastOrFail[T] internally per §7.2 (no manual assertions).
-func GetTyped[T SettingConstraint](svc SettingsService, category configcategorytype.Type, key string) apperror.Result[T] {
+func GetTyped[T SettingConstraint](svc SettingsService, category configcategorytype.Type, key string) appfault.Result[T] {
     var zero T
     // EXEMPTED: type-switch on generic zero value for dispatch (§7.2 — no runtime assertion on real data)
     switch any(zero).(type) {
     case string:
         r := svc.GetString(category, key)
         if r.IsErr() {
-            return apperror.Fail[T](r.Err())
+            return appfault.Fail[T](r.Err())
         }
         return typecast.CastOrFail[T](r.Value())
     case int:
         r := svc.GetInt(category, key)
         if r.IsErr() {
-            return apperror.Fail[T](r.Err())
+            return appfault.Fail[T](r.Err())
         }
         return typecast.CastOrFail[T](r.Value())
     case float64:
         r := svc.GetFloat(category, key)
         if r.IsErr() {
-            return apperror.Fail[T](r.Err())
+            return appfault.Fail[T](r.Err())
         }
         return typecast.CastOrFail[T](r.Value())
     case bool:
         r := svc.GetBool(category, key)
         if r.IsErr() {
-            return apperror.Fail[T](r.Err())
+            return appfault.Fail[T](r.Err())
         }
         return typecast.CastOrFail[T](r.Value())
     case []string:
         r := svc.GetStringSlice(category, key)
         if r.IsErr() {
-            return apperror.Fail[T](r.Err())
+            return appfault.Fail[T](r.Err())
         }
         return typecast.CastOrFail[T](r.Value())
     case map[string]string:
         r := svc.GetMap(category, key)
         if r.IsErr() {
-            return apperror.Fail[T](r.Err())
+            return appfault.Fail[T](r.Err())
         }
         return typecast.CastOrFail[T](r.Value())
     default:
-        return apperror.FailNew[T](
+        return appfault.FailNew[T](
             ErrSettingsUnsupportedType,
             "unsupported setting type",
         )
@@ -311,13 +311,13 @@ func Values() []Type {
     return vals
 }
 
-func Parse(s string) apperror.Result[Type] {
+func Parse(s string) appfault.Result[Type] {
     for k, v := range variantLabels {
         if strings.EqualFold(v, s) {
-            return apperror.Ok(k)
+            return appfault.Ok(k)
         }
     }
-    return apperror.FailNew[Type](
+    return appfault.FailNew[Type](
         ErrEnumInvalidVariant,
         "invalid ConfigCategoryType: %q",
         s,

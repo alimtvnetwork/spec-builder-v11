@@ -112,7 +112,7 @@ sessionId, err := sessionService.StartSession(
     siteId int64,
     pluginName string,
     siteName string,
-) apperror.Result[string]
+) appfault.Result[string]
 
 // Log a message to a session
 sessionService.Log(
@@ -135,13 +135,13 @@ sessionService.EndSession(sessionId, status, errorMsg string)
 
 ```go
 // Get session details
-session, err := sessionService.GetSession(sessionId string) apperror.Result[Session]
+session, err := sessionService.GetSession(sessionId string) appfault.Result[Session]
 
 // Get full logs
-logs, err := sessionService.GetSessionLogs(sessionId string) apperror.Result[string]
+logs, err := sessionService.GetSessionLogs(sessionId string) appfault.Result[string]
 
 // List recent sessions
-sessions, err := sessionService.ListSessions(limit int) apperror.Result[[]*SessionSummary]
+sessions, err := sessionService.ListSessions(limit int) appfault.Result[[]*SessionSummary]
 
 // Delete a session
 err := sessionService.DeleteSession(sessionId string) error

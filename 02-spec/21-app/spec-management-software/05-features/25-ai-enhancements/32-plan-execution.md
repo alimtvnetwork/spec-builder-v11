@@ -98,7 +98,7 @@ type executionState struct {
 }
 
 type StepHandler interface {
-	Execute(context stdctx.Context, step *PlanStep, plan *ExecutionPlan) apperror.Result[StepResult]
+	Execute(context stdctx.Context, step *PlanStep, plan *ExecutionPlan) appfault.Result[StepResult]
 	CanRetry(err error) bool
 }
 
@@ -156,10 +156,10 @@ func (e *ExecutionEngine) RegisterHandler(stepType string, handler StepHandler) 
 }
 
 // ExecuteStep runs a single step
-func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, stepIndex int) apperror.Result[StepResult] {
+func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, stepIndex int) appfault.Result[StepResult] {
 	plan, err := e.plans.Get(context, planId)
 	if err != nil {
-		return apperror.FailWrap[StepResult](
+		return appfault.FailWrap[StepResult](
 			err,
 			"E7700",
 			"plan not found",
@@ -167,7 +167,7 @@ func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, ste
 	}
 	
 	if stepIndex < 0 || stepIndex >= len(plan.Steps) {
-		return apperror.FailNew[StepResult](
+		return appfault.FailNew[StepResult](
 			"E7700",
 			fmt.Sprintf("invalid step index: %d", stepIndex),
 		)
@@ -177,7 +177,7 @@ func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, ste
 	
 	// Check dependencies
 	if err := e.checkDependencies(plan, step); err != nil {
-		return apperror.FailWrap[StepResult](
+		return appfault.FailWrap[StepResult](
 			err,
 			"E7701",
 			"dependency check failed",
@@ -187,7 +187,7 @@ func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, ste
 	// Get handler
 	handler, ok := e.stepHandlers[step.Type]
 	if !ok {
-		return apperror.FailNew[StepResult](
+		return appfault.FailNew[StepResult](
 			"E7702",
 			fmt.Sprintf("unknown step type: %s", step.Type),
 		)
@@ -200,7 +200,7 @@ func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, ste
 	plan.CurrentStepIndex = stepIndex
 	
 	if err := e.plans.Update(context, plan); err != nil {
-		return apperror.FailWrap[StepResult](
+		return appfault.FailWrap[StepResult](
 			err,
 			"E7703",
 			"failed to update plan",
@@ -238,7 +238,7 @@ func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, ste
 			// Record in history
 			e.recordStepHistory(context, plan.Id, step, "failed", StepOutputData{}, execErr.Error())
 			
-			return apperror.FailWrap[StepResult](
+			return appfault.FailWrap[StepResult](
 				execErr,
 				"E7704",
 				"step execution failed",
@@ -249,7 +249,7 @@ func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, ste
 		backoff := time.Duration(1<<attempt) * time.Second
 		select {
 		case <-context.Done():
-			return apperror.FailWrap[StepResult](
+			return appfault.FailWrap[StepResult](
 				context.Err(),
 				"E7705",
 				"execution cancelled",
@@ -282,7 +282,7 @@ func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, ste
 	}
 	
 	if err := e.plans.Update(context, plan); err != nil {
-		return apperror.FailWrap[StepResult](
+		return appfault.FailWrap[StepResult](
 			err,
 			"E7703",
 			"failed to update plan",
@@ -292,7 +292,7 @@ func (e *ExecutionEngine) ExecuteStep(context stdctx.Context, planId string, ste
 	// Record in history
 	e.recordStepHistory(context, plan.Id, step, "completed", result.Outputs, "")
 	
-	return apperror.Ok(result)
+	return appfault.Ok(result)
 }
 
 // ExecuteAll runs all remaining steps
@@ -379,7 +379,7 @@ func (e *ExecutionEngine) Pause(planId string) error {
 	
 	state, ok := e.activePlans[planId]
 	if !ok {
-		return apperror.New(
+		return appfault.New(
 			ErrPlanNotExecuting,
 			"plan not executing",
 		)
@@ -399,7 +399,7 @@ func (e *ExecutionEngine) Resume(planId string) error {
 	
 	state, ok := e.activePlans[planId]
 	if !ok {
-		return apperror.New(
+		return appfault.New(
 			ErrPlanNotExecuting,
 			"plan not executing",
 		)
@@ -439,7 +439,7 @@ func (e *ExecutionEngine) checkDependencies(plan *ExecutionPlan, step *PlanStep)
 	for _, depId := range step.Dependencies {
 		for _, s := range plan.Steps {
 			if s.Id == depId && s.Status != "completed" {
-				return apperror.New(
+				return appfault.New(
 					ErrDependencyNotCompleted,
 					"dependency "+depId+" not completed",
 				)
@@ -521,7 +521,7 @@ type AnalyzeHandler struct {
 	llm *llm.Client
 }
 
-func (h *AnalyzeHandler) Execute(context stdctx.Context, step *PlanStep, plan *ExecutionPlan) apperror.Result[StepResult] {
+func (h *AnalyzeHandler) Execute(context stdctx.Context, step *PlanStep, plan *ExecutionPlan) appfault.Result[StepResult] {
 	// Get typed inputs
 	inputs := step.GetAnalyzeInputs()
 	
@@ -551,14 +551,14 @@ Provide:
 	})
 	
 	if err != nil {
-		return apperror.FailWrap[StepResult](
+		return appfault.FailWrap[StepResult](
 			err,
 			"E7710",
 			"LLM analysis failed",
 		)
 	}
 	
-	return apperror.Ok(StepResult{
+	return appfault.Ok(StepResult{
 		Success: true,
 		Message: "Analysis complete",
 		Outputs: StepOutputData{
@@ -587,7 +587,7 @@ type GenerateHandler struct {
 	llm *llm.Client
 }
 
-func (h *GenerateHandler) Execute(context stdctx.Context, step *PlanStep, plan *ExecutionPlan) apperror.Result[StepResult] {
+func (h *GenerateHandler) Execute(context stdctx.Context, step *PlanStep, plan *ExecutionPlan) appfault.Result[StepResult] {
 	inputs := step.GetGenerateInputs()
 	
 	prompt := fmt.Sprintf(`Generate content for: %s
@@ -612,7 +612,7 @@ Requirements from the plan:
 	})
 	
 	if err != nil {
-		return apperror.FailWrap[StepResult](
+		return appfault.FailWrap[StepResult](
 			err,
 			"E7711",
 			"LLM generation failed",
@@ -622,7 +622,7 @@ Requirements from the plan:
 	// Parse and save generated content
 	content := extractCodeBlock(response.Content)
 	
-	return apperror.Ok(StepResult{
+	return appfault.Ok(StepResult{
 		Success: true,
 		Message: fmt.Sprintf("Generated %s", inputs.TargetPath),
 		Outputs: StepOutputData{
@@ -654,7 +654,7 @@ type ExecuteStepInputs struct {
 
 type ExecuteHandler struct{}
 
-func (h *ExecuteHandler) Execute(context stdctx.Context, step *PlanStep, plan *ExecutionPlan) apperror.Result[StepResult] {
+func (h *ExecuteHandler) Execute(context stdctx.Context, step *PlanStep, plan *ExecutionPlan) appfault.Result[StepResult] {
 	inputs := step.GetExecuteInputs()
 	
 	// Build command
@@ -671,7 +671,7 @@ func (h *ExecuteHandler) Execute(context stdctx.Context, step *PlanStep, plan *E
 	err := cmd.Run()
 	
 	if err != nil {
-		return apperror.Ok(StepResult{
+		return appfault.Ok(StepResult{
 			Success: false,
 			Message: err.Error(),
 			Outputs: StepOutputData{
@@ -682,7 +682,7 @@ func (h *ExecuteHandler) Execute(context stdctx.Context, step *PlanStep, plan *E
 		})
 	}
 	
-	return apperror.Ok(StepResult{
+	return appfault.Ok(StepResult{
 		Success: true,
 		Message: "Command executed successfully",
 		Outputs: StepOutputData{

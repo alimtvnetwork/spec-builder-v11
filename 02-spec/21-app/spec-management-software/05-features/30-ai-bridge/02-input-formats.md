@@ -63,7 +63,7 @@ type MarkdownFrontmatter struct {
     Variables    map[string]string `yaml:"variables,omitempty"`
 }
 
-func (p *MarkdownParser) Parse(content []byte) apperror.Result[NormalizedRequest] {
+func (p *MarkdownParser) Parse(content []byte) appfault.Result[NormalizedRequest] {
     // 1. Extract frontmatter
     frontmatter, body, err := p.extractFrontmatter(content)
     if err != nil {
@@ -199,7 +199,7 @@ type JSONRequest struct {
     BatchItems         []BatchItem       `json:",omitempty"`
 }
 
-func (p *JSONParser) Parse(content []byte) apperror.Result[NormalizedRequest] {
+func (p *JSONParser) Parse(content []byte) appfault.Result[NormalizedRequest] {
     // 1. Validate against schema
     if err := p.schema.Validate(content); err != nil {
         return nil, NewError(ErrJsonValidationFailed, "schema validation failed: %v", err)
@@ -330,7 +330,7 @@ type YAMLRequest struct {
     Context      []ContextItem     `yaml:"context,omitempty"`
 }
 
-func (p *YAMLParser) Parse(content []byte) apperror.Result[NormalizedRequest] {
+func (p *YAMLParser) Parse(content []byte) appfault.Result[NormalizedRequest] {
     // Check for multi-document
     if bytes.Contains(content, []byte("\n---\n")) {
         return p.parseMultiDocument(content)
@@ -338,7 +338,7 @@ func (p *YAMLParser) Parse(content []byte) apperror.Result[NormalizedRequest] {
     return p.parseSingleDocument(content)
 }
 
-func (p *YamlParser) parseSingleDocument(content []byte) apperror.Result[NormalizedRequest] {
+func (p *YamlParser) parseSingleDocument(content []byte) appfault.Result[NormalizedRequest] {
     var yr YamlRequest
     if err := yaml.Unmarshal(content, &yr); err != nil {
         return nil, NewError(ErrYamlParseFailed, "invalid YAML: %v", err)
@@ -364,7 +364,7 @@ func (p *YamlParser) parseSingleDocument(content []byte) apperror.Result[Normali
     }, nil
 }
 
-func (p *YamlParser) parseMultiDocument(content []byte) apperror.Result[NormalizedRequest] {
+func (p *YamlParser) parseMultiDocument(content []byte) appfault.Result[NormalizedRequest] {
     decoder := yaml.NewDecoder(bytes.NewReader(content))
     
     var requests []YamlRequest
@@ -467,11 +467,11 @@ type CSVConfig struct {
     SkipHeader         bool    `yaml:"skipHeader,omitempty"`
 }
 
-func (p *CSVParser) Parse(content []byte) apperror.Result[NormalizedRequest] {
+func (p *CSVParser) Parse(content []byte) appfault.Result[NormalizedRequest] {
     return nil, NewError(ErrCSVRequiresConfig, "CSV parsing requires companion config file")
 }
 
-func (p *CSVParser) ParseWithConfig(csvContent []byte, config CSVConfig) apperror.Result[NormalizedRequest] {
+func (p *CSVParser) ParseWithConfig(csvContent []byte, config CSVConfig) appfault.Result[NormalizedRequest] {
     // 1. Parse CSV
     reader := csv.NewReader(bytes.NewReader(csvContent))
     records, err := reader.ReadAll()

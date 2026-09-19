@@ -592,7 +592,7 @@ type Application struct {
 }
 
 // NewApplication creates and initializes the application
-func NewApplication(cfg *config.Config) apperror.Result[*Application] {
+func NewApplication(cfg *config.Config) appfault.Result[*Application] {
     app := &Application{
         Config:          cfg,
         ShutdownManager: NewShutdownManager(cfg.Shutdown),
@@ -602,7 +602,7 @@ func NewApplication(cfg *config.Config) apperror.Result[*Application] {
     // Initialize database
     dbResult := database.NewDatabase(cfg.Database.Path)
     if dbResult.HasError() {
-        return apperror.Fail[*Application](dbResult.Error())
+        return appfault.Fail[*Application](dbResult.Error())
     }
     app.DB = dbResult.Value()
     
@@ -621,7 +621,7 @@ func NewApplication(cfg *config.Config) apperror.Result[*Application] {
         app.TokenManager = tokenResult.Value()
     }
     
-    return apperror.Ok(app)
+    return appfault.Ok(app)
 }
 
 // Start starts the application and signal handling

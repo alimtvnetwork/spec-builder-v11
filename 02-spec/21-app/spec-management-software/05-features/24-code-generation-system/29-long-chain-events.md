@@ -366,7 +366,7 @@ func NewChainManager(db *gorm.DB, wsHub *websocket.Hub) *ChainManager {
 }
 
 // StartChain creates a new event chain
-func (m *ChainManager) StartChain(sessionId, messageId, title string, estimatedSteps int) apperror.Result[EventChain] {
+func (m *ChainManager) StartChain(sessionId, messageId, title string, estimatedSteps int) appfault.Result[EventChain] {
     chain := &EventChain{
         Id:                 uuid.NewString(),
         SessionId:          sessionId,
@@ -379,7 +379,7 @@ func (m *ChainManager) StartChain(sessionId, messageId, title string, estimatedS
     }
     
     if err := m.db.Create(chain).Error; err != nil {
-        return apperror.FailWrap[EventChain](
+        return appfault.FailWrap[EventChain](
             err,
             "E7200",
             "failed to create event chain",
@@ -397,14 +397,14 @@ func (m *ChainManager) StartChain(sessionId, messageId, title string, estimatedS
         },
     })
     
-    return apperror.Ok(*chain)
+    return appfault.Ok(*chain)
 }
 
 // StartStep begins a new step in the chain
-func (m *ChainManager) StartStep(chainId string, stepType ChainStepType, title string) apperror.Result[ChainStep] {
+func (m *ChainManager) StartStep(chainId string, stepType ChainStepType, title string) appfault.Result[ChainStep] {
     var chain EventChain
     if err := m.db.First(&chain, "id = ?", chainId).Error; err != nil {
-        return apperror.FailWrap[ChainStep](
+        return appfault.FailWrap[ChainStep](
             err,
             "E7201",
             "chain not found",
@@ -423,7 +423,7 @@ func (m *ChainManager) StartStep(chainId string, stepType ChainStepType, title s
     }
     
     if err := m.db.Create(step).Error; err != nil {
-        return apperror.FailWrap[ChainStep](
+        return appfault.FailWrap[ChainStep](
             err,
             "E7201",
             "failed to create chain step",
@@ -441,7 +441,7 @@ func (m *ChainManager) StartStep(chainId string, stepType ChainStepType, title s
         },
     })
     
-    return apperror.Ok(*step)
+    return appfault.Ok(*step)
 }
 
 // --- Typed Update Structs for GORM (no map[string]interface{}) ---

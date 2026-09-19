@@ -59,7 +59,7 @@ type CategoryPublishResult struct {
     CreatedAt   time.Time 
 }
 
-func (s *ContentService) PublishCategory(req CategoryPublishRequest) apperror.Result[CategoryPublishResult] {
+func (s *ContentService) PublishCategory(req CategoryPublishRequest) appfault.Result[CategoryPublishResult] {
     // 1. Process variables
     processedDesc := s.varProcessor.Process(req.Description, req.Variables)
     
@@ -74,7 +74,7 @@ func (s *ContentService) PublishCategory(req CategoryPublishRequest) apperror.Re
         }
         seoResult := s.aiBridge.GenerateSeo(seoReq)
         if seoResult.HasError() {
-            return apperror.Fail[CategoryPublishResult](seoResult.AppError())
+            return appfault.Fail[CategoryPublishResult](seoResult.AppError())
         }
         processedDesc = seoResult.Value().Content
     }
@@ -88,7 +88,7 @@ func (s *ContentService) PublishCategory(req CategoryPublishRequest) apperror.Re
     }
     catResult := s.wpClient.CreateCategory(wpCat)
     if catResult.HasError() {
-        return apperror.Fail[CategoryPublishResult](catResult.AppError())
+        return appfault.Fail[CategoryPublishResult](catResult.AppError())
     }
     created := catResult.Value()
     
@@ -101,7 +101,7 @@ func (s *ContentService) PublishCategory(req CategoryPublishRequest) apperror.Re
         Slug:        created.Slug,
     })
     
-    return apperror.Ok(CategoryPublishResult{
+    return appfault.Ok(CategoryPublishResult{
         Id:          created.Id,
         Name:        created.Name,
         Slug:        created.Slug,
@@ -158,7 +158,7 @@ type PostPublishResult struct {
     PublishedAt     time.Time 
 }
 
-func (s *ContentService) PublishPost(req PostPublishRequest) apperror.Result[PostPublishResult] {
+func (s *ContentService) PublishPost(req PostPublishRequest) appfault.Result[PostPublishResult] {
     var content string
     var suggestedCats, suggestedTags []string
     var internalLinks []Link
@@ -179,7 +179,7 @@ func (s *ContentService) PublishPost(req PostPublishRequest) apperror.Result[Pos
         
         seoResult := s.aiBridge.GenerateSeo(seoReq)
         if seoResult.HasError() {
-            return apperror.Fail[PostPublishResult](seoResult.AppError())
+            return appfault.Fail[PostPublishResult](seoResult.AppError())
         }
         seoResp := seoResult.Value()
         
@@ -227,7 +227,7 @@ func (s *ContentService) PublishPost(req PostPublishRequest) apperror.Result[Pos
     
     postResult := s.wpClient.CreatePost(wpReq)
     if postResult.HasError() {
-        return apperror.Fail[PostPublishResult](postResult.AppError())
+        return appfault.Fail[PostPublishResult](postResult.AppError())
     }
     created := postResult.Value()
     
@@ -243,7 +243,7 @@ func (s *ContentService) PublishPost(req PostPublishRequest) apperror.Result[Pos
         InternalLinks: internalLinks,
     })
     
-    return apperror.Ok(PostPublishResult{
+    return appfault.Ok(PostPublishResult{
         Id:             created.Id,
         Title:          created.Title.Rendered,
         Slug:           created.Slug,
@@ -287,7 +287,7 @@ type PagePublishRequest struct {
     Variables       json.RawMessage   `json:",omitempty"`
 }
 
-func (s *ContentService) PublishPage(req PagePublishRequest) apperror.Result[PagePublishResult] {
+func (s *ContentService) PublishPage(req PagePublishRequest) appfault.Result[PagePublishResult] {
     // Similar flow to PostPublish but for pages
     // ...
 }
@@ -314,11 +314,11 @@ type RewriteResult struct {
     Diff            string    `json:",omitempty"`
 }
 
-func (s *ContentService) RewritePost(req RewriteRequest) apperror.Result[RewriteResult] {
+func (s *ContentService) RewritePost(req RewriteRequest) appfault.Result[RewriteResult] {
     // 1. Fetch existing post from WordPress
     existingResult := s.wpClient.GetPost(req.PostId)
     if existingResult.HasError() {
-        return apperror.Fail[RewriteResult](existingResult.AppError())
+        return appfault.Fail[RewriteResult](existingResult.AppError())
     }
     existingPost := existingResult.Value()
     
@@ -330,7 +330,7 @@ func (s *ContentService) RewritePost(req RewriteRequest) apperror.Result[Rewrite
         Prompt:          req.Prompt,
     })
     if seoResult.HasError() {
-        return apperror.Fail[RewriteResult](seoResult.AppError())
+        return appfault.Fail[RewriteResult](seoResult.AppError())
     }
     seoResp := seoResult.Value()
     
@@ -348,7 +348,7 @@ func (s *ContentService) RewritePost(req RewriteRequest) apperror.Result[Rewrite
     
     updateResult := s.wpClient.UpdatePost(req.PostId, updateReq)
     if updateResult.HasError() {
-        return apperror.Fail[RewriteResult](updateResult.AppError())
+        return appfault.Fail[RewriteResult](updateResult.AppError())
     }
     
     // 4. Track modification in local DB
@@ -362,7 +362,7 @@ func (s *ContentService) RewritePost(req RewriteRequest) apperror.Result[Rewrite
         ModifiedAt:      time.Now(),
     })
     
-    return apperror.Ok(RewriteResult{
+    return appfault.Ok(RewriteResult{
         OriginalContent: originalContent,
         NewContent:      seoResp.Content,
         UpdatedAt:       time.Now(),
@@ -406,7 +406,7 @@ type BatchPublishResult struct {
     Results       []BatchItemResult    
 }
 
-func (s *ContentService) BatchPublish(req BatchPublishRequest) apperror.Result[BatchPublishResult] {
+func (s *ContentService) BatchPublish(req BatchPublishRequest) appfault.Result[BatchPublishResult] {
     results := make([]BatchItemResult, 0, len(req.Items))
     successful, failed := 0, 0
     
@@ -455,7 +455,7 @@ func (s *ContentService) BatchPublish(req BatchPublishRequest) apperror.Result[B
         }
     }
     
-    return apperror.Ok(BatchPublishResult{
+    return appfault.Ok(BatchPublishResult{
         TotalItems: len(req.Items),
         Successful: successful,
         Failed:     failed,

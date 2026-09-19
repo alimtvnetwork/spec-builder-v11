@@ -713,11 +713,11 @@ type ConversationMemory struct {
     TokenBudget  int              // Max tokens for context
 }
 
-func (m *MemoryManager) LoadConversation(sessionPath string, query string) apperror.Result[*ConversationMemory] {
+func (m *MemoryManager) LoadConversation(sessionPath string, query string) appfault.Result[*ConversationMemory] {
     // 1. Open session database via GORM
     db, err := gorm.Open(sqlite.Open(sessionPath), &gorm.Config{})
     if err != nil {
-        return apperror.FailWrap[*ConversationMemory](err, 9624, "session db open failed")
+        return appfault.FailWrap[*ConversationMemory](err, 9624, "session db open failed")
     }
     
     // 2. Load session config
@@ -747,7 +747,7 @@ func (m *MemoryManager) LoadConversation(sessionPath string, query string) apper
     // 5. Construct system prompt with RAG
     systemPrompt := m.buildSystemPrompt(meta, ragChunks)
     
-    return apperror.Ok(&ConversationMemory{
+    return appfault.Ok(&ConversationMemory{
         SessionId:    meta.SessionId,
         Messages:     selected,
         RagContext:   ragChunks,

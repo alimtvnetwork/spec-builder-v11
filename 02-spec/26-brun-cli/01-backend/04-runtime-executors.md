@@ -29,7 +29,7 @@ import (
     "encoding/json"
     "strings"
 
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
 )
 
 type RuntimeType byte
@@ -79,14 +79,14 @@ func Values() []RuntimeType {
     return values
 }
 
-func Parse(value string) (RuntimeType, *apperror.AppError) {
+func Parse(value string) (RuntimeType, *appfault.AppError) {
     for k, v := range variantLabels {
         if strings.EqualFold(v, value) {
             return k, nil
         }
     }
 
-    return 0, apperror.New(
+    return 0, appfault.New(
         7106,
         "invalid runtime type: "+value,
     )
@@ -220,13 +220,13 @@ import (
     "context"
 
     "brun/internal/enums/runtimetype"
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
 )
 
 type Executor interface {
-    Execute(context context.Context, cmd *Command) apperror.Result[*ExecutionResult]
-    Validate() *apperror.AppError
-    GetVersion() apperror.Result[string]
+    Execute(context context.Context, cmd *Command) appfault.Result[*ExecutionResult]
+    Validate() *appfault.AppError
+    GetVersion() appfault.Result[string]
     ParseErrors(output string) []BuildError
 }
 
@@ -258,7 +258,7 @@ type PowerShellExecutor struct {
     logger  *LogService
 }
 
-func (e *PowerShellExecutor) Execute(context context.Context, cmd *Command) apperror.Result[*ExecutionResult] {
+func (e *PowerShellExecutor) Execute(context context.Context, cmd *Command) appfault.Result[*ExecutionResult] {
     // Build command
     args := append(e.args, "-Command", cmd.Script)
     if cmd.Script != "" && isFilePath(cmd.Script) {
@@ -280,7 +280,7 @@ func (e *PowerShellExecutor) Execute(context context.Context, cmd *Command) appe
     runErr := execCmd.Run()
     endTime := time.Now()
     
-    return apperror.Ok(&ExecutionResult{
+    return appfault.Ok(&ExecutionResult{
         Success:   runErr == nil,
         ExitCode:  getExitCode(runErr),
         Stdout:    stdout.String(),
@@ -333,7 +333,7 @@ type NodeJSExecutor struct {
     logger         *LogService
 }
 
-func (e *NodeJSExecutor) Execute(context context.Context, cmd *Command) apperror.Result[*ExecutionResult] {
+func (e *NodeJSExecutor) Execute(context context.Context, cmd *Command) appfault.Result[*ExecutionResult] {
     var execPath string
     var args []string
     
@@ -358,11 +358,11 @@ func (e *NodeJSExecutor) Execute(context context.Context, cmd *Command) apperror
     // ... execution logic (same pattern as PowerShellExecutor)
 }
 
-func (e *NodeJSExecutor) Validate() *apperror.AppError {
+func (e *NodeJSExecutor) Validate() *appfault.AppError {
     // Check if package manager is installed using enum's String() method
     _, lookErr := exec.LookPath(e.packageManager.String())
     if lookErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             lookErr,
             7201,
             e.packageManager.Label()+" not found in PATH",
@@ -422,7 +422,7 @@ type GolangExecutor struct {
     logger     *LogService
 }
 
-func (e *GolangExecutor) Execute(context context.Context, cmd *Command) apperror.Result[*ExecutionResult] {
+func (e *GolangExecutor) Execute(context context.Context, cmd *Command) appfault.Result[*ExecutionResult] {
     results := &ExecutionResult{
         StartTime: time.Now(),
     }
@@ -431,8 +431,8 @@ func (e *GolangExecutor) Execute(context context.Context, cmd *Command) apperror
     if !e.modTidy.IsSkip() {
         tidyResult := e.runModTidy(context, cmd)
         if tidyResult.ExitCode != 0 && e.modTidy.IsForce() {
-            return apperror.Fail[*ExecutionResult](
-                apperror.New(
+            return appfault.Fail[*ExecutionResult](
+                appfault.New(
                     7211,
                     "go mod tidy failed",
                 ),
@@ -467,7 +467,7 @@ func (e *GolangExecutor) Execute(context context.Context, cmd *Command) apperror
     results.Stderr += stderr.String()
     results.Errors = e.ParseErrors(stderr.String())
     
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 
 func (e *GolangExecutor) runModTidy(context context.Context, cmd *Command) *ExecutionResult {
@@ -539,9 +539,9 @@ type ExecutorFactory struct {
     logger *LogService
 }
 
-func (f *ExecutorFactory) Create(rt runtimetype.RuntimeType) apperror.Result[Executor] {
+func (f *ExecutorFactory) Create(rt runtimetype.RuntimeType) appfault.Result[Executor] {
     if rt.IsPowerShell() {
-        return apperror.Ok[Executor](&PowerShellExecutor{
+        return appfault.Ok[Executor](&PowerShellExecutor{
             path:   f.config.Runtimes.PowerShell.Path,
             args:   f.config.Runtimes.PowerShell.Args,
             logger: f.logger,
@@ -549,7 +549,7 @@ func (f *ExecutorFactory) Create(rt runtimetype.RuntimeType) apperror.Result[Exe
     }
     
     if rt.IsNodeJs() {
-        return apperror.Ok[Executor](&NodeJSExecutor{
+        return appfault.Ok[Executor](&NodeJSExecutor{
             nodePath:       f.config.Runtimes.NodeJS.Path,
             packageManager: f.config.Runtimes.NodeJS.PackageManager,
             logger:         f.logger,
@@ -557,7 +557,7 @@ func (f *ExecutorFactory) Create(rt runtimetype.RuntimeType) apperror.Result[Exe
     }
     
     if rt.IsGolang() {
-        return apperror.Ok[Executor](&GolangExecutor{
+        return appfault.Ok[Executor](&GolangExecutor{
             goPath:     f.config.Runtimes.Golang.Path,
             buildFlags: f.config.Runtimes.Golang.BuildFlags,
             modTidy:    f.config.Runtimes.Golang.ModTidy,
@@ -565,8 +565,8 @@ func (f *ExecutorFactory) Create(rt runtimetype.RuntimeType) apperror.Result[Exe
         })
     }
     
-    return apperror.Fail[Executor](
-        apperror.New(
+    return appfault.Fail[Executor](
+        appfault.New(
             7106,
             "unknown runtime: "+rt.Label(),
         ),
@@ -579,12 +579,12 @@ func (f *ExecutorFactory) Create(rt runtimetype.RuntimeType) apperror.Result[Exe
 ## Runtime Version Detection
 
 ```go
-func (e *GolangExecutor) GetVersion() apperror.Result[string] {
+func (e *GolangExecutor) GetVersion() appfault.Result[string] {
     cmd := exec.Command(e.goPath, "version")
     output, execErr := cmd.Output()
     if execErr != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(
+        return appfault.Fail[string](
+            appfault.Wrap(
                 execErr,
                 7201,
                 "go runtime not found",
@@ -593,15 +593,15 @@ func (e *GolangExecutor) GetVersion() apperror.Result[string] {
     }
 
     // Parse: "go version go1.21.0 linux/amd64"
-    return apperror.Ok(parseGoVersion(string(output)))
+    return appfault.Ok(parseGoVersion(string(output)))
 }
 
-func (e *NodeJSExecutor) GetVersion() apperror.Result[string] {
+func (e *NodeJSExecutor) GetVersion() appfault.Result[string] {
     cmd := exec.Command(e.nodePath, "--version")
     output, execErr := cmd.Output()
     if execErr != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(
+        return appfault.Fail[string](
+            appfault.Wrap(
                 execErr,
                 7201,
                 "node runtime not found",
@@ -609,15 +609,15 @@ func (e *NodeJSExecutor) GetVersion() apperror.Result[string] {
         )
     }
 
-    return apperror.Ok(strings.TrimSpace(string(output)))
+    return appfault.Ok(strings.TrimSpace(string(output)))
 }
 
-func (e *PowerShellExecutor) GetVersion() apperror.Result[string] {
+func (e *PowerShellExecutor) GetVersion() appfault.Result[string] {
     cmd := exec.Command(e.path, "-Command", "$PSVersionTable.PSVersion.ToString()")
     output, execErr := cmd.Output()
     if execErr != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(
+        return appfault.Fail[string](
+            appfault.Wrap(
                 execErr,
                 7201,
                 "powershell runtime not found",
@@ -625,7 +625,7 @@ func (e *PowerShellExecutor) GetVersion() apperror.Result[string] {
         )
     }
 
-    return apperror.Ok(strings.TrimSpace(string(output)))
+    return appfault.Ok(strings.TrimSpace(string(output)))
 }
 ```
 

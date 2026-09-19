@@ -183,7 +183,7 @@ type FileNode struct {
     Dependents   []string
 }
 
-func (g *DependencyGraph) TopologicalSort() apperror.Result[[][]string] {
+func (g *DependencyGraph) TopologicalSort() appfault.Result[[][]string] {
     batches := [][]string{}
     remaining := make(map[string]bool)
     
@@ -202,7 +202,7 @@ func (g *DependencyGraph) TopologicalSort() apperror.Result[[][]string] {
         }
         
         if len(batch) == 0 {
-            return nil, apperror.New(
+            return nil, appfault.New(
                 ErrCircularDependency,
                 "circular dependency detected",
             )
@@ -257,10 +257,10 @@ type FileDefinition struct {
     ExternalDeps    []string        // External spec references
 }
 
-func (p *SpecParser) ParseSpec(specPath string) apperror.Result[ParsedSpec] {
+func (p *SpecParser) ParseSpec(specPath string) appfault.Result[ParsedSpec] {
     content, err := pathutil.ReadFile(specPath)
     if err != nil {
-        return apperror.FailWrap[ParsedSpec](
+        return appfault.FailWrap[ParsedSpec](
             err,
             "E8000",
             "failed to read spec",
@@ -282,7 +282,7 @@ func (p *SpecParser) ParseSpec(specPath string) apperror.Result[ParsedSpec] {
     // Extract cross-references
     parsed.Dependencies = p.extractCrossReferences(content)
     
-    return apperror.Ok(*parsed)
+    return appfault.Ok(*parsed)
 }
 ```
 

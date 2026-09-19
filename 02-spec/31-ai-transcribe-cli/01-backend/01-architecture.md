@@ -177,9 +177,9 @@ type STTEngine struct {
 
 type STTProvider interface {
     Name() string
-    Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) apperror.Result[Transcript]
-    TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) apperror.Result[<-chan *PartialTranscript]
-    DetectLanguage(context stdctx.Context, audio *AudioChunk) apperror.Result[LanguageDetection]
+    Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) appfault.Result[Transcript]
+    TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) appfault.Result[<-chan *PartialTranscript]
+    DetectLanguage(context stdctx.Context, audio *AudioChunk) appfault.Result[LanguageDetection]
     IsAvailable() bool
     Health() ProviderStatus
 }
@@ -208,10 +208,10 @@ type TTSEngine struct {
 
 type TTSProvider interface {
     Name() string
-    Synthesize(context stdctx.Context, text string, opts *SynthesizeOptions) apperror.Result[AudioResult]
-    SynthesizeStream(context stdctx.Context, text string, opts *SynthesizeOptions) apperror.Result[<-chan *AudioChunk]
-    ListVoices() apperror.Result[[]Voice]
-    CloneVoice(context stdctx.Context, name string, samples [][]byte) apperror.Result[Voice]
+    Synthesize(context stdctx.Context, text string, opts *SynthesizeOptions) appfault.Result[AudioResult]
+    SynthesizeStream(context stdctx.Context, text string, opts *SynthesizeOptions) appfault.Result[<-chan *AudioChunk]
+    ListVoices() appfault.Result[[]Voice]
+    CloneVoice(context stdctx.Context, name string, samples [][]byte) appfault.Result[Voice]
     IsAvailable() bool
     Health() ProviderStatus
 }
@@ -405,7 +405,7 @@ type ProviderConfig struct {
     Enabled    bool
 }
 
-func (ps *ProviderSelector) Select(context stdctx.Context) apperror.Result[STTProvider] {
+func (ps *ProviderSelector) Select(context stdctx.Context) appfault.Result[STTProvider] {
     // 1. Filter available providers
     available := ps.filterAvailable()
     
@@ -431,7 +431,7 @@ func (ps *ProviderSelector) Select(context stdctx.Context) apperror.Result[STTPr
         }
     }
     
-    return nil, apperror.New(
+    return nil, appfault.New(
         ErrSttProviderUnavailable,
         "no available stt provider",
     )
@@ -490,7 +490,7 @@ type VoiceDelegate struct {
     timeout    time.Duration
 }
 
-func (vd *VoiceDelegate) Transcribe(context stdctx.Context, audio []byte) apperror.Result[Transcript] {
+func (vd *VoiceDelegate) Transcribe(context stdctx.Context, audio []byte) appfault.Result[Transcript] {
     req, _ := http.NewRequestWithContext(context, httpmethod.Post.String(), 
         vd.endpoint+"/api/v1/transcribe", 
         bytes.NewReader(audio))
@@ -499,7 +499,7 @@ func (vd *VoiceDelegate) Transcribe(context stdctx.Context, audio []byte) apperr
     
     resp, err := vd.client.Do(req)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrSttDelegationFailed,
             "transcribe delegation",
@@ -609,7 +609,7 @@ type LoadedModel struct {
     UseCount   int64
 }
 
-func (mm *ModelManager) GetModel(name string) apperror.Result[LoadedModel] {
+func (mm *ModelManager) GetModel(name string) appfault.Result[LoadedModel] {
     mm.mu.Lock()
     defer mm.mu.Unlock()
     

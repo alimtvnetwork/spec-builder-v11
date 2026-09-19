@@ -538,9 +538,9 @@ type TracerConfig struct {
 }
 
 // InitTracer initializes OpenTelemetry tracer
-func InitTracer(cfg TracerConfig) apperror.Result[*sdktrace.TracerProvider] {
+func InitTracer(cfg TracerConfig) appfault.Result[*sdktrace.TracerProvider] {
     if !cfg.Enabled {
-        return apperror.Ok[*sdktrace.TracerProvider](nil)
+        return appfault.Ok[*sdktrace.TracerProvider](nil)
     }
 
     context := stdctx.Background()
@@ -553,7 +553,7 @@ func InitTracer(cfg TracerConfig) apperror.Result[*sdktrace.TracerProvider] {
         ),
     )
     if err != nil {
-        return apperror.FailWrap[*sdktrace.TracerProvider](
+        return appfault.FailWrap[*sdktrace.TracerProvider](
             err,
             ErrObservabilityTracerInit,
             "failed to create exporter",
@@ -569,7 +569,7 @@ func InitTracer(cfg TracerConfig) apperror.Result[*sdktrace.TracerProvider] {
         ),
     )
     if err != nil {
-        return apperror.FailWrap[*sdktrace.TracerProvider](
+        return appfault.FailWrap[*sdktrace.TracerProvider](
             err,
             ErrObservabilityResourceInit,
             "failed to create resource",
@@ -587,7 +587,7 @@ func InitTracer(cfg TracerConfig) apperror.Result[*sdktrace.TracerProvider] {
     )
 
     otel.SetTracerProvider(tp)
-    return apperror.Ok(tp)
+    return appfault.Ok(tp)
 }
 ```
 
@@ -642,7 +642,7 @@ type LogConfig struct {
 }
 
 // InitLogger initializes structured logger
-func InitLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
+func InitLogger(cfg LogConfig) appfault.Result[*zap.Logger] {
     level, err := zapcore.ParseLevel(cfg.Level)
     if err != nil {
         level = zapcore.InfoLevel
@@ -672,14 +672,14 @@ func InitLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
 
     logger, err := zapConfig.Build()
     if err != nil {
-        return apperror.FailWrap[*zap.Logger](
+        return appfault.FailWrap[*zap.Logger](
             err,
             ErrObservabilityLoggerInit,
             "failed to build logger",
         )
     }
 
-    return apperror.Ok(logger)
+    return appfault.Ok(logger)
 }
 ```
 

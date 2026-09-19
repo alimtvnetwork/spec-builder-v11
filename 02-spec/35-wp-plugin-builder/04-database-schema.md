@@ -353,7 +353,7 @@ func (v *VectorStore) Insert(embedding []float32, content string, meta RAGResult
     }).Error
 }
 
-func (v *VectorStore) Search(query []float32, topK int) apperror.Result[[]RAGResult] {
+func (v *VectorStore) Search(query []float32, topK int) appfault.Result[[]RAGResult] {
     // ORM EXCEPTION: db.Raw() required — sqlite-vec cosine similarity
     // has no native GORM equivalent. See ORM-Only Policy exceptions:
     // vector search operations where native ORM support is unavailable.

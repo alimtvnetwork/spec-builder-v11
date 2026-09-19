@@ -25,7 +25,7 @@ Main application spawns brun as a subprocess and reads JSON output.
 
 ```go
 // In main application
-func (app *App) runBuildCheck(profile string) apperror.Result[BuildResult] {
+func (app *App) runBuildCheck(profile string) appfault.Result[BuildResult] {
     cmd := exec.Command("brun", "check", 
         "--profile", profile,
         "--json",
@@ -43,12 +43,12 @@ func (app *App) runBuildCheck(profile string) apperror.Result[BuildResult] {
     
     var result BuildResult
     if unmarshalErr := json.Unmarshal(output, &result); unmarshalErr != nil {
-        return apperror.Fail[BuildResult](
-            apperror.Wrap(unmarshalErr, 7410, "failed to parse brun output"),
+        return appfault.Fail[BuildResult](
+            appfault.Wrap(unmarshalErr, 7410, "failed to parse brun output"),
         )
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -59,7 +59,7 @@ Import brun as a Go library.
 ```go
 import "github.com/user/brun/pkg/runner"
 
-func (app *App) runBuildCheck(profile string) apperror.Result[runner.ExecutionResult] {
+func (app *App) runBuildCheck(profile string) appfault.Result[runner.ExecutionResult] {
     r := runner.New(runner.Config{
         ConfigPath: "./config.json",
     })
@@ -174,7 +174,7 @@ type BuildError struct {
 }
 
 // execute runs brun with given arguments and parses JSON output
-func (r *BrunRunner) execute(context context.Context, args ...string) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) execute(context context.Context, args ...string) appfault.Result[ExecutionResult] {
     // Always request JSON output
     args = append(args, "--json", "--config", r.configPath)
     
@@ -198,8 +198,8 @@ func (r *BrunRunner) execute(context context.Context, args ...string) apperror.R
     var result ExecutionResult
     if stdout.Len() > 0 {
         if parseErr := json.Unmarshal(stdout.Bytes(), &result); parseErr != nil {
-            return apperror.Fail[ExecutionResult](
-                apperror.Wrap(parseErr, 7411, "failed to parse brun JSON output"),
+            return appfault.Fail[ExecutionResult](
+                appfault.Wrap(parseErr, 7411, "failed to parse brun JSON output"),
             )
         }
     }
@@ -208,8 +208,8 @@ func (r *BrunRunner) execute(context context.Context, args ...string) apperror.R
     if err != nil {
         // Context deadline exceeded
         if context.Err() == context.DeadlineExceeded {
-            return apperror.Fail[ExecutionResult](
-                apperror.New(7412, "brun execution timed out"),
+            return appfault.Fail[ExecutionResult](
+                appfault.New(7412, "brun execution timed out"),
             )
         }
         
@@ -218,21 +218,21 @@ func (r *BrunRunner) execute(context context.Context, args ...string) apperror.R
         if errors.As(err, &exitErr) {
             // If we have parsed result, return it (contains error details)
             if result.RunId != "" {
-                return apperror.Ok(result)
+                return appfault.Ok(result)
             }
             // Otherwise, construct error from stderr
-            return apperror.Fail[ExecutionResult](
-                apperror.New(7413, "brun exited with code "+strconv.Itoa(exitErr.ExitCode())+": "+stderr.String()),
+            return appfault.Fail[ExecutionResult](
+                appfault.New(7413, "brun exited with code "+strconv.Itoa(exitErr.ExitCode())+": "+stderr.String()),
             )
         }
         
         // Other errors (binary not found, permission denied, etc.)
-        return apperror.Fail[ExecutionResult](
-            apperror.Wrap(err, 7414, "failed to execute brun"),
+        return appfault.Fail[ExecutionResult](
+            appfault.Wrap(err, 7414, "failed to execute brun"),
         )
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -240,7 +240,7 @@ func (r *BrunRunner) execute(context context.Context, args ...string) apperror.R
 
 ```go
 // Check runs build verification without producing artifacts
-func (r *BrunRunner) Check(context context.Context, opts CheckOptions) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) Check(context context.Context, opts CheckOptions) appfault.Result[ExecutionResult] {
     args := []string{"check"}
     
     if opts.Profile != "" {
@@ -275,7 +275,7 @@ type CheckOptions struct {
 }
 
 // Build executes a full build using a profile
-func (r *BrunRunner) Build(context context.Context, opts BuildOptions) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) Build(context context.Context, opts BuildOptions) appfault.Result[ExecutionResult] {
     args := []string{"build"}
     
     if opts.Profile != "" {
@@ -302,7 +302,7 @@ type BuildOptions struct {
 }
 
 // Run executes application with health check waiting
-func (r *BrunRunner) Run(context context.Context, opts RunOptions) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) Run(context context.Context, opts RunOptions) appfault.Result[ExecutionResult] {
     args := []string{"run"}
     
     if opts.App != "" {
@@ -347,7 +347,7 @@ type RunOptions struct {
 }
 
 // Port checks port availability
-func (r *BrunRunner) Port(context context.Context, opts PortOptions) apperror.Result[PortResult] {
+func (r *BrunRunner) Port(context context.Context, opts PortOptions) appfault.Result[PortResult] {
     args := []string{"port"}
     
     if opts.Check > 0 {
@@ -369,7 +369,7 @@ func (r *BrunRunner) Port(context context.Context, opts PortOptions) apperror.Re
     
     execResult := r.execute(context, args...)
     if execResult.IsErr() {
-        return apperror.Fail[PortResult](execResult.Err())
+        return appfault.Fail[PortResult](execResult.Err())
     }
     result := execResult.Value()
     
@@ -378,7 +378,7 @@ func (r *BrunRunner) Port(context context.Context, opts PortOptions) apperror.Re
     portResult.RequestedPort = opts.Check
     portResult.Available = result.Success
     
-    return apperror.Ok(portResult)
+    return appfault.Ok(portResult)
 }
 
 type PortOptions struct {
@@ -403,7 +403,7 @@ type PortStatus struct {
 }
 
 // ValidateConfig validates a configuration file
-func (r *BrunRunner) ValidateConfig(context context.Context, configPath string) apperror.Result[ExecutionResult] {
+func (r *BrunRunner) ValidateConfig(context context.Context, configPath string) appfault.Result[ExecutionResult] {
     args := []string{"config", "validate"}
     if configPath != "" {
         args = append(args, "--config", configPath)
@@ -412,16 +412,16 @@ func (r *BrunRunner) ValidateConfig(context context.Context, configPath string) 
 }
 
 // Health checks brun availability and runtime status
-func (r *BrunRunner) Health(context context.Context) apperror.Result[HealthResult] {
+func (r *BrunRunner) Health(context context.Context) appfault.Result[HealthResult] {
     args := []string{"--health"}
     
     execResult := r.execute(context, args...)
     if execResult.IsErr() {
-        return apperror.Fail[HealthResult](execResult.Err())
+        return appfault.Fail[HealthResult](execResult.Err())
     }
     
     // Parse health-specific response
-    return apperror.Ok(HealthResult{
+    return appfault.Ok(HealthResult{
         Status:  "healthy",
         Version: "1.0.0",
     })
@@ -457,11 +457,11 @@ import (
 )
 
 // ParseResultFromFile reads a brun result from a log file
-func ParseResultFromFile(path string) apperror.Result[ExecutionResult] {
+func ParseResultFromFile(path string) appfault.Result[ExecutionResult] {
     f, err := os.Open(path)
     if err != nil {
-        return apperror.Fail[ExecutionResult](
-            apperror.Wrap(err, 7415, "failed to open result file"),
+        return appfault.Fail[ExecutionResult](
+            appfault.Wrap(err, 7415, "failed to open result file"),
         )
     }
     defer f.Close()
@@ -470,25 +470,25 @@ func ParseResultFromFile(path string) apperror.Result[ExecutionResult] {
 }
 
 // ParseResultFromReader parses brun JSON from any reader
-func ParseResultFromReader(reader io.Reader) apperror.Result[ExecutionResult] {
+func ParseResultFromReader(reader io.Reader) appfault.Result[ExecutionResult] {
     var result ExecutionResult
     if err := json.NewDecoder(reader).Decode(&result); err != nil {
-        return apperror.Fail[ExecutionResult](
-            apperror.Wrap(err, 7416, "failed to decode brun result"),
+        return appfault.Fail[ExecutionResult](
+            appfault.Wrap(err, 7416, "failed to decode brun result"),
         )
     }
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 // ParseResultFromBytes parses brun JSON from byte slice
-func ParseResultFromBytes(data []byte) apperror.Result[ExecutionResult] {
+func ParseResultFromBytes(data []byte) appfault.Result[ExecutionResult] {
     var result ExecutionResult
     if err := json.Unmarshal(data, &result); err != nil {
-        return apperror.Fail[ExecutionResult](
-            apperror.Wrap(err, 7417, "failed to unmarshal brun result"),
+        return appfault.Fail[ExecutionResult](
+            appfault.Wrap(err, 7417, "failed to unmarshal brun result"),
         )
     }
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 // ErrorsToMap converts build errors to a file-grouped map for AI processing
@@ -639,7 +639,7 @@ func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) 
             Tidy:    "run",
         })
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrBrunExecutionFailed,
                 "brun execution",
@@ -654,7 +654,7 @@ func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) 
         
         // Step 3: No errors to fix?
         if len(result.Errors) == 0 {
-            return apperror.New(
+            return appfault.New(
                 ErrBuildFailedNoErrors,
                 "build failed but no errors captured",
             ).WithContext("exitCode", result.ExitCode)
@@ -672,7 +672,7 @@ func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) 
             Language:    detectLanguage(profile),
         })
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrAiFixGenerationFailed,
                 "ai fix generation",
@@ -682,7 +682,7 @@ func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) 
         // Step 6: Apply fixes to filesystem
         for _, fix := range fixes {
             if err := applyFix(fix); err != nil {
-                return apperror.Wrap(
+                return appfault.Wrap(
                     err,
                     ErrFixApplyFailed,
                     "apply fix",
@@ -695,7 +695,7 @@ func (s *BuildService) BuildWithAutoFix(context stdctx.Context, profile string) 
         log.Printf("Fixes applied, retrying build...")
     }
     
-    return apperror.New(
+    return appfault.New(
         ErrMaxRetriesExceeded,
         "max retry attempts exceeded",
     ).WithContext("maxRetries", s.maxRetry)
@@ -706,7 +706,7 @@ func detectLanguage(profile string) string {
     return "go" // Simplified
 }
 
-func applyFix(fix ai.CodeFix) *apperror.AppError {
+func applyFix(fix ai.CodeFix) *appfault.AppError {
     // Write fix.Content to fix.File
     return pathutil.WriteFile(fix.File, []byte(fix.Content), 0644)
 }
@@ -769,7 +769,7 @@ func (f *AIErrorFixer) FixBuildErrors(context stdctx.Context, profile string) er
         // Run build check
         result, err := f.runner.Check(ctx, profile)
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrBrunExecutionFailed,
                 "build check",
@@ -784,7 +784,7 @@ func (f *AIErrorFixer) FixBuildErrors(context stdctx.Context, profile string) er
         
         // No errors but failed (shouldn't happen)
         if len(result.Errors) == 0 {
-            return apperror.New(
+            return appfault.New(
                 ErrBuildFailedNoErrors,
                 "build failed but no errors captured",
             )
@@ -796,7 +796,7 @@ func (f *AIErrorFixer) FixBuildErrors(context stdctx.Context, profile string) er
         // Get AI fix
         fix, err := f.ai.GenerateFix(ctx, prompt)
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrAiFixGenerationFailed,
                 "ai fix generation",
@@ -805,7 +805,7 @@ func (f *AIErrorFixer) FixBuildErrors(context stdctx.Context, profile string) er
         
         // Apply fix
         if err := f.fileWriter.ApplyFix(fix); err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrFixApplyFailed,
                 "apply fix",
@@ -815,7 +815,7 @@ func (f *AIErrorFixer) FixBuildErrors(context stdctx.Context, profile string) er
         f.log.Info("Applied AI fix", "attempt", attempt+1, "errors", len(result.Errors))
     }
     
-    return apperror.New(
+    return appfault.New(
         ErrMaxRetriesExceeded,
         "max retries exceeded",
     ).WithContext("maxRetries", f.maxRetries)

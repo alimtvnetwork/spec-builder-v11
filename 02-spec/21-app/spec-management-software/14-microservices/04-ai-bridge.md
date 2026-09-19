@@ -135,26 +135,26 @@ type Provider interface {
     Available(context stdctx.Context) bool
     
     // Models returns list of available models on this provider
-    Models(context stdctx.Context) apperror.Result[[]ModelInfo]
+    Models(context stdctx.Context) appfault.Result[[]ModelInfo]
     
     // LoadModel loads a model into memory (may be no-op for some providers)
-    LoadModel(context stdctx.Context, modelId string) *apperror.AppError
+    LoadModel(context stdctx.Context, modelId string) *appfault.AppError
     
     // UnloadModel removes model from memory
-    UnloadModel(context stdctx.Context, modelId string) *apperror.AppError
+    UnloadModel(context stdctx.Context, modelId string) *appfault.AppError
     
     // ModelStatus returns current status of a model
-    ModelStatus(context stdctx.Context, modelId string) apperror.Result[ModelStatus]
+    ModelStatus(context stdctx.Context, modelId string) appfault.Result[ModelStatus]
     
     // Complete performs a chat completion (non-streaming)
-    Complete(context stdctx.Context, req CompletionRequest) apperror.Result[CompletionResponse]
+    Complete(context stdctx.Context, req CompletionRequest) appfault.Result[CompletionResponse]
     
     // Stream performs a streaming chat completion
     // Returns a channel that emits tokens until completion or error
-    Stream(context stdctx.Context, req CompletionRequest) apperror.Result[<-chan StreamChunk]
+    Stream(context stdctx.Context, req CompletionRequest) appfault.Result[<-chan StreamChunk]
     
     // Embeddings generates embeddings for input text (optional capability)
-    Embeddings(context stdctx.Context, req EmbeddingRequest) apperror.Result[EmbeddingResponse]
+    Embeddings(context stdctx.Context, req EmbeddingRequest) appfault.Result[EmbeddingResponse]
 }
 
 // ModelInfo describes an available model
@@ -237,7 +237,7 @@ type StreamChunk struct {
     Delta   *DeltaChoice `json:",omitempty"`
     
     // Error is set if streaming encountered an error
-    Error   *apperror.AppError `json:",omitempty"`
+    Error   *appfault.AppError `json:",omitempty"`
     
     // Done signals stream completion
     Done    bool
@@ -393,7 +393,7 @@ func (o *OllamaAdapter) Available(context stdctx.Context) bool {
 }
 
 // Models returns all models available on Ollama
-func (o *OllamaAdapter) Models(context stdctx.Context) apperror.Result[[]ModelInfo] {
+func (o *OllamaAdapter) Models(context stdctx.Context) appfault.Result[[]ModelInfo] {
     _, file, line, _ := runtime.Caller(0)
     o.logger.Debug("fetching Ollama models",
         "func", "Models",
@@ -447,7 +447,7 @@ func (o *OllamaAdapter) Models(context stdctx.Context) apperror.Result[[]ModelIn
 }
 
 // Stream performs streaming chat completion via Ollama
-func (o *OllamaAdapter) Stream(context stdctx.Context, req CompletionRequest) apperror.Result[<-chan StreamChunk] {
+func (o *OllamaAdapter) Stream(context stdctx.Context, req CompletionRequest) appfault.Result[<-chan StreamChunk] {
     _, file, line, _ := runtime.Caller(0)
     o.logger.Info("starting Ollama stream",
         "func", "Stream",
@@ -681,15 +681,15 @@ func (o *OllamaAdapter) LoadModel(context stdctx.Context, modelId string) error 
 }
 
 // ModelStatus checks if model is loaded in Ollama
-func (o *OllamaAdapter) ModelStatus(context stdctx.Context, modelId string) apperror.Result[ModelStatus] {
+func (o *OllamaAdapter) ModelStatus(context stdctx.Context, modelId string) appfault.Result[ModelStatus] {
     req, err := http.NewRequestWithContext(context, httpmethod.Get.String(), o.baseUrl+"/api/ps", nil)
     if err != nil {
-        return apperror.FailNew[ModelStatus](ErrProviderUnavailable, "failed to create request")
+        return appfault.FailNew[ModelStatus](ErrProviderUnavailable, "failed to create request")
     }
     
     resp, err := o.httpClient.Do(req)
     if err != nil {
-        return apperror.FailNew[ModelStatus](ErrProviderUnavailable, "failed to check status")
+        return appfault.FailNew[ModelStatus](ErrProviderUnavailable, "failed to check status")
     }
     defer resp.Body.Close()
     
@@ -701,20 +701,20 @@ func (o *OllamaAdapter) ModelStatus(context stdctx.Context, modelId string) appe
     }
     
     if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-        return apperror.FailNew[ModelStatus](ErrProviderUnavailable, "failed to decode response")
+        return appfault.FailNew[ModelStatus](ErrProviderUnavailable, "failed to decode response")
     }
     
     for _, m := range result.Models {
         if m.Name == modelId {
-            return apperror.Ok(ModelStatusLoaded)
+            return appfault.Ok(ModelStatusLoaded)
         }
     }
     
-    return apperror.Ok(ModelStatusUnloaded)
+    return appfault.Ok(ModelStatusUnloaded)
 }
 
 // Complete performs non-streaming completion
-func (o *OllamaAdapter) Complete(context stdctx.Context, req CompletionRequest) apperror.Result[CompletionResponse] {
+func (o *OllamaAdapter) Complete(context stdctx.Context, req CompletionRequest) appfault.Result[CompletionResponse] {
     _, file, line, _ := runtime.Caller(0)
     o.logger.Info("Ollama completion request",
         "func", "Complete",
@@ -728,25 +728,25 @@ func (o *OllamaAdapter) Complete(context stdctx.Context, req CompletionRequest) 
     
     body, err := json.Marshal(ollamaReq)
     if err != nil {
-        return apperror.FailNew[CompletionResponse](ErrProviderUnavailable, "failed to marshal request")
+        return appfault.FailNew[CompletionResponse](ErrProviderUnavailable, "failed to marshal request")
     }
     
     httpReq, err := http.NewRequestWithContext(context, httpmethod.Post.String(), o.baseUrl+"/api/chat", bytes.NewReader(body))
     if err != nil {
-        return apperror.FailNew[CompletionResponse](ErrProviderUnavailable, "failed to create request")
+        return appfault.FailNew[CompletionResponse](ErrProviderUnavailable, "failed to create request")
     }
 
     httpReq.Header.Set("Content-Type", "application/json")
     
     resp, err := o.httpClient.Do(httpReq)
     if err != nil {
-        return apperror.FailNew[CompletionResponse](ErrProviderUnavailable, "failed to connect")
+        return appfault.FailNew[CompletionResponse](ErrProviderUnavailable, "failed to connect")
     }
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
         bodyBytes, _ := io.ReadAll(resp.Body)
-        return apperror.FailNew[CompletionResponse](
+        return appfault.FailNew[CompletionResponse](
             ErrProviderRejected,
             fmt.Sprintf("Ollama returned %d: %s", resp.StatusCode, string(bodyBytes)),
         )
@@ -765,10 +765,10 @@ func (o *OllamaAdapter) Complete(context stdctx.Context, req CompletionRequest) 
     }
     
     if err := json.NewDecoder(resp.Body).Decode(&ollamaResp); err != nil {
-        return apperror.FailNew[CompletionResponse](ErrProviderUnavailable, "failed to decode response")
+        return appfault.FailNew[CompletionResponse](ErrProviderUnavailable, "failed to decode response")
     }
     
-    return apperror.Ok(CompletionResponse{
+    return appfault.Ok(CompletionResponse{
         Id:      req.RequestId,
         Model:   ollamaResp.Model,
         Created: time.Now().Unix(),
@@ -799,7 +799,7 @@ func (o *OllamaAdapter) UnloadModel(context stdctx.Context, modelId string) erro
 }
 
 // Embeddings generates embeddings via Ollama
-func (o *OllamaAdapter) Embeddings(context stdctx.Context, req EmbeddingRequest) apperror.Result[EmbeddingResponse] {
+func (o *OllamaAdapter) Embeddings(context stdctx.Context, req EmbeddingRequest) appfault.Result[EmbeddingResponse] {
     _, file, line, _ := runtime.Caller(0)
     o.logger.Info("Ollama embedding request",
         "func", "Embeddings",
@@ -825,14 +825,14 @@ func (o *OllamaAdapter) Embeddings(context stdctx.Context, req EmbeddingRequest)
         
         httpReq, err := http.NewRequestWithContext(context, httpmethod.Post.String(), o.baseUrl+"/api/embeddings", bytes.NewReader(body))
         if err != nil {
-            return apperror.FailNew[EmbeddingResponse](ErrProviderUnavailable, "failed to create request")
+            return appfault.FailNew[EmbeddingResponse](ErrProviderUnavailable, "failed to create request")
         }
 
         httpReq.Header.Set("Content-Type", "application/json")
         
         resp, err := o.httpClient.Do(httpReq)
         if err != nil {
-            return apperror.FailNew[EmbeddingResponse](ErrProviderUnavailable, "failed to get embedding")
+            return appfault.FailNew[EmbeddingResponse](ErrProviderUnavailable, "failed to get embedding")
         }
         
         // EXEMPTED: External API (Ollama) — lowercase keys
@@ -846,7 +846,7 @@ func (o *OllamaAdapter) Embeddings(context stdctx.Context, req EmbeddingRequest)
         totalTokens += len(input) / 4 // Rough estimate
     }
     
-    return apperror.Ok(EmbeddingResponse{
+    return appfault.Ok(EmbeddingResponse{
         Model:      req.Model,
         Embeddings: embeddings,
         Usage: Usage{
@@ -937,7 +937,7 @@ func (l *LlamaAdapter) Available(context stdctx.Context) bool {
 }
 
 // Models returns models available in router mode
-func (l *LlamaAdapter) Models(context stdctx.Context) apperror.Result[[]ModelInfo] {
+func (l *LlamaAdapter) Models(context stdctx.Context) appfault.Result[[]ModelInfo] {
     _, file, line, _ := runtime.Caller(0)
     l.logger.Debug("fetching llama.cpp models",
         "func", "Models",
@@ -980,7 +980,7 @@ func (l *LlamaAdapter) Models(context stdctx.Context) apperror.Result[[]ModelInf
 }
 
 // LoadModel loads a model in router mode
-func (l *LlamaAdapter) LoadModel(context stdctx.Context, modelId string) *apperror.AppError {
+func (l *LlamaAdapter) LoadModel(context stdctx.Context, modelId string) *appfault.AppError {
     _, file, line, _ := runtime.Caller(0)
     l.logger.Info("loading model in llama.cpp",
         "func", "LoadModel",
@@ -1014,7 +1014,7 @@ func (l *LlamaAdapter) LoadModel(context stdctx.Context, modelId string) *apperr
 }
 
 // Stream performs streaming completion via llama.cpp OpenAI-compatible endpoint
-func (l *LlamaAdapter) Stream(context stdctx.Context, req CompletionRequest) apperror.Result[<-chan StreamChunk] {
+func (l *LlamaAdapter) Stream(context stdctx.Context, req CompletionRequest) appfault.Result[<-chan StreamChunk] {
     _, file, line, _ := runtime.Caller(0)
     l.logger.Info("starting llama.cpp stream",
         "func", "Stream",
@@ -1158,10 +1158,10 @@ func (l *LlamaAdapter) Stream(context stdctx.Context, req CompletionRequest) app
 // Complete, UnloadModel, ModelStatus, Embeddings implementations follow same pattern...
 // (Abbreviated for specification - full implementation mirrors Ollama adapter structure)
 
-func (l *LlamaAdapter) Complete(context stdctx.Context, req CompletionRequest) apperror.Result[CompletionResponse] {
+func (l *LlamaAdapter) Complete(context stdctx.Context, req CompletionRequest) appfault.Result[CompletionResponse] {
     // Implementation using /v1/chat/completions with stream: false
     // Returns parsed CompletionResponse
-    return apperror.FailNew[CompletionResponse](ErrProviderUnavailable, "not implemented")
+    return appfault.FailNew[CompletionResponse](ErrProviderUnavailable, "not implemented")
 }
 
 func (l *LlamaAdapter) UnloadModel(context stdctx.Context, modelId string) error {
@@ -1176,12 +1176,12 @@ func (l *LlamaAdapter) UnloadModel(context stdctx.Context, modelId string) error
     return nil
 }
 
-func (l *LlamaAdapter) ModelStatus(context stdctx.Context, modelId string) apperror.Result[ModelStatus] {
-    return apperror.Ok(ModelStatusUnknown)
+func (l *LlamaAdapter) ModelStatus(context stdctx.Context, modelId string) appfault.Result[ModelStatus] {
+    return appfault.Ok(ModelStatusUnknown)
 }
 
-func (l *LlamaAdapter) Embeddings(context stdctx.Context, req EmbeddingRequest) apperror.Result[EmbeddingResponse] {
-    return apperror.FailNew[EmbeddingResponse](ErrProviderUnavailable, "embeddings not supported")
+func (l *LlamaAdapter) Embeddings(context stdctx.Context, req EmbeddingRequest) appfault.Result[EmbeddingResponse] {
+    return appfault.FailNew[EmbeddingResponse](ErrProviderUnavailable, "embeddings not supported")
 }
 ```
 
@@ -1262,7 +1262,7 @@ func (ls *LlamaSwapAdapter) UnloadModel(context stdctx.Context, modelId string) 
 }
 
 // Models returns configured models from swap config
-func (ls *LlamaSwapAdapter) Models(context stdctx.Context) apperror.Result[[]ModelInfo] {
+func (ls *LlamaSwapAdapter) Models(context stdctx.Context) appfault.Result[[]ModelInfo] {
     models := make([]ModelInfo, 0, len(ls.swapConfig.Models))
     for alias := range ls.swapConfig.Models {
         models = append(models, ModelInfo{
@@ -1272,7 +1272,7 @@ func (ls *LlamaSwapAdapter) Models(context stdctx.Context) apperror.Result[[]Mod
         })
     }
 
-    return apperror.Ok(models)
+    return appfault.Ok(models)
 }
 ```
 
@@ -1367,7 +1367,7 @@ func (r *Registry) AddRoute(modelId string, route ModelRoute) {
 }
 
 // GetProvider returns provider for a model with failover support
-func (r *Registry) GetProvider(context stdctx.Context, modelId string) apperror.Result[Provider] {
+func (r *Registry) GetProvider(context stdctx.Context, modelId string) appfault.Result[Provider] {
     r.mu.RLock()
     defer r.mu.RUnlock()
     
@@ -1380,7 +1380,7 @@ func (r *Registry) GetProvider(context stdctx.Context, modelId string) apperror.
     }
     
     // Try providers in priority order
-    var lastErr *apperror.AppError
+    var lastErr *appfault.AppError
     for _, route := range routes {
         provider, ok := r.providers[route.ProviderId]
         if !ok {
@@ -1395,30 +1395,30 @@ func (r *Registry) GetProvider(context stdctx.Context, modelId string) apperror.
                 "provider", route.ProviderId,
             )
 
-            return apperror.Ok[Provider](provider)
+            return appfault.Ok[Provider](provider)
         }
         
-        lastErr = apperror.New(
+        lastErr = appfault.New(
             ErrProviderUnavailable,
             fmt.Sprintf("provider %s unavailable", route.ProviderId),
         )
     }
     
     if lastErr != nil {
-        return apperror.FailNew[Provider](
+        return appfault.FailNew[Provider](
             ErrFailoverExhausted,
             "all providers for model unavailable",
         )
     }
     
-    return apperror.FailNew[Provider](
+    return appfault.FailNew[Provider](
         ErrNoProviderAvailable,
         fmt.Sprintf("no provider configured for model %s", modelId),
     )
 }
 
 // findProviderWithModel searches all providers for a model
-func (r *Registry) findProviderWithModel(context stdctx.Context, modelId string) apperror.Result[Provider] {
+func (r *Registry) findProviderWithModel(context stdctx.Context, modelId string) appfault.Result[Provider] {
     for _, p := range r.providers {
         if !p.Available(context) {
             continue
@@ -1431,19 +1431,19 @@ func (r *Registry) findProviderWithModel(context stdctx.Context, modelId string)
         
         for _, m := range modelsResult.Value() {
             if m.Id == modelId {
-                return apperror.Ok[Provider](p)
+                return appfault.Ok[Provider](p)
             }
         }
     }
     
-    return apperror.FailNew[Provider](
+    return appfault.FailNew[Provider](
         ErrModelNotFound,
         fmt.Sprintf("model %s not found on any provider", modelId),
     )
 }
 
 // AllModels returns models from all providers
-func (r *Registry) AllModels(context stdctx.Context) apperror.Result[[]ModelInfo] {
+func (r *Registry) AllModels(context stdctx.Context) appfault.Result[[]ModelInfo] {
     r.mu.RLock()
     defer r.mu.RUnlock()
     
@@ -1472,7 +1472,7 @@ func (r *Registry) AllModels(context stdctx.Context) apperror.Result[[]ModelInfo
         }
     }
     
-    return apperror.Ok(allModels)
+    return appfault.Ok(allModels)
 }
 
 // HealthCheck returns status of all providers

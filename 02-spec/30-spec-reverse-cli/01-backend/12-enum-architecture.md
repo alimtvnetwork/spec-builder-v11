@@ -147,12 +147,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid language",
     ).WithContext("value", s)
@@ -275,12 +275,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid framework",
     ).WithContext("value", s)
@@ -379,12 +379,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid pattern type",
     ).WithContext("value", s)
@@ -478,12 +478,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid symbol type",
     ).WithContext("value", s)
@@ -568,12 +568,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid severity",
     ).WithContext("value", s)
@@ -664,12 +664,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid spec type",
     ).WithContext("value", s)
@@ -751,12 +751,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid output format",
     ).WithContext("value", s)
@@ -847,12 +847,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid knowledge category",
     ).WithContext("value", s)
@@ -949,12 +949,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid analysis depth",
     ).WithContext("value", s)
@@ -1042,12 +1042,12 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) { return Variant(i), nil }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid log level",
     ).WithContext("value", s)

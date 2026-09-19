@@ -404,9 +404,9 @@ func (s *SearchIntegrationService) ExecuteSearch(
     query string,
     presets []string,
     options SearchOptions,
-) apperror.Result[SearchResults] {
+) appfault.Result[SearchResults] {
     if !s.config.Enabled {
-        return apperror.FailNew[SearchResults](
+        return appfault.FailNew[SearchResults](
             "E5400",
             "search is disabled",
         )
@@ -415,7 +415,7 @@ func (s *SearchIntegrationService) ExecuteSearch(
     // Start chain step
     step, err := s.chainMgr.StartStep(chainId, "search", "Web Search: "+query)
     if err != nil {
-        return apperror.FailWrap[SearchResults](
+        return appfault.FailWrap[SearchResults](
             err,
             "E5401",
             "failed to start chain step",
@@ -431,7 +431,7 @@ func (s *SearchIntegrationService) ExecuteSearch(
     if err != nil {
         s.chainMgr.CompleteStep(chainId, step.Id, "failed", nil, 0, 0)
 
-        return apperror.FailWrap[SearchResults](
+        return appfault.FailWrap[SearchResults](
             err,
             "E5402",
             "gsearch execution failed",
@@ -441,7 +441,7 @@ func (s *SearchIntegrationService) ExecuteSearch(
     // Parse results
     var results SearchResults
     if err := json.Unmarshal(output, &results); err != nil {
-        return apperror.FailWrap[SearchResults](
+        return appfault.FailWrap[SearchResults](
             err,
             "E5403",
             "failed to parse search results",
@@ -482,7 +482,7 @@ func (s *SearchIntegrationService) ExecuteSearch(
         Engine:      results.Engine,
     }, 0, 0)
     
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 
 func (s *SearchIntegrationService) buildSearchArgs(
@@ -681,7 +681,7 @@ type GitHubSearcher struct {
     token  string
 }
 
-func (g *GitHubSearcher) Search(query string, opts SearchOptions) apperror.Result[SearchResults] {
+func (g *GitHubSearcher) Search(query string, opts SearchOptions) appfault.Result[SearchResults] {
     searchOpts := &github.SearchOptions{
         Sort:  "best-match",
         Order: "desc",
@@ -693,7 +693,7 @@ func (g *GitHubSearcher) Search(query string, opts SearchOptions) apperror.Resul
     // Search repositories
     repos, _, err := g.client.Search.Repositories(context.Background(), query, searchOpts)
     if err != nil {
-        return apperror.FailWrap[SearchResults](
+        return appfault.FailWrap[SearchResults](
             err,
             "E5410",
             "github repository search failed",
@@ -703,7 +703,7 @@ func (g *GitHubSearcher) Search(query string, opts SearchOptions) apperror.Resul
     // Search code
     code, _, err := g.client.Search.Code(context.Background(), query, searchOpts)
     if err != nil {
-        return apperror.FailWrap[SearchResults](
+        return appfault.FailWrap[SearchResults](
             err,
             "E5411",
             "github code search failed",
@@ -733,7 +733,7 @@ func (g *GitHubSearcher) Search(query string, opts SearchOptions) apperror.Resul
         })
     }
     
-    return apperror.Ok(*results)
+    return appfault.Ok(*results)
 }
 ```
 
@@ -745,7 +745,7 @@ type RedditSearcher struct {
     baseUrl string
 }
 
-func (r *RedditSearcher) Search(query string, opts SearchOptions) apperror.Result[SearchResults] {
+func (r *RedditSearcher) Search(query string, opts SearchOptions) appfault.Result[SearchResults] {
     url := fmt.Sprintf("%s/search.json?q=%s&limit=%d&sort=relevance",
         r.baseUrl,
         url.QueryEscape(query),
@@ -754,7 +754,7 @@ func (r *RedditSearcher) Search(query string, opts SearchOptions) apperror.Resul
     
     resp, err := r.client.Get(url)
     if err != nil {
-        return apperror.FailWrap[SearchResults](
+        return appfault.FailWrap[SearchResults](
             err,
             "E5412",
             "reddit search request failed",
@@ -764,7 +764,7 @@ func (r *RedditSearcher) Search(query string, opts SearchOptions) apperror.Resul
     
     var redditResp RedditSearchResponse
     if err := json.NewDecoder(resp.Body).Decode(&redditResp); err != nil {
-        return apperror.FailWrap[SearchResults](
+        return appfault.FailWrap[SearchResults](
             err,
             "E5413",
             "failed to parse reddit response",
@@ -786,7 +786,7 @@ func (r *RedditSearcher) Search(query string, opts SearchOptions) apperror.Resul
         })
     }
     
-    return apperror.Ok(*results)
+    return appfault.Ok(*results)
 }
 ```
 

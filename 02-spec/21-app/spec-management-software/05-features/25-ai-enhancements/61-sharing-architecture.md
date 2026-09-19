@@ -359,11 +359,11 @@ func NewShareService(
 }
 
 // CreateShare establishes a new share between projects
-func (s *ShareService) CreateShare(context stdctx.Context, req CreateShareRequest) apperror.Result[MemoryShare] {
+func (s *ShareService) CreateShare(context stdctx.Context, req CreateShareRequest) appfault.Result[MemoryShare] {
 	// Validate source resource exists
 	exists, err := s.files.Exists(context, req.SourceProjectId, req.ResourcePath)
 	if err != nil || !exists {
-		return apperror.FailNew[MemoryShare](
+		return appfault.FailNew[MemoryShare](
 			"E9100",
 			fmt.Sprintf("resource not found: %s", req.ResourcePath),
 		)
@@ -372,7 +372,7 @@ func (s *ShareService) CreateShare(context stdctx.Context, req CreateShareReques
 	// Validate user has permission on source project
 	hasAccess, err := s.projects.HasAccess(context, req.UserId, req.SourceProjectId, "admin")
 	if err != nil || !hasAccess {
-		return apperror.FailNew[MemoryShare](
+		return appfault.FailNew[MemoryShare](
 			"E9101",
 			"insufficient permissions on source project",
 		)
@@ -385,7 +385,7 @@ func (s *ShareService) CreateShare(context stdctx.Context, req CreateShareReques
 	// Calculate content hash
 	content, err := s.files.GetContent(context, req.SourceProjectId, req.ResourcePath)
 	if err != nil {
-		return apperror.FailWrap[MemoryShare](
+		return appfault.FailWrap[MemoryShare](
 			err,
 			"E9102",
 			"failed to read content",
@@ -422,7 +422,7 @@ func (s *ShareService) CreateShare(context stdctx.Context, req CreateShareReques
 
 	// Insert share
 	if err := s.insertShare(context, share); err != nil {
-		return apperror.FailWrap[MemoryShare](
+		return appfault.FailWrap[MemoryShare](
 			err,
 			"E9102",
 			"failed to create share",
@@ -454,11 +454,11 @@ func (s *ShareService) CreateShare(context stdctx.Context, req CreateShareReques
 		AccessLevel: req.AccessLevel,
 	})
 
-	return apperror.Ok(*share)
+	return appfault.Ok(*share)
 }
 
 // GetSharesForProject returns all shares where project is target
-func (s *ShareService) GetSharesForProject(context stdctx.Context, projectId string) apperror.Result[[]MemoryShare] {
+func (s *ShareService) GetSharesForProject(context stdctx.Context, projectId string) appfault.Result[[]MemoryShare] {
 	query := `
 		SELECT * FROM memory_shares 
 		WHERE target_project_id = ? AND status = 'active'
@@ -467,18 +467,18 @@ func (s *ShareService) GetSharesForProject(context stdctx.Context, projectId str
 
 	shares, err := s.queryShares(context, query, projectId)
 	if err != nil {
-		return apperror.FailWrap[[]MemoryShare](
+		return appfault.FailWrap[[]MemoryShare](
 			err,
 			"E9103",
 			"failed to query shares for project",
 		)
 	}
 
-	return apperror.Ok(shares)
+	return appfault.Ok(shares)
 }
 
 // GetSharesFromProject returns all shares where project is source
-func (s *ShareService) GetSharesFromProject(context stdctx.Context, projectId string) apperror.Result[[]MemoryShare] {
+func (s *ShareService) GetSharesFromProject(context stdctx.Context, projectId string) appfault.Result[[]MemoryShare] {
 	query := `
 		SELECT * FROM memory_shares 
 		WHERE source_project_id = ? AND status != 'revoked'
@@ -487,21 +487,21 @@ func (s *ShareService) GetSharesFromProject(context stdctx.Context, projectId st
 
 	shares, err := s.queryShares(context, query, projectId)
 	if err != nil {
-		return apperror.FailWrap[[]MemoryShare](
+		return appfault.FailWrap[[]MemoryShare](
 			err,
 			"E9103",
 			"failed to query shares from project",
 		)
 	}
 
-	return apperror.Ok(shares)
+	return appfault.Ok(shares)
 }
 
 // GetShareContent retrieves the actual content of a shared resource
-func (s *ShareService) GetShareContent(context stdctx.Context, shareId, userId string) apperror.Result[string] {
+func (s *ShareService) GetShareContent(context stdctx.Context, shareId, userId string) appfault.Result[string] {
 	share, err := s.GetShare(context, shareId)
 	if err != nil {
-		return apperror.FailWrap[string](
+		return appfault.FailWrap[string](
 			err,
 			"E9104",
 			"share not found",
@@ -510,7 +510,7 @@ func (s *ShareService) GetShareContent(context stdctx.Context, shareId, userId s
 
 	// Validate user has access
 	if err := s.validateAccess(context, share, userId); err != nil {
-		return apperror.FailWrap[string](
+		return appfault.FailWrap[string](
 			err,
 			"E9104",
 			"access denied",
@@ -519,13 +519,13 @@ func (s *ShareService) GetShareContent(context stdctx.Context, shareId, userId s
 
 	// Try cache first
 	if cached, err := s.getCachedContent(context, shareId); err == nil {
-		return apperror.Ok(cached)
+		return appfault.Ok(cached)
 	}
 
 	// Fetch from source
 	content, err := s.files.GetContent(context, share.SourceProjectId, share.ResourcePath)
 	if err != nil {
-		return apperror.FailWrap[string](
+		return appfault.FailWrap[string](
 			err,
 			"E9104",
 			"failed to fetch content",
@@ -536,7 +536,7 @@ func (s *ShareService) GetShareContent(context stdctx.Context, shareId, userId s
 	hash := s.hashContent(content)
 	s.cacheContent(context, shareId, content, hash)
 
-	return apperror.Ok(content)
+	return appfault.Ok(content)
 }
 
 // RevokeShare permanently disables a share
@@ -551,7 +551,7 @@ func (s *ShareService) RevokeShare(context stdctx.Context, shareId, userId, user
 		// Check if user is project admin
 		hasAccess, _ := s.projects.HasAccess(context, userId, share.SourceProjectId, "admin")
 		if !hasAccess {
-			return apperror.New(
+			return appfault.New(
 				ErrInsufficientPermissions,
 				"insufficient permissions to revoke share",
 			)
@@ -579,7 +579,7 @@ func (s *ShareService) UpdatePermissions(context stdctx.Context, shareId, userId
 	}
 
 	if share.SharedBy != userId {
-		return apperror.New(
+		return appfault.New(
 			ErrInsufficientPermissions,
 			"only the sharer can update permissions",
 		)
@@ -641,7 +641,7 @@ func (v *PermissionValidator) ValidateAccess(
 ) error {
 	// Check share status
 	if share.Status != "active" {
-		return apperror.New(
+		return appfault.New(
 			ErrShareNotActive,
 			"share is not active: "+share.Status,
 		)
@@ -649,7 +649,7 @@ func (v *PermissionValidator) ValidateAccess(
 
 	// Check expiration
 	if share.ExpiresAt != nil && time.Now().After(*share.ExpiresAt) {
-		return apperror.New(
+		return appfault.New(
 			ErrShareExpired,
 			"share has expired",
 		)
@@ -667,7 +667,7 @@ func (v *PermissionValidator) ValidateAccess(
 		if hasAccess {
 			return nil
 		}
-		return apperror.New(
+		return appfault.New(
 			ErrAccessDenied,
 			"not a workspace member",
 		)
@@ -678,7 +678,7 @@ func (v *PermissionValidator) ValidateAccess(
 		if hasAccess {
 			return nil
 		}
-		return apperror.New(
+		return appfault.New(
 			ErrAccessDenied,
 			"not a project member",
 		)
@@ -689,13 +689,13 @@ func (v *PermissionValidator) ValidateAccess(
 		if hasAccess {
 			return nil
 		}
-		return apperror.New(
+		return appfault.New(
 			ErrAccessDenied,
 			"access denied",
 		)
 	}
 
-	return apperror.New(
+	return appfault.New(
 		ErrUnknownAccessLevel,
 		"unknown access level",
 	)

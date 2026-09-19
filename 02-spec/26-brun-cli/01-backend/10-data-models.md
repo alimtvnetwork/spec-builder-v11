@@ -189,62 +189,62 @@ func (r *BuildRunRepository) Create(run *BuildRun) error {
     return r.db.Create(run).Error
 }
 
-func (r *BuildRunRepository) GetByRunId(runId string) apperror.Result[BuildRun] {
+func (r *BuildRunRepository) GetByRunId(runId string) appfault.Result[BuildRun] {
     var run BuildRun
     err := r.db.Preload("Errors").Preload("Assets").
         Where("RunId = ?", runId).
         First(&run).Error
     if err != nil {
-        return apperror.Fail[BuildRun](
-            apperror.Wrap(err, 7405, "build run not found"),
+        return appfault.Fail[BuildRun](
+            appfault.Wrap(err, 7405, "build run not found"),
         )
     }
-    return apperror.Ok(run)
+    return appfault.Ok(run)
 }
 
-func (r *BuildRunRepository) GetRecent(limit int) apperror.Result[[]BuildRun] {
+func (r *BuildRunRepository) GetRecent(limit int) appfault.Result[[]BuildRun] {
     var runs []BuildRun
     err := r.db.Preload("Errors").
         Order("CreatedAt DESC").
         Limit(limit).
         Find(&runs).Error
     if err != nil {
-        return apperror.Fail[[]BuildRun](
-            apperror.Wrap(err, 7406, "failed to get recent runs"),
+        return appfault.Fail[[]BuildRun](
+            appfault.Wrap(err, 7406, "failed to get recent runs"),
         )
     }
-    return apperror.Ok(runs)
+    return appfault.Ok(runs)
 }
 
-func (r *BuildRunRepository) GetByProfile(profileName string, limit int) apperror.Result[[]BuildRun] {
+func (r *BuildRunRepository) GetByProfile(profileName string, limit int) appfault.Result[[]BuildRun] {
     var runs []BuildRun
     err := r.db.Where("ProfileName = ?", profileName).
         Order("CreatedAt DESC").
         Limit(limit).
         Find(&runs).Error
     if err != nil {
-        return apperror.Fail[[]BuildRun](
-            apperror.Wrap(err, 7407, "failed to get runs by profile"),
+        return appfault.Fail[[]BuildRun](
+            appfault.Wrap(err, 7407, "failed to get runs by profile"),
         )
     }
-    return apperror.Ok(runs)
+    return appfault.Ok(runs)
 }
 
-func (r *BuildRunRepository) GetFailedRuns(since time.Time) apperror.Result[[]BuildRun] {
+func (r *BuildRunRepository) GetFailedRuns(since time.Time) appfault.Result[[]BuildRun] {
     var runs []BuildRun
     err := r.db.Preload("Errors").
         Where("Success = ? AND CreatedAt > ?", false, since).
         Order("CreatedAt DESC").
         Find(&runs).Error
     if err != nil {
-        return apperror.Fail[[]BuildRun](
-            apperror.Wrap(err, 7408, "failed to get failed runs"),
+        return appfault.Fail[[]BuildRun](
+            appfault.Wrap(err, 7408, "failed to get failed runs"),
         )
     }
-    return apperror.Ok(runs)
+    return appfault.Ok(runs)
 }
 
-func (r *BuildRunRepository) DeleteOldRuns(keepCount int) *apperror.AppError {
+func (r *BuildRunRepository) DeleteOldRuns(keepCount int) *appfault.AppError {
     // Get Ids to keep
     var keepIds []uint
     r.db.Model(&BuildRun{}).
@@ -254,12 +254,12 @@ func (r *BuildRunRepository) DeleteOldRuns(keepCount int) *apperror.AppError {
     
     // Delete older runs (cascade deletes errors and assets)
     if err := r.db.Where("Id NOT IN ?", keepIds).Delete(&BuildRun{}).Error; err != nil {
-        return apperror.Wrap(err, 7409, "failed to delete old runs")
+        return appfault.Wrap(err, 7409, "failed to delete old runs")
     }
     return nil
 }
 
-func (r *BuildRunRepository) GetStatistics(since time.Time) apperror.Result[BuildStatistics] {
+func (r *BuildRunRepository) GetStatistics(since time.Time) appfault.Result[BuildStatistics] {
     var stats BuildStatistics
     
     r.db.Model(&BuildRun{}).
@@ -295,12 +295,12 @@ type BuildStatistics struct {
 ## Database Initialization
 
 ```go
-func InitDatabase(dbPath string) apperror.Result[*gorm.DB] {
+func InitDatabase(dbPath string) appfault.Result[*gorm.DB] {
     db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
         Logger: logger.Default.LogMode(logger.Warn),
     })
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrDatabaseOpen,
             "open database",
@@ -315,7 +315,7 @@ func InitDatabase(dbPath string) apperror.Result[*gorm.DB] {
         &PortCheck{},
     )
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrDatabaseMigrate,
             "migrate database",

@@ -426,13 +426,13 @@ func (c ExecuteConfig) StepType() step_type.Variant   { return step_type.Execute
 // ParallelExecutor handles concurrent step execution
 type ParallelExecutor interface {
     // Execute runs the command with given input
-    Execute(context stdctx.Context, cmd *Command, input *ExecutionInput) apperror.Result[*ExecutionResult]
+    Execute(context stdctx.Context, cmd *Command, input *ExecutionInput) appfault.Result[*ExecutionResult]
     
     // Cancel stops an in-progress execution
-    Cancel(executionId string) *apperror.AppError
+    Cancel(executionId string) *appfault.AppError
     
     // Status returns current execution status
-    Status(executionId string) apperror.Result[execution_status.Variant]
+    Status(executionId string) appfault.Result[execution_status.Variant]
 }
 
 // ExecutionResult contains the final output of a command execution
@@ -477,25 +477,25 @@ type ExecutionError struct {
 // CommandRegistry manages command registration and lookup
 type CommandRegistry interface {
     // Register adds a new command
-    Register(cmd *Command) *apperror.AppError
+    Register(cmd *Command) *appfault.AppError
     
     // Unregister removes a command by ID
-    Unregister(commandId string) *apperror.AppError
+    Unregister(commandId string) *appfault.AppError
     
     // Get retrieves a command by ID
-    Get(commandId string) apperror.Result[*Command]
+    Get(commandId string) appfault.Result[*Command]
     
     // GetByName retrieves a command by name
-    GetByName(name string) apperror.Result[*Command]
+    GetByName(name string) appfault.Result[*Command]
     
     // Match finds commands matching the input text
-    Match(input string) apperror.Result[[]*Command]
+    Match(input string) appfault.Result[[]*Command]
     
     // List returns all registered commands
-    List(filter *CommandFilter) apperror.Result[[]*Command]
+    List(filter *CommandFilter) appfault.Result[[]*Command]
     
     // LoadBuiltIn loads all built-in commands
-    LoadBuiltIn() *apperror.AppError
+    LoadBuiltIn() *appfault.AppError
 }
 
 // CommandFilter for listing commands
@@ -512,10 +512,10 @@ type CommandFilter struct {
 // ParallelFetcher handles concurrent URL and file fetching
 type ParallelFetcher interface {
     // FetchUrls fetches multiple URLs concurrently
-    FetchUrls(context stdctx.Context, urls []string, opts *FetchOptions) apperror.Result[[]*FetchResult]
+    FetchUrls(context stdctx.Context, urls []string, opts *FetchOptions) appfault.Result[[]*FetchResult]
     
     // FetchFiles reads multiple files concurrently
-    FetchFiles(context stdctx.Context, paths []string, opts *FileOptions) apperror.Result[[]*FileResult]
+    FetchFiles(context stdctx.Context, paths []string, opts *FileOptions) appfault.Result[[]*FileResult]
 }
 
 // FetchOptions configures URL fetching
@@ -533,7 +533,7 @@ type FetchResult struct {
     Status    int
     Headers   map[string]string
     DurationMs int64
-    Error     *apperror.AppError `json:",omitempty"`
+    Error     *appfault.AppError `json:",omitempty"`
 }
 
 // FileOptions configures file reading
@@ -549,7 +549,7 @@ type FileResult struct {
     Content   string
     SizeBytes int64
     ModTime   time.Time
-    Error     *apperror.AppError `json:",omitempty"`
+    Error     *appfault.AppError `json:",omitempty"`
 }
 ```
 
@@ -923,7 +923,7 @@ Response:
 
 ```go
 // BuildDependencyGraph constructs a DAG from step definitions
-func BuildDependencyGraph(steps []StepDefinition) apperror.Result[*DependencyGraph] {
+func BuildDependencyGraph(steps []StepDefinition) appfault.Result[*DependencyGraph] {
     graph := &DependencyGraph{
         Nodes: make(map[string]*GraphNode),
         Edges: make(map[string][]string),
@@ -941,7 +941,7 @@ func BuildDependencyGraph(steps []StepDefinition) apperror.Result[*DependencyGra
     for _, step := range steps {
         for _, depId := range step.DependsOn {
             if _, exists := graph.Nodes[depId]; !exists {
-                return apperror.FailNew[*DependencyGraph](
+                return appfault.FailNew[*DependencyGraph](
                     ErrLongChainDependencyNotFound,
                     "dependency %s not found",
                     depId,
@@ -955,13 +955,13 @@ func BuildDependencyGraph(steps []StepDefinition) apperror.Result[*DependencyGra
     
     // 3. Detect cycles using Kahn's algorithm
     if hasCycle := graph.DetectCycle(); hasCycle {
-        return apperror.FailNew[*DependencyGraph](
+        return appfault.FailNew[*DependencyGraph](
             ErrLongChainCyclicDependency,
             "cyclic dependency detected in task graph",
         )
     }
     
-    return apperror.Ok(graph)
+    return appfault.Ok(graph)
 }
 ```
 
@@ -1170,7 +1170,7 @@ type DAGBuilderConfig struct {
     DefaultRetry    int           // Default: 3
 }
 
-func (b *DAGBuilder) BuildFromSearchPlan(plan *SearchPlan) apperror.Result[*TaskDAG] {
+func (b *DAGBuilder) BuildFromSearchPlan(plan *SearchPlan) appfault.Result[*TaskDAG] {
     dag := &TaskDAG{
         Nodes:      make(map[string]*TaskNode),
         Edges:      []TaskEdge{},
@@ -1236,7 +1236,7 @@ func (b *DAGBuilder) BuildFromSearchPlan(plan *SearchPlan) apperror.Result[*Task
     // 4. Validate DAG
     validationErr := b.validateDAG(dag)
     if validationErr != nil {
-        return apperror.Fail[*TaskDAG](validationErr)
+        return appfault.Fail[*TaskDAG](validationErr)
     }
 
     // 5. Compute metadata
@@ -1244,7 +1244,7 @@ func (b *DAGBuilder) BuildFromSearchPlan(plan *SearchPlan) apperror.Result[*Task
     dag.Metadata.MaxParallelism = b.computeMaxParallelism(dag)
     dag.Metadata.EstimatedMs = b.estimateExecutionTime(dag)
 
-    return apperror.Ok(dag)
+    return appfault.Ok(dag)
 }
 
 func (b *DAGBuilder) actionToStepType(action string) step_type.Variant {
@@ -1271,7 +1271,7 @@ func (b *DAGBuilder) actionToStepType(action string) step_type.Variant {
 // ScheduleWaves returns execution waves using Kahn's algorithm.
 // Each wave contains tasks that can execute in parallel.
 // Tasks in wave N+1 depend on at least one task in wave N or earlier.
-func (dag *TaskDAG) ScheduleWaves() apperror.Result[[]ExecutionWave] {
+func (dag *TaskDAG) ScheduleWaves() appfault.Result[[]ExecutionWave] {
     // Build adjacency and in-degree maps
     inDegree := map[string]int{}
     children := map[string][]string{}
@@ -1305,7 +1305,7 @@ func (dag *TaskDAG) ScheduleWaves() apperror.Result[[]ExecutionWave] {
         }
 
         if len(parallelTasks) == 0 && len(sequentialTasks) == 0 {
-            return apperror.FailNew[[]ExecutionWave](
+            return appfault.FailNew[[]ExecutionWave](
                 9973, "cyclic dependency detected in task DAG",
             )
         }
@@ -1328,7 +1328,7 @@ func (dag *TaskDAG) ScheduleWaves() apperror.Result[[]ExecutionWave] {
         }
     }
 
-    return apperror.Ok(waves)
+    return appfault.Ok(waves)
 }
 
 type ExecutionWave struct {

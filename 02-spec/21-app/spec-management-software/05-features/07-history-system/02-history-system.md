@@ -122,12 +122,12 @@ type SnapshotService struct {
     config    *Config
 }
 
-func (s *SnapshotService) Create(context stdctx.Context, req CreateSnapshotRequest) apperror.Result[*Snapshot] {
+func (s *SnapshotService) Create(context stdctx.Context, req CreateSnapshotRequest) appfault.Result[*Snapshot] {
     // 1. Validate project exists
     project, err := s.projectRepo.GetById(context, req.ProjectId)
     if err != nil {
-        return apperror.Fail[*Snapshot](
-            apperror.New(
+        return appfault.Fail[*Snapshot](
+            appfault.New(
                 ErrProjectNotFound,
                 "project not found",
             ),
@@ -144,8 +144,8 @@ func (s *SnapshotService) Create(context stdctx.Context, req CreateSnapshotReque
     
     // 4. Copy all project files to snapshot
     if err := s.copyProjectFiles(project.Path, historyPath); err != nil {
-        return apperror.Fail[*Snapshot](
-            apperror.New(
+        return appfault.Fail[*Snapshot](
+            appfault.New(
                 ErrCopyFailed,
                 "failed to copy project files",
             ),
@@ -166,8 +166,8 @@ func (s *SnapshotService) Create(context stdctx.Context, req CreateSnapshotReque
     if err := s.snapshotRepo.Create(context, snapshot); err != nil {
         // Rollback: delete copied files
         pathutil.RemoveAll(historyPath)
-        return apperror.Fail[*Snapshot](
-            apperror.New(
+        return appfault.Fail[*Snapshot](
+            appfault.New(
                 ErrDbWrite,
                 "failed to save snapshot metadata",
             ),
@@ -189,7 +189,7 @@ func (s *SnapshotService) Create(context stdctx.Context, req CreateSnapshotReque
         "project", project.Name,
         "user", req.Username)
     
-    return apperror.OK(snapshot)
+    return appfault.Ok(snapshot)
 }
 
 func (s *SnapshotService) copyProjectFiles(srcPath, destPath string) error {
@@ -244,7 +244,7 @@ func (s *SnapshotService) Restore(context stdctx.Context, req RestoreSnapshotReq
     // 1. Get snapshot metadata
     snapshot, err := s.snapshotRepo.GetById(context, req.SnapshotId)
     if err != nil {
-        return apperror.New(
+        return appfault.New(
             ErrSnapshotNotFound,
             "snapshot not found",
         )
@@ -253,7 +253,7 @@ func (s *SnapshotService) Restore(context stdctx.Context, req RestoreSnapshotReq
     // 2. Get project
     project, err := s.projectRepo.GetById(context, snapshot.ProjectId)
     if err != nil {
-        return apperror.New(
+        return appfault.New(
             ErrProjectNotFound,
             "project not found",
         )
@@ -269,7 +269,7 @@ func (s *SnapshotService) Restore(context stdctx.Context, req RestoreSnapshotReq
     
     // 4. Clear current project files (except .history)
     if err := s.clearProjectFiles(project.Path); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrFilesystemOperation,
             "failed to clear files",
@@ -278,7 +278,7 @@ func (s *SnapshotService) Restore(context stdctx.Context, req RestoreSnapshotReq
     
     // 5. Copy snapshot files to project
     if err := s.copyProjectFiles(snapshot.FolderPath, project.Path); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrFilesystemOperation,
             "failed to restore",
@@ -341,7 +341,7 @@ func (s *SnapshotService) Delete(context stdctx.Context, req DeleteSnapshotReque
     // 1. Get snapshot
     snapshot, err := s.snapshotRepo.GetById(context, req.SnapshotId)
     if err != nil {
-        return apperror.New(
+        return appfault.New(
             ErrSnapshotNotFound,
             "snapshot not found",
         )
@@ -357,7 +357,7 @@ func (s *SnapshotService) Delete(context stdctx.Context, req DeleteSnapshotReque
     
     // 3. Delete from database
     if err := s.snapshotRepo.Delete(context, req.SnapshotId); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrDatabaseDelete,
             "failed to delete snapshot",

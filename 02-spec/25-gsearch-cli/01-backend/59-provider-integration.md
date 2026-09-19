@@ -59,19 +59,19 @@ type Provider interface {
     Name() provider.Variant
     
     // Search executes a search query
-    Search(context stdctx.Context, req *SearchRequest) apperror.Result[*SearchResponse]
+    Search(context stdctx.Context, req *SearchRequest) appfault.Result[*SearchResponse]
     
     // SearchParallel executes multiple searches in parallel
-    SearchParallel(context stdctx.Context, reqs []*SearchRequest) apperror.Result[[]*SearchResponse]
+    SearchParallel(context stdctx.Context, reqs []*SearchRequest) appfault.Result[[]*SearchResponse]
     
     // HealthCheck verifies provider connectivity
-    HealthCheck(context stdctx.Context) *apperror.AppError
+    HealthCheck(context stdctx.Context) *appfault.AppError
     
     // RateLimit returns current rate limit status
     RateLimit() *RateLimitStatus
     
     // Close cleans up resources
-    Close() *apperror.AppError
+    Close() *appfault.AppError
 }
 
 // SearchRequest represents a unified search request
@@ -166,10 +166,10 @@ type SerpApiConfig struct {
     RequestsPerMin  int           // Default: 100
 }
 
-func NewSerpApiProvider(cfg *SerpApiConfig) apperror.Result[*SerpApiProvider] {
+func NewSerpApiProvider(cfg *SerpApiConfig) appfault.Result[*SerpApiProvider] {
     if cfg.ApiKey == "" {
-        return apperror.Fail[*SerpApiProvider](
-            apperror.New(
+        return appfault.Fail[*SerpApiProvider](
+            appfault.New(
                 "SerpApi API key required",
             ),
         )
@@ -185,7 +185,7 @@ func NewSerpApiProvider(cfg *SerpApiConfig) apperror.Result[*SerpApiProvider] {
         cfg.RequestsPerMin = 100
     }
     
-    return apperror.OK(&SerpApiProvider{
+    return appfault.Ok(&SerpApiProvider{
         apiKey:  cfg.ApiKey,
         baseUrl: cfg.BaseUrl,
         httpClient: &http.Client{
@@ -206,11 +206,11 @@ func (p *SerpApiProvider) Name() provider.Variant {
     return provider.SerpApi
 }
 
-func (p *SerpApiProvider) Search(context stdctx.Context, req *serpProvider.SearchRequest) apperror.Result[*serpProvider.SearchResponse] {
+func (p *SerpApiProvider) Search(context stdctx.Context, req *serpProvider.SearchRequest) appfault.Result[*serpProvider.SearchResponse] {
     // Wait for rate limiter
     if err := p.rateLimiter.Wait(context); err != nil {
-        return apperror.Fail[*serpProvider.SearchResponse](
-            apperror.Wrap(
+        return appfault.Fail[*serpProvider.SearchResponse](
+            appfault.Wrap(
                 err,
                 "rate limit wait",
             ),
@@ -233,8 +233,8 @@ func (p *SerpApiProvider) Search(context stdctx.Context, req *serpProvider.Searc
     reqUrl := fmt.Sprintf("%s?%s", p.baseUrl, params.Encode())
     httpReq, err := http.NewRequestWithContext(context, httpmethod.Get.String(), reqUrl, nil)
     if err != nil {
-        return apperror.Fail[*serpProvider.SearchResponse](
-            apperror.Wrap(
+        return appfault.Fail[*serpProvider.SearchResponse](
+            appfault.Wrap(
                 err,
                 "create request",
             ),
@@ -243,8 +243,8 @@ func (p *SerpApiProvider) Search(context stdctx.Context, req *serpProvider.Searc
     
     resp, err := p.httpClient.Do(httpReq)
     if err != nil {
-        return apperror.Fail[*serpProvider.SearchResponse](
-            apperror.Wrap(
+        return appfault.Fail[*serpProvider.SearchResponse](
+            appfault.Wrap(
                 err,
                 "execute request",
             ),
@@ -256,8 +256,8 @@ func (p *SerpApiProvider) Search(context stdctx.Context, req *serpProvider.Searc
     p.updateRateLimitFromHeaders(resp.Header)
     
     if resp.StatusCode != http.StatusOK {
-        return apperror.Fail[*serpProvider.SearchResponse](
-            apperror.New(
+        return appfault.Fail[*serpProvider.SearchResponse](
+            appfault.New(
                 fmt.Sprintf("SerpApi error: status %d", resp.StatusCode),
             ),
         )
@@ -266,8 +266,8 @@ func (p *SerpApiProvider) Search(context stdctx.Context, req *serpProvider.Searc
     // Parse response
     var serpResp SerpApiResponse
     if err := json.NewDecoder(resp.Body).Decode(&serpResp); err != nil {
-        return apperror.Fail[*serpProvider.SearchResponse](
-            apperror.Wrap(
+        return appfault.Fail[*serpProvider.SearchResponse](
+            appfault.Wrap(
                 err,
                 "decode response",
             ),
@@ -275,13 +275,13 @@ func (p *SerpApiProvider) Search(context stdctx.Context, req *serpProvider.Searc
     }
     
     // Convert to unified format
-    return apperror.OK(p.convertToUnified(req, &serpResp, time.Since(startTime)))
+    return appfault.Ok(p.convertToUnified(req, &serpResp, time.Since(startTime)))
 }
 
-func (p *SerpApiProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) apperror.Result[[]*serpProvider.SearchResponse] {
+func (p *SerpApiProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) appfault.Result[[]*serpProvider.SearchResponse] {
     results := make([]*serpProvider.SearchResponse, len(reqs))
     var wg sync.WaitGroup
-    errChan := make(chan *apperror.AppError, len(reqs))
+    errChan := make(chan *appfault.AppError, len(reqs))
     
     for i, req := range reqs {
         wg.Add(1)
@@ -302,23 +302,23 @@ func (p *SerpApiProvider) SearchParallel(context stdctx.Context, reqs []*serpPro
     close(errChan)
     
     // Collect errors
-    var errs []*apperror.AppError
+    var errs []*appfault.AppError
     for err := range errChan {
         errs = append(errs, err)
     }
     
     if len(errs) == len(reqs) {
-        return apperror.Fail[[]*serpProvider.SearchResponse](
-            apperror.New(
+        return appfault.Fail[[]*serpProvider.SearchResponse](
+            appfault.New(
                 "all requests failed",
             ),
         )
     }
     
-    return apperror.OK(results)
+    return appfault.Ok(results)
 }
 
-func (p *SerpApiProvider) HealthCheck(context stdctx.Context) *apperror.AppError {
+func (p *SerpApiProvider) HealthCheck(context stdctx.Context) *appfault.AppError {
     // Simple search to verify connectivity
     searchResult := p.Search(context, &serpProvider.SearchRequest{
         Query:      "test",
@@ -338,7 +338,7 @@ func (p *SerpApiProvider) RateLimit() *serpProvider.RateLimitStatus {
     return p.rateStatus
 }
 
-func (p *SerpApiProvider) Close() *apperror.AppError {
+func (p *SerpApiProvider) Close() *appfault.AppError {
     return nil
 }
 ```
@@ -373,7 +373,7 @@ type MapsScraperConfig struct {
     UserAgent       string        // Custom user agent
 }
 
-func NewMapsScraperProvider(cfg *MapsScraperConfig) apperror.Result[*MapsScraperProvider] {
+func NewMapsScraperProvider(cfg *MapsScraperConfig) appfault.Result[*MapsScraperProvider] {
     if cfg.Concurrency == 0 {
         cfg.Concurrency = 10
     }
@@ -391,15 +391,15 @@ func NewMapsScraperProvider(cfg *MapsScraperConfig) apperror.Result[*MapsScraper
     
     scraper, err := gmaps.NewScraper(scraperCfg)
     if err != nil {
-        return apperror.Fail[*MapsScraperProvider](
-            apperror.Wrap(
+        return appfault.Fail[*MapsScraperProvider](
+            appfault.Wrap(
                 err,
                 "create scraper",
             ),
         )
     }
     
-    return apperror.OK(&MapsScraperProvider{
+    return appfault.Ok(&MapsScraperProvider{
         scraper: scraper,
         config:  cfg,
         rateStatus: &serpProvider.RateLimitStatus{
@@ -413,7 +413,7 @@ func (p *MapsScraperProvider) Name() provider.Variant {
     return provider.MapsScraper
 }
 
-func (p *MapsScraperProvider) Search(context stdctx.Context, req *serpProvider.SearchRequest) apperror.Result[*serpProvider.SearchResponse] {
+func (p *MapsScraperProvider) Search(context stdctx.Context, req *serpProvider.SearchRequest) appfault.Result[*serpProvider.SearchResponse] {
     startTime := time.Now()
     
     // Build Maps search request
@@ -434,8 +434,8 @@ func (p *MapsScraperProvider) Search(context stdctx.Context, req *serpProvider.S
     
     places, err := p.scraper.Search(searchContext, mapsReq)
     if err != nil {
-        return apperror.Fail[*serpProvider.SearchResponse](
-            apperror.Wrap(
+        return appfault.Fail[*serpProvider.SearchResponse](
+            appfault.Wrap(
                 err,
                 "maps scrape",
             ),
@@ -472,14 +472,14 @@ func (p *MapsScraperProvider) Search(context stdctx.Context, req *serpProvider.S
     
     response.TotalResults = int64(len(places))
 
-    return apperror.OK(response)
+    return appfault.Ok(response)
 }
 
-func (p *MapsScraperProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) apperror.Result[[]*serpProvider.SearchResponse] {
+func (p *MapsScraperProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) appfault.Result[[]*serpProvider.SearchResponse] {
     // Maps scraper already supports internal concurrency
     results := make([]*serpProvider.SearchResponse, len(reqs))
     var wg sync.WaitGroup
-    errChan := make(chan *apperror.AppError, len(reqs))
+    errChan := make(chan *appfault.AppError, len(reqs))
     
     // Use semaphore to limit concurrent scrapes
     sem := make(chan struct{}, p.config.Concurrency)
@@ -505,10 +505,10 @@ func (p *MapsScraperProvider) SearchParallel(context stdctx.Context, reqs []*ser
     wg.Wait()
     close(errChan)
     
-    return apperror.OK(results)
+    return appfault.Ok(results)
 }
 
-func (p *MapsScraperProvider) HealthCheck(context stdctx.Context) *apperror.AppError {
+func (p *MapsScraperProvider) HealthCheck(context stdctx.Context) *appfault.AppError {
     searchResult := p.Search(context, &serpProvider.SearchRequest{
         Query:      "coffee shop",
         MaxResults: 1,
@@ -524,9 +524,9 @@ func (p *MapsScraperProvider) RateLimit() *serpProvider.RateLimitStatus {
     return p.rateStatus
 }
 
-func (p *MapsScraperProvider) Close() *apperror.AppError {
+func (p *MapsScraperProvider) Close() *appfault.AppError {
     if err := p.scraper.Close(); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "close maps scraper",
         )
@@ -577,7 +577,7 @@ type CollyConfig struct {
     DisableCache    bool            // Disable caching
 }
 
-func NewCollyProvider(cfg *CollyConfig) apperror.Result[*CollyProvider] {
+func NewCollyProvider(cfg *CollyConfig) appfault.Result[*CollyProvider] {
     if cfg.MaxConcurrent == 0 {
         cfg.MaxConcurrent = 50
     }
@@ -628,7 +628,7 @@ func NewCollyProvider(cfg *CollyConfig) apperror.Result[*CollyProvider] {
         })
     }
     
-    return apperror.Ok(&CollyProvider{
+    return appfault.Ok(&CollyProvider{
         config:    cfg,
         collector: c,
         rateStatus: &serpProvider.RateLimitStatus{
@@ -642,7 +642,7 @@ func (p *CollyProvider) Name() provider.Variant {
     return provider.Colly
 }
 
-func (p *CollyProvider) Search(context stdctx.Context, req *serpProvider.SearchRequest) apperror.Result[*serpProvider.SearchResponse] {
+func (p *CollyProvider) Search(context stdctx.Context, req *serpProvider.SearchRequest) appfault.Result[*serpProvider.SearchResponse] {
     startTime := time.Now()
     
     response := &serpProvider.SearchResponse{
@@ -733,13 +733,13 @@ func (p *CollyProvider) Search(context stdctx.Context, req *serpProvider.SearchR
     
     select {
     case <-context.Done():
-        return apperror.Fail[*serpProvider.SearchResponse](
-            apperror.Wrap(context.Err(), "context cancelled"),
+        return appfault.Fail[*serpProvider.SearchResponse](
+            appfault.Wrap(context.Err(), "context cancelled"),
         )
     case err := <-done:
         if err != nil {
-            return apperror.Fail[*serpProvider.SearchResponse](
-                apperror.Wrap(err, "colly visit"),
+            return appfault.Fail[*serpProvider.SearchResponse](
+                appfault.Wrap(err, "colly visit"),
             )
         }
     }
@@ -749,19 +749,19 @@ func (p *CollyProvider) Search(context stdctx.Context, req *serpProvider.SearchR
     response.Duration = time.Since(startTime)
     response.TotalResults = int64(len(response.Results))
     
-    return apperror.OK(response)
+    return appfault.Ok(response)
 }
 
-func (p *CollyProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) apperror.Result[[]*serpProvider.SearchResponse] {
+func (p *CollyProvider) SearchParallel(context stdctx.Context, reqs []*serpProvider.SearchRequest) appfault.Result[[]*serpProvider.SearchResponse] {
     results := make([]*serpProvider.SearchResponse, len(reqs))
     var wg sync.WaitGroup
-    errChan := make(chan *apperror.AppError, len(reqs))
+    errChan := make(chan *appfault.AppError, len(reqs))
     
     // Create request queue
     q, err := queue.New(p.config.MaxConcurrent, &queue.InMemoryQueueStorage{MaxSize: 10000})
     if err != nil {
-        return apperror.Fail[[]*serpProvider.SearchResponse](
-            apperror.Wrap(err, "create queue"),
+        return appfault.Fail[[]*serpProvider.SearchResponse](
+            appfault.Wrap(err, "create queue"),
         )
     }
     
@@ -782,7 +782,7 @@ func (p *CollyProvider) SearchParallel(context stdctx.Context, reqs []*serpProvi
     wg.Wait()
     close(errChan)
     
-    return apperror.OK(results)
+    return appfault.Ok(results)
 }
 
 func (p *CollyProvider) buildSearchUrl(req *serpProvider.SearchRequest) string {
@@ -827,7 +827,7 @@ func (p *CollyProvider) buildSearchUrl(req *serpProvider.SearchRequest) string {
     return baseUrl + "?" + params.Encode()
 }
 
-func (p *CollyProvider) HealthCheck(context stdctx.Context) *apperror.AppError {
+func (p *CollyProvider) HealthCheck(context stdctx.Context) *appfault.AppError {
     searchResult := p.Search(context, &serpProvider.SearchRequest{
         Query:      "test",
         Engine:     engine.DuckDuckGo,
@@ -843,7 +843,7 @@ func (p *CollyProvider) RateLimit() *serpProvider.RateLimitStatus {
     return p.rateStatus
 }
 
-func (p *CollyProvider) Close() *apperror.AppError {
+func (p *CollyProvider) Close() *appfault.AppError {
     return nil
 }
 ```
@@ -909,7 +909,7 @@ func (o *Orchestrator) RegisterProvider(p serpProvider.Provider) error {
     defer o.mu.Unlock()
     
     if _, exists := o.providers[p.Name()]; exists {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("provider %s already registered", p.Name()),
         )
     }
@@ -929,7 +929,7 @@ type SearchOptions struct {
     StoreResults    bool                    // Store in Split DB
 }
 
-func (o *Orchestrator) Search(context stdctx.Context, req *serpProvider.SearchRequest, opts *SearchOptions) apperror.Result[*AggregatedResponse] {
+func (o *Orchestrator) Search(context stdctx.Context, req *serpProvider.SearchRequest, opts *SearchOptions) appfault.Result[*AggregatedResponse] {
     // Set defaults
     if len(opts.Providers) == 0 {
         opts.Providers = []provider.Variant{o.config.DefaultProvider}
@@ -942,12 +942,12 @@ func (o *Orchestrator) Search(context stdctx.Context, req *serpProvider.SearchRe
     if opts.UseCache && o.config.EnableCaching {
         cachedResult := o.storage.GetCachedResults(context, req)
         if cachedResult.IsOk() {
-            return apperror.OK(cachedResult.Value())
+            return appfault.Ok(cachedResult.Value())
         }
     }
     
     var responses []*serpProvider.SearchResponse
-    var searchErr *apperror.AppError
+    var searchErr *appfault.AppError
     
     switch opts.Mode {
     case search_mode.Sequential:
@@ -961,7 +961,7 @@ func (o *Orchestrator) Search(context stdctx.Context, req *serpProvider.SearchRe
     }
     
     if searchErr != nil {
-        return apperror.Fail[*AggregatedResponse](searchErr)
+        return appfault.Fail[*AggregatedResponse](searchErr)
     }
     
     // Aggregate results
@@ -975,10 +975,10 @@ func (o *Orchestrator) Search(context stdctx.Context, req *serpProvider.SearchRe
         }
     }
     
-    return apperror.OK(aggregated)
+    return appfault.Ok(aggregated)
 }
 
-func (o *Orchestrator) searchSequential(context stdctx.Context, req *serpProvider.SearchRequest, providers []provider.Variant) ([]*serpProvider.SearchResponse, *apperror.AppError) {
+func (o *Orchestrator) searchSequential(context stdctx.Context, req *serpProvider.SearchRequest, providers []provider.Variant) ([]*serpProvider.SearchResponse, *appfault.AppError) {
     responses := make([]*serpProvider.SearchResponse, 0, len(providers))
     
     for _, prov := range providers {
@@ -999,16 +999,16 @@ func (o *Orchestrator) searchSequential(context stdctx.Context, req *serpProvide
     }
     
     if len(responses) == 0 {
-        return nil, apperror.New("all providers failed")
+        return nil, appfault.New("all providers failed")
     }
     
     return responses, nil
 }
 
-func (o *Orchestrator) searchParallel(context stdctx.Context, req *serpProvider.SearchRequest, providers []provider.Variant) ([]*serpProvider.SearchResponse, *apperror.AppError) {
+func (o *Orchestrator) searchParallel(context stdctx.Context, req *serpProvider.SearchRequest, providers []provider.Variant) ([]*serpProvider.SearchResponse, *appfault.AppError) {
     responses := make([]*serpProvider.SearchResponse, len(providers))
     var wg sync.WaitGroup
-    errChan := make(chan *apperror.AppError, len(providers))
+    errChan := make(chan *appfault.AppError, len(providers))
     
     for i, prov := range providers {
         wg.Add(1)
@@ -1020,7 +1020,7 @@ func (o *Orchestrator) searchParallel(context stdctx.Context, req *serpProvider.
             o.mu.RUnlock()
             
             if !exists {
-                errChan <- apperror.New(fmt.Sprintf("provider %s not registered", provVariant))
+                errChan <- appfault.New(fmt.Sprintf("provider %s not registered", provVariant))
                 return
             }
             
@@ -1046,13 +1046,13 @@ func (o *Orchestrator) searchParallel(context stdctx.Context, req *serpProvider.
     }
     
     if len(validResponses) == 0 {
-        return nil, apperror.New("all providers failed")
+        return nil, appfault.New("all providers failed")
     }
     
     return validResponses, nil
 }
 
-func (o *Orchestrator) searchRoundRobin(context stdctx.Context, req *serpProvider.SearchRequest, providers []provider.Variant) ([]*serpProvider.SearchResponse, *apperror.AppError) {
+func (o *Orchestrator) searchRoundRobin(context stdctx.Context, req *serpProvider.SearchRequest, providers []provider.Variant) ([]*serpProvider.SearchResponse, *appfault.AppError) {
     // Select provider based on current time (simple rotation)
     idx := int(time.Now().UnixNano()) % len(providers)
     return o.searchSequential(context, req, []provider.Variant{providers[idx]})
@@ -1185,7 +1185,7 @@ func (s *SplitDbStorage) GetDbPath(prov provider.Variant, queryHash string) stri
 }
 
 // StoreResults stores aggregated results in Split DB
-func (s *SplitDbStorage) StoreResults(context stdctx.Context, agg *AggregatedResponse) *apperror.AppError {
+func (s *SplitDbStorage) StoreResults(context stdctx.Context, agg *AggregatedResponse) *appfault.AppError {
     queryHash := s.hashQuery(agg.Query)
     
     for prov, resp := range agg.ProviderResults {
@@ -1193,7 +1193,7 @@ func (s *SplitDbStorage) StoreResults(context stdctx.Context, agg *AggregatedRes
         
         // Ensure directory exists
         if mkErr := pathutil.MkdirAll(filepath.Dir(dbPath), 0755); mkErr != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 mkErr,
                 "create db dir",
             )
@@ -1201,7 +1201,7 @@ func (s *SplitDbStorage) StoreResults(context stdctx.Context, agg *AggregatedRes
         
         db, openErr := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
         if openErr != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 openErr,
                 "open db",
             )
@@ -1209,7 +1209,7 @@ func (s *SplitDbStorage) StoreResults(context stdctx.Context, agg *AggregatedRes
         
         // Auto migrate
         if migrateErr := db.AutoMigrate(&StoredResult{}); migrateErr != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 migrateErr,
                 "migrate",
             )
@@ -1234,7 +1234,7 @@ func (s *SplitDbStorage) StoreResults(context stdctx.Context, agg *AggregatedRes
         }
         
         if createErr := db.Create(stored).Error; createErr != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 createErr,
                 "store result",
             )
@@ -1245,7 +1245,7 @@ func (s *SplitDbStorage) StoreResults(context stdctx.Context, agg *AggregatedRes
 }
 
 // GetCachedResults retrieves cached results if not expired
-func (s *SplitDbStorage) GetCachedResults(context stdctx.Context, req *serpProvider.SearchRequest) apperror.Result[*AggregatedResponse] {
+func (s *SplitDbStorage) GetCachedResults(context stdctx.Context, req *serpProvider.SearchRequest) appfault.Result[*AggregatedResponse] {
     queryHash := s.hashQuery(req.Query)
     
     // Check all registered providers
@@ -1301,10 +1301,10 @@ func (s *SplitDbStorage) GetCachedResults(context stdctx.Context, req *serpProvi
     }
     
     if len(agg.ProviderResults) == 0 {
-        return apperror.Fail[*AggregatedResponse](apperror.New("no cached results"))
+        return appfault.Fail[*AggregatedResponse](appfault.New("no cached results"))
     }
     
-    return apperror.OK(agg)
+    return appfault.Ok(agg)
 }
 
 func (s *SplitDbStorage) hashQuery(query string) string {

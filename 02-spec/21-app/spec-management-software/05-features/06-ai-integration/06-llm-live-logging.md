@@ -788,7 +788,7 @@ func (sm *SlotManager) startModel(context stdctx.Context, slot *ModelSlot, model
     // Capture and stream process output
     if err := sm.logManager.CaptureProcessOutput(context, cmd, model.Id, model.DisplayName, slot.SlotIndex); err != nil {
         done(1, err)
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrCaptureProcessOutput,
             "failed to capture process output",

@@ -155,7 +155,7 @@ func (v *Validator) checkBalancedBrackets(code string) error {
 		for open, close := range brackets {
 			if ch == close {
 				if len(stack) == 0 || stack[len(stack)-1] != open {
-					return apperror.New(
+					return appfault.New(
 						ErrUnbalancedBrackets,
 						fmt.Sprintf("unbalanced %c bracket", ch),
 					)
@@ -166,7 +166,7 @@ func (v *Validator) checkBalancedBrackets(code string) error {
 	}
 	
 	if len(stack) > 0 {
-		return apperror.New(
+		return appfault.New(
 			ErrUnclosedBracket,
 			fmt.Sprintf("unclosed bracket: %c", stack[len(stack)-1]),
 		)

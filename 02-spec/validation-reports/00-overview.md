@@ -52,6 +52,7 @@ Central repository for all audit, validation, and compliance reports generated d
 | `14-audit-certificate-2026-03-18.md` | Audit certificate v30.0.0: 4 validation activities, 34 links verified (CERT-2026-0318-REFRESH) | 2026-03-18 |
 | `15-comprehensive-audit-2026-03-22.md` | Comprehensive audit v31.0.0: +198 files, +24 acceptance criteria, +117 consistency reports, 509 broken links fixed (CERT-2026-0322-COMPREHENSIVE) | 2026-03-22 |
 | `16-audit-certificate-v2-compliance-2026-03-30.md` | Spec Authoring Guide v2.0.0 compliance rollout: 139 overviews upgraded, 100% compliance across 1,567 files (CERT-2026-0330-V2COMP) | 2026-03-30 |
+| `17-spec-audit-and-error-management-modernization.md` | Spec audit and error management modernization across specs 21–60 to canonical `appfault` architecture (CERT-2026-0919-APPFAULT-MODERNIZATION) | 2026-09-19 |
 
 ---
 

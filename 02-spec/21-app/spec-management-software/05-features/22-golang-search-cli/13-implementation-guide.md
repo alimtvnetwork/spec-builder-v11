@@ -189,7 +189,7 @@ go get github.com/stretchr/testify@v1.9.0
 ```go
 // internal/parser/parser.go
 type Parser interface {
-    Parse(html string) apperror.Result[[]SearchResult]
+    Parse(html string) appfault.Result[[]SearchResult]
     IsBlocked(html string) bool
     GetEngineName() string
 }
@@ -284,11 +284,11 @@ var GoogleSelectors = struct {
 **Algorithm Implementation:**
 ```go
 // internal/switcher/weighted.go
-func (s *Switcher) SelectMethod() apperror.Result[SearchMethod] {
+func (s *Switcher) SelectMethod() appfault.Result[SearchMethod] {
     // 1. Filter out blocked methods
     available := s.getAvailableMethods()
     if len(available) == 0 {
-        return apperror.FailNew[SearchMethod](
+        return appfault.FailNew[SearchMethod](
             "ErrAllMethodsBlocked",
             "all search methods are currently blocked",
         )
@@ -306,11 +306,11 @@ func (s *Switcher) SelectMethod() apperror.Result[SearchMethod] {
     for _, m := range available {
         cumulative += m.Weight
         if r <= cumulative {
-            return apperror.Ok(m)
+            return appfault.Ok(m)
         }
     }
     
-    return apperror.Ok(available[len(available)-1])
+    return appfault.Ok(available[len(available)-1])
 }
 ```
 
@@ -328,7 +328,7 @@ func (s *Switcher) SelectMethod() apperror.Result[SearchMethod] {
 
 **Concurrency Pattern:**
 ```go
-func (o *Orchestrator) SearchConcurrent(keywords []string) apperror.Result[[]SearchResult] {
+func (o *Orchestrator) SearchConcurrent(keywords []string) appfault.Result[[]SearchResult] {
     resultsChan := make(chan KeywordResult, len(keywords))
     sem := make(chan struct{}, o.config.MaxConcurrency)
     
@@ -641,7 +641,7 @@ Each phase includes migration rollback capabilities:
 
 ```go
 // internal/database/migrate.go
-func Rollback(db *gorm.DB, steps int) *apperror.AppError {
+func Rollback(db *gorm.DB, steps int) *appfault.AppError {
     // Implement using GORM migrator
     m := db.Migrator()
     // Track migration versions

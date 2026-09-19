@@ -317,7 +317,7 @@ func (s *CheckerService) RunCheck(
 	projectId string,
 	projectPath string,
 	triggeredBy string,
-) apperror.Result[*models.ConsistencyReport] {
+) appfault.Result[*models.ConsistencyReport] {
 	startTime := time.Now()
 	reportId := uuid.NewString()
 
@@ -350,7 +350,7 @@ func (s *CheckerService) RunCheck(
 	files, err := s.scanner.ScanDirectory(ctx, projectPath, s.config)
 	if err != nil {
 		report.Status = models.StatusFailed
-		return report, apperror.Wrap(
+		return report, appfault.Wrap(
 			err,
 			ErrScanDirectory,
 			"scan directory",
@@ -372,7 +372,7 @@ func (s *CheckerService) RunCheck(
 			defer wg.Done()
 			issues, err := s.linkValidator.ValidateAll(ctx, files, projectPath)
 			if err != nil {
-				errCh <- apperror.Wrap(
+				errCh <- appfault.Wrap(
 					err,
 					ErrLinkValidation,
 					"link validation",
@@ -390,7 +390,7 @@ func (s *CheckerService) RunCheck(
 			defer wg.Done()
 			issues, err := s.duplicateFinder.FindAll(ctx, files)
 			if err != nil {
-				errCh <- apperror.Wrap(
+				errCh <- appfault.Wrap(
 					err,
 					ErrDuplicateDetection,
 					"duplicate detection",
@@ -408,7 +408,7 @@ func (s *CheckerService) RunCheck(
 			defer wg.Done()
 			issues, err := s.namingValidator.ValidateAll(ctx, files, projectPath)
 			if err != nil {
-				errCh <- apperror.Wrap(
+				errCh <- appfault.Wrap(
 					err,
 					ErrNamingValidation,
 					"naming validation",
@@ -426,7 +426,7 @@ func (s *CheckerService) RunCheck(
 			defer wg.Done()
 			issues, err := s.completenessChecker.CheckAll(ctx, files)
 			if err != nil {
-				errCh <- apperror.Wrap(
+				errCh <- appfault.Wrap(
 					err,
 					ErrCompletenessCheck,
 					"completeness check",
@@ -444,7 +444,7 @@ func (s *CheckerService) RunCheck(
 			defer wg.Done()
 			issues, err := s.findOrphans(ctx, files)
 			if err != nil {
-				errCh <- apperror.Wrap(
+				errCh <- appfault.Wrap(
 					err,
 					ErrOrphanDetection,
 					"orphan detection",
@@ -500,7 +500,7 @@ func (s *CheckerService) RunCheck(
 	report.CompletedAt = &completedAt
 
 	if err := s.repo.SaveReport(ctx, report); err != nil {
-		return report, apperror.Wrap(
+		return report, appfault.Wrap(
 			err,
 			ErrSaveReport,
 			"save report",
@@ -572,7 +572,7 @@ func (s *CheckerService) calculateSummary(
 func (s *CheckerService) findOrphans(
 	context stdctx.Context,
 	files []models.FileInfo,
-) apperror.Result[[]models.ConsistencyIssue] {
+) appfault.Result[[]models.ConsistencyIssue] {
 	// Build a set of all referenced files
 	referenced := make(map[string]bool)
 	
@@ -681,7 +681,7 @@ func (s *Scanner) ScanDirectory(
 	context stdctx.Context,
 	rootPath string,
 	config *models.ScanConfig,
-) apperror.Result[[]models.FileInfo] {
+) appfault.Result[[]models.FileInfo] {
 	var files []models.FileInfo
 
 	err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
@@ -754,7 +754,7 @@ func (s *Scanner) ScanFile(
 	context stdctx.Context,
 	filePath string,
 	relativePath string,
-) apperror.Result[*models.FileInfo] {
+) appfault.Result[*models.FileInfo] {
 	file, err := pathutil.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -937,7 +937,7 @@ func (v *LinkValidator) ValidateAll(
 	context stdctx.Context,
 	files []models.FileInfo,
 	rootPath string,
-) apperror.Result[[]models.ConsistencyIssue] {
+) appfault.Result[[]models.ConsistencyIssue] {
 	var issues []models.ConsistencyIssue
 
 	// Pre-populate heading cache
@@ -1246,7 +1246,7 @@ func (v *NamingValidator) ValidateAll(
 	context stdctx.Context,
 	files []models.FileInfo,
 	rootPath string,
-) apperror.Result[[]models.ConsistencyIssue] {
+) appfault.Result[[]models.ConsistencyIssue] {
 	var issues []models.ConsistencyIssue
 	checkedDirs := make(map[string]bool)
 
@@ -1365,7 +1365,7 @@ func NewDuplicateFinder() *DuplicateFinder {
 func (d *DuplicateFinder) FindAll(
 	context stdctx.Context,
 	files []models.FileInfo,
-) apperror.Result[[]models.ConsistencyIssue] {
+) appfault.Result[[]models.ConsistencyIssue] {
 	var issues []models.ConsistencyIssue
 
 	// Collect all definitions
@@ -1559,15 +1559,15 @@ func (c *CompletenessChecker) registerPatterns() {
 func (c *CompletenessChecker) CheckAll(
 	context stdctx.Context,
 	files []models.FileInfo,
-) apperror.Result[[]models.ConsistencyIssue] {
+) appfault.Result[[]models.ConsistencyIssue] {
 	var issues []models.ConsistencyIssue
 
 	for _, file := range files {
 		select {
 		case <-context.Done():
-			return apperror.Fail[[]models.ConsistencyIssue](
-				apperror.New(
-					apperror.ErrContextCancelled,
+			return appfault.Fail[[]models.ConsistencyIssue](
+				appfault.New(
+					appfault.ErrContextCancelled,
 					"completeness check cancelled",
 				),
 			)
@@ -1846,7 +1846,7 @@ func (f *Fixer) fixMissingSection(issue *models.ConsistencyIssue) *models.AutoFi
 func (f *Fixer) ApplyFixes(
 	fixes []models.AutoFix,
 	dryRun bool,
-) apperror.Result[*models.FixResult] {
+) appfault.Result[*models.FixResult] {
 	result := &models.FixResult{
 		Applied: make([]models.AutoFix, 0),
 		Skipped: make([]models.AutoFix, 0),
@@ -1923,7 +1923,7 @@ func (r *ConsistencyRepo) SaveReport(
 func (r *ConsistencyRepo) GetLatestReport(
 	context stdctx.Context,
 	projectId string,
-) apperror.Result[*models.ConsistencyReport] {
+) appfault.Result[*models.ConsistencyReport] {
 	row := r.db.QueryRowContext(context, `
 		SELECT Id, ProjectId, Status, Score, Grade, 
 		       SummaryJson, FindingsJson, DurationMs,
@@ -1942,7 +1942,7 @@ func (r *ConsistencyRepo) GetReportHistory(
 	context stdctx.Context,
 	projectId string,
 	limit int,
-) apperror.Result[[]models.ConsistencyReport] {
+) appfault.Result[[]models.ConsistencyReport] {
 	rows, err := r.db.QueryContext(context, `
 		SELECT Id, ProjectId, Status, Score, Grade, 
 		       SummaryJson, FindingsJson, DurationMs,
@@ -1973,7 +1973,7 @@ func (r *ConsistencyRepo) GetReportHistory(
 func (r *ConsistencyRepo) GetReport(
 	context stdctx.Context,
 	reportId string,
-) apperror.Result[*models.ConsistencyReport] {
+) appfault.Result[*models.ConsistencyReport] {
 	row := r.db.QueryRowContext(context, `
 		SELECT Id, ProjectId, Status, Score, Grade, 
 		       SummaryJson, FindingsJson, DurationMs,
@@ -1990,7 +1990,7 @@ func (r *ConsistencyRepo) DeleteOldReports(
 	context stdctx.Context,
 	projectId string,
 	keepCount int,
-) apperror.Result[int64] {
+) appfault.Result[int64] {
 	result, err := r.db.ExecContext(context, `
 		DELETE FROM ConsistencyReport
 		WHERE ProjectId = ?
@@ -2007,7 +2007,7 @@ func (r *ConsistencyRepo) DeleteOldReports(
 	return result.RowsAffected()
 }
 
-func (r *ConsistencyRepo) scanReport(row *sql.Row) apperror.Result[*models.ConsistencyReport] {
+func (r *ConsistencyRepo) scanReport(row *sql.Row) appfault.Result[*models.ConsistencyReport] {
 	var report models.ConsistencyReport
 	var status, summaryJson, findingsJson string
 	var createdAt string
@@ -2055,7 +2055,7 @@ func (r *ConsistencyRepo) scanReport(row *sql.Row) apperror.Result[*models.Consi
 	return &report, nil
 }
 
-func (r *ConsistencyRepo) scanReportRow(rows *sql.Rows) apperror.Result[*models.ConsistencyReport] {
+func (r *ConsistencyRepo) scanReportRow(rows *sql.Rows) appfault.Result[*models.ConsistencyReport] {
 	var report models.ConsistencyReport
 	var status, summaryJson, findingsJson string
 	var createdAt string

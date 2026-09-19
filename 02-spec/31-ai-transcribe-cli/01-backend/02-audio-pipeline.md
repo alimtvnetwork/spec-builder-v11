@@ -59,9 +59,9 @@ type AudioCapturer struct {
 }
 
 type AudioSource interface {
-    Open() *apperror.AppError
+    Open() *appfault.AppError
     Read(buf []byte) (int, error) // EXEMPTED: io.Reader stdlib boundary
-    Close() *apperror.AppError
+    Close() *appfault.AppError
     Format() AudioFormat
 }
 
@@ -140,7 +140,7 @@ type PreprocessConfig struct {
     LowPassFilter     int     // Hz cutoff (8000)
 }
 
-func (ap *AudioPreprocessor) Process(chunk *AudioChunk) apperror.Result[AudioChunk] {
+func (ap *AudioPreprocessor) Process(chunk *AudioChunk) appfault.Result[AudioChunk] {
     var data []byte = chunk.Data
     
     // 1. Resample if needed
@@ -251,10 +251,10 @@ type SileroVAD struct {
     state      []float32  // Hidden state
 }
 
-func NewSileroVAD(modelPath string) apperror.Result[SileroVAD] {
+func NewSileroVAD(modelPath string) appfault.Result[SileroVAD] {
     session, err := onnxruntime.NewSession(modelPath)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrAudioPipelineModelLoad,
             "load silero model",
@@ -319,7 +319,7 @@ type WebRTCVAD struct {
     sampleRate int
 }
 
-func NewWebRTCVAD(mode int) apperror.Result[WebRTCVAD] {
+func NewWebRTCVAD(mode int) appfault.Result[WebRTCVAD] {
     vad, err := webrtcvad.New()
     if err != nil {
         return nil, err
@@ -384,7 +384,7 @@ type EncoderConfig struct {
     Quality    int    // 0-10 for variable bitrate
 }
 
-func (ae *AudioEncoder) Encode(chunk *AudioChunk) apperror.Result[[]byte] {
+func (ae *AudioEncoder) Encode(chunk *AudioChunk) appfault.Result[[]byte] {
     switch ae.format {
     case "pcm":
         return chunk.Data, nil
@@ -399,14 +399,14 @@ func (ae *AudioEncoder) Encode(chunk *AudioChunk) apperror.Result[[]byte] {
         return ae.encodeMP3(chunk)
         
     default:
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrAudioFormatInvalid,
             "unsupported audio format",
         ).WithContext("format", ae.format)
     }
 }
 
-func (ae *AudioEncoder) encodeOpus(chunk *AudioChunk) apperror.Result[[]byte] {
+func (ae *AudioEncoder) encodeOpus(chunk *AudioChunk) appfault.Result[[]byte] {
     encoder, err := opus.NewEncoder(ae.sampleRate, 1, opus.AppVoIP)
     if err != nil {
         return nil, err

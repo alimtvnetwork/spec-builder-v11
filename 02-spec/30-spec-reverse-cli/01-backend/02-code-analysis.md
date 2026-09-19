@@ -69,7 +69,7 @@ type DiscoveredFile struct {
     ModTime      time.Time
 }
 
-func (d *FileDiscovery) Discover() apperror.Result[[]DiscoveredFile] {
+func (d *FileDiscovery) Discover() appfault.Result[[]DiscoveredFile] {
     var files []DiscoveredFile
     
     err := filepath.WalkDir(d.RootPath, func(path string, entry os.DirEntry, err error) error {
@@ -128,7 +128,7 @@ type LanguageInfo struct {
 
 type LanguageDetector struct{}
 
-func (d *LanguageDetector) Detect(rootPath string) apperror.Result[*LanguageInfo] {
+func (d *LanguageDetector) Detect(rootPath string) appfault.Result[*LanguageInfo] {
     info := &LanguageInfo{
         Language:  LanguageUnknown,
         Framework: FrameworkNone,
@@ -177,7 +177,7 @@ import (
 )
 
 type ASTParser interface {
-    Parse(filePath string) apperror.Result[*ParsedFile]
+    Parse(filePath string) appfault.Result[*ParsedFile]
 }
 
 type ParsedFile struct {
@@ -230,7 +230,7 @@ func NewGoASTParser() *GoASTParser {
     }
 }
 
-func (p *GoASTParser) Parse(filePath string) apperror.Result[*ParsedFile] {
+func (p *GoASTParser) Parse(filePath string) appfault.Result[*ParsedFile] {
     node, err := parser.ParseFile(p.fset, filePath, nil, parser.ParseComments)
     if err != nil {
         return nil, err
@@ -311,7 +311,7 @@ type HandlerSymbol struct {
     Source     string
 }
 
-func (e *SymbolExtractor) Extract() apperror.Result[*ExtractedSymbols] {
+func (e *SymbolExtractor) Extract() appfault.Result[*ExtractedSymbols] {
     symbols := &ExtractedSymbols{}
     
     for _, file := range e.parsedFiles {
@@ -383,7 +383,7 @@ type PatternAnalyzer struct {
     files   []DiscoveredFile
 }
 
-func (p *PatternAnalyzer) Analyze() apperror.Result[*ArchitecturePattern] {
+func (p *PatternAnalyzer) Analyze() appfault.Result[*ArchitecturePattern] {
     pattern := &ArchitecturePattern{
         Dependencies: make(map[string][]string),
     }
@@ -493,7 +493,7 @@ type AnalysisIssue struct {
     LineNum  int
 }
 
-func (p *AnalysisPipeline) Run(context stdctx.Context) apperror.Result[*AnalysisResult] {
+func (p *AnalysisPipeline) Run(context stdctx.Context) appfault.Result[*AnalysisResult] {
     start := time.Now()
     result := &AnalysisResult{
         RootPath: p.rootPath,

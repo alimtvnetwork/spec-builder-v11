@@ -93,7 +93,7 @@ type CommandRouter struct {
     aiBridge      *AIBridgeClient
 }
 
-func (r *CommandRouter) Route(cmd Command) apperror.Result[Result] {
+func (r *CommandRouter) Route(cmd Command) appfault.Result[Result] {
     switch {
     case cmd.Type.IsProjectCreate():
         return r.projectMgr.Create(cmd.Args)
@@ -129,11 +129,11 @@ type Project struct {
     UpdatedAt   time.Time
 }
 
-func (pm *ProjectManager) Create(name string, opts ProjectOptions) apperror.Result[*Project]
-func (pm *ProjectManager) Open(name string) apperror.Result[*Project]
-func (pm *ProjectManager) Export(name string, outputPath string) *apperror.AppError
-func (pm *ProjectManager) Import(dbPath string) apperror.Result[*Project]
-func (pm *ProjectManager) Clone(source, target string) apperror.Result[*Project]
+func (pm *ProjectManager) Create(name string, opts ProjectOptions) appfault.Result[*Project]
+func (pm *ProjectManager) Open(name string) appfault.Result[*Project]
+func (pm *ProjectManager) Export(name string, outputPath string) *appfault.AppError
+func (pm *ProjectManager) Import(dbPath string) appfault.Result[*Project]
+func (pm *ProjectManager) Clone(source, target string) appfault.Result[*Project]
 ```
 
 ### 3. RAG Service
@@ -156,9 +156,9 @@ type RAGVector struct {
     Metadata  JSON    // Additional context
 }
 
-func (r *RAGService) Index(content string, source string) *apperror.AppError
-func (r *RAGService) Query(prompt string, topK int) apperror.Result[[]RAGResult]
-func (r *RAGService) ImportPreset(path string) *apperror.AppError
+func (r *RAGService) Index(content string, source string) *appfault.AppError
+func (r *RAGService) Query(prompt string, topK int) appfault.Result[[]RAGResult]
+func (r *RAGService) ImportPreset(path string) *appfault.AppError
 ```
 
 ### 4. Code Generator
@@ -186,8 +186,8 @@ type GenerateOptions struct {
     DryRun        bool
 }
 
-func (g *CodeGenerator) Generate(req GenerationRequest) apperror.Result[*GenerationResult]
-func (g *CodeGenerator) ValidateAgainstSpec(code string, spec string) apperror.Result[ValidationResult]
+func (g *CodeGenerator) Generate(req GenerationRequest) appfault.Result[*GenerationResult]
+func (g *CodeGenerator) ValidateAgainstSpec(code string, spec string) appfault.Result[ValidationResult]
 ```
 
 ### 5. AI Bridge Client
@@ -207,9 +207,9 @@ type AIRequest struct {
     Temperature float64
 }
 
-func (c *AIBridgeClient) Generate(req AIRequest) apperror.Result[string]
-func (c *AIBridgeClient) Embed(text string) apperror.Result[[]float32]
-func (c *AIBridgeClient) Stream(req AIRequest, handler StreamHandler) *apperror.AppError
+func (c *AIBridgeClient) Generate(req AIRequest) appfault.Result[string]
+func (c *AIBridgeClient) Embed(text string) appfault.Result[[]float32]
+func (c *AIBridgeClient) Stream(req AIRequest, handler StreamHandler) *appfault.AppError
 ```
 
 ---
@@ -266,7 +266,7 @@ All components use the shared error package with stack traces:
 ```go
 import "github.com/user/shared/errors"
 
-func (pm *ProjectManager) Create(name string, opts ProjectOptions) apperror.Result[*Project] {
+func (pm *ProjectManager) Create(name string, opts ProjectOptions) appfault.Result[*Project] {
     if name == "" {
         return nil, errors.New(10301, "project name required").
             WithStack().

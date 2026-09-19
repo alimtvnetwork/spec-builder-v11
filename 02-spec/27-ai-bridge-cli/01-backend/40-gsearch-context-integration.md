@@ -183,13 +183,13 @@ var defaultPatterns = []ContextPattern{
 ```go
 type GSearchExecutor interface {
     // Web search for general context
-    WebSearch(context stdctx.Context, req WebSearchRequest) apperror.Result[*WebSearchResult]
+    WebSearch(context stdctx.Context, req WebSearchRequest) appfault.Result[*WebSearchResult]
     
     // Code-specific search (GitHub, StackOverflow)
-    CodeSearch(context stdctx.Context, req CodeSearchRequest) apperror.Result[*CodeSearchResult]
+    CodeSearch(context stdctx.Context, req CodeSearchRequest) appfault.Result[*CodeSearchResult]
     
     // URL content extraction
-    Extract(context stdctx.Context, req ExtractRequest) apperror.Result[*ExtractResult]
+    Extract(context stdctx.Context, req ExtractRequest) appfault.Result[*ExtractResult]
 }
 
 type WebSearchRequest struct {
@@ -229,7 +229,7 @@ type ExtractRequest struct {
 ### 4.3 Execution Flow
 
 ```go
-func (e *ContextFetcher) FetchContextNeeds(context stdctx.Context, needs []ContextNeed) apperror.Result[*FetchResult] {
+func (e *ContextFetcher) FetchContextNeeds(context stdctx.Context, needs []ContextNeed) appfault.Result[*FetchResult] {
     result := &FetchResult{
         Chunks:    []RAGChunk{},
         Errors:    []ContextError{},
@@ -278,10 +278,10 @@ func (e *ContextFetcher) FetchContextNeeds(context stdctx.Context, needs []Conte
         result.Chunks = append(result.Chunks, chunks...)
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
-func (e *ContextFetcher) fetchSingleNeed(context stdctx.Context, need ContextNeed) apperror.Result[[]RAGChunk] {
+func (e *ContextFetcher) fetchSingleNeed(context stdctx.Context, need ContextNeed) appfault.Result[[]RAGChunk] {
     switch need.Type {
     case ContextTypeWebSearch:
         return e.executeWebSearch(context, need)
@@ -290,7 +290,7 @@ func (e *ContextFetcher) fetchSingleNeed(context stdctx.Context, need ContextNee
     case ContextTypeExtraction:
         return e.executeExtraction(context, need)
     default:
-        return apperror.FailNew[[]RAGChunk](
+        return appfault.FailNew[[]RAGChunk](
             ErrContextFetchFailed,
             "unsupported context type: %s", need.Type,
         )
@@ -572,12 +572,12 @@ func (s *ContextIntegrationService) EnrichPromptContext(
     context stdctx.Context,
     prompt string,
     existingContext []RAGChunk,
-) apperror.Result[*EnrichedContext] {
+) appfault.Result[*EnrichedContext] {
     // 1. Detect context needs
     needs := s.detector.DetectContextNeeds(prompt, existingContext)
     
     if len(needs) == 0 {
-        return apperror.Ok(&EnrichedContext{
+        return appfault.Ok(&EnrichedContext{
             Chunks:       existingContext,
             SearchPerformed: false,
         })
@@ -589,8 +589,8 @@ func (s *ContextIntegrationService) EnrichPromptContext(
     // 3. Fetch uncached context
     fetchResult, err := s.executor.FetchContextNeeds(context, uncachedNeeds)
     if err != nil {
-        return apperror.Fail[*EnrichedContext](
-            apperror.Wrap(
+        return appfault.Fail[*EnrichedContext](
+            appfault.Wrap(
                 err,
                 ErrContextFetchFailed,
                 "context fetch failed",
@@ -607,7 +607,7 @@ func (s *ContextIntegrationService) EnrichPromptContext(
     // 6. Apply token budget
     budgetedChunks := applyTokenBudget(allChunks, s.config.MaxTotalTokens)
     
-    return apperror.Ok(&EnrichedContext{
+    return appfault.Ok(&EnrichedContext{
         Chunks:          budgetedChunks,
         SearchPerformed: true,
         ContextNeeds:    needs,
@@ -656,7 +656,7 @@ func (s *ContextIntegrationService) handleFetchError(
     context stdctx.Context,
     need ContextNeed,
     err error,
-) apperror.Result[*RecoveryResult] {
+) appfault.Result[*RecoveryResult] {
     // Check if GSearch returned specific exit code
     var exitErr *exec.ExitError
     if errors.As(err, &exitErr) {
@@ -664,15 +664,15 @@ func (s *ContextIntegrationService) handleFetchError(
         case 2: // Rate limited
             return s.handleRateLimited(context, need)
         case 3: // No results
-            return apperror.Ok(&RecoveryResult{
+            return appfault.Ok(&RecoveryResult{
                 Action: "ContinueWithout",
                 Message: "No external context found for query",
             })
         case 4: // Network error
             return s.handleNetworkError(context, need)
         case 5: // Auth error
-            return apperror.Fail[*RecoveryResult](
-                apperror.New(
+            return appfault.Fail[*RecoveryResult](
+                appfault.New(
                     ErrGSearchNotAvailable,
                     "GSearch API authentication failed",
                 ),
@@ -682,8 +682,8 @@ func (s *ContextIntegrationService) handleFetchError(
     
     // For required context, escalate error
     if need.Priority == ContextPriorityRequired {
-        return apperror.Fail[*RecoveryResult](
-            apperror.Wrap(
+        return appfault.Fail[*RecoveryResult](
+            appfault.Wrap(
                 err,
                 ErrContextFetchFailed,
                 "required context fetch failed",
@@ -692,7 +692,7 @@ func (s *ContextIntegrationService) handleFetchError(
     }
     
     // For optional/helpful, continue without
-    return apperror.Ok(&RecoveryResult{
+    return appfault.Ok(&RecoveryResult{
         Action: "ContinueWithout",
         Message: fmt.Sprintf("Optional context fetch failed: %v", err),
     })
@@ -862,7 +862,7 @@ func (e *HtmlBlogSearchExecutor) ExecuteResearch(
     context stdctx.Context,
     req HtmlBlogGenerateRequest,
     preset HtmlBlogPreset,
-) apperror.Result[*HtmlBlogSearchResult] {
+) appfault.Result[*HtmlBlogSearchResult] {
     // 1. Extract keywords
     keywords := e.extractKeywords(req.Prompt, req.Keywords, preset.CommonPrompt)
     
@@ -918,7 +918,7 @@ func (e *HtmlBlogSearchExecutor) ExecuteResearch(
         req.AppName, req.Company, uuid.New().String())
     e.ragStore.StoreChunks(context, sessionDbPath, allChunks)
     
-    return apperror.Ok(&HtmlBlogSearchResult{
+    return appfault.Ok(&HtmlBlogSearchResult{
         Chunks:       allChunks,
         TotalResults: len(allChunks),
         Platforms:    req.SearchPlatforms,

@@ -272,23 +272,23 @@ CREATE INDEX IdxCitationsResearch ON ResearchCitations(ResearchId);
 
 ```go
 type ResearchService interface {
-    Start(context stdctx.Context, req ResearchRequest) apperror.Result[*ResearchResponse]
-    GetStatus(context stdctx.Context, id string) apperror.Result[*ResearchStatus]
-    GetResult(context stdctx.Context, id string) apperror.Result[*ResearchResult]
-    Cancel(context stdctx.Context, id string) *apperror.AppError
-    List(context stdctx.Context, sessionId string, opts ListOptions) apperror.Result[[]Research]
+    Start(context stdctx.Context, req ResearchRequest) appfault.Result[*ResearchResponse]
+    GetStatus(context stdctx.Context, id string) appfault.Result[*ResearchStatus]
+    GetResult(context stdctx.Context, id string) appfault.Result[*ResearchResult]
+    Cancel(context stdctx.Context, id string) *appfault.AppError
+    List(context stdctx.Context, sessionId string, opts ListOptions) appfault.Result[[]Research]
 }
 
 type ResearchPlanner interface {
-    AnalyzeQuery(query string) apperror.Result[*QueryAnalysis]
-    GenerateSubtasks(analysis *QueryAnalysis, config SourceConfig) apperror.Result[[]ResearchSubtask]
-    EstimateTokenBudget(subtasks []ResearchSubtask, lengthConfig OutputLengthConfig) apperror.Result[int]
+    AnalyzeQuery(query string) appfault.Result[*QueryAnalysis]
+    GenerateSubtasks(analysis *QueryAnalysis, config SourceConfig) appfault.Result[[]ResearchSubtask]
+    EstimateTokenBudget(subtasks []ResearchSubtask, lengthConfig OutputLengthConfig) appfault.Result[int]
 }
 
 type ResearchGatherer interface {
-    ExecuteSubtasks(context stdctx.Context, subtasks []ResearchSubtask) apperror.Result[<-chan SubtaskResult]
-    FetchSources(context stdctx.Context, urls []string) apperror.Result[[]SourceContent]
-    QueryRag(context stdctx.Context, query string, limit int) apperror.Result[[]RagChunk]
+    ExecuteSubtasks(context stdctx.Context, subtasks []ResearchSubtask) appfault.Result[<-chan SubtaskResult]
+    FetchSources(context stdctx.Context, urls []string) appfault.Result[[]SourceContent]
+    QueryRag(context stdctx.Context, query string, limit int) appfault.Result[[]RagChunk]
 }
 
 // CitatedContent holds content with its citations after processing
@@ -299,14 +299,14 @@ type CitatedContent struct {
 
 type ResearchSynthesizer interface {
     Deduplicate(sources []SourceContent) []SourceContent
-    CreateOutline(sources []SourceContent, query string) apperror.Result[*Outline]
-    GenerateContent(outline *Outline, format string, lengthConfig OutputLengthConfig) apperror.Result[string]
-    AddCitations(content string, sources []SourceContent) apperror.Result[CitatedContent]
+    CreateOutline(sources []SourceContent, query string) appfault.Result[*Outline]
+    GenerateContent(outline *Outline, format string, lengthConfig OutputLengthConfig) appfault.Result[string]
+    AddCitations(content string, sources []SourceContent) appfault.Result[CitatedContent]
 }
 
 type ResearchVerifier interface {
-    CheckConsistency(content string, sources []SourceContent) apperror.Result[float64]
-    ValidateCitations(content string, citations []Citation) *apperror.AppError
+    CheckConsistency(content string, sources []SourceContent) appfault.Result[float64]
+    ValidateCitations(content string, citations []Citation) *appfault.AppError
     CalculateConfidence(research *Research) float64
 }
 ```

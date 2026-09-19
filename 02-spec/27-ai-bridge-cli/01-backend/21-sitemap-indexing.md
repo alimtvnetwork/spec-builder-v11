@@ -132,18 +132,18 @@ type SitemapEntry struct {
     Title        string    `json:",omitempty"` // If fetched
 }
 
-func (s *SitemapService) FetchSitemap(url string, config *SitemapFetchConfig) apperror.Result[*SitemapResult] {
+func (s *SitemapService) FetchSitemap(url string, config *SitemapFetchConfig) appfault.Result[*SitemapResult] {
     // Check cache first
     cacheKey := s.buildCacheKey(url, config)
     // EXEMPTED: typed accessor internal — cache stores known *SitemapResult values (§7.2)
     if cached, ok := s.Cache.Get(cacheKey); ok {
-        return apperror.Ok(cached.(*SitemapResult))
+        return appfault.Ok(cached.(*SitemapResult))
     }
     
     // Fetch sitemap XML
     resp, err := s.HttpClient.Get(url)
     if err != nil {
-        return apperror.FailWrap[*SitemapResult](
+        return appfault.FailWrap[*SitemapResult](
             err,
             ErrSitemapFetchFailed,
             "failed to fetch sitemap",
@@ -155,7 +155,7 @@ func (s *SitemapService) FetchSitemap(url string, config *SitemapFetchConfig) ap
     // Parse XML (handle sitemap index and urlset)
     parseResult := s.parseSitemap(resp.Body, config)
     if parseResult.IsErr() {
-        return apperror.Fail[*SitemapResult](parseResult.Err())
+        return appfault.Fail[*SitemapResult](parseResult.Err())
     }
 
     result := parseResult.Value()
@@ -168,7 +168,7 @@ func (s *SitemapService) FetchSitemap(url string, config *SitemapFetchConfig) ap
     // Cache result
     s.Cache.Set(cacheKey, result, 24*time.Hour)
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -185,7 +185,7 @@ type SitemapController struct {
     DbManager       *DatabaseManager
 }
 
-func (c *SitemapController) IndexSitemap(req *SitemapIndexRequest) apperror.Result[*SitemapIndex] {
+func (c *SitemapController) IndexSitemap(req *SitemapIndexRequest) appfault.Result[*SitemapIndex] {
     // 1. Create index record
     index := &SitemapIndex{
         Id:         generateId("sitemap"),
@@ -205,7 +205,7 @@ func (c *SitemapController) IndexSitemap(req *SitemapIndexRequest) apperror.Resu
         index.Status = "error"
         index.ErrorMessage = fetchResult.Err().Error()
         c.saveIndex(index)
-        return apperror.Fail[*SitemapIndex](fetchResult.Err())
+        return appfault.Fail[*SitemapIndex](fetchResult.Err())
     }
 
     result := fetchResult.Value()
@@ -242,7 +242,7 @@ func (c *SitemapController) IndexSitemap(req *SitemapIndexRequest) apperror.Resu
     index.Status = "ready"
     c.saveIndex(index)
     
-    return apperror.Ok(index)
+    return appfault.Ok(index)
 }
 
 func (c *SitemapController) buildSearchableContent(entry SitemapEntry) string {
@@ -310,7 +310,7 @@ type FoundLink struct {
 func (s *InternalLinkService) FindLinksForKeywords(
     keywords []string,
     config *LinkFinderConfig,
-) apperror.Result[[]FoundLink] {
+) appfault.Result[[]FoundLink] {
     var links []FoundLink
     generatedCount := 0
     
@@ -349,7 +349,7 @@ func (s *InternalLinkService) FindLinksForKeywords(
         }
     }
     
-    return apperror.Ok(links)
+    return appfault.Ok(links)
 }
 
 func (s *InternalLinkService) generateSlug(keyword string) string {
@@ -415,7 +415,7 @@ func (p *ChunkProcessor) ProcessContent(
     content string,
     keywords []string,
     sitemapRag string,
-) apperror.Result[ProcessedContent] {
+) appfault.Result[ProcessedContent] {
     paragraphs := strings.Split(content, "\n\n")
     var allLinks []FoundLink
     var processedParagraphs []string
@@ -462,7 +462,7 @@ func (p *ChunkProcessor) ProcessContent(
         totalLinks += len(links)
     }
     
-    return apperror.Ok(ProcessedContent{
+    return appfault.Ok(ProcessedContent{
         Content: strings.Join(processedParagraphs, "\n\n"),
         Links:   allLinks,
     })

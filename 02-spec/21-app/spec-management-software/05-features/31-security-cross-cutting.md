@@ -43,7 +43,7 @@ func ValidateInput[T any](input T) error {
 
 ```go
 // ALWAYS validate file paths
-func ValidatePath(basePath, requestedPath string) apperror.Result[string] {
+func ValidatePath(basePath, requestedPath string) appfault.Result[string] {
     // Resolve to absolute path
     fullPath := filepath.Join(basePath, requestedPath)
     absPath, err := filepath.Abs(fullPath)
@@ -128,10 +128,10 @@ func canAccessResource(user *User, resource *Resource, action string) bool {
 
 ```go
 // NEVER log secrets
-func loadSecret(name string) apperror.Result[string] {
+func loadSecret(name string) appfault.Result[string] {
     value := os.Getenv(name)
     if value == "" {
-        return "", apperror.New(
+        return "", appfault.New(
             ErrSecretMissing,
             "missing secret",
         ).WithContext("name", name)

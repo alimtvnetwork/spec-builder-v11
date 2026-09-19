@@ -432,7 +432,7 @@ import (
     "github.com/spf13/viper"
 )
 
-func Load(configPath string) apperror.Result[Config] {
+func Load(configPath string) appfault.Result[Config] {
     v := viper.New()
     
     // Set defaults
@@ -445,7 +445,7 @@ func Load(configPath string) apperror.Result[Config] {
     if err := v.ReadInConfig(); err != nil {
         // Config file is optional, continue with defaults
         if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-            return apperror.FailWrap[Config](
+            return appfault.FailWrap[Config](
                 err,
                 "E8100",
                 "failed to read config",
@@ -460,7 +460,7 @@ func Load(configPath string) apperror.Result[Config] {
     
     var config Config
     if err := v.Unmarshal(&config); err != nil {
-        return apperror.FailWrap[Config](
+        return appfault.FailWrap[Config](
             err,
             "E8100",
             "failed to unmarshal config",
@@ -469,14 +469,14 @@ func Load(configPath string) apperror.Result[Config] {
     
     // Validate required fields
     if err := config.Validate(); err != nil {
-        return apperror.FailWrap[Config](
+        return appfault.FailWrap[Config](
             err,
             "E8100",
             "config validation failed",
         )
     }
     
-    return apperror.Ok(config)
+    return appfault.Ok(config)
 }
 
 func setDefaults(v *viper.Viper) {

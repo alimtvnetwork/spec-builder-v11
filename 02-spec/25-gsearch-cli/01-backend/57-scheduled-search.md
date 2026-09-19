@@ -210,15 +210,15 @@ CREATE INDEX IdxExecutionsStatus ON ScheduleExecutions(Status);
 
 ```go
 type SchedulerService interface {
-    Create(context stdctx.Context, req CreateScheduleRequest) apperror.Result[*Schedule]
-    Get(context stdctx.Context, id string) apperror.Result[*Schedule]
-    List(context stdctx.Context, opts ListOptions) apperror.Result[[]Schedule]
-    Update(context stdctx.Context, id string, req UpdateScheduleRequest) apperror.Result[*Schedule]
-    Delete(context stdctx.Context, id string) *apperror.AppError
-    RunNow(context stdctx.Context, id string) apperror.Result[*ScheduleExecution]
-    GetHistory(context stdctx.Context, id string, opts ListOptions) apperror.Result[[]ScheduleExecution]
-    Start() *apperror.AppError
-    Stop() *apperror.AppError
+    Create(context stdctx.Context, req CreateScheduleRequest) appfault.Result[*Schedule]
+    Get(context stdctx.Context, id string) appfault.Result[*Schedule]
+    List(context stdctx.Context, opts ListOptions) appfault.Result[[]Schedule]
+    Update(context stdctx.Context, id string, req UpdateScheduleRequest) appfault.Result[*Schedule]
+    Delete(context stdctx.Context, id string) *appfault.AppError
+    RunNow(context stdctx.Context, id string) appfault.Result[*ScheduleExecution]
+    GetHistory(context stdctx.Context, id string, opts ListOptions) appfault.Result[[]ScheduleExecution]
+    Start() *appfault.AppError
+    Stop() *appfault.AppError
 }
 
 type Schedule struct {

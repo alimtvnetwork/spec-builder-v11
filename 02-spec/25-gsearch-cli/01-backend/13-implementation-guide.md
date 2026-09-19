@@ -189,7 +189,7 @@ go get github.com/stretchr/testify@v1.9.0
 ```go
 // internal/parser/parser.go
 type Parser interface {
-    Parse(html string) apperror.Result[[]SearchResult]
+    Parse(html string) appfault.Result[[]SearchResult]
     IsBlocked(html string) bool
     GetEngineName() string
 }
@@ -284,7 +284,7 @@ var GoogleSelectors = struct {
 **Algorithm Implementation:**
 ```go
 // internal/switcher/weighted.go
-func (s *Switcher) SelectMethod() apperror.Result[SearchMethod] {
+func (s *Switcher) SelectMethod() appfault.Result[SearchMethod] {
     // 1. Filter out blocked methods
     available := s.getAvailableMethods()
     if len(available) == 0 {
@@ -324,7 +324,7 @@ func (s *Switcher) SelectMethod() apperror.Result[SearchMethod] {
 
 **Concurrency Pattern:**
 ```go
-func (o *Orchestrator) SearchConcurrent(keywords []string) apperror.Result[[]SearchResult] {
+func (o *Orchestrator) SearchConcurrent(keywords []string) appfault.Result[[]SearchResult] {
     resultsChan := make(chan KeywordResult, len(keywords))
     sem := make(chan struct{}, o.config.MaxConcurrency)
     

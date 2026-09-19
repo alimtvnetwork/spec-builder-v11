@@ -272,14 +272,14 @@ type FileLogger struct {
     combinedFile *os.File
 }
 
-func (l *FileLogger) Initialize() *apperror.AppError {
+func (l *FileLogger) Initialize() *appfault.AppError {
     l.runId = fmt.Sprintf("run_%s", time.Now().Format("20060102_150405"))
     l.runDir = filepath.Join(l.baseDir, l.runId)
 
     err := pathutil.EnsureDir(l.runDir)
 
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "failed to create run directory",
         ).WithSkip(1)
@@ -295,25 +295,25 @@ func (l *FileLogger) Initialize() *apperror.AppError {
     return nil
 }
 
-func (l *FileLogger) openLogFiles() *apperror.AppError {
+func (l *FileLogger) openLogFiles() *appfault.AppError {
     var err error
 
     l.stdoutFile, err = pathutil.Create(filepath.Join(l.runDir, "log.txt"))
 
     if err != nil {
-        return apperror.Wrap(err, "failed to create stdout log").WithSkip(1)
+        return appfault.Wrap(err, "failed to create stdout log").WithSkip(1)
     }
 
     l.stderrFile, err = pathutil.Create(filepath.Join(l.runDir, "error.txt"))
 
     if err != nil {
-        return apperror.Wrap(err, "failed to create stderr log").WithSkip(1)
+        return appfault.Wrap(err, "failed to create stderr log").WithSkip(1)
     }
 
     l.combinedFile, err = pathutil.Create(filepath.Join(l.runDir, "combined.txt"))
 
     if err != nil {
-        return apperror.Wrap(err, "failed to create combined log").WithSkip(1)
+        return appfault.Wrap(err, "failed to create combined log").WithSkip(1)
     }
 
     return nil
@@ -337,7 +337,7 @@ type RunMetadata struct {
     Warnings  int
 }
 
-func (l *FileLogger) WriteMetadata(result *ExecutionResult) *apperror.AppError {
+func (l *FileLogger) WriteMetadata(result *ExecutionResult) *appfault.AppError {
     meta := RunMetadata{
         RunId:     l.runId,
         IsSuccess: result.IsSuccess,
@@ -352,7 +352,7 @@ func (l *FileLogger) WriteMetadata(result *ExecutionResult) *apperror.AppError {
     data, err := json.MarshalIndent(meta, "", "  ")
 
     if err != nil {
-        return apperror.Wrap(err, "failed to marshal metadata").WithSkip(1)
+        return appfault.Wrap(err, "failed to marshal metadata").WithSkip(1)
     }
 
     writeErr := pathutil.WriteFile(
@@ -362,17 +362,17 @@ func (l *FileLogger) WriteMetadata(result *ExecutionResult) *apperror.AppError {
     )
 
     if writeErr != nil {
-        return apperror.Wrap(writeErr, "failed to write metadata").WithSkip(1)
+        return appfault.Wrap(writeErr, "failed to write metadata").WithSkip(1)
     }
 
     return nil
 }
 
-func (l *FileLogger) Cleanup(keepRuns int) *apperror.AppError {
+func (l *FileLogger) Cleanup(keepRuns int) *appfault.AppError {
     entries, err := pathutil.ReadDir(l.baseDir)
 
     if err != nil {
-        return apperror.Wrap(err, "failed to read log directory").WithSkip(1)
+        return appfault.Wrap(err, "failed to read log directory").WithSkip(1)
     }
 
     runs := l.filterRunEntries(entries)
@@ -616,9 +616,9 @@ const (
     ErrBrunHealthBodyMismatch  = 7505
 )
 
-// Error constructors using *apperror.AppError
-func NewConfigNotFoundError(path string) *apperror.AppError {
-    return apperror.New(
+// Error constructors using *appfault.AppError
+func NewConfigNotFoundError(path string) *appfault.AppError {
+    return appfault.New(
         "configuration file not found",
     ).
         WithCode(ErrBrunConfigNotFound).
@@ -626,8 +626,8 @@ func NewConfigNotFoundError(path string) *apperror.AppError {
         WithSkip(1)
 }
 
-func NewPortUnavailableError(port int, fallbackTried []int) *apperror.AppError {
-    return apperror.New(
+func NewPortUnavailableError(port int, fallbackTried []int) *appfault.AppError {
+    return appfault.New(
         "port %d unavailable, all fallbacks exhausted",
         port,
     ).
@@ -636,8 +636,8 @@ func NewPortUnavailableError(port int, fallbackTried []int) *apperror.AppError {
         WithSkip(1)
 }
 
-func NewHealthTimeoutError(url string, timeout time.Duration) *apperror.AppError {
-    return apperror.New(
+func NewHealthTimeoutError(url string, timeout time.Duration) *appfault.AppError {
+    return appfault.New(
         "health check did not pass within timeout",
     ).
         WithCode(ErrBrunHealthTimeout).
@@ -646,8 +646,8 @@ func NewHealthTimeoutError(url string, timeout time.Duration) *apperror.AppError
         WithSkip(1)
 }
 
-func NewGoBuildError(file string, line int, message string) *apperror.AppError {
-    return apperror.New(
+func NewGoBuildError(file string, line int, message string) *appfault.AppError {
+    return appfault.New(
         message,
     ).
         WithCode(ErrBrunGoBuildFailed).

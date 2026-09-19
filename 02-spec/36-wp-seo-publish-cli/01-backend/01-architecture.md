@@ -92,10 +92,10 @@ type ConnectionConfig struct {
     Nickname        string
 }
 
-func (s *ConnectionService) Connect(cfg ConnectionConfig) apperror.Result[Website]
-func (s *ConnectionService) Validate(websiteId string) apperror.Result[ValidationResult]
-func (s *ConnectionService) Disconnect(websiteId string) *apperror.AppError
-func (s *ConnectionService) List() apperror.Result[[]Website]
+func (s *ConnectionService) Connect(cfg ConnectionConfig) appfault.Result[Website]
+func (s *ConnectionService) Validate(websiteId string) appfault.Result[ValidationResult]
+func (s *ConnectionService) Disconnect(websiteId string) *appfault.AppError
+func (s *ConnectionService) List() appfault.Result[[]Website]
 ```
 
 #### Content Service
@@ -135,10 +135,10 @@ type PublishResponse struct {
     PublishedAt     time.Time
 }
 
-func (s *ContentService) Publish(req PublishRequest) apperror.Result[PublishResponse]
-func (s *ContentService) Update(postId int, req PublishRequest) apperror.Result[PublishResponse]
-func (s *ContentService) Fetch(websiteId string, postId int) apperror.Result[Content]
-func (s *ContentService) Rewrite(postId int, prompt string) apperror.Result[PublishResponse]
+func (s *ContentService) Publish(req PublishRequest) appfault.Result[PublishResponse]
+func (s *ContentService) Update(postId int, req PublishRequest) appfault.Result[PublishResponse]
+func (s *ContentService) Fetch(websiteId string, postId int) appfault.Result[Content]
+func (s *ContentService) Rewrite(postId int, prompt string) appfault.Result[PublishResponse]
 ```
 
 #### Variable Service
@@ -156,11 +156,11 @@ type VariableSource struct {
     Scope    variablescopetype.Variant    // → internal/enums/variablescopetype/
 }
 
-func (s *VariableService) Import(source VariableSource) apperror.Result[ImportResult]
-func (s *VariableService) Export(scope string, format string) apperror.Result[[]byte]
-func (s *VariableService) Get(scope string, key string) apperror.Result[any]
-func (s *VariableService) Set(scope string, key string, value any) *apperror.AppError
-func (s *VariableService) List(scope string) apperror.Result[[]Variable]
+func (s *VariableService) Import(source VariableSource) appfault.Result[ImportResult]
+func (s *VariableService) Export(scope string, format string) appfault.Result[[]byte]
+func (s *VariableService) Get(scope string, key string) appfault.Result[any]
+func (s *VariableService) Set(scope string, key string, value any) *appfault.AppError
+func (s *VariableService) List(scope string) appfault.Result[[]Variable]
 ```
 
 #### Automation Service
@@ -190,8 +190,8 @@ type AutomationResult struct {
     Publications []PublishResult
 }
 
-func (s *AutomationService) Run(cfg AutomationConfig) apperror.Result[AutomationResult]
-func (s *AutomationService) Preview(cfg AutomationConfig, limit int) apperror.Result[[]PreviewItem]
+func (s *AutomationService) Run(cfg AutomationConfig) appfault.Result[AutomationResult]
+func (s *AutomationService) Preview(cfg AutomationConfig, limit int) appfault.Result[[]PreviewItem]
 ```
 
 ### 3. Client Layer
@@ -206,27 +206,27 @@ type WordPressClient struct {
 }
 
 // Categories
-func (c *WordPressClient) CreateCategory(cat Category) apperror.Result[Category]
-func (c *WordPressClient) UpdateCategory(id int, cat Category) apperror.Result[Category]
-func (c *WordPressClient) GetCategories() apperror.Result[[]Category]
+func (c *WordPressClient) CreateCategory(cat Category) appfault.Result[Category]
+func (c *WordPressClient) UpdateCategory(id int, cat Category) appfault.Result[Category]
+func (c *WordPressClient) GetCategories() appfault.Result[[]Category]
 
 // Posts
-func (c *WordPressClient) CreatePost(post Post) apperror.Result[Post]
-func (c *WordPressClient) UpdatePost(id int, post Post) apperror.Result[Post]
-func (c *WordPressClient) GetPost(id int) apperror.Result[Post]
-func (c *WordPressClient) GetPosts(params PostQuery) apperror.Result[[]Post]
+func (c *WordPressClient) CreatePost(post Post) appfault.Result[Post]
+func (c *WordPressClient) UpdatePost(id int, post Post) appfault.Result[Post]
+func (c *WordPressClient) GetPost(id int) appfault.Result[Post]
+func (c *WordPressClient) GetPosts(params PostQuery) appfault.Result[[]Post]
 
 // Pages
-func (c *WordPressClient) CreatePage(page Page) apperror.Result[Page]
-func (c *WordPressClient) UpdatePage(id int, page Page) apperror.Result[Page]
-func (c *WordPressClient) GetPage(id int) apperror.Result[Page]
+func (c *WordPressClient) CreatePage(page Page) appfault.Result[Page]
+func (c *WordPressClient) UpdatePage(id int, page Page) appfault.Result[Page]
+func (c *WordPressClient) GetPage(id int) appfault.Result[Page]
 
 // Tags
-func (c *WordPressClient) CreateTag(tag Tag) apperror.Result[Tag]
-func (c *WordPressClient) GetTags() apperror.Result[[]Tag]
+func (c *WordPressClient) CreateTag(tag Tag) appfault.Result[Tag]
+func (c *WordPressClient) GetTags() appfault.Result[[]Tag]
 
 // Media
-func (c *WordPressClient) UploadMedia(file []byte, filename string) apperror.Result[Media]
+func (c *WordPressClient) UploadMedia(file []byte, filename string) appfault.Result[Media]
 ```
 
 #### AI Bridge Client
@@ -259,11 +259,11 @@ type SeoResponse struct {
     Metadata        SeoMeta
 }
 
-func (c *AiBridgeClient) GenerateSeo(req SeoRequest) apperror.Result[SeoResponse]
-func (c *AiBridgeClient) GenerateSeoStream(req SeoRequest) apperror.Result[<-chan SeoChunk]
-func (c *AiBridgeClient) SuggestCategories(content string) apperror.Result[[]string]
-func (c *AiBridgeClient) SuggestTags(content string) apperror.Result[[]string]
-func (c *AiBridgeClient) RewriteContent(content, prompt string) apperror.Result[SeoResponse]
+func (c *AiBridgeClient) GenerateSeo(req SeoRequest) appfault.Result[SeoResponse]
+func (c *AiBridgeClient) GenerateSeoStream(req SeoRequest) appfault.Result[<-chan SeoChunk]
+func (c *AiBridgeClient) SuggestCategories(content string) appfault.Result[[]string]
+func (c *AiBridgeClient) SuggestTags(content string) appfault.Result[[]string]
+func (c *AiBridgeClient) RewriteContent(content, prompt string) appfault.Result[SeoResponse]
 ```
 
 ---

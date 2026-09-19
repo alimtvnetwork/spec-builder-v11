@@ -173,12 +173,12 @@ func (s *ExportService) ExportProject(
     projectId string, 
     userId string,
     options ExportOptions,
-) apperror.Result[*ExportResult] {
+) appfault.Result[*ExportResult] {
     // 1. Load project with metadata
     var project models.Project
     if err := s.db.Preload("Metadata").First(&project, "id = ?", projectId).Error; err != nil {
-        return apperror.Fail[*ExportResult](
-            apperror.New(
+        return appfault.Fail[*ExportResult](
+            appfault.New(
                 ERR_PROJECT_NOT_FOUND,
                 "Project not found",
             ),
@@ -187,8 +187,8 @@ func (s *ExportService) ExportProject(
     
     // 2. Verify ownership or global access
     if project.OwnerId != userId && project.Visibility != models.VisibilityGlobal {
-        return apperror.Fail[*ExportResult](
-            apperror.New(
+        return appfault.Fail[*ExportResult](
+            appfault.New(
                 ERR_ACCESS_DENIED,
                 "Cannot export this project",
             ),
@@ -202,8 +202,8 @@ func (s *ExportService) ExportProject(
     
     // 4. Ensure export directory exists
     if err := pathutil.EnsureDir(filepath.Dir(zipPath)); err != nil {
-        return apperror.Fail[*ExportResult](
-            apperror.New(
+        return appfault.Fail[*ExportResult](
+            appfault.New(
                 ERR_DIR_CREATE,
                 "Failed to create export directory",
             ),
@@ -213,8 +213,8 @@ func (s *ExportService) ExportProject(
     // 5. Create ZIP file
     zipFile, err := pathutil.Create(zipPath)
     if err != nil {
-        return apperror.Fail[*ExportResult](
-            apperror.New(
+        return appfault.Fail[*ExportResult](
+            appfault.New(
                 ERR_FILE_WRITE,
                 "Failed to create export file",
             ),
@@ -443,7 +443,7 @@ const (
 )
 
 // DetectImportSource analyzes input to determine import type
-func DetectImportSource(filePath string) apperror.Result[ImportSourceType] {
+func DetectImportSource(filePath string) appfault.Result[ImportSourceType] {
     ext := strings.ToLower(filepath.Ext(filePath))
     
     // Check if it's a directory
@@ -567,10 +567,10 @@ type ImportService struct {
 }
 
 // PreviewImport analyzes import source without executing
-func (s *ImportService) PreviewImport(context stdctx.Context, sourcePath string) apperror.Result[*ImportPreview] {
+func (s *ImportService) PreviewImport(context stdctx.Context, sourcePath string) appfault.Result[*ImportPreview] {
     sourceType, err := DetectImportSource(sourcePath)
     if err != nil {
-        return apperror.Fail[*ImportPreview](err)
+        return appfault.Fail[*ImportPreview](err)
     }
     
     switch sourceType {
@@ -581,8 +581,8 @@ func (s *ImportService) PreviewImport(context stdctx.Context, sourcePath string)
     case ImportSourceFolder:
         return s.previewFolderImport(context, sourcePath)
     default:
-        return apperror.Fail[*ImportPreview](
-            apperror.New(
+        return appfault.Fail[*ImportPreview](
+            appfault.New(
                 ERR_INVALID_FORMAT,
                 "Unknown import source type",
             ),
@@ -590,11 +590,11 @@ func (s *ImportService) PreviewImport(context stdctx.Context, sourcePath string)
     }
 }
 
-func (s *ImportService) previewZipImport(context stdctx.Context, zipPath string) apperror.Result[*ImportPreview] {
+func (s *ImportService) previewZipImport(context stdctx.Context, zipPath string) appfault.Result[*ImportPreview] {
     reader, err := zip.OpenReader(zipPath)
     if err != nil {
-        return apperror.Fail[*ImportPreview](
-            apperror.New(
+        return appfault.Fail[*ImportPreview](
+            appfault.New(
                 ERR_FILE_READ,
                 "Failed to open ZIP file",
             ),
@@ -663,18 +663,18 @@ func (s *ImportService) previewZipImport(context stdctx.Context, zipPath string)
             "No 00-overview.md found - consider adding one for better organization")
     }
     
-    return apperror.OK(preview)
+    return appfault.Ok(preview)
 }
 
 func (s *ImportService) previewMarkdownImport(
     context stdctx.Context, 
     mdPath string, 
     sourceType ImportSourceType,
-) apperror.Result[*ImportPreview] {
+) appfault.Result[*ImportPreview] {
     content, err := pathutil.ReadFile(mdPath)
     if err != nil {
-        return apperror.Fail[*ImportPreview](
-            apperror.New(
+        return appfault.Fail[*ImportPreview](
+            appfault.New(
                 ERR_FILE_READ,
                 "Failed to read markdown file",
             ),
@@ -701,7 +701,7 @@ func (s *ImportService) previewMarkdownImport(
         preview.FileCount = len(sections)
     }
     
-    return apperror.OK(preview)
+    return appfault.Ok(preview)
 }
 
 // ImportFromSource executes the import operation
@@ -710,10 +710,10 @@ func (s *ImportService) ImportFromSource(
     userId string,
     sourcePath string,
     options ImportOptions,
-) apperror.Result[*ImportResult] {
+) appfault.Result[*ImportResult] {
     sourceType, err := DetectImportSource(sourcePath)
     if err != nil {
-        return apperror.Fail[*ImportResult](err)
+        return appfault.Fail[*ImportResult](err)
     }
     
     switch sourceType {
@@ -726,8 +726,8 @@ func (s *ImportService) ImportFromSource(
     case ImportSourceFolder:
         return s.importFromFolder(context, userId, sourcePath, options)
     default:
-        return apperror.Fail[*ImportResult](
-            apperror.New(
+        return appfault.Fail[*ImportResult](
+            appfault.New(
                 ERR_INVALID_FORMAT,
                 "Unknown import source type",
             ),
@@ -740,11 +740,11 @@ func (s *ImportService) importFromZip(
     userId string,
     zipPath string,
     options ImportOptions,
-) apperror.Result[*ImportResult] {
+) appfault.Result[*ImportResult] {
     reader, err := zip.OpenReader(zipPath)
     if err != nil {
-        return apperror.Fail[*ImportResult](
-            apperror.New(
+        return appfault.Fail[*ImportResult](
+            appfault.New(
                 ERR_FILE_READ,
                 "Failed to open ZIP file",
             ),
@@ -763,8 +763,8 @@ func (s *ImportService) importFromZip(
     if err := s.db.Where("slug = ?", existingSlug).First(&existing).Error; err == nil {
         switch options.ConflictStrategy {
         case ConflictSkip:
-            return apperror.Fail[*ImportResult](
-                apperror.New(
+            return appfault.Fail[*ImportResult](
+                appfault.New(
                     ERR_DUPLICATE_ENTRY,
                     "Project already exists",
                 ),
@@ -794,8 +794,8 @@ func (s *ImportService) importFromZip(
             project.ParentId = s.findOrCreateCategory(context, userId, *options.Category)
         }
         if err := s.db.Create(&project).Error; err != nil {
-            return apperror.Fail[*ImportResult](
-                apperror.New(
+            return appfault.Fail[*ImportResult](
+                appfault.New(
                     ERR_DATABASE,
                     "Failed to create project",
                 ),
@@ -808,8 +808,8 @@ func (s *ImportService) importFromZip(
     // 3. Create project directory
     projectDir := s.pathManager.ToAbsolute(project.Id, "")
     if err := pathutil.EnsureDir(projectDir); err != nil {
-        return apperror.Fail[*ImportResult](
-            apperror.New(
+        return appfault.Fail[*ImportResult](
+            appfault.New(
                 ERR_DIR_CREATE,
                 "Failed to create project directory",
             ),
@@ -874,7 +874,7 @@ func (s *ImportService) importFromZip(
     // 6. Write spec.project.json
     s.writeProjectJson(projectDir, &project)
     
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 
 func (s *ImportService) importFromMarkdown(
@@ -883,11 +883,11 @@ func (s *ImportService) importFromMarkdown(
     mdPath string,
     options ImportOptions,
     isPRD bool,
-) apperror.Result[*ImportResult] {
+) appfault.Result[*ImportResult] {
     content, err := pathutil.ReadFile(mdPath)
     if err != nil {
-        return apperror.Fail[*ImportResult](
-            apperror.New(
+        return appfault.Fail[*ImportResult](
+            appfault.New(
                 ERR_FILE_READ,
                 "Failed to read markdown file",
             ),

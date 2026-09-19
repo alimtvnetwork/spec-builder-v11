@@ -62,7 +62,7 @@ type SessionStartConfig struct {
     LoadRag     bool     // Whether to load RAG on start
 }
 
-func StartSession(config SessionStartConfig) apperror.Result[Session] {
+func StartSession(config SessionStartConfig) appfault.Result[Session] {
     session := &Session{
         Id:        config.SessionId,
         Module:    config.Module,
@@ -74,7 +74,7 @@ func StartSession(config SessionStartConfig) apperror.Result[Session] {
         // CRITICAL: Load RAG memories FIRST before AI interaction
         loadErr := session.LoadCoreMemory(config.AppName, config.Company)
         if loadErr != nil {
-            return apperror.FailWrap[Session](
+            return appfault.FailWrap[Session](
                 loadErr,
                 ErrRagMemoryLoadFailed,
                 "failed to load RAG for session %s", config.SessionId,
@@ -84,7 +84,7 @@ func StartSession(config SessionStartConfig) apperror.Result[Session] {
         session.RagLoaded = true
     }
     
-    return apperror.Ok(*session)
+    return appfault.Ok(*session)
 }
 ```
 
@@ -149,13 +149,13 @@ func Values() []Type {
     return vals
 }
 
-func Parse(s string) apperror.Result[Type] {
+func Parse(s string) appfault.Result[Type] {
     for k, v := range variantLabels {
         if strings.EqualFold(v, s) {
-            return apperror.Ok(k)
+            return appfault.Ok(k)
         }
     }
-    return apperror.FailNew[Type](
+    return appfault.FailNew[Type](
         ErrEnumInvalidVariant,
         "invalid SessionCloseActionType: %q",
         s,
@@ -185,7 +185,7 @@ func (t *Type) UnmarshalJSON(data []byte) error {
 Usage in session close:
 
 ```go
-func CloseSession(sessionId string, action sessioncloseactiontype.Type) *apperror.AppError {
+func CloseSession(sessionId string, action sessioncloseactiontype.Type) *appfault.AppError {
     sessionResult := GetSession(sessionId)
     if sessionResult.HasError() {
         return sessionResult.Error()
@@ -303,7 +303,7 @@ When threshold exceeded, provide user options:
 ### 4.3 Archive Strategy
 
 ```go
-func ArchiveOldChunks(sessionId string, retainDays int) *apperror.AppError {
+func ArchiveOldChunks(sessionId string, retainDays int) *appfault.AppError {
     cutoffTime := time.Now().AddDate(0, 0, -retainDays)
     
     // Move old chunks to archive table
@@ -314,7 +314,7 @@ func ArchiveOldChunks(sessionId string, retainDays int) *apperror.AppError {
         WHERE CreatedAt < ? AND IsPinned = 0
     `, cutoffTime)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrRagArchiveFailed,
             "failed to insert archived chunks",
@@ -327,7 +327,7 @@ func ArchiveOldChunks(sessionId string, retainDays int) *apperror.AppError {
         WHERE CreatedAt < ? AND IsPinned = 0
     `, cutoffTime)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrRagArchiveFailed,
             "failed to delete archived chunks from active table",
@@ -353,7 +353,7 @@ type MinimalMemoryConfig struct {
     MaxCoreChunks           int   // Limit core memory size
 }
 
-func StartFreshSession(config SessionStartConfig, minimal MinimalMemoryConfig) apperror.Result[Session] {
+func StartFreshSession(config SessionStartConfig, minimal MinimalMemoryConfig) appfault.Result[Session] {
     session := &Session{
         Id:        uuid.New().String(), // New session ID
         Module:    config.Module,
@@ -378,7 +378,7 @@ func StartFreshSession(config SessionStartConfig, minimal MinimalMemoryConfig) a
         session.LoadBaseCodeIndex()
     }
     
-    return apperror.Ok(*session)
+    return appfault.Ok(*session)
 }
 ```
 

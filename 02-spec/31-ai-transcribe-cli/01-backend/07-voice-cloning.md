@@ -206,7 +206,7 @@ type ElevenLabsCloner struct {
     client  *http.Client
 }
 
-func (c *ElevenLabsCloner) InstantClone(req InstantCloneRequest) apperror.Result[VoiceProfile] {
+func (c *ElevenLabsCloner) InstantClone(req InstantCloneRequest) appfault.Result[VoiceProfile] {
     // Prepare multipart form
     body := &bytes.Buffer{}
     writer := multipart.NewWriter(body)
@@ -253,7 +253,7 @@ type XTTSCloner struct {
     client  *http.Client
 }
 
-func (c *XTTSCloner) InstantClone(req InstantCloneRequest) apperror.Result[VoiceProfile] {
+func (c *XTTSCloner) InstantClone(req InstantCloneRequest) appfault.Result[VoiceProfile] {
     // XTTS uses reference audio directly, no separate clone step
     // Store the sample for use during synthesis
     
@@ -274,7 +274,7 @@ func (c *XTTSCloner) InstantClone(req InstantCloneRequest) apperror.Result[Voice
 }
 
 // Synthesis uses the stored sample as reference
-func (c *XTTSCloner) Synthesize(profile *VoiceProfile, text string) apperror.Result[[]byte] {
+func (c *XTTSCloner) Synthesize(profile *VoiceProfile, text string) appfault.Result[[]byte] {
     // EXEMPTED: external XTTS API — raw JSON payload required by third-party TTS server (§7.2)
     payload := map[string]any{
         "text":           text,
@@ -323,7 +323,7 @@ var qualityRequirements = map[string]SampleQualityCheck{
     },
 }
 
-func ValidateSample(audio []byte, method string) apperror.Result[SampleValidation] {
+func ValidateSample(audio []byte, method string) appfault.Result[SampleValidation] {
     reqs := qualityRequirements[method]
     
     // Analyze audio

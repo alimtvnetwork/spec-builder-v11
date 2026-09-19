@@ -45,22 +45,22 @@ This specification defines the vector database integration layer for AI Bridge C
 // VectorStore defines the core vector storage operations
 type VectorStore interface {
     // Collection management
-    CreateCollection(context stdctx.Context, name string, config CollectionConfig) *apperror.AppError
-    DeleteCollection(context stdctx.Context, name string) *apperror.AppError
-    ListCollections(context stdctx.Context) apperror.Result[[]CollectionInfo]
+    CreateCollection(context stdctx.Context, name string, config CollectionConfig) *appfault.AppError
+    DeleteCollection(context stdctx.Context, name string) *appfault.AppError
+    ListCollections(context stdctx.Context) appfault.Result[[]CollectionInfo]
     
     // Document operations
-    AddDocuments(context stdctx.Context, collection string, docs []Document) *apperror.AppError
-    UpdateDocuments(context stdctx.Context, collection string, docs []Document) *apperror.AppError
-    DeleteDocuments(context stdctx.Context, collection string, ids []string) *apperror.AppError
+    AddDocuments(context stdctx.Context, collection string, docs []Document) *appfault.AppError
+    UpdateDocuments(context stdctx.Context, collection string, docs []Document) *appfault.AppError
+    DeleteDocuments(context stdctx.Context, collection string, ids []string) *appfault.AppError
     
     // Search operations
-    Query(context stdctx.Context, collection string, query QueryRequest) apperror.Result[QueryResult]
-    QueryMultiple(context stdctx.Context, queries []MultiQueryRequest) apperror.Result[[]QueryResult]
+    Query(context stdctx.Context, collection string, query QueryRequest) appfault.Result[QueryResult]
+    QueryMultiple(context stdctx.Context, queries []MultiQueryRequest) appfault.Result[[]QueryResult]
     
     // Persistence
-    Persist(context stdctx.Context) *apperror.AppError
-    Load(context stdctx.Context, path string) *apperror.AppError
+    Persist(context stdctx.Context) *appfault.AppError
+    Load(context stdctx.Context, path string) *appfault.AppError
 }
 
 // CollectionConfig defines collection settings
@@ -108,13 +108,13 @@ func Values() []Type {
     return vals
 }
 
-func Parse(s string) apperror.Result[Type] {
+func Parse(s string) appfault.Result[Type] {
     for k, v := range variantLabels {
         if strings.EqualFold(v, s) {
-            return apperror.Ok(k)
+            return appfault.Ok(k)
         }
     }
-    return apperror.FailNew[Type](
+    return appfault.FailNew[Type](
         ErrEnumInvalidVariant,
         "invalid DistanceMetricType: %q",
         s,
@@ -197,10 +197,10 @@ type MetadataFilter struct {
 // EmbeddingProvider generates vector embeddings
 type EmbeddingProvider interface {
     // Generate embedding for single text
-    Embed(context stdctx.Context, text string) apperror.Result[[]float32]
+    Embed(context stdctx.Context, text string) appfault.Result[[]float32]
     
     // Batch embedding generation
-    EmbedBatch(context stdctx.Context, texts []string) apperror.Result[[][]float32]
+    EmbedBatch(context stdctx.Context, texts []string) appfault.Result[[][]float32]
     
     // Get embedding dimension
     Dimension() int
@@ -209,7 +209,7 @@ type EmbeddingProvider interface {
     ModelId() string
     
     // Health check
-    Ping(context stdctx.Context) *apperror.AppError
+    Ping(context stdctx.Context) *appfault.AppError
 }
 
 // OllamaEmbedder implements EmbeddingProvider for Ollama
@@ -247,12 +247,12 @@ type ChromemStore struct {
 }
 
 // NewChromemStore creates a new vector store
-func NewChromemStore(config ChromemConfig) apperror.Result[ChromemStore] {
+func NewChromemStore(config ChromemConfig) appfault.Result[ChromemStore] {
     db := chromem.NewDb()
     
     embedderResult := createEmbedder(config.Embedding)
     if embedderResult.HasError() {
-        return apperror.FailWrap[ChromemStore](
+        return appfault.FailWrap[ChromemStore](
             embedderResult.Error(),
             ErrEmbedderInit,
             "failed to create embedder",
@@ -276,7 +276,7 @@ func NewChromemStore(config ChromemConfig) apperror.Result[ChromemStore] {
         }
     }
     
-    return apperror.Ok(*store)
+    return appfault.Ok(*store)
 }
 
 // ChromemConfig for store initialization
@@ -351,7 +351,7 @@ type OllamaEmbedOptions struct {
 }
 
 // Embed generates embedding via Ollama
-func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) apperror.Result[[]float32] {
+func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) appfault.Result[[]float32] {
     start := time.Now()
     
     req := OllamaEmbedRequest{
@@ -361,7 +361,7 @@ func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) apperror.Res
     
     body, err := json.Marshal(req)
     if err != nil {
-        return apperror.FailWrap[[]float32](
+        return appfault.FailWrap[[]float32](
             err,
             ErrEmbedMarshal,
             "failed to marshal embed request",
@@ -375,7 +375,7 @@ func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) apperror.Res
         bytes.NewReader(body),
     )
     if err != nil {
-        return apperror.FailWrap[[]float32](
+        return appfault.FailWrap[[]float32](
             err,
             ErrEmbedRequest,
             "failed to create HTTP request",
@@ -386,7 +386,7 @@ func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) apperror.Res
     
     resp, err := o.httpClient.Do(httpReq)
     if err != nil {
-        return apperror.FailWrap[[]float32](
+        return appfault.FailWrap[[]float32](
             err,
             ErrOllamaConnection,
             "Ollama connection failed",
@@ -395,7 +395,7 @@ func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) apperror.Res
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
-        return apperror.FailNew[[]float32](
+        return appfault.FailNew[[]float32](
             ErrOllamaResponse,
             "unexpected status: %d", resp.StatusCode,
         )
@@ -403,7 +403,7 @@ func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) apperror.Res
     
     var result OllamaEmbedResponse
     if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-        return apperror.FailWrap[[]float32](
+        return appfault.FailWrap[[]float32](
             err,
             ErrEmbedDecode,
             "failed to decode embed response",
@@ -413,7 +413,7 @@ func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) apperror.Res
     vectorEmbedDuration.Observe(time.Since(start).Seconds())
     vectorEmbedTotal.Inc()
     
-    return apperror.Ok(result.Embedding)
+    return appfault.Ok(result.Embedding)
 }
 ```
 
@@ -421,13 +421,13 @@ func (o *OllamaEmbedder) Embed(context stdctx.Context, text string) apperror.Res
 
 ```go
 // EmbedBatch generates embeddings in parallel
-func (o *OllamaEmbedder) EmbedBatch(context stdctx.Context, texts []string) apperror.Result[[][]float32] {
+func (o *OllamaEmbedder) EmbedBatch(context stdctx.Context, texts []string) appfault.Result[[][]float32] {
     if len(texts) == 0 {
-        return apperror.Ok[[][]float32](nil)
+        return appfault.Ok[[][]float32](nil)
     }
     
     results := make([][]float32, len(texts))
-    batchErrors := make([]*apperror.AppError, len(texts))
+    batchErrors := make([]*appfault.AppError, len(texts))
     
     sem := make(chan struct{}, o.NumParallel)
     var wg sync.WaitGroup
@@ -455,7 +455,7 @@ func (o *OllamaEmbedder) EmbedBatch(context stdctx.Context, texts []string) appe
     // Check for errors
     for i, appErr := range batchErrors {
         if appErr != nil {
-            return apperror.FailWrap[[][]float32](
+            return appfault.FailWrap[[][]float32](
                 appErr,
                 ErrBatchEmbed,
                 "failed at index %d", i,
@@ -463,7 +463,7 @@ func (o *OllamaEmbedder) EmbedBatch(context stdctx.Context, texts []string) appe
         }
     }
     
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 ```
 
@@ -716,9 +716,9 @@ const (
     ErrVectorPersist     VectorErrorCode = 9999
 )
 
-// NewVectorError creates an *apperror.AppError with the given vector error code
-func NewVectorError(code VectorErrorCode, cause error) *apperror.AppError {
-    return apperror.Wrap(
+// NewVectorError creates an *appfault.AppError with the given vector error code
+func NewVectorError(code VectorErrorCode, cause error) *appfault.AppError {
+    return appfault.Wrap(
         cause,
         int(code),
         vectorErrorMessages[code],

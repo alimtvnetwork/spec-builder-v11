@@ -65,10 +65,10 @@ func NewProjectId() ProjectId {
 }
 
 // ParseProjectId parses a string into a ProjectId
-func ParseProjectId(s string) apperror.Result[ProjectId] {
+func ParseProjectId(s string) appfault.Result[ProjectId] {
     id, err := uuid.Parse(s)
     if err != nil {
-        return ProjectId{}, apperror.Wrap(
+        return ProjectId{}, appfault.Wrap(
             err,
             ErrProjectIdInvalid,
             "parse project id",
@@ -90,7 +90,7 @@ func (id ProjectId) String() string   { return id.value.String() }
 func (id ProjectId) IsZero() bool     { return id.value == uuid.Nil }
 func (id ProjectId) Validate() error {
     if id.IsZero() {
-        return apperror.New(
+        return appfault.New(
             ErrProjectIdZero,
             "project id cannot be zero",
         )
@@ -120,7 +120,7 @@ func (id *ProjectId) Scan(src any) error {
         }
         id.value = parsed
     default:
-        return apperror.New(
+        return appfault.New(
             ErrScanTypeMismatch,
             "cannot scan into project id",
         )
@@ -156,7 +156,7 @@ type SpecId struct {
 }
 
 func NewSpecId() SpecId                          { return SpecId{value: uuid.New()} }
-func ParseSpecId(s string) apperror.Result[SpecId]       { /* similar to ProjectId */ }
+func ParseSpecId(s string) appfault.Result[SpecId]       { /* similar to ProjectId */ }
 func MustParseSpecId(s string) SpecId            { /* similar to ProjectId */ }
 func (id SpecId) String() string                 { return id.value.String() }
 func (id SpecId) IsZero() bool                   { return id.value == uuid.Nil }
@@ -174,7 +174,7 @@ type ConversationId struct {
 }
 
 func NewConversationId() ConversationId                          { return ConversationId{value: uuid.New()} }
-func ParseConversationId(s string) apperror.Result[ConversationId]       { /* similar pattern */ }
+func ParseConversationId(s string) appfault.Result[ConversationId]       { /* similar pattern */ }
 func MustParseConversationId(s string) ConversationId            { /* similar pattern */ }
 func (id ConversationId) String() string                         { return id.value.String() }
 func (id ConversationId) IsZero() bool                           { return id.value == uuid.Nil }
@@ -192,7 +192,7 @@ type BlockId struct {
 }
 
 func NewBlockId() BlockId                          { return BlockId{value: uuid.New()} }
-func ParseBlockId(s string) apperror.Result[BlockId]       { /* similar pattern */ }
+func ParseBlockId(s string) appfault.Result[BlockId]       { /* similar pattern */ }
 func (id BlockId) String() string                  { return id.value.String() }
 func (id BlockId) IsZero() bool                    { return id.value == uuid.Nil }
 
@@ -204,7 +204,7 @@ type ExecutionId struct {
 }
 
 func NewExecutionId() ExecutionId                  { return ExecutionId{value: uuid.New()} }
-func ParseExecutionId(s string) apperror.Result[ExecutionId] { /* similar pattern */ }
+func ParseExecutionId(s string) appfault.Result[ExecutionId] { /* similar pattern */ }
 func (id ExecutionId) String() string              { return id.value.String() }
 func (id ExecutionId) IsZero() bool                { return id.value == uuid.Nil }
 
@@ -216,7 +216,7 @@ type UserId struct {
 }
 
 func NewUserId() UserId                          { return UserId{value: uuid.New()} }
-func ParseUserId(s string) apperror.Result[UserId]       { /* similar pattern */ }
+func ParseUserId(s string) appfault.Result[UserId]       { /* similar pattern */ }
 func (id UserId) String() string                 { return id.value.String() }
 func (id UserId) IsZero() bool                   { return id.value == uuid.Nil }
 ```
@@ -310,13 +310,13 @@ func (p PageRequest) Limit() int {
 // Validate ensures pagination is within bounds
 func (p PageRequest) Validate() error {
     if p.Page < 1 {
-        return apperror.New(
+        return appfault.New(
             ErrFieldInvalid,
             "page must be >= 1",
         )
     }
     if p.PageSize < 1 || p.PageSize > 100 {
-        return apperror.New(
+        return appfault.New(
             ErrFieldInvalid,
             "page size must be between 1 and 100",
         )
@@ -562,7 +562,7 @@ func (t *Tags) Scan(src any) error {
         *t = nil
         return nil
     default:
-        return apperror.New(
+        return appfault.New(
             ErrScanTypeMismatch,
             "cannot scan into tags",
         )
@@ -621,7 +621,7 @@ func (m *Metadata) Scan(src any) error {
         *m = nil
         return nil
     default:
-        return apperror.New(
+        return appfault.New(
             ErrScanTypeMismatch,
             "cannot scan into metadata",
         )
@@ -693,7 +693,7 @@ func (s Status) Validate() error {
     case StatusDraft, StatusActive, StatusArchived, StatusDeleted:
         return nil
     default:
-        return apperror.New(
+        return appfault.New(
             ErrEnumParseFailed,
             "invalid status",
         ).WithContext("value", s)
@@ -719,7 +719,7 @@ func (s *Status) Scan(src any) error {
     case []byte:
         *s = Status(v)
     default:
-        return apperror.New(
+        return appfault.New(
             ErrScanTypeMismatch,
             "cannot scan into status",
         )
@@ -750,7 +750,7 @@ func (p Priority) Validate() error {
     case PriorityLow, PriorityMedium, PriorityHigh, PriorityCritical:
         return nil
     default:
-        return apperror.New(
+        return appfault.New(
             ErrEnumParseFailed,
             "invalid priority",
         ).WithContext("value", p)
@@ -787,7 +787,7 @@ func (p *Priority) Scan(src any) error {
     case []byte:
         *p = Priority(v)
     default:
-        return apperror.New(
+        return appfault.New(
             ErrScanTypeMismatch,
             "cannot scan into priority",
         )
@@ -818,7 +818,7 @@ func (s Severity) Validate() error {
     case SeverityInfo, SeverityWarning, SeverityError, SeverityCritical:
         return nil
     default:
-        return apperror.New(
+        return appfault.New(
             ErrEnumParseFailed,
             "invalid severity",
         ).WithContext("value", s)
@@ -839,7 +839,7 @@ func (s *Severity) Scan(src any) error {
     case []byte:
         *s = Severity(v)
     default:
-        return apperror.New(
+        return appfault.New(
             ErrScanTypeMismatch,
             "cannot scan into severity",
         )
@@ -881,7 +881,7 @@ func (b BlockType) Validate() error {
             return nil
         }
     }
-    return apperror.New(
+    return appfault.New(
         ErrEnumParseFailed,
         "invalid block type",
     ).WithContext("value", b)
@@ -931,7 +931,7 @@ func (e ExecutionStatus) Validate() error {
             return nil
         }
     }
-    return apperror.New(
+    return appfault.New(
         ErrEnumParseFailed,
         "invalid execution status",
     ).WithContext("value", e)
@@ -1013,7 +1013,7 @@ func (t *Timestamp) Scan(src any) error {
         }
         *t = Timestamp(parsed.UTC())
     default:
-        return apperror.New(
+        return appfault.New(
             ErrScanTypeMismatch,
             "cannot scan into timestamp",
         )
@@ -1058,7 +1058,7 @@ func (d *Duration) Scan(src any) error {
     case float64:
         *d = Duration(int64(v))
     default:
-        return apperror.New(
+        return appfault.New(
             ErrScanTypeMismatch,
             "cannot scan into duration",
         )

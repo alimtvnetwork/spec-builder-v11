@@ -232,31 +232,31 @@ type GitConfig struct {
 
 type GitAdapter interface {
     // Repository operations
-    Init() *apperror.AppError
-    Clone(url string) *apperror.AppError
+    Init() *appfault.AppError
+    Clone(url string) *appfault.AppError
     
     // Commit operations
-    Commit(files []string, message string) apperror.Result[string]
-    GetCommit(sha string) apperror.Result[Commit]
-    GetCommitHistory(path string, limit int) apperror.Result[[]Commit]
+    Commit(files []string, message string) appfault.Result[string]
+    GetCommit(sha string) appfault.Result[Commit]
+    GetCommitHistory(path string, limit int) appfault.Result[[]Commit]
     
     // Diff operations
-    DiffCommits(from, to string) apperror.Result[DiffResult]
-    DiffWorking(path string) apperror.Result[DiffResult]
+    DiffCommits(from, to string) appfault.Result[DiffResult]
+    DiffWorking(path string) appfault.Result[DiffResult]
     
     // Branch operations
-    CreateBranch(name string) *apperror.AppError
-    SwitchBranch(name string) *apperror.AppError
-    MergeBranch(source, target string) apperror.Result[MergeResult]
+    CreateBranch(name string) *appfault.AppError
+    SwitchBranch(name string) *appfault.AppError
+    MergeBranch(source, target string) appfault.Result[MergeResult]
     
     // Blob operations
-    GetBlob(sha string) apperror.Result[[]byte]
-    GetBlobAtCommit(path, commitSha string) apperror.Result[[]byte]
+    GetBlob(sha string) appfault.Result[[]byte]
+    GetBlobAtCommit(path, commitSha string) appfault.Result[[]byte]
     
     // Tag operations (for snapshots)
-    CreateTag(name, commitSha, message string) *apperror.AppError
-    ListTags() apperror.Result[[]Tag]
-    GetTaggedCommit(tagName string) apperror.Result[string]
+    CreateTag(name, commitSha, message string) *appfault.AppError
+    ListTags() appfault.Result[[]Tag]
+    GetTaggedCommit(tagName string) appfault.Result[string]
 }
 ```
 
@@ -405,7 +405,7 @@ type MergeConflict struct {
     TheirLines  []string
 }
 
-func (m *ThreeWayMerge) Merge() apperror.Result[MergeResult] {
+func (m *ThreeWayMerge) Merge() appfault.Result[MergeResult] {
     // Compute diffs from base to each version
     oursEdits := MyersDiff{m.base, m.ours}.Compute()
     theirsEdits := MyersDiff{m.base, m.theirs}.Compute()

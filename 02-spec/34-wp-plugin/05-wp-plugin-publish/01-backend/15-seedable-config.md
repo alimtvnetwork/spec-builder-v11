@@ -338,7 +338,7 @@ type SettingConfig struct {
 func (s *ConfigService) SeedWithVersionCheck() error {
     seed, err := s.loadSeedFile()
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedLoadFailed,
             "load seed file",

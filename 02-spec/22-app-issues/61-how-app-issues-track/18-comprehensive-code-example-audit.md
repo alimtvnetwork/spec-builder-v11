@@ -52,8 +52,8 @@ A project-wide scan of all markdown specification files against the [Master Codi
 ### Phase 1 — CLI Module Remediation (Waves 1–61)
 - All 9 CLI modules brought to 100% compliance
 - ~4,700 `ctx` abbreviations → `context`
-- ~1,300 `fmt.Errorf` → `apperror.Wrap`/`apperror.New`
-- ~1,400 `(*T, error)` tuples → `apperror.Result[T]`
+- ~1,300 `fmt.Errorf` → `appfault.Wrap`/`appfault.New`
+- ~1,400 `(*T, error)` tuples → `appfault.Result[T]`
 - ~1,660 raw `os.*` → `pathutil` wrappers
 
 ### Phase 2 — Cross-Cutting Categories (Waves 62–88)

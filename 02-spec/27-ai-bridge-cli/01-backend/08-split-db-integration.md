@@ -299,13 +299,13 @@ type AiBridgeDbManager struct {
 }
 
 // NewAiBridgeDbManager creates a DB manager for AI Bridge CLI
-func NewAiBridgeDbManager(dataDir string, logger *slog.Logger) apperror.Result[*AiBridgeDbManager] {
+func NewAiBridgeDbManager(dataDir string, logger *slog.Logger) appfault.Result[*AiBridgeDbManager] {
     baseResult := NewDbManager(dataDir)
     if baseResult.HasError() {
-        return apperror.Fail[*AiBridgeDbManager](baseResult.Error())
+        return appfault.Fail[*AiBridgeDbManager](baseResult.Error())
     }
     
-    return apperror.Ok(&AiBridgeDbManager{
+    return appfault.Ok(&AiBridgeDbManager{
         DbManager: baseResult.Value(),
         logger:    logger,
     })
@@ -321,7 +321,7 @@ type ChatSessionResult struct {
 func (m *AiBridgeDbManager) GetOrCreateChatSession(
     appName string, 
     sessionId string,
-) apperror.Result[ChatSessionResult] {
+) appfault.Result[ChatSessionResult] {
     m.logger.Info("getting chat session",
         slog.String("app", appName),
         slog.String("session", sessionId),
@@ -333,7 +333,7 @@ func (m *AiBridgeDbManager) GetOrCreateChatSession(
         m.logger.Error("failed to allocate sequence",
             slog.String("error", err.Error()),
         )
-        return apperror.FailWrap[ChatSessionResult](err, 9623, "sequence allocation failed")
+        return appfault.FailWrap[ChatSessionResult](err, 9623, "sequence allocation failed")
     }
     
     // Build path: {app}/ai/chat/{seq}-{session-id}.db
@@ -341,7 +341,7 @@ func (m *AiBridgeDbManager) GetOrCreateChatSession(
     
     db, err := m.GetOrCreateDb(appName, "ai/chat", fmt.Sprintf("%02d-%s", seq, sessionId))
     if err != nil {
-        return apperror.FailWrap[ChatSessionResult](err, 9621, "db creation failed")
+        return appfault.FailWrap[ChatSessionResult](err, 9621, "db creation failed")
     }
     
     if isNew {
@@ -351,11 +351,11 @@ func (m *AiBridgeDbManager) GetOrCreateChatSession(
         )
         err = m.initChatSchema(db, sessionId)
         if err != nil {
-            return apperror.FailWrap[ChatSessionResult](err, 9622, "schema init failed")
+            return appfault.FailWrap[ChatSessionResult](err, 9622, "schema init failed")
         }
     }
     
-    return apperror.Ok(ChatSessionResult{Db: db, Path: dbPath})
+    return appfault.Ok(ChatSessionResult{Db: db, Path: dbPath})
 }
 
 // RagDocumentResult holds the result of creating/getting a RAG document
@@ -368,7 +368,7 @@ type RagDocumentResult struct {
 func (m *AiBridgeDbManager) GetOrCreateRagDocument(
     appName string,
     docId string,
-) apperror.Result[RagDocumentResult] {
+) appfault.Result[RagDocumentResult] {
     m.logger.Info("getting RAG document",
         slog.String("app", appName),
         slog.String("doc", docId),
@@ -376,14 +376,14 @@ func (m *AiBridgeDbManager) GetOrCreateRagDocument(
     
     seq, isNew, err := m.getOrAllocateSequence(appName, "rag", "documents", docId)
     if err != nil {
-        return apperror.FailWrap[RagDocumentResult](err, 9623, "sequence allocation failed")
+        return appfault.FailWrap[RagDocumentResult](err, 9623, "sequence allocation failed")
     }
     
     dbPath := fmt.Sprintf("%s/rag/documents/%02d-%s.db", appName, seq, docId)
     
     db, err := m.GetOrCreateDb(appName, "rag/documents", fmt.Sprintf("%02d-%s", seq, docId))
     if err != nil {
-        return apperror.FailWrap[RagDocumentResult](err, 9621, "db creation failed")
+        return appfault.FailWrap[RagDocumentResult](err, 9621, "db creation failed")
     }
     
     if isNew {
@@ -393,11 +393,11 @@ func (m *AiBridgeDbManager) GetOrCreateRagDocument(
         )
         err = m.initRagSchema(db, docId)
         if err != nil {
-            return apperror.FailWrap[RagDocumentResult](err, 9622, "schema init failed")
+            return appfault.FailWrap[RagDocumentResult](err, 9622, "schema init failed")
         }
     }
     
-    return apperror.Ok(RagDocumentResult{Db: db, Path: dbPath})
+    return appfault.Ok(RagDocumentResult{Db: db, Path: dbPath})
 }
 
 // FileHistoryResult holds the result of creating/getting a file history
@@ -410,7 +410,7 @@ type FileHistoryResult struct {
 func (m *AiBridgeDbManager) GetOrCreateFileHistory(
     appName string,
     filePath string,
-) apperror.Result[FileHistoryResult] {
+) appfault.Result[FileHistoryResult] {
     fileSlug := slugify(filePath)
     
     m.logger.Info("getting file history",
@@ -421,7 +421,7 @@ func (m *AiBridgeDbManager) GetOrCreateFileHistory(
     
     seqResult := m.getOrAllocateSequence(appName, "files", "history", fileSlug)
     if seqResult.IsErr() {
-        return apperror.Fail[FileHistoryResult](seqResult.Err())
+        return appfault.Fail[FileHistoryResult](seqResult.Err())
     }
 
     seq := seqResult.Value()
@@ -429,7 +429,7 @@ func (m *AiBridgeDbManager) GetOrCreateFileHistory(
     
     dbResult := m.GetOrCreateDb(appName, "files/history", fmt.Sprintf("%02d-%s", seq.SequenceNum, fileSlug))
     if dbResult.IsErr() {
-        return apperror.Fail[FileHistoryResult](dbResult.Err())
+        return appfault.Fail[FileHistoryResult](dbResult.Err())
     }
 
     db := dbResult.Value()
@@ -440,11 +440,11 @@ func (m *AiBridgeDbManager) GetOrCreateFileHistory(
             slog.Int("sequence", seq.SequenceNum),
         )
         if schemaErr := m.initFileHistorySchema(db, filePath, fileSlug); schemaErr != nil {
-            return apperror.Fail[FileHistoryResult](schemaErr)
+            return appfault.Fail[FileHistoryResult](schemaErr)
         }
     }
     
-    return apperror.Ok(FileHistoryResult{Db: db, Path: dbPath})
+    return appfault.Ok(FileHistoryResult{Db: db, Path: dbPath})
 }
 
 // SequenceAllocation holds the result of sequence allocation
@@ -456,7 +456,7 @@ type SequenceAllocation struct {
 // getOrAllocateSequence gets existing sequence or allocates new one
 func (m *AiBridgeDbManager) getOrAllocateSequence(
     appName, category, dbType string,
-) apperror.Result[SequenceAllocation] {
+) appfault.Result[SequenceAllocation] {
     // Note: entityId removed — callers pass via category/dbType composite key
     // Check if entity already has a sequence via GORM
     var registry DbRegistryEntry
@@ -466,7 +466,7 @@ func (m *AiBridgeDbManager) getOrAllocateSequence(
     ).First(&registry)
     
     if result.Error == nil {
-        return apperror.Ok(SequenceAllocation{SequenceNum: registry.SequenceNum, IsNew: false})
+        return appfault.Ok(SequenceAllocation{SequenceNum: registry.SequenceNum, IsNew: false})
     }
     
     // Allocate new sequence via GORM
@@ -493,7 +493,7 @@ func (m *AiBridgeDbManager) getOrAllocateSequence(
         UpdatedAt:     time.Now(),
     })
     
-    return apperror.Ok(SequenceAllocation{SequenceNum: newSeq, IsNew: true})
+    return appfault.Ok(SequenceAllocation{SequenceNum: newSeq, IsNew: true})
 }
 
 // ChatSessionInfo holds metadata about a chat session
@@ -506,7 +506,7 @@ type ChatSessionInfo struct {
 }
 
 // ListChatSessions lists all chat sessions for an application
-func (m *AiBridgeDbManager) ListChatSessions(appName string) apperror.Result[[]ChatSessionInfo] {
+func (m *AiBridgeDbManager) ListChatSessions(appName string) appfault.Result[[]ChatSessionInfo] {
     var registries []DbRegistryEntry
     result := m.rootDb.
         Joins("JOIN Applications ON DbRegistry.ApplicationId = Applications.Id").
@@ -515,7 +515,7 @@ func (m *AiBridgeDbManager) ListChatSessions(appName string) apperror.Result[[]C
         Find(&registries)
     
     if result.Error != nil {
-        return apperror.FailWrap[[]ChatSessionInfo](
+        return appfault.FailWrap[[]ChatSessionInfo](
             result.Error,
             ErrDbListSessionsFailed,
             "failed to list chat sessions",
@@ -533,7 +533,7 @@ func (m *AiBridgeDbManager) ListChatSessions(appName string) apperror.Result[[]C
         }
     }
     
-    return apperror.Ok(sessions)
+    return appfault.Ok(sessions)
 }
 
 // DbRegistryEntry is the GORM model for the DbRegistry table

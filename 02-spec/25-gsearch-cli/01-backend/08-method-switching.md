@@ -122,7 +122,7 @@ import (
     "time"
     
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "gsearch/pkg/config"
 )
 
@@ -329,14 +329,14 @@ import (
     "time"
     
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // RetryableFunc is a function that can be retried
-type RetryableFunc func(context stdctx.Context) *apperror.AppError
+type RetryableFunc func(context stdctx.Context) *appfault.AppError
 
 // RetryableFuncWithResult is a function that returns a result
-type RetryableFuncWithResult[T any] func(context stdctx.Context) apperror.Result[T]
+type RetryableFuncWithResult[T any] func(context stdctx.Context) appfault.Result[T]
 
 // RetryPolicy defines when to retry
 type RetryPolicy interface {
@@ -375,10 +375,10 @@ func NewRetryExecutor(backoff *Backoff, policy RetryPolicy) *RetryExecutor {
 }
 
 // Execute runs a function with retries
-func (e *RetryExecutor) Execute(context stdctx.Context, fn RetryableFunc) *apperror.AppError {
+func (e *RetryExecutor) Execute(context stdctx.Context, fn RetryableFunc) *appfault.AppError {
     e.backoff.Reset()
     
-    var lastErr *apperror.AppError
+    var lastErr *appfault.AppError
     
     for {
         err := fn(context)
@@ -402,7 +402,7 @@ func (e *RetryExecutor) Execute(context stdctx.Context, fn RetryableFunc) *apper
                 Int("attempts", e.backoff.Attempt()).
                 Str("error", err.Error()).
                 Msg("Max retries exceeded")
-            return apperror.Wrap(
+            return appfault.Wrap(
                 lastErr,
                 "max retries exceeded",
             )
@@ -415,7 +415,7 @@ func (e *RetryExecutor) Execute(context stdctx.Context, fn RetryableFunc) *apper
             Msg("Retrying after backoff")
             
         if waitErr := e.backoff.Wait(context); waitErr != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 waitErr,
                 "backoff wait cancelled",
             )
@@ -429,14 +429,14 @@ func ExecuteWithResult[T any](
     backoff *Backoff,
     policy RetryPolicy,
     fn RetryableFuncWithResult[T],
-) apperror.Result[T] {
+) appfault.Result[T] {
     backoff.Reset()
     
     if policy == nil {
         policy = &DefaultRetryPolicy{}
     }
     
-    var lastErr *apperror.AppError
+    var lastErr *appfault.AppError
     
     for {
         result := fn(context)
@@ -447,18 +447,18 @@ func ExecuteWithResult[T any](
         lastErr = result.Error
         
         if policy.ShouldAbort(lastErr) {
-            return apperror.Fail[T](lastErr)
+            return appfault.Fail[T](lastErr)
         }
         
         if backoff.HasExhausted() {
-            return apperror.Fail[T](apperror.Wrap(
+            return appfault.Fail[T](appfault.Wrap(
                 lastErr,
                 "max retries exceeded",
             ))
         }
         
         if waitErr := backoff.Wait(context); waitErr != nil {
-            return apperror.Fail[T](apperror.Wrap(
+            return appfault.Fail[T](appfault.Wrap(
                 waitErr,
                 "backoff wait cancelled",
             ))
@@ -572,13 +572,13 @@ import (
     stdctx "context"
     "time"
     
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 type SearchMethod interface {
     Id() string
     Name() string
-    Search(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]Result]
+    Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result]
     IsAvailable() bool
     RequiresApi() bool
 }
@@ -607,7 +607,7 @@ import (
     "sync"
     "time"
     
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "gsearch/pkg/retry"
 )
 
@@ -644,18 +644,18 @@ func (s *MethodSwitcher) RegisterMethod(m SearchMethod) {
     s.methods[m.Id()] = m
 }
 
-func (s *MethodSwitcher) SelectMethod() apperror.Result[SearchMethod] {
+func (s *MethodSwitcher) SelectMethod() appfault.Result[SearchMethod] {
     s.mu.RLock()
     defer s.mu.RUnlock()
     
     available := s.getAvailableMethods()
     if len(available) == 0 {
-        return apperror.Fail[SearchMethod](
-            apperror.New("all search methods blocked"),
+        return appfault.Fail[SearchMethod](
+            appfault.New("all search methods blocked"),
         )
     }
     
-    return apperror.OK(s.weightedSelect(available))
+    return appfault.Ok(s.weightedSelect(available))
 }
 
 func (s *MethodSwitcher) getAvailableMethods() []SearchMethod {
@@ -798,7 +798,7 @@ import (
     "time"
     
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "gsearch/pkg/retry"
 )
 
@@ -826,8 +826,8 @@ func NewExecutor(switcher *MethodSwitcher, cfg *config.Config) *Executor {
     }
 }
 
-func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]Result] {
-    var lastErr *apperror.AppError
+func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
+    var lastErr *appfault.AppError
     triedMethods := make(map[string]bool)
     backoff := retry.NewBackoff(e.backoffCfg)
     
@@ -843,14 +843,14 @@ func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptio
                     Msg("All methods blocked, waiting before retry")
                     
                 if waitErr := backoff.Wait(context); waitErr != nil {
-                    return apperror.Fail[[]Result](apperror.Wrap(
+                    return appfault.Fail[[]Result](appfault.Wrap(
                         waitErr,
                         "backoff wait cancelled",
                     ))
                 }
                 continue
             }
-            return apperror.Fail[[]Result](apperror.Wrap(
+            return appfault.Fail[[]Result](appfault.Wrap(
                 methodResult.Error,
                 "no methods available",
             ))
@@ -863,7 +863,7 @@ func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptio
         if triedMethods[methodId] {
             // Already tried this method - wait and try different approach
             if waitErr := backoff.Wait(context); waitErr != nil {
-                return apperror.Fail[[]Result](apperror.Wrap(
+                return appfault.Fail[[]Result](appfault.Wrap(
                     waitErr,
                     "backoff wait cancelled",
                 ))
@@ -914,20 +914,20 @@ func (e *Executor) Search(context stdctx.Context, query string, opts SearchOptio
             Msg("Transient error, applying backoff")
             
         if waitErr := backoff.Wait(context); waitErr != nil {
-            return apperror.Fail[[]Result](apperror.Wrap(
+            return appfault.Fail[[]Result](appfault.Wrap(
                 waitErr,
                 "backoff wait cancelled",
             ))
         }
     }
     
-    return apperror.Fail[[]Result](apperror.Wrap(
+    return appfault.Fail[[]Result](appfault.Wrap(
         lastErr,
         "search failed after max attempts",
     ))
 }
 
-func (e *Executor) isBlockingError(err *apperror.AppError) bool {
+func (e *Executor) isBlockingError(err *appfault.AppError) bool {
     var blockErr *BlockedError
     return errors.As(err, &blockErr)
 }
@@ -938,13 +938,13 @@ func (e *Executor) SearchWithRetryPolicy(
     query string,
     opts SearchOptions,
     policy retry.RetryPolicy,
-) apperror.Result[[]Result] {
+) appfault.Result[[]Result] {
     backoff := retry.NewBackoff(e.backoffCfg)
     
-    return retry.ExecuteWithResult(context, backoff, policy, func(context stdctx.Context) apperror.Result[[]Result] {
+    return retry.ExecuteWithResult(context, backoff, policy, func(context stdctx.Context) appfault.Result[[]Result] {
         methodResult := e.switcher.SelectMethod()
         if !methodResult.IsSuccess {
-            return apperror.Fail[[]Result](methodResult.Error)
+            return appfault.Fail[[]Result](methodResult.Error)
         }
         
         method := methodResult.Value

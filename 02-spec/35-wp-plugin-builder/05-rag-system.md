@@ -167,7 +167,7 @@ func (c *Chunker) Chunk(text string) []Chunk {
 ### Via AI Bridge
 
 ```go
-func (r *RAGService) Embed(text string) apperror.Result[[]float32] {
+func (r *RAGService) Embed(text string) appfault.Result[[]float32] {
     resp, err := r.aiBridge.Embed(AIEmbedRequest{
         Input: text,
         Model: r.config.EmbeddingModel,
@@ -182,7 +182,7 @@ func (r *RAGService) Embed(text string) apperror.Result[[]float32] {
 ### Batch Embedding
 
 ```go
-func (r *RAGService) EmbedBatch(texts []string) apperror.Result[[][]float32] {
+func (r *RAGService) EmbedBatch(texts []string) appfault.Result[[][]float32] {
     // Batch up to 20 texts per request
     const batchSize = 20
     var results [][]float32
@@ -221,7 +221,7 @@ func (v *VectorStore) Insert(vec RAGVector) error {
     return v.db.Create(&vec).Error
 }
 
-func (v *VectorStore) Search(query []float32, topK int, minScore float64) apperror.Result[[]RAGResult] {
+func (v *VectorStore) Search(query []float32, topK int, minScore float64) appfault.Result[[]RAGResult] {
     queryBlob := serializeFloat32(query)
     
     // ORM EXCEPTION: db.Raw() required — sqlite-vec cosine similarity
@@ -311,7 +311,7 @@ func (r *RAGService) IndexDocument(source SourceInfo, content string) error {
 ### Index Preset
 
 ```go
-func (r *RAGService) ImportPreset(path string) apperror.Result[*Preset] {
+func (r *RAGService) ImportPreset(path string) appfault.Result[*Preset] {
     // 1. Read markdown file
     content, err := pathutil.ReadFile(path)
     if err != nil {
@@ -354,7 +354,7 @@ func (r *RAGService) ImportPreset(path string) apperror.Result[*Preset] {
 ### Context Retrieval
 
 ```go
-func (r *RAGService) Query(prompt string, topK int) apperror.Result[[]RAGResult] {
+func (r *RAGService) Query(prompt string, topK int) appfault.Result[[]RAGResult] {
     // 1. Embed the query
     queryVec, err := r.Embed(prompt)
     if err != nil {
@@ -378,7 +378,7 @@ func (r *RAGService) Query(prompt string, topK int) apperror.Result[[]RAGResult]
 ### Build Context for Generation
 
 ```go
-func (r *RAGService) BuildContext(prompt string, opts ContextOptions) apperror.Result[string] {
+func (r *RAGService) BuildContext(prompt string, opts ContextOptions) appfault.Result[string] {
     // 1. Get relevant chunks
     results, err := r.Query(prompt, opts.TopK)
     if err != nil {

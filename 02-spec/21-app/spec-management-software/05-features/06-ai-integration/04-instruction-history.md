@@ -136,16 +136,16 @@ type InstructionImpact struct {
 
 type InstructionHistoryService interface {
     // Get impact summary for an instruction
-    GetInstructionImpact(context stdctx.Context, instructionId string) apperror.Result[*InstructionImpact]
+    GetInstructionImpact(context stdctx.Context, instructionId string) appfault.Result[*InstructionImpact]
     
     // Get all changes for a specific file
-    GetFileHistory(context stdctx.Context, fileId string, limit int) apperror.Result[[]FileChange]
+    GetFileHistory(context stdctx.Context, fileId string, limit int) appfault.Result[[]FileChange]
     
     // Get changes within time range
-    GetChangesByTimeRange(context stdctx.Context, projectId string, from, to time.Time) apperror.Result[[]FileChange]
+    GetChangesByTimeRange(context stdctx.Context, projectId string, from, to time.Time) appfault.Result[[]FileChange]
     
     // Get instruction that last modified a file
-    GetLastModifyingInstruction(context stdctx.Context, fileId string) apperror.Result[*Instruction]
+    GetLastModifyingInstruction(context stdctx.Context, fileId string) appfault.Result[*Instruction]
 }
 ```
 
@@ -245,7 +245,7 @@ type CascadeAnalysis struct {
     CascadeInstructions []string     // IDs of instructions that would also need rollback
 }
 
-func AnalyzeCascade(context stdctx.Context, instructionId string) apperror.Result[*CascadeAnalysis]
+func AnalyzeCascade(context stdctx.Context, instructionId string) appfault.Result[*CascadeAnalysis]
 ```
 
 ---
@@ -366,11 +366,11 @@ func GenerateUnifiedDiff(before, after, filePath string) string {
 ### 7.3 Applying Reverse Diff
 
 ```go
-func ApplyReverseDiff(currentContent, diff string) apperror.Result[string] {
+func ApplyReverseDiff(currentContent, diff string) appfault.Result[string] {
     dmp := diffmatchpatch.New()
     patches, err := dmp.PatchFromText(diff)
     if err != nil {
-        return apperror.FailWrap[string](
+        return appfault.FailWrap[string](
             err,
             "failed to parse diff patches",
         )
@@ -381,13 +381,13 @@ func ApplyReverseDiff(currentContent, diff string) apperror.Result[string] {
     
     result, applied := dmp.PatchApply(reversed, currentContent)
     if !allTrue(applied) {
-        return apperror.FailNew[string](
-            apperror.ErrDiffApplyFailed,
+        return appfault.FailNew[string](
+            appfault.ErrDiffApplyFailed,
             "failed to apply reverse diff",
         )
     }
 
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 

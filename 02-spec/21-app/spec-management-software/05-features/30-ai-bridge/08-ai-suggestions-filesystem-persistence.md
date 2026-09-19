@@ -314,7 +314,7 @@ func UpdateSuggestionFile(suggestion Suggestion) error {
     files, err := filepath.Glob(".ai-memory/memories/suggestions/ai-generated/*-" + 
         FormatSuggestionId(suggestion.Id) + ".md")
     if err != nil || len(files) == 0 {
-        return apperror.New(
+        return appfault.New(
             ErrSuggestionNotFound,
             "suggestion file not found: "+FormatSuggestionId(suggestion.Id),
         )

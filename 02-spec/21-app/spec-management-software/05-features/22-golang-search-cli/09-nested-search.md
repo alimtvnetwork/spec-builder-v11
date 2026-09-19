@@ -66,7 +66,7 @@ import (
     stdctx "context"
     "sync"
     
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 type NestedSearchService struct {
@@ -101,7 +101,7 @@ func (s *NestedSearchService) ExecuteNested(
     parentSearchId string,
     results []search.Result,
     currentDepth int,
-) *apperror.AppError {
+) *appfault.AppError {
     if currentDepth >= s.config.MaxDepth {
         return nil
     }
@@ -288,7 +288,7 @@ type PageContent struct {
     RawHtml   string
     Text      string
     Keywords  []string
-    Error     *apperror.AppError
+    Error     *appfault.AppError
 }
 
 func (f *PageFetcher) FetchAll(context stdctx.Context, results []search.Result) []PageContent {
@@ -310,14 +310,14 @@ func (f *PageFetcher) FetchAll(context stdctx.Context, results []search.Result) 
 func (f *PageFetcher) fetch(context stdctx.Context, pageUrl string) PageContent {
     req, err := http.NewRequestWithContext(context, httpmethod.Get.String(), pageUrl, nil)
     if err != nil {
-        return PageContent{Url: pageUrl, Error: apperror.Wrap(err, "create request")}
+        return PageContent{Url: pageUrl, Error: appfault.Wrap(err, "create request")}
     }
     
     req.Header.Set("User-Agent", f.userAgent)
     
     resp, err := f.client.Do(req)
     if err != nil {
-        return PageContent{Url: pageUrl, Error: apperror.Wrap(err, "execute request")}
+        return PageContent{Url: pageUrl, Error: appfault.Wrap(err, "execute request")}
     }
     defer resp.Body.Close()
     
@@ -325,7 +325,7 @@ func (f *PageFetcher) fetch(context stdctx.Context, pageUrl string) PageContent 
     reader := io.LimitReader(resp.Body, int64(f.maxSize))
     body, err := io.ReadAll(reader)
     if err != nil {
-        return PageContent{Url: pageUrl, Error: apperror.Wrap(err, "read body")}
+        return PageContent{Url: pageUrl, Error: appfault.Wrap(err, "read body")}
     }
     
     rawHtml := string(body)
@@ -360,9 +360,9 @@ func (s *NestedSearchService) executeNestedSearches(
     parentId string,
     keywords []string,
     depth int,
-) *apperror.AppError {
+) *appfault.AppError {
     var wg sync.WaitGroup
-    errChan := make(chan *apperror.AppError, len(keywords))
+    errChan := make(chan *appfault.AppError, len(keywords))
     
     for _, keyword := range keywords {
         wg.Add(1)
@@ -372,14 +372,14 @@ func (s *NestedSearchService) executeNestedSearches(
             // Create child search
             childSearch, err := s.db.CreateSearchRequest(kw, "auto", "html")
             if err != nil {
-                errChan <- apperror.Wrap(err, "create child search")
+                errChan <- appfault.Wrap(err, "create child search")
                 return
             }
             
             // Link to parent
             linkErr := s.db.CreateNestedSearch(parentId, childSearch.Id, kw, depth)
             if linkErr != nil {
-                errChan <- apperror.Wrap(linkErr, "link nested search")
+                errChan <- appfault.Wrap(linkErr, "link nested search")
                 return
             }
             
@@ -407,13 +407,13 @@ func (s *NestedSearchService) executeNestedSearches(
     close(errChan)
     
     // Collect errors
-    var errs []*apperror.AppError
+    var errs []*appfault.AppError
     for appErr := range errChan {
         errs = append(errs, appErr)
     }
     
     if len(errs) > 0 {
-        return apperror.New(
+        return appfault.New(
             "nested search encountered " + strconv.Itoa(len(errs)) + " errors",
         )
     }

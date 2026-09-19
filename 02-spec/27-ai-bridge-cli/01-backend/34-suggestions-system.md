@@ -106,18 +106,18 @@ func FormatSuggestionId(id int) string {
 }
 
 // ParseSuggestionId extracts the numeric Id from display format
-func ParseSuggestionId(displayId string) apperror.Result[int] {
+func ParseSuggestionId(displayId string) appfault.Result[int] {
     if stringutil.IsMissingPrefix(displayId, "S") {
-        return apperror.FailNew[int](
+        return appfault.FailNew[int](
             ErrSuggestionInvalidId,
             "invalid suggestion ID format: %s", displayId,
         )
     }
     num, err := strconv.Atoi(strings.TrimPrefix(displayId, "S"))
     if err != nil {
-        return apperror.FailWrap[int](err, ErrSuggestionInvalidId, "suggestion ID parse failed")
+        return appfault.FailWrap[int](err, ErrSuggestionInvalidId, "suggestion ID parse failed")
     }
-    return apperror.Ok(num)
+    return appfault.Ok(num)
 }
 ```
 
@@ -286,7 +286,7 @@ When user accepts a suggestion:
 4. **New Revision**: Response creates new revision linked to accepted suggestion
 
 ```go
-func AcceptSuggestion(sessionId string, suggestionId int) *apperror.AppError {
+func AcceptSuggestion(sessionId string, suggestionId int) *appfault.AppError {
     // 1. Load suggestion
     suggestionResult := GetSuggestion(sessionId, suggestionId)
     if suggestionResult.HasError() {
@@ -296,7 +296,7 @@ func AcceptSuggestion(sessionId string, suggestionId int) *apperror.AppError {
     suggestion := suggestionResult.Value()
     
     if suggestion.Type != suggestion_type.Actionable {
-        return apperror.New(
+        return appfault.New(
             ErrSuggestionNotActionable,
             "suggestion %d is not actionable",
             suggestionId,

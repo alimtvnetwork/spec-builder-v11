@@ -1612,33 +1612,33 @@ type ScenarioAssertion struct {
 }
 
 // LoadScenario loads a test scenario by name
-func LoadScenario(name string) apperror.Result[TestScenario] {
+func LoadScenario(name string) appfault.Result[TestScenario] {
     data, err := MockFS.ReadFile("scenarios/" + name + ".json")
     if err != nil {
-        return apperror.Fail[TestScenario](apperror.Wrap(err, 7900, "load scenario"))
+        return appfault.Fail[TestScenario](appfault.Wrap(err, 7900, "load scenario"))
     }
     
     var scenario TestScenario
     if err := json.Unmarshal(data, &scenario); err != nil {
-        return apperror.Fail[TestScenario](apperror.Wrap(err, 7901, "parse scenario"))
+        return appfault.Fail[TestScenario](appfault.Wrap(err, 7901, "parse scenario"))
     }
     
-    return apperror.Ok(scenario)
+    return appfault.Ok(scenario)
 }
 
 // LoadMockResponse loads a mock response definition
-func LoadMockResponse(name string) apperror.Result[MockResponse] {
+func LoadMockResponse(name string) appfault.Result[MockResponse] {
     data, err := MockFS.ReadFile("responses/" + name)
     if err != nil {
-        return apperror.Fail[MockResponse](apperror.Wrap(err, 7902, "load mock response"))
+        return appfault.Fail[MockResponse](appfault.Wrap(err, 7902, "load mock response"))
     }
     
     var mock MockResponse
     if err := json.Unmarshal(data, &mock); err != nil {
-        return apperror.Fail[MockResponse](apperror.Wrap(err, 7903, "parse mock response"))
+        return appfault.Fail[MockResponse](appfault.Wrap(err, 7903, "parse mock response"))
     }
     
-    return apperror.Ok(mock)
+    return appfault.Ok(mock)
 }
 
 // CreateHttpMock creates an httpmock responder from a MockResponse
@@ -1651,7 +1651,7 @@ func (m *MockResponse) CreateHttpMock() func(req *http.Request) (*http.Response,
             if m.ProxyError {
                 return nil, &proxyError{message: m.Error}
             }
-            return nil, apperror.New(
+            return nil, appfault.New(
                 ErrMockError,
                 m.Error,
             )
@@ -1797,59 +1797,59 @@ type FixtureInfo struct {
 }
 
 // LoadFixture loads a fixture file from the embedded filesystem
-func LoadFixture(path string) apperror.Result[[]byte] {
+func LoadFixture(path string) appfault.Result[[]byte] {
     return FixtureFS.ReadFile(filepath.Join("fixtures", path))
 }
 
 // LoadGoogleNormal loads the standard Google results fixture
-func LoadGoogleNormal() apperror.Result[string] {
+func LoadGoogleNormal() appfault.Result[string] {
     data, err := LoadFixture("google/results_normal.html")
     return string(data), err
 }
 
 // LoadGoogleCaptcha loads the Google CAPTCHA page fixture
-func LoadGoogleCaptcha() apperror.Result[string] {
+func LoadGoogleCaptcha() appfault.Result[string] {
     data, err := LoadFixture("google/results_captcha.html")
     return string(data), err
 }
 
 // LoadGoogleEmpty loads the Google empty results fixture
-func LoadGoogleEmpty() apperror.Result[string] {
+func LoadGoogleEmpty() appfault.Result[string] {
     data, err := LoadFixture("google/results_empty.html")
     return string(data), err
 }
 
 // LoadDuckDuckGoNormal loads standard DuckDuckGo results
-func LoadDuckDuckGoNormal() apperror.Result[string] {
+func LoadDuckDuckGoNormal() appfault.Result[string] {
     data, err := LoadFixture("duckduckgo/results_normal.html")
     return string(data), err
 }
 
 // LoadBingNormal loads standard Bing HTML results
-func LoadBingNormal() apperror.Result[string] {
+func LoadBingNormal() appfault.Result[string] {
     data, err := LoadFixture("bing/results_normal.html")
     return string(data), err
 }
 
 // LoadBingApiResponse loads Bing API JSON response
-func LoadBingApiResponse() apperror.Result[string] {
+func LoadBingApiResponse() appfault.Result[string] {
     data, err := LoadFixture("bing/api_response.json")
     return string(data), err
 }
 
 // LoadMetadata loads fixture metadata
-func LoadMetadata() apperror.Result[FixtureMetadata] {
+func LoadMetadata() appfault.Result[FixtureMetadata] {
     data, err := FixtureFS.ReadFile("metadata.json")
     if err != nil {
-        return apperror.Fail[FixtureMetadata](apperror.Wrap(err, 7904, "read fixture metadata"))
+        return appfault.Fail[FixtureMetadata](appfault.Wrap(err, 7904, "read fixture metadata"))
     }
     
     var meta FixtureMetadata
     if err := json.Unmarshal(data, &meta); err != nil {
-        return apperror.Fail[FixtureMetadata](apperror.Wrap(err, 7905, "parse fixture metadata"))
+        return appfault.Fail[FixtureMetadata](appfault.Wrap(err, 7905, "parse fixture metadata"))
     }
     
-    return apperror.Ok(meta)
+    return appfault.Ok(meta)
 }
 
 // ValidateFixtures validates all fixtures against current selectors
@@ -1958,7 +1958,7 @@ func runFixturesCapture(cmd *cobra.Command, args []string) error {
     case "bing":
         url = fmt.Sprintf("https://www.bing.com/search?q=%s", query)
     default:
-        return apperror.New(
+        return appfault.New(
             ErrUnknownEngine,
             "unknown engine: "+engine,
         )
@@ -1970,7 +1970,7 @@ func runFixturesCapture(cmd *cobra.Command, args []string) error {
     
     resp, err := client.Do(req)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrRequestFailed,
             "request failed",
@@ -1980,7 +1980,7 @@ func runFixturesCapture(cmd *cobra.Command, args []string) error {
     
     body, err := io.ReadAll(resp.Body)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrReadBody,
             "read body",
@@ -2032,7 +2032,7 @@ func runFixturesValidate(cmd *cobra.Command, args []string) error {
     }
     
     if !allValid {
-        return apperror.New(
+        return appfault.New(
             ErrFixtureValidation,
             "fixture validation failed",
         )

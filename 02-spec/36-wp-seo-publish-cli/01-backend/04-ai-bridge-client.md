@@ -146,12 +146,12 @@ type RagInfo struct {
 ### Generate SEO Content
 
 ```go
-func (c *AiBridgeClient) GenerateSeo(req SeoRequest) apperror.Result[SeoResponse] {
+func (c *AiBridgeClient) GenerateSeo(req SeoRequest) appfault.Result[SeoResponse] {
     endpoint := c.baseUrl + "/api/seo/generate"
     
     jsonBody, marshalErr := json.Marshal(req)
     if marshalErr != nil {
-        return apperror.FailWrap[SeoResponse](
+        return appfault.FailWrap[SeoResponse](
             marshalErr,
             "E12301",
             "marshal SEO request",
@@ -160,7 +160,7 @@ func (c *AiBridgeClient) GenerateSeo(req SeoRequest) apperror.Result[SeoResponse
     
     httpReq, reqErr := http.NewRequest(httpmethodtype.Post.HttpVerb(), endpoint, bytes.NewReader(jsonBody))
     if reqErr != nil {
-        return apperror.FailWrap[SeoResponse](
+        return appfault.FailWrap[SeoResponse](
             reqErr,
             "E12302",
             "create SEO request",
@@ -170,7 +170,7 @@ func (c *AiBridgeClient) GenerateSeo(req SeoRequest) apperror.Result[SeoResponse
     
     resp, doErr := c.httpClient.Do(httpReq)
     if doErr != nil {
-        return apperror.FailWrap[SeoResponse](
+        return appfault.FailWrap[SeoResponse](
             doErr,
             "E12303",
             "execute SEO request",
@@ -179,19 +179,19 @@ func (c *AiBridgeClient) GenerateSeo(req SeoRequest) apperror.Result[SeoResponse
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
-        return apperror.Fail[SeoResponse](parseAiBridgeAppError(resp))
+        return appfault.Fail[SeoResponse](parseAiBridgeAppError(resp))
     }
     
     var result SeoResponse
     if decodeErr := json.NewDecoder(resp.Body).Decode(&result); decodeErr != nil {
-        return apperror.FailWrap[SeoResponse](
+        return appfault.FailWrap[SeoResponse](
             decodeErr,
             "E12304",
             "decode SEO response",
         )
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -206,12 +206,12 @@ type SeoChunk struct {
     Error   string   `json:",omitempty"`
 }
 
-func (c *AiBridgeClient) GenerateSeoStream(req SeoRequest) apperror.Result[<-chan SeoChunk] {
+func (c *AiBridgeClient) GenerateSeoStream(req SeoRequest) appfault.Result[<-chan SeoChunk] {
     wsUrl := strings.Replace(c.baseUrl, "http", "ws", 1) + "/ws/seo/generate"
     
     conn, _, dialErr := c.wsDialer.Dial(wsUrl, nil)
     if dialErr != nil {
-        return apperror.FailWrap[<-chan SeoChunk](
+        return appfault.FailWrap[<-chan SeoChunk](
             dialErr,
             "E12305",
             "dial WebSocket for SEO stream",
@@ -222,7 +222,7 @@ func (c *AiBridgeClient) GenerateSeoStream(req SeoRequest) apperror.Result[<-cha
     if writeErr := conn.WriteJson(req); writeErr != nil {
         conn.Close()
 
-        return apperror.FailWrap[<-chan SeoChunk](
+        return appfault.FailWrap[<-chan SeoChunk](
             writeErr,
             "E12306",
             "send SEO stream request",
@@ -251,7 +251,7 @@ func (c *AiBridgeClient) GenerateSeoStream(req SeoRequest) apperror.Result[<-cha
         }
     }()
     
-    return apperror.Ok((<-chan SeoChunk)(chunks))
+    return appfault.Ok((<-chan SeoChunk)(chunks))
 }
 ```
 
@@ -271,7 +271,7 @@ type CategorySuggestion struct {
     Reasoning   string  `json:",omitempty"`
 }
 
-func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) apperror.Result[[]CategorySuggestion] {
+func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) appfault.Result[[]CategorySuggestion] {
     endpoint := c.baseUrl + "/api/seo/suggest-categories"
     
     if req.MaxResults == 0 {
@@ -280,7 +280,7 @@ func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) apperr
     
     jsonBody, marshalErr := json.Marshal(req)
     if marshalErr != nil {
-        return apperror.FailWrap[[]CategorySuggestion](
+        return appfault.FailWrap[[]CategorySuggestion](
             marshalErr,
             "E12301",
             "marshal category suggestion request",
@@ -289,7 +289,7 @@ func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) apperr
     
     httpReq, reqErr := http.NewRequest(httpmethodtype.Post.HttpVerb(), endpoint, bytes.NewReader(jsonBody))
     if reqErr != nil {
-        return apperror.FailWrap[[]CategorySuggestion](
+        return appfault.FailWrap[[]CategorySuggestion](
             reqErr,
             "E12302",
             "create category suggestion request",
@@ -299,7 +299,7 @@ func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) apperr
     
     resp, doErr := c.httpClient.Do(httpReq)
     if doErr != nil {
-        return apperror.FailWrap[[]CategorySuggestion](
+        return appfault.FailWrap[[]CategorySuggestion](
             doErr,
             "E12303",
             "execute category suggestion request",
@@ -311,14 +311,14 @@ func (c *AiBridgeClient) SuggestCategories(req CategorySuggestionRequest) apperr
         Suggestions []CategorySuggestion
     }
     if decodeErr := json.NewDecoder(resp.Body).Decode(&result); decodeErr != nil {
-        return apperror.FailWrap[[]CategorySuggestion](
+        return appfault.FailWrap[[]CategorySuggestion](
             decodeErr,
             "E12304",
             "decode category suggestions",
         )
     }
     
-    return apperror.Ok(result.Suggestions)
+    return appfault.Ok(result.Suggestions)
 }
 ```
 
@@ -337,7 +337,7 @@ type TagSuggestion struct {
     Confidence  float64 
 }
 
-func (c *AiBridgeClient) SuggestTags(req TagSuggestionRequest) apperror.Result[[]TagSuggestion] {
+func (c *AiBridgeClient) SuggestTags(req TagSuggestionRequest) appfault.Result[[]TagSuggestion] {
     endpoint := c.baseUrl + "/api/seo/suggest-tags"
     // Similar implementation to SuggestCategories
     // ...
@@ -356,12 +356,12 @@ type RewriteContentRequest struct {
     LinkDensity     *LinkDensityConfig `json:",omitempty"`
 }
 
-func (c *AiBridgeClient) RewriteContent(req RewriteContentRequest) apperror.Result[SeoResponse] {
+func (c *AiBridgeClient) RewriteContent(req RewriteContentRequest) appfault.Result[SeoResponse] {
     endpoint := c.baseUrl + "/api/seo/rewrite"
     
     jsonBody, marshalErr := json.Marshal(req)
     if marshalErr != nil {
-        return apperror.FailWrap[SeoResponse](
+        return appfault.FailWrap[SeoResponse](
             marshalErr,
             "E12301",
             "marshal rewrite request",
@@ -370,7 +370,7 @@ func (c *AiBridgeClient) RewriteContent(req RewriteContentRequest) apperror.Resu
     
     httpReq, reqErr := http.NewRequest(httpmethodtype.Post.HttpVerb(), endpoint, bytes.NewReader(jsonBody))
     if reqErr != nil {
-        return apperror.FailWrap[SeoResponse](
+        return appfault.FailWrap[SeoResponse](
             reqErr,
             "E12302",
             "create rewrite request",
@@ -380,7 +380,7 @@ func (c *AiBridgeClient) RewriteContent(req RewriteContentRequest) apperror.Resu
     
     resp, doErr := c.httpClient.Do(httpReq)
     if doErr != nil {
-        return apperror.FailWrap[SeoResponse](
+        return appfault.FailWrap[SeoResponse](
             doErr,
             "E12303",
             "execute rewrite request",
@@ -390,14 +390,14 @@ func (c *AiBridgeClient) RewriteContent(req RewriteContentRequest) apperror.Resu
     
     var result SeoResponse
     if decodeErr := json.NewDecoder(resp.Body).Decode(&result); decodeErr != nil {
-        return apperror.FailWrap[SeoResponse](
+        return appfault.FailWrap[SeoResponse](
             decodeErr,
             "E12304",
             "decode rewrite response",
         )
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -419,12 +419,12 @@ type SitemapRagResult struct {
 }
 
 // Request AI Bridge to index sitemap via GSearch
-func (c *AiBridgeClient) IndexSitemap(req SitemapRagRequest) apperror.Result[SitemapRagResult] {
+func (c *AiBridgeClient) IndexSitemap(req SitemapRagRequest) appfault.Result[SitemapRagResult] {
     endpoint := c.baseUrl + "/api/rag/sitemap/index"
     
     jsonBody, marshalErr := json.Marshal(req)
     if marshalErr != nil {
-        return apperror.FailWrap[SitemapRagResult](
+        return appfault.FailWrap[SitemapRagResult](
             marshalErr,
             "E12301",
             "marshal sitemap index request",
@@ -433,7 +433,7 @@ func (c *AiBridgeClient) IndexSitemap(req SitemapRagRequest) apperror.Result[Sit
     
     httpReq, reqErr := http.NewRequest(httpmethodtype.Post.HttpVerb(), endpoint, bytes.NewReader(jsonBody))
     if reqErr != nil {
-        return apperror.FailWrap[SitemapRagResult](
+        return appfault.FailWrap[SitemapRagResult](
             reqErr,
             "E12302",
             "create sitemap index request",
@@ -443,7 +443,7 @@ func (c *AiBridgeClient) IndexSitemap(req SitemapRagRequest) apperror.Result[Sit
     
     resp, doErr := c.httpClient.Do(httpReq)
     if doErr != nil {
-        return apperror.FailWrap[SitemapRagResult](
+        return appfault.FailWrap[SitemapRagResult](
             doErr,
             "E12303",
             "execute sitemap index request",
@@ -453,23 +453,23 @@ func (c *AiBridgeClient) IndexSitemap(req SitemapRagRequest) apperror.Result[Sit
     
     var result SitemapRagResult
     if decodeErr := json.NewDecoder(resp.Body).Decode(&result); decodeErr != nil {
-        return apperror.FailWrap[SitemapRagResult](
+        return appfault.FailWrap[SitemapRagResult](
             decodeErr,
             "E12304",
             "decode sitemap index response",
         )
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 // Refresh sitemap cache
-func (c *AiBridgeClient) RefreshSitemapCache(websiteId string) apperror.Result[SitemapRagResult] {
+func (c *AiBridgeClient) RefreshSitemapCache(websiteId string) appfault.Result[SitemapRagResult] {
     endpoint := c.baseUrl + "/api/rag/sitemap/refresh/" + websiteId
     
     httpReq, reqErr := http.NewRequest(httpmethodtype.Post.HttpVerb(), endpoint, nil)
     if reqErr != nil {
-        return apperror.FailWrap[SitemapRagResult](
+        return appfault.FailWrap[SitemapRagResult](
             reqErr,
             "E12302",
             "create sitemap refresh request",
@@ -478,7 +478,7 @@ func (c *AiBridgeClient) RefreshSitemapCache(websiteId string) apperror.Result[S
     
     resp, doErr := c.httpClient.Do(httpReq)
     if doErr != nil {
-        return apperror.FailWrap[SitemapRagResult](
+        return appfault.FailWrap[SitemapRagResult](
             doErr,
             "E12303",
             "execute sitemap refresh request",
@@ -488,23 +488,23 @@ func (c *AiBridgeClient) RefreshSitemapCache(websiteId string) apperror.Result[S
     
     var result SitemapRagResult
     if decodeErr := json.NewDecoder(resp.Body).Decode(&result); decodeErr != nil {
-        return apperror.FailWrap[SitemapRagResult](
+        return appfault.FailWrap[SitemapRagResult](
             decodeErr,
             "E12304",
             "decode sitemap refresh response",
         )
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 // Clear sitemap cache
-func (c *AiBridgeClient) ClearSitemapCache(websiteId string) *apperror.AppError {
+func (c *AiBridgeClient) ClearSitemapCache(websiteId string) *appfault.AppError {
     endpoint := c.baseUrl + "/api/rag/sitemap/clear/" + websiteId
     
     httpReq, reqErr := http.NewRequest(httpmethodtype.Delete.HttpVerb(), endpoint, nil)
     if reqErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             reqErr,
             "E12302",
             "create sitemap clear request",
@@ -513,7 +513,7 @@ func (c *AiBridgeClient) ClearSitemapCache(websiteId string) *apperror.AppError 
     
     resp, doErr := c.httpClient.Do(httpReq)
     if doErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             doErr,
             "E12303",
             "execute sitemap clear request",
@@ -540,16 +540,16 @@ type AiBridgeError struct {
     Details string `json:",omitempty"`
 }
 
-func parseAiBridgeAppError(resp *http.Response) *apperror.AppError {
+func parseAiBridgeAppError(resp *http.Response) *appfault.AppError {
     var abErr AiBridgeError
     if decodeErr := json.NewDecoder(resp.Body).Decode(&abErr); decodeErr != nil {
-        return apperror.New(
+        return appfault.New(
             "E12310",
             fmt.Sprintf("HTTP %d: %s", resp.StatusCode, resp.Status),
         ).WithStatusCode(resp.StatusCode)
     }
 
-    return apperror.New(
+    return appfault.New(
         fmt.Sprintf("E%d", AiBridgeErrorMapping[abErr.Code]),
         fmt.Sprintf("AI Bridge error [%d]: %s", abErr.Code, abErr.Message),
     ).WithStatusCode(resp.StatusCode)

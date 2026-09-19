@@ -214,14 +214,14 @@ func NewEmbeddingService(db *db.DB, apiKey string) *EmbeddingService {
 }
 
 // EmbedDocument chunks and embeds a document
-func (s *EmbeddingService) EmbedDocument(context stdctx.Context, doc Document) apperror.Result[[]EmbeddedChunk] {
+func (s *EmbeddingService) EmbedDocument(context stdctx.Context, doc Document) appfault.Result[[]EmbeddedChunk] {
 	// Chunk the content
 	chunks := s.chunkText(doc.Content)
 	
 	// Generate embeddings for all chunks
 	embeddings, err := s.generateEmbeddings(context, chunks)
 	if err != nil {
-		return nil, apperror.Wrap(
+		return nil, appfault.Wrap(
 			err,
 			ErrEmbeddingGeneration,
 			"failed to generate embeddings",
@@ -251,7 +251,7 @@ func (s *EmbeddingService) EmbedDocument(context stdctx.Context, doc Document) a
 	
 	// Store in database
 	if err := s.storeChunks(context, result); err != nil {
-		return nil, apperror.Wrap(
+		return nil, appfault.Wrap(
 			err,
 			ErrChunkStorage,
 			"failed to store chunks",
@@ -293,7 +293,7 @@ type EmbeddingApiRequest struct {
 	Input []string
 }
 
-func (s *EmbeddingService) generateEmbeddings(context stdctx.Context, texts []string) apperror.Result[[][]float64] {
+func (s *EmbeddingService) generateEmbeddings(context stdctx.Context, texts []string) appfault.Result[[][]float64] {
 	reqBody, _ := json.Marshal(EmbeddingApiRequest{
 		Model: s.model,
 		Input: texts,
@@ -331,13 +331,13 @@ func (s *EmbeddingService) generateEmbeddings(context stdctx.Context, texts []st
 }
 
 // EmbedQuery embeds a single query for search
-func (s *EmbeddingService) EmbedQuery(context stdctx.Context, query string) apperror.Result[[]float64] {
+func (s *EmbeddingService) EmbedQuery(context stdctx.Context, query string) appfault.Result[[]float64] {
 	embeddings, err := s.generateEmbeddings(context, []string{query})
 	if err != nil {
 		return nil, err
 	}
 	if len(embeddings) == 0 {
-		return nil, apperror.New(
+		return nil, appfault.New(
 			ErrNoEmbeddingReturned,
 			"no embedding returned",
 		)
@@ -398,7 +398,7 @@ type SearchOptions struct {
 }
 
 // Search finds relevant chunks for a query
-func (s *SearchService) Search(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]SearchResult] {
+func (s *SearchService) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]SearchResult] {
 	// Embed the query
 	queryEmbedding, err := s.embedding.EmbedQuery(context, query)
 	if err != nil {
@@ -437,7 +437,7 @@ func (s *SearchService) Search(context stdctx.Context, query string, opts Search
 	return results, nil
 }
 
-func (s *SearchService) getCandidateChunks(context stdctx.Context, opts SearchOptions) apperror.Result[[]EmbeddedChunk] {
+func (s *SearchService) getCandidateChunks(context stdctx.Context, opts SearchOptions) appfault.Result[[]EmbeddedChunk] {
 	query := `
 		SELECT id, project_id, source_id, source_type, content, chunk_index, total_chunks,
 			   title, path, share_id, embedding, embedding_model, created_at, updated_at
@@ -548,7 +548,7 @@ func (a *ContextAssembler) AssembleContext(
 	context stdctx.Context,
 	projectId string,
 	query string,
-) apperror.Result[AssembledContext] {
+) appfault.Result[AssembledContext] {
 	// Search for relevant chunks
 	results, err := a.search.Search(context, query, SearchOptions{
 		ProjectId:     projectId,
@@ -557,7 +557,7 @@ func (a *ContextAssembler) AssembleContext(
 		IncludeShared: true,
 	})
 	if err != nil {
-		return apperror.FailWrap[AssembledContext](
+		return appfault.FailWrap[AssembledContext](
 			err,
 			"E9700",
 			"search failed",
@@ -616,7 +616,7 @@ func (a *ContextAssembler) AssembleContext(
 		assembled.TotalTokens += tokens
 	}
 	
-	return apperror.Ok(*assembled)
+	return appfault.Ok(*assembled)
 }
 
 // FormatForPrompt formats assembled context for inclusion in prompt
@@ -982,7 +982,7 @@ func (w *IndexingWorker) indexSharedMemories(context stdctx.Context) {
 	}
 }
 
-func (w *IndexingWorker) getFilesNeedingIndexing(context stdctx.Context) apperror.Result[[]FileInfo] {
+func (w *IndexingWorker) getFilesNeedingIndexing(context stdctx.Context) appfault.Result[[]FileInfo] {
 	// Find files where hash changed or not indexed
 	rows, err := w.db.QueryContext(context, `
 		SELECT f.project_id, f.path, f.name, f.hash

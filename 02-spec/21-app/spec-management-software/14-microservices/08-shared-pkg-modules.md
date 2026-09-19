@@ -549,7 +549,7 @@ func NewConnectionManager(rootPath string, config ConnectionConfig, logger *logg
 }
 
 // GetConnection returns a connection to a database
-func (cm *ConnectionManager) GetConnection(context stdctx.Context, dbPath string) apperror.Result[*sql.DB] {
+func (cm *ConnectionManager) GetConnection(context stdctx.Context, dbPath string) appfault.Result[*sql.DB] {
     fullPath := cm.resolvePath(dbPath)
     
     // Check cache first
@@ -585,7 +585,7 @@ func (cm *ConnectionManager) GetConnection(context stdctx.Context, dbPath string
 }
 
 // openDatabase opens a new database connection
-func (cm *ConnectionManager) openDatabase(context stdctx.Context, fullPath string) apperror.Result[*sql.DB] {
+func (cm *ConnectionManager) openDatabase(context stdctx.Context, fullPath string) appfault.Result[*sql.DB] {
     dsn := cm.buildDSN(fullPath)
     
     db, err := sql.Open("sqlite3", dsn)
@@ -747,7 +747,7 @@ func WithTransaction(context stdctx.Context, db *sql.DB, fn TxFunc) error {
 }
 
 // WithTransactionResult executes a function within a transaction and returns a result
-func WithTransactionResult[T any](context stdctx.Context, db *sql.DB, fn func(tx *sql.Tx) apperror.Result[T]) apperror.Result[T] {
+func WithTransactionResult[T any](context stdctx.Context, db *sql.DB, fn func(tx *sql.Tx) appfault.Result[T]) appfault.Result[T] {
     var result T
     
     tx, err := db.BeginTx(context, nil)
@@ -809,7 +809,7 @@ func NewProjectDbRouter(connManager *ConnectionManager, appPath string, logger *
 }
 
 // GetProjectDb returns the database for a specific project
-func (r *ProjectDbRouter) GetProjectDb(context stdctx.Context, projectId string) apperror.Result[*sql.DB] {
+func (r *ProjectDbRouter) GetProjectDb(context stdctx.Context, projectId string) appfault.Result[*sql.DB] {
     // Check cache
     if db, ok := r.projectDbs.Load(projectId); ok {
         return db.(*sql.DB), nil
@@ -828,7 +828,7 @@ func (r *ProjectDbRouter) GetProjectDb(context stdctx.Context, projectId string)
 }
 
 // GetAppDb returns the application-level database
-func (r *ProjectDbRouter) GetAppDb(context stdctx.Context) apperror.Result[*sql.DB] {
+func (r *ProjectDbRouter) GetAppDb(context stdctx.Context) appfault.Result[*sql.DB] {
     dbPath := filepath.Join(r.appPath, "app.db")
     return r.connManager.GetConnection(context, dbPath)
 }

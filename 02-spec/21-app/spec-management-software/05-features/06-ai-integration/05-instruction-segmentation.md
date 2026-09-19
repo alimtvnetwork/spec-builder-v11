@@ -179,7 +179,7 @@ func NewSegmentationParser(tokenCounter TokenCounter, config SegmentationConfig)
 }
 
 // Parse splits instruction content into sections
-func (p *SegmentationParser) Parse(context stdctx.Context, content string) apperror.Result[[]ParsedSection] {
+func (p *SegmentationParser) Parse(context stdctx.Context, content string) appfault.Result[[]ParsedSection] {
     lines := strings.Split(content, "\n")
     sections := make([]ParsedSection, 0)
     
@@ -248,7 +248,7 @@ func (p *SegmentationParser) Parse(context stdctx.Context, content string) apper
         sections = p.mergeSmallSections(sections)
     }
     
-    return apperror.Ok(sections)
+    return appfault.Ok(sections)
 }
 
 // extractKeywords extracts relevant keywords for dependency detection
@@ -420,7 +420,7 @@ func NewDependencyResolver() *DependencyResolver {
 }
 
 // Resolve analyzes sections and builds dependency graph
-func (r *DependencyResolver) Resolve(sections []ParsedSection) apperror.Result[*DependencyGraph] {
+func (r *DependencyResolver) Resolve(sections []ParsedSection) appfault.Result[*DependencyGraph] {
     graph := &DependencyGraph{
         segments:     sections,
         dependencies: make([]SegmentDependency, 0),
@@ -464,7 +464,7 @@ func (r *DependencyResolver) Resolve(sections []ParsedSection) apperror.Result[*
         graph = r.breakCycles(graph)
     }
     
-    return apperror.Ok(graph)
+    return appfault.Ok(graph)
 }
 
 // matchesKeywords checks if keywords contain any required keywords
@@ -578,7 +578,7 @@ func (r *DependencyResolver) breakCycles(graph *DependencyGraph) *DependencyGrap
 }
 
 // TopologicalSort returns execution order respecting dependencies
-func (g *DependencyGraph) TopologicalSort() apperror.Result[[]int] {
+func (g *DependencyGraph) TopologicalSort() appfault.Result[[]int] {
     inDegree := make(map[int]int)
     for i := range g.segments {
         inDegree[i] = 0
@@ -614,13 +614,13 @@ func (g *DependencyGraph) TopologicalSort() apperror.Result[[]int] {
     }
     
     if len(result) != len(g.segments) {
-        return apperror.FailNew[[]int](
-            apperror.ErrDependencyCycle,
+        return appfault.FailNew[[]int](
+            appfault.ErrDependencyCycle,
             "dependency cycle detected, could not complete sort",
         )
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -766,10 +766,10 @@ func (e *SegmentExecutionEngine) CreateExecutionPlan(
     instructionId string,
     sections []ParsedSection,
     graph *DependencyGraph,
-) apperror.Result[*ExecutionPlan] {
+) appfault.Result[*ExecutionPlan] {
     orderResult := graph.TopologicalSort()
     if orderResult.IsError() {
-        return apperror.FailWrap[*ExecutionPlan](
+        return appfault.FailWrap[*ExecutionPlan](
             orderResult.Error(),
             "E5070",
             "failed to determine execution order",
@@ -814,7 +814,7 @@ func (e *SegmentExecutionEngine) CreateExecutionPlan(
     // Save segments to database
     for i := range segments {
         if err := e.db.WithContext(context).Create(&segments[i].InstructionSegment).Error; err != nil {
-            return apperror.FailWrap[*ExecutionPlan](
+            return appfault.FailWrap[*ExecutionPlan](
                 err,
                 "E5070",
                 fmt.Sprintf("failed to save segment %d", i),
@@ -822,7 +822,7 @@ func (e *SegmentExecutionEngine) CreateExecutionPlan(
         }
     }
     
-    return apperror.Ok(&ExecutionPlan{
+    return appfault.Ok(&ExecutionPlan{
         InstructionId:  instructionId,
         Segments:       segments,
         ExecutionOrder: order,
@@ -832,7 +832,7 @@ func (e *SegmentExecutionEngine) CreateExecutionPlan(
 }
 
 // Execute runs the execution plan
-func (e *SegmentExecutionEngine) Execute(context stdctx.Context, plan *ExecutionPlan) *apperror.AppError {
+func (e *SegmentExecutionEngine) Execute(context stdctx.Context, plan *ExecutionPlan) *appfault.AppError {
     now := time.Now()
     plan.StartedAt = &now
     plan.Status = "running"
@@ -850,7 +850,7 @@ func (e *SegmentExecutionEngine) Execute(context stdctx.Context, plan *Execution
                 continue
             }
 
-            return apperror.Wrap(
+            return appfault.Wrap(
                 depErr,
                 "E5075",
                 fmt.Sprintf("dependency check failed for segment %d", segmentIndex),
@@ -868,7 +868,7 @@ func (e *SegmentExecutionEngine) Execute(context stdctx.Context, plan *Execution
 
             plan.Status = "failed"
 
-            return apperror.Wrap(
+            return appfault.Wrap(
                 execErr,
                 "E5074",
                 fmt.Sprintf("segment %d execution failed", segmentIndex),
@@ -898,7 +898,7 @@ func (e *SegmentExecutionEngine) checkDependencies(
     context stdctx.Context,
     segment *ExecutionSegment,
     plan *ExecutionPlan,
-) *apperror.AppError {
+) *appfault.AppError {
     for _, depId := range segment.DependencyIds {
         // Parse segment index from ID
         var depIndex int
@@ -911,17 +911,17 @@ func (e *SegmentExecutionEngine) checkDependencies(
         case SegmentStatusCompleted, SegmentStatusSummarized:
             continue // OK
         case SegmentStatusFailed:
-            return apperror.New(
+            return appfault.New(
                 "E5075",
                 fmt.Sprintf("dependency %s failed", depId),
             )
         case SegmentStatusBlocked:
-            return apperror.New(
+            return appfault.New(
                 "E5075",
                 fmt.Sprintf("dependency %s is blocked", depId),
             )
         default:
-            return apperror.New(
+            return appfault.New(
                 "E5075",
                 fmt.Sprintf("dependency %s not completed (status: %s)", depId, status),
             )
@@ -936,7 +936,7 @@ func (e *SegmentExecutionEngine) executeSegment(
     context stdctx.Context,
     segment *ExecutionSegment,
     plan *ExecutionPlan,
-) *apperror.AppError {
+) *appfault.AppError {
     segment.Status = string(SegmentStatusExecuting)
     e.updateSegmentStatus(context, segment)
     
@@ -963,7 +963,7 @@ func (e *SegmentExecutionEngine) executeSegment(
                 time.Sleep(time.Duration(e.config.RetryDelaySeconds) * time.Second)
                 continue
             }
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 "E5074",
                 fmt.Sprintf("all %d attempts failed", segment.MaxAttempts),
@@ -978,7 +978,7 @@ func (e *SegmentExecutionEngine) executeSegment(
         return nil
     }
     
-    return apperror.New(
+    return appfault.New(
         "E5074",
         fmt.Sprintf("execution failed after %d attempts", segment.MaxAttempts),
     )
@@ -1077,24 +1077,24 @@ func indexOf(slice []int, val int) int {
 // InstructionSegmentationService is the main interface
 type InstructionSegmentationService interface {
     // Analysis
-    NeedsSegmentation(context stdctx.Context, instruction string, maxTokens int) apperror.Result[SegmentationCheck]
+    NeedsSegmentation(context stdctx.Context, instruction string, maxTokens int) appfault.Result[SegmentationCheck]
     
     // Segmentation
-    Segment(context stdctx.Context, instructionId, content string) apperror.Result[*ExecutionPlan]
+    Segment(context stdctx.Context, instructionId, content string) appfault.Result[*ExecutionPlan]
     
     // Execution
-    Execute(context stdctx.Context, plan *ExecutionPlan) *apperror.AppError
-    ExecuteAsync(context stdctx.Context, plan *ExecutionPlan) apperror.Result[string] // Returns job ID
+    Execute(context stdctx.Context, plan *ExecutionPlan) *appfault.AppError
+    ExecuteAsync(context stdctx.Context, plan *ExecutionPlan) appfault.Result[string] // Returns job ID
     
     // Status
-    GetPlanStatus(context stdctx.Context, instructionId string) apperror.Result[*ExecutionPlan]
-    GetSegmentStatus(context stdctx.Context, segmentId string) apperror.Result[*ExecutionSegment]
+    GetPlanStatus(context stdctx.Context, instructionId string) appfault.Result[*ExecutionPlan]
+    GetSegmentStatus(context stdctx.Context, segmentId string) appfault.Result[*ExecutionSegment]
     
     // Control
-    PausePlan(context stdctx.Context, instructionId string) *apperror.AppError
-    ResumePlan(context stdctx.Context, instructionId string) *apperror.AppError
-    RetrySegment(context stdctx.Context, segmentId string) *apperror.AppError
-    SkipSegment(context stdctx.Context, segmentId string) *apperror.AppError
+    PausePlan(context stdctx.Context, instructionId string) *appfault.AppError
+    ResumePlan(context stdctx.Context, instructionId string) *appfault.AppError
+    RetrySegment(context stdctx.Context, segmentId string) *appfault.AppError
+    SkipSegment(context stdctx.Context, segmentId string) *appfault.AppError
 }
 
 // SegmentationCheck holds the result of a segmentation analysis
@@ -1138,13 +1138,13 @@ func (s *InstructionSegmentationServiceImpl) NeedsSegmentation(
     context stdctx.Context,
     instruction string,
     maxTokens int,
-) apperror.Result[SegmentationCheck] {
+) appfault.Result[SegmentationCheck] {
     tokens, err := s.tokenCounter.Count(instruction)
     if err != nil {
-        return apperror.Fail[SegmentationCheck](err)
+        return appfault.Fail[SegmentationCheck](err)
     }
     
-    return apperror.Ok(SegmentationCheck{
+    return appfault.Ok(SegmentationCheck{
         NeedsSegmentation: tokens > maxTokens,
         TokenCount:        tokens,
     })
@@ -1155,11 +1155,11 @@ func (s *InstructionSegmentationServiceImpl) Segment(
     context stdctx.Context,
     instructionId string,
     content string,
-) apperror.Result[*ExecutionPlan] {
+) appfault.Result[*ExecutionPlan] {
     // Parse into sections
     parseResult := s.parser.Parse(context, content)
     if parseResult.IsError() {
-        return apperror.FailWrap[*ExecutionPlan](
+        return appfault.FailWrap[*ExecutionPlan](
             parseResult.Error(),
             "E5070",
             "parsing failed",
@@ -1168,8 +1168,8 @@ func (s *InstructionSegmentationServiceImpl) Segment(
     sections := parseResult.Value()
     
     if len(sections) == 0 {
-        return apperror.FailNew[*ExecutionPlan](
-            apperror.ErrSegmentationNoSections,
+        return appfault.FailNew[*ExecutionPlan](
+            appfault.ErrSegmentationNoSections,
             "no sections detected in instruction",
         )
     }
@@ -1177,7 +1177,7 @@ func (s *InstructionSegmentationServiceImpl) Segment(
     // Resolve dependencies
     graphResult := s.resolver.Resolve(sections)
     if graphResult.IsError() {
-        return apperror.FailWrap[*ExecutionPlan](
+        return appfault.FailWrap[*ExecutionPlan](
             graphResult.Error(),
             "E5073",
             "dependency resolution failed",
@@ -1192,7 +1192,7 @@ func (s *InstructionSegmentationServiceImpl) Segment(
 func (s *InstructionSegmentationServiceImpl) Execute(
     context stdctx.Context,
     plan *ExecutionPlan,
-) *apperror.AppError {
+) *appfault.AppError {
     return s.engine.Execute(context, plan)
 }
 
@@ -1200,7 +1200,7 @@ func (s *InstructionSegmentationServiceImpl) Execute(
 func (s *InstructionSegmentationServiceImpl) GetPlanStatus(
     context stdctx.Context,
     instructionId string,
-) apperror.Result[*ExecutionPlan] {
+) appfault.Result[*ExecutionPlan] {
     var segments []models.InstructionSegment
     err := s.db.WithContext(context).
         Where("instruction_id = ?", instructionId).
@@ -1208,7 +1208,7 @@ func (s *InstructionSegmentationServiceImpl) GetPlanStatus(
         Find(&segments).Error
     
     if err != nil {
-        return apperror.Fail[*ExecutionPlan](err)
+        return appfault.Fail[*ExecutionPlan](err)
     }
     
     execSegments := make([]ExecutionSegment, len(segments))
@@ -1231,7 +1231,7 @@ func (s *InstructionSegmentationServiceImpl) GetPlanStatus(
         }
     }
     
-    return apperror.Ok(&ExecutionPlan{
+    return appfault.Ok(&ExecutionPlan{
         InstructionId: instructionId,
         Segments:      execSegments,
         Status:        status,

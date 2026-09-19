@@ -173,7 +173,7 @@ import (
     
     "brun/internal/cli"
     "brun/internal/config"
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
     
     "github.com/rs/zerolog"
     "github.com/rs/zerolog/log"
@@ -302,7 +302,7 @@ import (
     "path/filepath"
     "time"
     
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
     
     "github.com/google/uuid"
     "github.com/rs/zerolog"
@@ -315,14 +315,14 @@ type LogService struct {
     fileLog    zerolog.Logger
 }
 
-func NewLogService(logDir string) apperror.Result[*LogService] {
+func NewLogService(logDir string) appfault.Result[*LogService] {
     runId := generateRunId()
     runDir := filepath.Join(logDir, runId)
     
     mkdirErr := pathutil.MkdirAll(runDir, 0755)
     if mkdirErr != nil {
-        return apperror.Fail[*LogService](
-            apperror.Wrap(
+        return appfault.Fail[*LogService](
+            appfault.Wrap(
                 mkdirErr,
                 7101,
                 "create log directory failed",
@@ -332,8 +332,8 @@ func NewLogService(logDir string) apperror.Result[*LogService] {
     
     logFileResult := pathutil.CreateFile(filepath.Join(runDir, "log.txt"))
     if logFileResult.HasError() {
-        return apperror.Fail[*LogService](
-            apperror.Wrap(
+        return appfault.Fail[*LogService](
+            appfault.Wrap(
                 logFileResult.Error(),
                 7102,
                 "create log file failed",
@@ -343,7 +343,7 @@ func NewLogService(logDir string) apperror.Result[*LogService] {
 
     logFile := logFileResult.Value()
     
-    return apperror.Ok(&LogService{
+    return appfault.Ok(&LogService{
         runId:      runId,
         logDir:     runDir,
         consoleLog: zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger(),
@@ -552,7 +552,7 @@ import (
     "net"
     "time"
     
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
 )
 
 type Manager struct {
@@ -575,33 +575,33 @@ func (m *Manager) IsAvailable(port int) bool {
     return true
 }
 
-func (m *Manager) FindAvailable(preferred int, fallbacks []int) apperror.Result[int] {
+func (m *Manager) FindAvailable(preferred int, fallbacks []int) appfault.Result[int] {
     if m.IsAvailable(preferred) {
-        return apperror.Ok(preferred)
+        return appfault.Ok(preferred)
     }
     
     for _, port := range fallbacks {
         if m.IsAvailable(port) {
-            return apperror.Ok(port)
+            return appfault.Ok(port)
         }
     }
     
-    return apperror.Fail[int](
-        apperror.New(
+    return appfault.Fail[int](
+        appfault.New(
             7201,
             "no available port found",
         ),
     )
 }
 
-func (m *Manager) WaitForPort(context context.Context, port int) *apperror.AppError {
+func (m *Manager) WaitForPort(context context.Context, port int) *appfault.AppError {
     ticker := time.NewTicker(500 * time.Millisecond)
     defer ticker.Stop()
     
     for {
         select {
         case <-context.Done():
-            return apperror.Wrap(
+            return appfault.Wrap(
                 context.Err(),
                 7202,
                 "port wait cancelled",
@@ -638,7 +638,7 @@ import (
     "os"
     "path/filepath"
     
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
 )
 
 type CopyMode byte
@@ -658,12 +658,12 @@ func NewCopier(mode CopyMode, ignore []string) *Copier {
     return &Copier{mode: mode, ignore: ignore}
 }
 
-func (c *Copier) Copy(src, dst string) *apperror.AppError {
+func (c *Copier) Copy(src, dst string) *appfault.AppError {
     switch c.mode {
     case CopyModeClear:
         removeErr := pathutil.RemoveAll(dst)
         if removeErr != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 removeErr,
                 7301,
                 "clear destination failed",
@@ -678,7 +678,7 @@ func (c *Copier) Copy(src, dst string) *apperror.AppError {
     return c.copyDir(src, dst)
 }
 
-func (c *Copier) copyDir(src, dst string) *apperror.AppError {
+func (c *Copier) copyDir(src, dst string) *appfault.AppError {
     walkErr := filepath.Walk(src, func(path string, info os.FileInfo, walkItemErr error) error {
         if walkItemErr != nil {
             return walkItemErr
@@ -706,7 +706,7 @@ func (c *Copier) copyDir(src, dst string) *apperror.AppError {
     })
 
     if walkErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             walkErr,
             7302,
             "copy directory failed",
@@ -759,14 +759,14 @@ import (
     "context"
     "time"
     
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
     "brun/pkg/models"
 )
 
 type Executor interface {
-    Execute(context context.Context, cmd *Command) apperror.Result[*Result]
-    Validate() *apperror.AppError
-    GetVersion() apperror.Result[string]
+    Execute(context context.Context, cmd *Command) appfault.Result[*Result]
+    Validate() *appfault.AppError
+    GetVersion() appfault.Result[string]
     RuntimeType() string
 }
 
@@ -813,7 +813,7 @@ import (
     "runtime"
     "time"
     
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
     brunError "brun/internal/error"
 )
 
@@ -831,7 +831,7 @@ func (e *PowerShellExecutor) RuntimeType() string {
     return "powershell"
 }
 
-func (e *PowerShellExecutor) Validate() *apperror.AppError {
+func (e *PowerShellExecutor) Validate() *appfault.AppError {
     versionResult := e.GetVersion()
     if versionResult.HasError() {
         return versionResult.Error()
@@ -840,12 +840,12 @@ func (e *PowerShellExecutor) Validate() *apperror.AppError {
     return nil
 }
 
-func (e *PowerShellExecutor) GetVersion() apperror.Result[string] {
+func (e *PowerShellExecutor) GetVersion() appfault.Result[string] {
     cmd := exec.Command(e.executable(), "-Version")
     output, execErr := cmd.Output()
     if execErr != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(
+        return appfault.Fail[string](
+            appfault.Wrap(
                 execErr,
                 7103,
                 "powershell not found",
@@ -853,7 +853,7 @@ func (e *PowerShellExecutor) GetVersion() apperror.Result[string] {
         )
     }
 
-    return apperror.Ok(string(output))
+    return appfault.Ok(string(output))
 }
 
 func (e *PowerShellExecutor) executable() string {
@@ -864,7 +864,7 @@ func (e *PowerShellExecutor) executable() string {
     return "pwsh"
 }
 
-func (e *PowerShellExecutor) Execute(context context.Context, cmd *Command) apperror.Result[*Result] {
+func (e *PowerShellExecutor) Execute(context context.Context, cmd *Command) appfault.Result[*Result] {
     startTime := time.Now()
     
     // Build command
@@ -903,7 +903,7 @@ func (e *PowerShellExecutor) Execute(context context.Context, cmd *Command) appe
     // Parse errors from output
     result.Errors = e.parser.Parse("powershell", stderr.String())
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -986,7 +986,7 @@ import (
     "time"
     
     "brun/internal/config"
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
 )
 
 type Checker struct {
@@ -999,12 +999,12 @@ func NewChecker(timeout time.Duration) *Checker {
     }
 }
 
-func (c *Checker) Check(context context.Context, app config.AppDef) *apperror.AppError {
+func (c *Checker) Check(context context.Context, app config.AppDef) *appfault.AppError {
     url := fmt.Sprintf("http://%s:%d%s", app.Host, app.Port, app.HealthPath)
     
     req, reqErr := http.NewRequestWithContext(context, http.MethodGet, url, nil)
     if reqErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             reqErr,
             7401,
             "health check request creation failed",
@@ -1013,7 +1013,7 @@ func (c *Checker) Check(context context.Context, app config.AppDef) *apperror.Ap
     
     resp, doErr := c.client.Do(req)
     if doErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             doErr,
             7402,
             "health check request failed",
@@ -1022,7 +1022,7 @@ func (c *Checker) Check(context context.Context, app config.AppDef) *apperror.Ap
     defer resp.Body.Close()
     
     if resp.StatusCode != app.HealthCheck.ExpectedStatus {
-        return apperror.New(
+        return appfault.New(
             7403,
             fmt.Sprintf("unexpected health check status: %d", resp.StatusCode),
         )
@@ -1031,7 +1031,7 @@ func (c *Checker) Check(context context.Context, app config.AppDef) *apperror.Ap
     return nil
 }
 
-func (c *Checker) WaitForHealthy(context context.Context, app config.AppDef) *apperror.AppError {
+func (c *Checker) WaitForHealthy(context context.Context, app config.AppDef) *appfault.AppError {
     hc := app.HealthCheck
     
     for i := 0; i < hc.Retries; i++ {
@@ -1042,7 +1042,7 @@ func (c *Checker) WaitForHealthy(context context.Context, app config.AppDef) *ap
         
         select {
         case <-context.Done():
-            return apperror.Wrap(
+            return appfault.Wrap(
                 context.Err(),
                 7404,
                 "health check wait cancelled",
@@ -1052,7 +1052,7 @@ func (c *Checker) WaitForHealthy(context context.Context, app config.AppDef) *ap
         }
     }
     
-    return apperror.New(
+    return appfault.New(
         7405,
         fmt.Sprintf("health check failed after %d retries", hc.Retries),
     )
@@ -1092,7 +1092,7 @@ import (
     
     "brun/internal/config"
     "brun/internal/engine"
-    "brun/pkg/apperror"
+    "brun/pkg/appfault"
     
     "github.com/spf13/cobra"
 )
@@ -1107,7 +1107,7 @@ func NewBuildCmd(cfg *config.Config) *cobra.Command {
         RunE: func(cmd *cobra.Command, args []string) error {
             profile, ok := cfg.Profiles[profileName]
             if !ok {
-                return apperror.New(
+                return appfault.New(
                     7501,
                     "profile not found: "+profileName,
                 )

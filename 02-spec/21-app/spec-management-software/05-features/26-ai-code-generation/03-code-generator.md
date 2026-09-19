@@ -208,7 +208,7 @@ func logOperation(entry HistoryEntry) {
     history = append(history, entry)
 }
 
-func calculateChecksum(filePath string) apperror.Result[string] {
+func calculateChecksum(filePath string) appfault.Result[string] {
     file, err := pathutil.Open(filePath)
     if err != nil {
         return "", err
@@ -234,7 +234,7 @@ func saveHistory(path string, entries []HistoryEntry) error {
 func validatePath(path string) error {
     absPath, err := filepath.Abs(path)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrInvalidPath,
             "invalid path",
@@ -293,7 +293,7 @@ func ValidateSyntax(code string) error {
     fset := token.NewFileSet()
     _, err := parser.ParseFile(fset, "main.go", code, parser.AllErrors)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSyntaxValidation,
             "syntax error",
@@ -325,7 +325,7 @@ func TestCompilation(code string, workDir string) error {
     cmd.Dir = workDir
     output, err := cmd.CombinedOutput()
     if err != nil {
-        return apperror.New(
+        return appfault.New(
             ErrCompilationFailed,
             "compilation failed: "+string(output),
         )
@@ -358,8 +358,8 @@ func RunStaticAnalysis(code string) []Warning {
 When compilation fails, AI attempts to fix:
 
 ```go
-func GenerateWithRetry(request TaskRequest, maxRetries int) apperror.Result[*GeneratedCode] {
-    var lastError *apperror.AppError
+func GenerateWithRetry(request TaskRequest, maxRetries int) appfault.Result[*GeneratedCode] {
+    var lastError *appfault.AppError
     var code string
     
     for attempt := 0; attempt < maxRetries; attempt++ {
@@ -379,11 +379,11 @@ func GenerateWithRetry(request TaskRequest, maxRetries int) apperror.Result[*Gen
             continue
         }
         
-        return apperror.OK(&GeneratedCode{Code: code})
+        return appfault.Ok(&GeneratedCode{Code: code})
     }
     
-    return apperror.Fail[*GeneratedCode](
-        apperror.Wrap(
+    return appfault.Fail[*GeneratedCode](
+        appfault.Wrap(
             lastError,
             ErrCodeGenerationFailed,
             "failed after all retry attempts",

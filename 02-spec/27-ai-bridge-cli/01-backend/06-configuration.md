@@ -243,7 +243,7 @@ type LoggingConfig struct {
     Requests RequestLogConfig
 }
 
-func Load(path string) apperror.Result[*Config] {
+func Load(path string) appfault.Result[*Config] {
     // 1. Load defaults
     cfg := DefaultConfig()
     
@@ -256,12 +256,12 @@ func Load(path string) apperror.Result[*Config] {
     if path != "" {
         data, err := pathutil.ReadFile(path)
         if err != nil {
-            return apperror.FailWrap[*Config](err, ErrConfigNotFound, "config file read failed")
+            return appfault.FailWrap[*Config](err, ErrConfigNotFound, "config file read failed")
         }
 
         err = yaml.Unmarshal(data, cfg)
         if err != nil {
-            return apperror.FailNew[*Config](
+            return appfault.FailNew[*Config](
                 ErrConfigInvalid,
                 "invalid config: %v", err,
             )
@@ -274,10 +274,10 @@ func Load(path string) apperror.Result[*Config] {
     // 5. Validate
     err := cfg.Validate()
     if err != nil {
-        return apperror.FailWrap[*Config](err, ErrConfigInvalid, "config validation failed")
+        return appfault.FailWrap[*Config](err, ErrConfigInvalid, "config validation failed")
     }
     
-    return apperror.Ok(cfg)
+    return appfault.Ok(cfg)
 }
 
 func DefaultConfig() *Config {
@@ -323,10 +323,10 @@ func DefaultConfig() *Config {
 ## Validation Rules
 
 ```go
-func (c *Config) Validate() *apperror.AppError {
+func (c *Config) Validate() *appfault.AppError {
     // Backend validation
     if c.Backend.Default.IsInvalid() {
-        return apperror.New(
+        return appfault.New(
             ErrConfigInvalid,
             "invalid backend: %s",
             c.Backend.Default,
@@ -335,7 +335,7 @@ func (c *Config) Validate() *apperror.AppError {
     
     // Port validation
     if c.Daemon.Port < 1 || c.Daemon.Port > 65535 {
-        return apperror.New(
+        return appfault.New(
             ErrConfigInvalid,
             "invalid port: %d",
             c.Daemon.Port,
@@ -344,7 +344,7 @@ func (c *Config) Validate() *apperror.AppError {
     
     // Temperature validation
     if c.Generation.Temperature < 0 || c.Generation.Temperature > 2 {
-        return apperror.New(
+        return appfault.New(
             ErrConfigInvalid,
             "temperature must be 0-2",
         )
@@ -353,7 +353,7 @@ func (c *Config) Validate() *apperror.AppError {
     // TLS validation
     if c.Daemon.TLS.Enabled {
         if c.Daemon.TLS.CertFile == "" || c.Daemon.TLS.KeyFile == "" {
-            return apperror.New(
+            return appfault.New(
                 ErrConfigInvalid,
                 "TLS requires CertFile and KeyFile",
             )

@@ -212,7 +212,7 @@ func NewMultiSourceOrchestrator(cfg *OrchestratorConfig) *MultiSourceOrchestrato
 }
 
 // SearchParallel executes searches across all specified platforms in parallel
-func (o *MultiSourceOrchestrator) SearchParallel(context stdctx.Context, req *ParallelSearchRequest) apperror.Result[*ParallelSearchResponse] {
+func (o *MultiSourceOrchestrator) SearchParallel(context stdctx.Context, req *ParallelSearchRequest) appfault.Result[*ParallelSearchResponse] {
     startTime := time.Now()
     
     response := &ParallelSearchResponse{
@@ -323,10 +323,10 @@ func (o *MultiSourceOrchestrator) SearchParallel(context stdctx.Context, req *Pa
     
     response.Data.Duration = time.Since(startTime).Milliseconds()
 
-    return apperror.OK(response)
+    return appfault.Ok(response)
 }
 
-func (o *MultiSourceOrchestrator) searchPlatform(context stdctx.Context, plat platform.Variant, query string, limit int) apperror.Result[[]SearchResult] {
+func (o *MultiSourceOrchestrator) searchPlatform(context stdctx.Context, plat platform.Variant, query string, limit int) appfault.Result[[]SearchResult] {
     // Build site-scoped query using platform's site operator
     siteOp := plat.SiteOperator()
     if siteOp != "" {
@@ -337,11 +337,11 @@ func (o *MultiSourceOrchestrator) searchPlatform(context stdctx.Context, plat pl
     return o.engineSearcher.Search(context, engine.Google, query, limit)
 }
 
-func (o *MultiSourceOrchestrator) searchEngine(context stdctx.Context, eng engine.Variant, query string, limit int) apperror.Result[[]SearchResult] {
+func (o *MultiSourceOrchestrator) searchEngine(context stdctx.Context, eng engine.Variant, query string, limit int) appfault.Result[[]SearchResult] {
     return o.engineSearcher.Search(context, eng, query, limit)
 }
 
-func (o *MultiSourceOrchestrator) searchSite(context stdctx.Context, siteUrl, query string, limit int) apperror.Result[[]SearchResult] {
+func (o *MultiSourceOrchestrator) searchSite(context stdctx.Context, siteUrl, query string, limit int) appfault.Result[[]SearchResult] {
     siteQuery := fmt.Sprintf("site:%s %s", siteUrl, query)
 
     return o.engineSearcher.Search(context, engine.Google, siteQuery, limit)

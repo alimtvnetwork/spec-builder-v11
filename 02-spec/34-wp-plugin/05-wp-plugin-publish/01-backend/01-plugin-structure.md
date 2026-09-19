@@ -248,16 +248,16 @@ func New(db *database.DB, wpClient *wordpress.Client, log *logger.Logger) *Servi
 All functions that can fail return `error` as the last return value:
 
 ```go
-func (s *Service) GetSiteById(context stdctx.Context, id int64) apperror.Result[*models.Site] {
+func (s *Service) GetSiteById(context stdctx.Context, id int64) appfault.Result[*models.Site] {
     site, err := s.db.GetSite(context, id)
     if err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseQuery, "failed to get site",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseQuery, "failed to get site",
         )
     }
     if site == nil {
-        return nil, apperror.New(
-            apperror.ErrNotFound, "site not found",
+        return nil, appfault.New(
+            appfault.ErrNotFound, "site not found",
         )
     }
     return site, nil

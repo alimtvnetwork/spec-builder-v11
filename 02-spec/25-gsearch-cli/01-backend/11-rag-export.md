@@ -137,7 +137,7 @@ import (
     
     "github.com/pelletier/go-toml/v2"
     "gopkg.in/yaml.v3"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 type ExportService struct {
@@ -167,12 +167,12 @@ type ExportOptions struct {
 ### Export Generation
 
 ```go
-func (s *ExportService) Generate(context stdctx.Context, opts ExportOptions) apperror.Result[RAGMemory] {
+func (s *ExportService) Generate(context stdctx.Context, opts ExportOptions) appfault.Result[RAGMemory] {
     // Query search results
     searchesResult := s.db.QuerySearches(opts)
     if searchesResult.HasError() {
-        return apperror.Fail[RAGMemory](
-            apperror.Wrap(
+        return appfault.Fail[RAGMemory](
+            appfault.Wrap(
                 searchesResult.Error(),
                 "query searches",
             ),
@@ -234,7 +234,7 @@ func (s *ExportService) Generate(context stdctx.Context, opts ExportOptions) app
         CoverageDepth:  s.maxDepth(sources),
     }
     
-    return apperror.Ok(RAGMemory{
+    return appfault.Ok(RAGMemory{
         Version:     "1.0",
         GeneratedAt: time.Now(),
         Query: RAGQuery{
@@ -350,7 +350,7 @@ func (c *TextChunker) estimateTokens(text string) int {
 ### Output Formatting
 
 ```go
-func (s *ExportService) Export(context stdctx.Context, opts ExportOptions) *apperror.AppError {
+func (s *ExportService) Export(context stdctx.Context, opts ExportOptions) *appfault.AppError {
     memoryResult := s.Generate(context, opts)
     if memoryResult.HasError() {
         return memoryResult.Error()
@@ -368,14 +368,14 @@ func (s *ExportService) Export(context stdctx.Context, opts ExportOptions) *appe
     case "toml":
         output, marshalErr = toml.Marshal(memory)
     default:
-        return apperror.New(
+        return appfault.New(
             "E9003",
             "unsupported format: "+opts.Format,
         )
     }
     
     if marshalErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             marshalErr,
             "E9004",
             "marshal export data",
@@ -388,7 +388,7 @@ func (s *ExportService) Export(context stdctx.Context, opts ExportOptions) *appe
     } else {
         writeErr := pathutil.WriteFile(opts.OutputPath, output, 0644)
         if writeErr != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 writeErr,
                 "E9001",
                 "write file: "+opts.OutputPath,
@@ -400,10 +400,10 @@ func (s *ExportService) Export(context stdctx.Context, opts ExportOptions) *appe
     return s.saveToDb(&memory, opts.Format)
 }
 
-func (s *ExportService) saveToDb(memory *RAGMemory, format string) *apperror.AppError {
+func (s *ExportService) saveToDb(memory *RAGMemory, format string) *appfault.AppError {
     contentBytes, marshalErr := json.Marshal(memory)
     if marshalErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             marshalErr,
             "E9004",
             "marshal memory for db storage",
@@ -417,7 +417,7 @@ func (s *ExportService) saveToDb(memory *RAGMemory, format string) *apperror.App
     }
     
     if dbErr := s.db.Create(ragMemory).Error; dbErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             dbErr,
             "E3006",
             "save rag memory to database",
@@ -553,11 +553,11 @@ The main application reads RAG exports via:
 
 ```go
 // In main application
-func LoadRAGMemory(path string) apperror.Result[RAGMemory] {
+func LoadRAGMemory(path string) appfault.Result[RAGMemory] {
     data, readErr := pathutil.ReadFile(path)
     if readErr != nil {
-        return apperror.Fail[RAGMemory](
-            apperror.Wrap(
+        return appfault.Fail[RAGMemory](
+            appfault.Wrap(
                 readErr,
                 "E9001",
                 "read rag memory file",
@@ -579,8 +579,8 @@ func LoadRAGMemory(path string) apperror.Result[RAGMemory] {
     }
     
     if unmarshalErr != nil {
-        return apperror.Fail[RAGMemory](
-            apperror.Wrap(
+        return appfault.Fail[RAGMemory](
+            appfault.Wrap(
                 unmarshalErr,
                 "E9004",
                 "unmarshal rag memory",
@@ -588,7 +588,7 @@ func LoadRAGMemory(path string) apperror.Result[RAGMemory] {
         )
     }
 
-    return apperror.Ok(memory)
+    return appfault.Ok(memory)
 }
 
 // Inject into AI context

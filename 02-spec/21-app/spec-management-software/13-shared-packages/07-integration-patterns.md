@@ -173,7 +173,7 @@ func main() {
 
 ```go
 // Repository layer
-func (r *SpecRepository) GetById(context stdctx.Context, id types.SpecId) apperror.Result[Spec] {
+func (r *SpecRepository) GetById(context stdctx.Context, id types.SpecId) appfault.Result[Spec] {
     row := r.db.QueryRowContext(context, "SELECT ... WHERE Id = ?", id)
     
     var spec Spec
@@ -192,7 +192,7 @@ func (r *SpecRepository) GetById(context stdctx.Context, id types.SpecId) apperr
 }
 
 // Service layer
-func (s *SpecService) GetSpec(context stdctx.Context, id types.SpecId) apperror.Result[Spec] {
+func (s *SpecService) GetSpec(context stdctx.Context, id types.SpecId) appfault.Result[Spec] {
     spec, err := s.repo.GetById(context, id)
     if err != nil {
         // Log but don't wrap - error already has context
@@ -317,7 +317,7 @@ type DatabaseManager struct {
     logger   logging.Logger
 }
 
-func NewDatabaseManager(cfg config.DatabaseConfig, logger logging.Logger) apperror.Result[DatabaseManager] {
+func NewDatabaseManager(cfg config.DatabaseConfig, logger logging.Logger) appfault.Result[DatabaseManager] {
     settings, err := database.Open(cfg.SettingsPath,
         database.WithLogger(logger.With("db", "settings")),
     )
@@ -341,7 +341,7 @@ func NewDatabaseManager(cfg config.DatabaseConfig, logger logging.Logger) apperr
 }
 
 // GetProjectDb opens the project-specific database
-func (m *DatabaseManager) GetProjectDb(projectId types.ProjectId) apperror.Result[*database.Db] {
+func (m *DatabaseManager) GetProjectDb(projectId types.ProjectId) appfault.Result[*database.Db] {
     path := filepath.Join(m.projectDataDir, projectId.String(), "project.db")
     return database.Open(path,
         database.WithLogger(m.logger.With("db", "project", "projectId", projectId)),
@@ -349,7 +349,7 @@ func (m *DatabaseManager) GetProjectDb(projectId types.ProjectId) apperror.Resul
 }
 
 // GetConversationDb opens a conversation-specific database
-func (m *DatabaseManager) GetConversationDb(convId types.ConversationId) apperror.Result[*database.Db] {
+func (m *DatabaseManager) GetConversationDb(convId types.ConversationId) appfault.Result[*database.Db] {
     path := filepath.Join(m.convDataDir, convId.String()+".db")
     return database.Open(path,
         database.WithLogger(m.logger.With("db", "conversation", "convId", convId)),

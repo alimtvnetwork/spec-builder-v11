@@ -313,7 +313,7 @@ func (m *DbManager) BackupProject(projectSlug, backupDir string) error {
         
         // Use SQLite backup API for consistency
         if err := m.backupDb(srcPath, dstPath); err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrDbBackupFailed,
                 "backup database",
@@ -400,16 +400,16 @@ type Database struct {
 }
 
 // NewDbManager creates a new split database manager
-func NewDbManager(dataDir string) apperror.Result[*DbManager] {
+func NewDbManager(dataDir string) appfault.Result[*DbManager] {
     ensureErr := pathutil.EnsureDir(dataDir)
     if ensureErr != nil {
-        return apperror.Fail[*DbManager](ensureErr)
+        return appfault.Fail[*DbManager](ensureErr)
     }
     
     rootPath := filepath.Join(dataDir, "root.db")
     rootDb, err := sql.Open("sqlite3", rootPath)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrDbOpen,
             "open root database",
@@ -430,7 +430,7 @@ func NewDbManager(dataDir string) apperror.Result[*DbManager] {
 }
 
 // GetOrCreateDb returns a database, creating it if it doesn't exist
-func (m *DbManager) GetOrCreateDb(projectSlug, dbType, entityId string) apperror.Result[*sql.DB] {
+func (m *DbManager) GetOrCreateDb(projectSlug, dbType, entityId string) appfault.Result[*sql.DB] {
     m.mu.Lock()
     defer m.mu.Unlock()
     
@@ -464,7 +464,7 @@ func (m *DbManager) GetOrCreateDb(projectSlug, dbType, entityId string) apperror
     fullPath := filepath.Join(m.dataDir, dbRecord.Path)
     db, err := sql.Open("sqlite3", fullPath)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrDbOpen,
             "open database",
@@ -480,7 +480,7 @@ func (m *DbManager) GetOrCreateDb(projectSlug, dbType, entityId string) apperror
 }
 
 // ListDatabases returns all databases for a project
-func (m *DbManager) ListDatabases(projectSlug string) apperror.Result[[]Database] {
+func (m *DbManager) ListDatabases(projectSlug string) appfault.Result[[]Database] {
     query := `
         SELECT d.id, d.project_id, d.type, d.entity_id, d.path, 
                d.size_bytes, d.record_count, d.status, d.created_at, d.updated_at
@@ -663,7 +663,7 @@ func (m *DbManager) ExportProjectToZip(projectSlug, outputPath string) error {
     projectDir := filepath.Join(m.dataDir, projectSlug)
     isProjectExists := pathutil.IsDir(projectDir)
     if !isProjectExists {
-        return apperror.New(apperror.ErrProjectNotFound, "project not found: "+projectSlug)
+        return appfault.New(appfault.ErrProjectNotFound, "project not found: "+projectSlug)
     }
     
     // Create zip file
@@ -710,7 +710,7 @@ func (m *DbManager) ExportProjectToZip(projectSlug, outputPath string) error {
     })
     
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrExportFailed,
             "export project to zip",
@@ -732,7 +732,7 @@ func (m *DbManager) ImportProjectFromZip(zipPath, projectSlug string, overwrite 
     // Open zip file
     reader, err := zip.OpenReader(zipPath)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrFsRead,
             "open zip file",
@@ -748,7 +748,7 @@ func (m *DbManager) ImportProjectFromZip(zipPath, projectSlug string, overwrite 
     isProjectConflict := isProjectExists && isReadOnly
 
     if isProjectConflict {
-        return apperror.FailNew[ImportResult](
+        return appfault.FailNew[ImportResult](
             errors.ErrFsConflict,
             "project already exists; use overwrite=true to replace",
         )
@@ -781,7 +781,7 @@ func (m *DbManager) ImportProjectFromZip(zipPath, projectSlug string, overwrite 
         
         // Extract file
         if err := m.extractZipFile(file, destPath); err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrImportFailed,
                 "extract zip entry",
@@ -906,7 +906,7 @@ func (l *DbLogger) Error(msg string, args ...any) {
 
 ```go
 // GetOrCreateDb with logging
-func (m *DbManager) GetOrCreateDb(projectSlug, dbType, entityId string) apperror.Result[*sql.DB] {
+func (m *DbManager) GetOrCreateDb(projectSlug, dbType, entityId string) appfault.Result[*sql.DB] {
     startTime := time.Now()
     
     m.logger.Debug("GetOrCreateDb called",

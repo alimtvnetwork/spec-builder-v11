@@ -283,10 +283,10 @@ func GenerateChunkId(fileId string, chunkIndex int) string {
 ```go
 // EmbeddingStorage handles embedding persistence
 type EmbeddingStorage interface {
-    Store(chunkId string, embedding []float32) *apperror.AppError
-    Retrieve(chunkId string) apperror.Result[[]float32]
-    Search(queryEmbedding []float32, limit int) apperror.Result[[]ChunkScore]
-    Delete(chunkId string) *apperror.AppError
+    Store(chunkId string, embedding []float32) *appfault.AppError
+    Retrieve(chunkId string) appfault.Result[[]float32]
+    Search(queryEmbedding []float32, limit int) appfault.Result[[]ChunkScore]
+    Delete(chunkId string) *appfault.AppError
 }
 
 // SQLite implementation stores as BLOB

@@ -160,14 +160,14 @@ import (
     "strings"
 )
 
-func (c *AIBridgeClient) Generate(context stdctx.Context, req *GenerationRequest) apperror.Result[*GenerationResponse] {
+func (c *AIBridgeClient) Generate(context stdctx.Context, req *GenerationRequest) appfault.Result[*GenerationResponse] {
     if req.Stream {
         return c.generateStream(context, req)
     }
     return c.generateSync(context, req)
 }
 
-func (c *AIBridgeClient) generateSync(context stdctx.Context, req *GenerationRequest) apperror.Result[*GenerationResponse] {
+func (c *AIBridgeClient) generateSync(context stdctx.Context, req *GenerationRequest) appfault.Result[*GenerationResponse] {
     body, err := json.Marshal(req)
     if err != nil {
         return nil, NewError(SRC_ERR_AI_REQUEST, err.Error())
@@ -201,7 +201,7 @@ func (c *AIBridgeClient) generateSync(context stdctx.Context, req *GenerationReq
     return &genResp, nil
 }
 
-func (c *AIBridgeClient) generateStream(context stdctx.Context, req *GenerationRequest) apperror.Result[*GenerationResponse] {
+func (c *AIBridgeClient) generateStream(context stdctx.Context, req *GenerationRequest) appfault.Result[*GenerationResponse] {
     req.Stream = true
     body, _ := json.Marshal(req)
     
@@ -448,7 +448,7 @@ type RAGLoader struct {
 //
 // knowledgecategorytype.Variant: Unknown, SplitDb, SeedableConfig, ErrorCodes, GeneralSpec, CliPatterns
 
-func (l *RAGLoader) LoadKnowledge(categories []KnowledgeCategory) apperror.Result[[]RAGChunk] {
+func (l *RAGLoader) LoadKnowledge(categories []KnowledgeCategory) appfault.Result[[]RAGChunk] {
     var chunks []RAGChunk
     
     for _, cat := range categories {
@@ -462,7 +462,7 @@ func (l *RAGLoader) LoadKnowledge(categories []KnowledgeCategory) apperror.Resul
     return chunks, nil
 }
 
-func (l *RAGLoader) loadCategory(category KnowledgeCategory) apperror.Result[[]RAGChunk] {
+func (l *RAGLoader) loadCategory(category KnowledgeCategory) appfault.Result[[]RAGChunk] {
     paths := map[KnowledgeCategory]string{
         KnowledgeSplitDb:     "02-spec/06-split-db-architecture/00-overview.md",
         KnowledgeSeedable:    "02-spec/07-seedable-config-architecture/00-overview.md",
@@ -517,7 +517,7 @@ type SemanticSearcher struct {
     embedder EmbeddingService
 }
 
-func (s *SemanticSearcher) Search(query string, limit int) apperror.Result[[]RAGChunk] {
+func (s *SemanticSearcher) Search(query string, limit int) appfault.Result[[]RAGChunk] {
     // Get query embedding
     embedding, err := s.embedder.Embed(query)
     if err != nil {
@@ -593,7 +593,7 @@ type CodeBlock struct {
     Code     string
 }
 
-func (p *ResponseParser) Parse(response *GenerationResponse) apperror.Result[*ParsedSpec] {
+func (p *ResponseParser) Parse(response *GenerationResponse) appfault.Result[*ParsedSpec] {
     content := response.Content
     
     spec := &ParsedSpec{

@@ -186,7 +186,7 @@ type NotificationRequest struct {
     ExpiresAt    time.Time           `json:",omitempty"`
 }
 
-func (r *PriorityRouter) Route(context stdctx.Context, req NotificationRequest) *apperror.AppError {
+func (r *PriorityRouter) Route(context stdctx.Context, req NotificationRequest) *appfault.AppError {
     // 1. Get user preferences
     prefs, err := r.preferences.Get(context, req.UserId)
     if err != nil {
@@ -228,7 +228,7 @@ func (r *PriorityRouter) Route(context stdctx.Context, req NotificationRequest) 
             }
             
             if err := channel.Send(context, notification); err != nil {
-                errors <- apperror.Wrap(
+                errors <- appfault.Wrap(
                     err,
                     "E4001",
                     fmt.Sprintf("channel %s delivery failed", ch),
@@ -869,24 +869,24 @@ type Tag struct {
     Value string `json:"value"`
 }
 
-func NewResendEmailService(apiKey, fromAddress string) apperror.Result[*ResendEmailService] {
+func NewResendEmailService(apiKey, fromAddress string) appfault.Result[*ResendEmailService] {
     templates, err := template.ParseGlob("templates/email/*.html")
     if err != nil {
-        return apperror.Fail[*ResendEmailService](err)
+        return appfault.Fail[*ResendEmailService](err)
     }
     
-    return apperror.Ok(&ResendEmailService{
+    return appfault.Ok(&ResendEmailService{
         apiKey:      apiKey,
         fromAddress: fromAddress,
         templates:   templates,
     })
 }
 
-func (s *ResendEmailService) SendEscalationEmail(context stdctx.Context, data EscalationEmailData) *apperror.AppError {
+func (s *ResendEmailService) SendEscalationEmail(context stdctx.Context, data EscalationEmailData) *appfault.AppError {
     // Render template
     var body bytes.Buffer
     if err := s.templates.ExecuteTemplate(&body, "escalation.html", data); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "E4001",
             "template render failed",
@@ -909,10 +909,10 @@ func (s *ResendEmailService) SendEscalationEmail(context stdctx.Context, data Es
     return s.send(context, req)
 }
 
-func (s *ResendEmailService) SendBatchEmail(context stdctx.Context, data BatchEmailData) *apperror.AppError {
+func (s *ResendEmailService) SendBatchEmail(context stdctx.Context, data BatchEmailData) *appfault.AppError {
     var body bytes.Buffer
     if err := s.templates.ExecuteTemplate(&body, "batch.html", data); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "E4001",
             "template render failed",
@@ -932,7 +932,7 @@ func (s *ResendEmailService) SendBatchEmail(context stdctx.Context, data BatchEm
     return s.send(context, req)
 }
 
-func (s *ResendEmailService) send(context stdctx.Context, req ResendEmailRequest) *apperror.AppError {
+func (s *ResendEmailService) send(context stdctx.Context, req ResendEmailRequest) *appfault.AppError {
     body, err := json.Marshal(req)
     if err != nil {
         return err
@@ -953,7 +953,7 @@ func (s *ResendEmailService) send(context stdctx.Context, req ResendEmailRequest
     defer resp.Body.Close()
     
     if resp.StatusCode >= 400 {
-        return apperror.New(
+        return appfault.New(
             "E4001",
             fmt.Sprintf("resend API error: %d", resp.StatusCode),
         )
@@ -1000,7 +1000,7 @@ func (p *EmailBatchProcessor) processPendingBatches(context stdctx.Context) {
     }
 }
 
-func (p *EmailBatchProcessor) processBatch(context stdctx.Context, batch *EmailBatch) *apperror.AppError {
+func (p *EmailBatchProcessor) processBatch(context stdctx.Context, batch *EmailBatch) *appfault.AppError {
     // Get all notifications in batch
     notifications, err := p.queue.GetBatchNotifications(context, batch.Id)
     if err != nil {
@@ -1050,7 +1050,7 @@ type WebhookPayload struct {
     Notification NotificationData
 }
 
-func (w *WebhookChannel) Send(context stdctx.Context, notification *NotificationLog, prefs *NotificationPreference) *apperror.AppError {
+func (w *WebhookChannel) Send(context stdctx.Context, notification *NotificationLog, prefs *NotificationPreference) *appfault.AppError {
     payload := WebhookPayload{
         Event:       "notification.created",
         Timestamp:   time.Now().UTC().Format(time.RFC3339),
@@ -1084,7 +1084,7 @@ func (w *WebhookChannel) Send(context stdctx.Context, notification *Notification
     
     resp, err := w.httpClient.Do(req)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "E4001",
             "webhook delivery failed",
@@ -1093,7 +1093,7 @@ func (w *WebhookChannel) Send(context stdctx.Context, notification *Notification
     defer resp.Body.Close()
     
     if resp.StatusCode >= 400 {
-        return apperror.New(
+        return appfault.New(
             "E4001",
             fmt.Sprintf("webhook returned error: %d", resp.StatusCode),
         )

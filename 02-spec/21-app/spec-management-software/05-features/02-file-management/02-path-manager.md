@@ -79,24 +79,24 @@ SPEC_WORK_DIRECTORY=/var/lib/specmgr/specs
 ### Configuration Resolution
 
 ```go
-func ResolveWorkDirectory(configService *ConfigService) apperror.Result[string] {
+func ResolveWorkDirectory(configService *ConfigService) appfault.Result[string] {
     // 1. Check environment variable first
     if envPath := os.Getenv("SPEC_WORK_DIRECTORY"); envPath != "" {
         abs, err := filepath.Abs(envPath)
         if err != nil {
-            return apperror.FailWrap[string](
+            return appfault.FailWrap[string](
                 err,
                 "invalid SPEC_WORK_DIRECTORY env var",
             )
         }
 
-        return apperror.Ok(abs)
+        return appfault.Ok(abs)
     }
     
     // 2. Check database config
     dbPath, err := configService.GetConfig("path.workDirectory")
     if err != nil || dbPath == "" {
-        return apperror.FailNew[string](
+        return appfault.FailNew[string](
             "ErrConfigMissing",
             "workDirectory not configured",
         )
@@ -110,13 +110,13 @@ func ResolveWorkDirectory(configService *ConfigService) apperror.Result[string] 
     
     abs, err := filepath.Abs(dbPath)
     if err != nil {
-        return apperror.FailWrap[string](
+        return appfault.FailWrap[string](
             err,
             "invalid workDirectory path",
         )
     }
 
-    return apperror.Ok(abs)
+    return appfault.Ok(abs)
 }
 ```
 
@@ -177,11 +177,11 @@ func DefaultConfig() PathManagerConfig {
 
 ```go
 // NewPathManager creates a new PathManager with validated config
-func NewPathManager(config PathManagerConfig) apperror.Result[*PathManager] {
+func NewPathManager(config PathManagerConfig) appfault.Result[*PathManager] {
     // Resolve and validate work directory
     absWorkDir, err := filepath.Abs(config.WorkDirectory)
     if err != nil {
-        return apperror.FailWrap[*PathManager](
+        return appfault.FailWrap[*PathManager](
             err,
             "invalid workDirectory",
         )
@@ -189,13 +189,13 @@ func NewPathManager(config PathManagerConfig) apperror.Result[*PathManager] {
     
     // Ensure work directory exists
     if err := pathutil.EnsureDir(absWorkDir, 0755); err != nil {
-        return apperror.FailWrap[*PathManager](
+        return appfault.FailWrap[*PathManager](
             err,
             "cannot create workDirectory",
         )
     }
     
-    return apperror.Ok(&PathManager{
+    return appfault.Ok(&PathManager{
         workDirectory:     absWorkDir,
         maxPathLength:     config.MaxPathLength,
         allowedExtensions: config.AllowedExtensions,
@@ -286,10 +286,10 @@ func (pm *PathManager) ValidateExtension(filename string) error {
 
 ```go
 // Resolve converts a relative path to absolute, with validation
-func (pm *PathManager) Resolve(relativePath string) apperror.Result[string] {
+func (pm *PathManager) Resolve(relativePath string) appfault.Result[string] {
     // Validate first
     if err := pm.ValidateRelativePath(relativePath); err != nil {
-        return apperror.Fail[string](err)
+        return appfault.Fail[string](err)
     }
     
     // Normalize and join
@@ -299,13 +299,13 @@ func (pm *PathManager) Resolve(relativePath string) apperror.Result[string] {
     // Final security check: ensure result is within sandbox
     absClean := filepath.Clean(absolute)
     if stringutil.IsMissingPrefix(absClean, pm.workDirectory) {
-        return apperror.FailNew[string](
+        return appfault.FailNew[string](
             "ErrOutsideSandbox",
             "path resolves outside work directory",
         )
     }
     
-    return apperror.Ok(absClean)
+    return appfault.Ok(absClean)
 }
 
 // MustResolve resolves path and panics on error (use in controlled contexts)
@@ -322,13 +322,13 @@ func (pm *PathManager) MustResolve(relativePath string) string {
 
 ```go
 // ToRelative converts an absolute path to relative (for storage)
-func (pm *PathManager) ToRelative(absolutePath string) apperror.Result[string] {
+func (pm *PathManager) ToRelative(absolutePath string) appfault.Result[string] {
     // Clean the absolute path
     absClean := filepath.Clean(absolutePath)
     
     // Must be within work directory
     if stringutil.IsMissingPrefix(absClean, pm.workDirectory) {
-        return apperror.FailNew[string](
+        return appfault.FailNew[string](
             "ErrOutsideSandbox",
             "path resolves outside work directory",
         )
@@ -339,7 +339,7 @@ func (pm *PathManager) ToRelative(absolutePath string) apperror.Result[string] {
     relative = strings.TrimPrefix(relative, string(filepath.Separator))
     
     // Normalize to forward slashes for storage
-    return apperror.Ok(pm.NormalizePath(relative))
+    return appfault.Ok(pm.NormalizePath(relative))
 }
 
 // NormalizePath ensures consistent path format
@@ -389,39 +389,39 @@ func (pm *PathManager) Ext(path string) string {
 }
 
 // Exists checks if a file exists at the relative path
-func (pm *PathManager) Exists(relativePath string) apperror.Result[bool] {
+func (pm *PathManager) Exists(relativePath string) appfault.Result[bool] {
     result := pm.Resolve(relativePath)
     if result.HasError() {
-        return apperror.Fail[bool](result.Error())
+        return appfault.Fail[bool](result.Error())
     }
     
     existsResult, err := pathutil.Exists(result.Value())
     if err != nil {
-        return apperror.FailWrap[bool](
+        return appfault.FailWrap[bool](
             err,
             "failed to check path existence",
         )
     }
 
-    return apperror.Ok(existsResult)
+    return appfault.Ok(existsResult)
 }
 
 // IsDirectory checks if path is a directory
-func (pm *PathManager) IsDirectory(relativePath string) apperror.Result[bool] {
+func (pm *PathManager) IsDirectory(relativePath string) appfault.Result[bool] {
     result := pm.Resolve(relativePath)
     if result.HasError() {
-        return apperror.Fail[bool](result.Error())
+        return appfault.Fail[bool](result.Error())
     }
     
     info, err := pathutil.Stat(result.Value())
     if err != nil {
-        return apperror.FailWrap[bool](
+        return appfault.FailWrap[bool](
             err,
             "failed to stat path",
         )
     }
     
-    return apperror.Ok(info.IsDir())
+    return appfault.Ok(info.IsDir())
 }
 ```
 
@@ -494,10 +494,10 @@ func (pm *PathManager) NextNumberedFilename(
     directory string,
     artifactType string, // "idea" or "instruction"
     slug string,
-) apperror.Result[string] {
+) appfault.Result[string] {
     result := pm.Resolve(directory)
     if result.HasError() {
-        return apperror.Fail[string](result.Error())
+        return appfault.Fail[string](result.Error())
     }
     
     // Get next available number
@@ -506,7 +506,7 @@ func (pm *PathManager) NextNumberedFilename(
     // Generate filename
     filename := fmt.Sprintf("%02d-%s-%s.md", nextNum, artifactType, slug)
     
-    return apperror.Ok(filename)
+    return appfault.Ok(filename)
 }
 
 // findNextNumber scans directory for highest numbered file
@@ -574,21 +574,21 @@ func SlugFromTitle(title string) string {
 
 ```go
 // SafeRead reads file content with path validation
-func (pm *PathManager) SafeRead(relativePath string) apperror.Result[[]byte] {
+func (pm *PathManager) SafeRead(relativePath string) appfault.Result[[]byte] {
     result := pm.Resolve(relativePath)
     if result.HasError() {
-        return apperror.Fail[[]byte](result.Error())
+        return appfault.Fail[[]byte](result.Error())
     }
     
     data, err := pathutil.ReadFile(result.Value())
     if err != nil {
-        return apperror.FailWrap[[]byte](
+        return appfault.FailWrap[[]byte](
             err,
             "failed to read file",
         )
     }
     
-    return apperror.Ok(data)
+    return appfault.Ok(data)
 }
 
 // SafeWrite writes content with path validation
@@ -621,7 +621,7 @@ func (pm *PathManager) SafeDelete(relativePath string) error {
 func (pm *PathManager) SafeMove(fromRelative, toRelative string) error {
     fromAbs, err := pm.Resolve(fromRelative)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrPathInvalid,
             "source path invalid",
@@ -630,7 +630,7 @@ func (pm *PathManager) SafeMove(fromRelative, toRelative string) error {
     
     toAbs, err := pm.Resolve(toRelative)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrPathInvalid,
             "destination path invalid",
@@ -663,11 +663,11 @@ import (
 var (
     instance *PathManager
     once     sync.Once
-    initErr  *apperror.AppError
+    initErr  *appfault.AppError
 )
 
 // Initialize sets up the global PathManager instance
-func Initialize(config PathManagerConfig) *apperror.AppError {
+func Initialize(config PathManagerConfig) *appfault.AppError {
     once.Do(func() {
         result := NewPathManager(config)
         if result.HasError() {
@@ -730,22 +730,22 @@ func NewFileService(pm *PathManager, repo FileRepository) *FileService {
     return &FileService{pm: pm, repo: repo}
 }
 
-func (s *FileService) CreateFile(projectSlug, subPath, content string) apperror.Result[*File] {
+func (s *FileService) CreateFile(projectSlug, subPath, content string) appfault.Result[*File] {
     // Build relative path
     paths := s.pm.ForProject(projectSlug)
     relativePath := paths.SpecFile(subPath)
     
     // Validate
     if err := s.pm.ValidateRelativePath(relativePath); err != nil {
-        return apperror.Fail[*File](err)
+        return appfault.Fail[*File](err)
     }
     if err := s.pm.ValidateExtension(subPath); err != nil {
-        return apperror.Fail[*File](err)
+        return appfault.Fail[*File](err)
     }
     
     // Write file
     if err := s.pm.SafeWrite(relativePath, []byte(content)); err != nil {
-        return apperror.Fail[*File](err)
+        return appfault.Fail[*File](err)
     }
     
     // Create DB record with RELATIVE path only
@@ -764,7 +764,7 @@ func (s *FileService) CreateFile(projectSlug, subPath, content string) apperror.
 ### Idea Creation
 
 ```go
-func (s *IdeaService) CreateIdea(projectSlug, title, content string) apperror.Result[*Idea] {
+func (s *IdeaService) CreateIdea(projectSlug, title, content string) appfault.Result[*Idea] {
     paths := s.pm.ForProject(projectSlug)
     
     // Generate slug from title
@@ -773,7 +773,7 @@ func (s *IdeaService) CreateIdea(projectSlug, title, content string) apperror.Re
     // Get next numbered filename
     filenameResult := s.pm.NextNumberedFilename(paths.Ideas(), "idea", slug)
     if filenameResult.HasError() {
-        return apperror.Fail[*Idea](filenameResult.Error())
+        return appfault.Fail[*Idea](filenameResult.Error())
     }
     
     // Build full relative path
@@ -784,7 +784,7 @@ func (s *IdeaService) CreateIdea(projectSlug, title, content string) apperror.Re
     
     // Write to filesystem
     if err := s.pm.SafeWrite(relativePath, []byte(markdown)); err != nil {
-        return apperror.Fail[*Idea](err)
+        return appfault.Fail[*Idea](err)
     }
     
     // Create DB record

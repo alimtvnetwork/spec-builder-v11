@@ -213,8 +213,8 @@ Categories:
 ## Go Constants File
 
 ```go
-// pkg/apperror/codes.go
-package apperror
+// pkg/appfault/codes.go
+package appfault
 
 // Error code constants - see 66-shared-constants.md for full documentation
 

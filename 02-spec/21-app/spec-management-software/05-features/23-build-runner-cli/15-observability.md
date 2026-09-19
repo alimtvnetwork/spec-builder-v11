@@ -835,17 +835,17 @@ type TracerConfig struct {
 }
 
 // InitTracer initializes OpenTelemetry tracing
-func InitTracer(context stdctx.Context, cfg TracerConfig) apperror.Result[*sdktrace.TracerProvider] {
+func InitTracer(context stdctx.Context, cfg TracerConfig) appfault.Result[*sdktrace.TracerProvider] {
     isDisabled := !cfg.IsEnabled
 
     if isDisabled {
-        return apperror.Ok[*sdktrace.TracerProvider](nil)
+        return appfault.Ok[*sdktrace.TracerProvider](nil)
     }
 
     return initTracerProvider(context, cfg)
 }
 
-func initTracerProvider(context stdctx.Context, cfg TracerConfig) apperror.Result[*sdktrace.TracerProvider] {
+func initTracerProvider(context stdctx.Context, cfg TracerConfig) appfault.Result[*sdktrace.TracerProvider] {
     client := otlptracegrpc.NewClient(
         otlptracegrpc.WithEndpoint(cfg.OtlpEndpoint),
         otlptracegrpc.WithInsecure(),
@@ -853,8 +853,8 @@ func initTracerProvider(context stdctx.Context, cfg TracerConfig) apperror.Resul
 
     exporter, err := otlptrace.New(context, client)
     if err != nil {
-        return apperror.Fail[*sdktrace.TracerProvider](
-            apperror.Wrap(err, "failed to create exporter").WithSkip(1),
+        return appfault.Fail[*sdktrace.TracerProvider](
+            appfault.Wrap(err, "failed to create exporter").WithSkip(1),
         )
     }
 
@@ -866,8 +866,8 @@ func initTracerProvider(context stdctx.Context, cfg TracerConfig) apperror.Resul
         ),
     )
     if err != nil {
-        return apperror.Fail[*sdktrace.TracerProvider](
-            apperror.Wrap(err, "failed to create resource").WithSkip(1),
+        return appfault.Fail[*sdktrace.TracerProvider](
+            appfault.Wrap(err, "failed to create resource").WithSkip(1),
         )
     }
 
@@ -883,7 +883,7 @@ func initTracerProvider(context stdctx.Context, cfg TracerConfig) apperror.Resul
 
     otel.SetTracerProvider(tp)
 
-    return apperror.Ok(tp)
+    return appfault.Ok(tp)
 }
 ```
 
@@ -1005,7 +1005,7 @@ type LogConfig struct {
 }
 
 // InitLogger initializes the structured logger
-func InitLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
+func InitLogger(cfg LogConfig) appfault.Result[*zap.Logger] {
     level, err := zapcore.ParseLevel(cfg.Level)
     if err != nil {
         level = zapcore.InfoLevel
@@ -1015,13 +1015,13 @@ func InitLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
     output := resolveOutput(cfg)
 
     if output.Err != nil {
-        return apperror.Fail[*zap.Logger](output.Err)
+        return appfault.Fail[*zap.Logger](output.Err)
     }
 
     core := zapcore.NewCore(encoder, output.Value, level)
     logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 
-    return apperror.Ok(logger)
+    return appfault.Ok(logger)
 }
 
 func buildEncoder(cfg LogConfig) zapcore.Encoder {
@@ -1038,26 +1038,26 @@ func buildEncoder(cfg LogConfig) zapcore.Encoder {
     return zapcore.NewJsonEncoder(encoderConfig)
 }
 
-func resolveOutput(cfg LogConfig) apperror.Result[zapcore.WriteSyncer] {
+func resolveOutput(cfg LogConfig) appfault.Result[zapcore.WriteSyncer] {
     isStdout := cfg.OutputPath == "stdout"
     isStderr := cfg.OutputPath == "stderr"
 
     if isStdout {
-        return apperror.Ok[zapcore.WriteSyncer](zapcore.AddSync(os.Stdout))
+        return appfault.Ok[zapcore.WriteSyncer](zapcore.AddSync(os.Stdout))
     }
 
     if isStderr {
-        return apperror.Ok[zapcore.WriteSyncer](zapcore.AddSync(os.Stderr))
+        return appfault.Ok[zapcore.WriteSyncer](zapcore.AddSync(os.Stderr))
     }
 
     file, err := pathutil.OpenFile(cfg.OutputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
     if err != nil {
-        return apperror.Fail[zapcore.WriteSyncer](
-            apperror.Wrap(err, "failed to open log file").WithSkip(1),
+        return appfault.Fail[zapcore.WriteSyncer](
+            appfault.Wrap(err, "failed to open log file").WithSkip(1),
         )
     }
 
-    return apperror.Ok[zapcore.WriteSyncer](zapcore.AddSync(file))
+    return appfault.Ok[zapcore.WriteSyncer](zapcore.AddSync(file))
 }
 ```
 

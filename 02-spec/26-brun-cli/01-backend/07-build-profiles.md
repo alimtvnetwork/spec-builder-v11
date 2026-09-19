@@ -130,21 +130,21 @@ type ProfileManager struct {
     profiles map[string]*BuildProfile
 }
 
-func (pm *ProfileManager) Get(name string) apperror.Result[*BuildProfile] {
+func (pm *ProfileManager) Get(name string) appfault.Result[*BuildProfile] {
     profile, exists := pm.profiles[name]
     if !exists {
-        return apperror.FailNew[*BuildProfile](
+        return appfault.FailNew[*BuildProfile](
             "E7201",
             "profile not found: "+name,
         )
     }
 
-    return apperror.Ok(profile)
+    return appfault.Ok(profile)
 }
 
-func (pm *ProfileManager) Add(profile *BuildProfile) *apperror.AppError {
+func (pm *ProfileManager) Add(profile *BuildProfile) *appfault.AppError {
     if _, exists := pm.profiles[profile.Name]; exists {
-        return apperror.New(
+        return appfault.New(
             "E7202",
             "profile already exists: "+profile.Name,
         )
@@ -159,9 +159,9 @@ func (pm *ProfileManager) Add(profile *BuildProfile) *apperror.AppError {
     return pm.save()
 }
 
-func (pm *ProfileManager) Remove(name string) *apperror.AppError {
+func (pm *ProfileManager) Remove(name string) *appfault.AppError {
     if _, exists := pm.profiles[name]; !exists {
-        return apperror.New(
+        return appfault.New(
             "E7201",
             "profile not found: "+name,
         )
@@ -181,21 +181,21 @@ func (pm *ProfileManager) List() []*BuildProfile {
     return profiles
 }
 
-func (pm *ProfileManager) validate(profile *BuildProfile) *apperror.AppError {
+func (pm *ProfileManager) validate(profile *BuildProfile) *appfault.AppError {
     if profile.Name == "" {
-        return apperror.New("E7203", "profile name is required")
+        return appfault.New("E7203", "profile name is required")
     }
     
     // Use enum's IsValid() method for validation
     if profile.Runtime.IsInvalid() {
-        return apperror.New(
+        return appfault.New(
             "E7204",
             "invalid runtime: "+profile.Runtime.String(),
         )
     }
     
     if profile.Source == "" && profile.Command == "" {
-        return apperror.New("E7205", "source or command is required")
+        return appfault.New("E7205", "source or command is required")
     }
     
     return nil
@@ -207,11 +207,11 @@ func (pm *ProfileManager) validate(profile *BuildProfile) *apperror.AppError {
 ## Profile Execution
 
 ```go
-func (e *ExecutionEngine) ExecuteProfile(context context.Context, profileName string) apperror.Result[ExecutionResult] {
+func (e *ExecutionEngine) ExecuteProfile(context context.Context, profileName string) appfault.Result[ExecutionResult] {
     // Get profile
     profileResult := e.profileManager.Get(profileName)
     if profileResult.IsErr() {
-        return apperror.Fail[ExecutionResult](profileResult.Err())
+        return appfault.Fail[ExecutionResult](profileResult.Err())
     }
     profile := profileResult.Value()
     
@@ -236,8 +236,8 @@ func (e *ExecutionEngine) ExecuteProfile(context context.Context, profileName st
     for _, preCmd := range cmd.PreCommands {
         preCmdResult := e.executeShellCommand(context, preCmd, cmd.WorkDir)
         if preCmdResult.IsErr() {
-            return apperror.Fail[ExecutionResult](
-                apperror.Wrap(preCmdResult.Err(), 7201, "pre-command failed"),
+            return appfault.Fail[ExecutionResult](
+                appfault.Wrap(preCmdResult.Err(), 7201, "pre-command failed"),
             )
         }
     }
@@ -245,7 +245,7 @@ func (e *ExecutionEngine) ExecuteProfile(context context.Context, profileName st
     // Get executor for runtime
     executorResult := e.factory.Create(profile.Runtime)
     if executorResult.IsErr() {
-        return apperror.Fail[ExecutionResult](executorResult.Err())
+        return appfault.Fail[ExecutionResult](executorResult.Err())
     }
     executor := executorResult.Value()
     

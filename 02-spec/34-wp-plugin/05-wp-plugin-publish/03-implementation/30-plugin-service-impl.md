@@ -98,22 +98,22 @@ import (
 // Service interface for plugin operations
 type Service interface {
 	// CRUD operations
-	List(context stdctx.Context) apperror.Result[[]models.Plugin]
-	GetById(context stdctx.Context, id int64) apperror.Result[*models.Plugin]
-	Create(context stdctx.Context, input CreateInput) apperror.Result[*models.Plugin]
-	Update(context stdctx.Context, id int64, input UpdateInput) apperror.Result[*models.Plugin]
-	Delete(context stdctx.Context, id int64) *apperror.AppError
+	List(context stdctx.Context) appfault.Result[[]models.Plugin]
+	GetById(context stdctx.Context, id int64) appfault.Result[*models.Plugin]
+	Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Plugin]
+	Update(context stdctx.Context, id int64, input UpdateInput) appfault.Result[*models.Plugin]
+	Delete(context stdctx.Context, id int64) *appfault.AppError
 
 	// Directory scanning
-	ScanDirectory(context stdctx.Context, path string) apperror.Result[*ScanResult]
-	ValidatePath(context stdctx.Context, path string) *apperror.AppError
-	RefreshFileCount(context stdctx.Context, id int64) *apperror.AppError
+	ScanDirectory(context stdctx.Context, path string) appfault.Result[*ScanResult]
+	ValidatePath(context stdctx.Context, path string) *appfault.AppError
+	RefreshFileCount(context stdctx.Context, id int64) *appfault.AppError
 
 	// Mappings
-	GetMappings(context stdctx.Context, pluginId int64) apperror.Result[[]models.PluginMapping]
-	CreateMapping(context stdctx.Context, input CreateMappingInput) apperror.Result[*models.PluginMapping]
-	DeleteMapping(context stdctx.Context, mappingId int64) *apperror.AppError
-	GetMappingsBySite(context stdctx.Context, siteId int64) apperror.Result[[]models.PluginMapping]
+	GetMappings(context stdctx.Context, pluginId int64) appfault.Result[[]models.PluginMapping]
+	CreateMapping(context stdctx.Context, input CreateMappingInput) appfault.Result[*models.PluginMapping]
+	DeleteMapping(context stdctx.Context, mappingId int64) *appfault.AppError
+	GetMappingsBySite(context stdctx.Context, siteId int64) appfault.Result[[]models.PluginMapping]
 }
 
 // Config holds service configuration
@@ -150,18 +150,18 @@ import (
 	"time"
 
 	"wp-plugin-publish/internal/models"
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 
 	"gorm.io/gorm"
 )
 
-func (s *serviceImpl) List(context stdctx.Context) apperror.Result[[]models.Plugin] {
+func (s *serviceImpl) List(context stdctx.Context) appfault.Result[[]models.Plugin] {
 	s.log.Debug("Listing all plugins")
 
 	var plugins []models.Plugin
 	if err := s.db.GormDb().WithContext(context).Order("Name ASC").Find(&plugins).Error; err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrDatabaseQuery, "failed to list plugins",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDatabaseQuery, "failed to list plugins",
 		)
 	}
 
@@ -173,19 +173,19 @@ func (s *serviceImpl) List(context stdctx.Context) apperror.Result[[]models.Plug
 	return plugins, nil
 }
 
-func (s *serviceImpl) GetById(context stdctx.Context, id int64) apperror.Result[*models.Plugin] {
+func (s *serviceImpl) GetById(context stdctx.Context, id int64) appfault.Result[*models.Plugin] {
 	s.log.Debug("Getting plugin by id", "pluginId", id)
 
 	var p models.Plugin
 	if err := s.db.GormDb().WithContext(context).First(&p, "Id = ?", id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, apperror.New(
-				apperror.ErrNotFound, "plugin not found",
+			return nil, appfault.New(
+				appfault.ErrNotFound, "plugin not found",
 			).
 				WithContext("pluginId", id)
 		}
-		return nil, apperror.Wrap(
-			err, apperror.ErrDatabaseQuery, "failed to get plugin",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDatabaseQuery, "failed to get plugin",
 		)
 	}
 
@@ -193,7 +193,7 @@ func (s *serviceImpl) GetById(context stdctx.Context, id int64) apperror.Result[
 	return &p, nil
 }
 
-func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror.Result[*models.Plugin] {
+func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Plugin] {
 	s.log.Info("Creating plugin", "name", input.Name, "path", input.Path)
 
 	// Validate path exists and is a valid plugin directory
@@ -205,8 +205,8 @@ func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror
 	var count int64
 	s.db.GormDb().WithContext(context).Model(&models.Plugin{}).Where("Path = ?", input.Path).Count(&count)
 	if count > 0 {
-		return nil, apperror.New(
-			apperror.ErrDuplicate, "plugin path already registered",
+		return nil, appfault.New(
+			appfault.ErrDuplicate, "plugin path already registered",
 		).
 			WithContext("path", input.Path)
 	}
@@ -234,8 +234,8 @@ func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror
 	}
 
 	if err := s.db.GormDb().WithContext(context).Create(&p).Error; err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrDatabaseExec, "failed to create plugin",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDatabaseExec, "failed to create plugin",
 		)
 	}
 
@@ -243,7 +243,7 @@ func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror
 	return s.GetById(context, p.Id)
 }
 
-func (s *serviceImpl) Update(context stdctx.Context, id int64, input UpdateInput) apperror.Result[*models.Plugin] {
+func (s *serviceImpl) Update(context stdctx.Context, id int64, input UpdateInput) appfault.Result[*models.Plugin] {
 	s.log.Info("Updating plugin", "pluginId", id)
 
 	// Verify plugin exists
@@ -272,8 +272,8 @@ func (s *serviceImpl) Update(context stdctx.Context, id int64, input UpdateInput
 	existing.UpdatedAt = time.Now()
 
 	if err := s.db.GormDb().WithContext(context).Save(existing).Error; err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrDatabaseExec, "failed to update plugin",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDatabaseExec, "failed to update plugin",
 		)
 	}
 
@@ -290,15 +290,15 @@ func (s *serviceImpl) Delete(context stdctx.Context, id int64) error {
 
 	// Delete mappings first (foreign key)
 	if err := s.db.GormDb().WithContext(context).Where("PluginId = ?", id).Delete(&models.PluginMapping{}).Error; err != nil {
-		return apperror.Wrap(
-			err, apperror.ErrDatabaseExec, "failed to delete plugin mappings",
+		return appfault.Wrap(
+			err, appfault.ErrDatabaseExec, "failed to delete plugin mappings",
 		)
 	}
 
 	// Delete plugin
 	if err := s.db.GormDb().WithContext(context).Delete(&models.Plugin{}, "Id = ?", id).Error; err != nil {
-		return apperror.Wrap(
-			err, apperror.ErrDatabaseExec, "failed to delete plugin",
+		return appfault.Wrap(
+			err, appfault.ErrDatabaseExec, "failed to delete plugin",
 		)
 	}
 
@@ -325,10 +325,10 @@ import (
 	"regexp"
 	"strings"
 
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 )
 
-func (s *serviceImpl) ScanDirectory(context stdctx.Context, path string) apperror.Result[ScanResult] {
+func (s *serviceImpl) ScanDirectory(context stdctx.Context, path string) appfault.Result[ScanResult] {
 	s.log.Debug("Scanning directory", "path", path)
 
 	scan := &ScanResult{
@@ -344,8 +344,8 @@ func (s *serviceImpl) ScanDirectory(context stdctx.Context, path string) apperro
 		return scan, nil
 	}
 	if err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrDirRead, "failed to stat directory",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDirRead, "failed to stat directory",
 		)
 	}
 	if info.IsFile() {
@@ -405,8 +405,8 @@ func (s *serviceImpl) ScanDirectory(context stdctx.Context, path string) apperro
 	})
 
 	if err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrDirRead, "failed to scan directory",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDirRead, "failed to scan directory",
 		)
 	}
 
@@ -427,7 +427,7 @@ func (s *serviceImpl) ValidatePath(context stdctx.Context, path string) error {
 	}
 
 	if !scan.IsValid {
-		return apperror.New(apperror.ErrPathInvalid, scan.Error).
+		return appfault.New(appfault.ErrPathInvalid, scan.Error).
 			WithContext("path", path)
 	}
 
@@ -461,12 +461,12 @@ type PluginFileOutcome struct {
 }
 
 // findMainPluginFile locates the main plugin PHP file with the plugin header
-func (s *serviceImpl) findMainPluginFile(path string) apperror.Result[PluginFileOutcome] {
+func (s *serviceImpl) findMainPluginFile(path string) appfault.Result[PluginFileOutcome] {
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		return apperror.ResultErr[PluginFileOutcome](
-			apperror.Wrap(
-				err, apperror.ErrDirRead, "failed to read plugin directory",
+		return appfault.ResultErr[PluginFileOutcome](
+			appfault.Wrap(
+				err, appfault.ErrDirRead, "failed to read plugin directory",
 			),
 		)
 	}
@@ -503,7 +503,7 @@ func (s *serviceImpl) findMainPluginFile(path string) apperror.Result[PluginFile
 		file.Close()
 
 		if pluginName != "" {
-			return apperror.ResultOk(PluginFileOutcome{
+			return appfault.ResultOk(PluginFileOutcome{
 				FileName:   entry.Name(),
 				PluginName: pluginName,
 				Version:    version,
@@ -511,12 +511,12 @@ func (s *serviceImpl) findMainPluginFile(path string) apperror.Result[PluginFile
 		}
 	}
 
-	return apperror.ResultErr[PluginFileOutcome](apperror.New(apperror.ErrPathInvalid,
+	return appfault.ResultErr[PluginFileOutcome](appfault.New(appfault.ErrPathInvalid,
 		"no valid WordPress plugin file found (missing Plugin Name header)"))
 }
 
 // calculateFileHash computes MD5 hash of a file
-func (s *serviceImpl) calculateFileHash(path string) apperror.Result[string] {
+func (s *serviceImpl) calculateFileHash(path string) appfault.Result[string] {
 	file, err := os.Open(path)
 	if err != nil {
 		return "", err
@@ -544,42 +544,42 @@ import (
 	"time"
 
 	"wp-plugin-publish/internal/models"
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 
 	"gorm.io/gorm"
 )
 
-func (s *serviceImpl) GetMappings(context stdctx.Context, pluginId int64) apperror.Result[[]models.PluginMapping] {
+func (s *serviceImpl) GetMappings(context stdctx.Context, pluginId int64) appfault.Result[[]models.PluginMapping] {
 	var mappings []models.PluginMapping
 	if err := s.db.GormDb().WithContext(context).
 		Joins("JOIN Sites s ON s.Id = PluginMappings.SiteId").
 		Where("PluginMappings.PluginId = ?", pluginId).
 		Order("s.Name ASC").
 		Find(&mappings).Error; err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrDatabaseQuery, "failed to get mappings",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDatabaseQuery, "failed to get mappings",
 		)
 	}
 
 	return mappings, nil
 }
 
-func (s *serviceImpl) GetMappingsBySite(context stdctx.Context, siteId int64) apperror.Result[[]models.PluginMapping] {
+func (s *serviceImpl) GetMappingsBySite(context stdctx.Context, siteId int64) appfault.Result[[]models.PluginMapping] {
 	var mappings []models.PluginMapping
 	if err := s.db.GormDb().WithContext(context).
 		Joins("JOIN Plugins p ON p.Id = PluginMappings.PluginId").
 		Where("PluginMappings.SiteId = ?", siteId).
 		Order("p.Name ASC").
 		Find(&mappings).Error; err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrDatabaseQuery, "failed to get mappings by site",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDatabaseQuery, "failed to get mappings by site",
 		)
 	}
 
 	return mappings, nil
 }
 
-func (s *serviceImpl) CreateMapping(context stdctx.Context, input CreateMappingInput) apperror.Result[*models.PluginMapping] {
+func (s *serviceImpl) CreateMapping(context stdctx.Context, input CreateMappingInput) appfault.Result[*models.PluginMapping] {
 	s.log.Info("Creating plugin mapping", "pluginId", input.PluginId, "siteId", input.SiteId)
 
 	// Check for duplicate mapping
@@ -587,8 +587,8 @@ func (s *serviceImpl) CreateMapping(context stdctx.Context, input CreateMappingI
 	s.db.GormDb().WithContext(context).Model(&models.PluginMapping{}).
 		Where("PluginId = ? AND SiteId = ?", input.PluginId, input.SiteId).Count(&count)
 	if count > 0 {
-		return nil, apperror.New(
-			apperror.ErrDuplicate, "mapping already exists",
+		return nil, appfault.New(
+			appfault.ErrDuplicate, "mapping already exists",
 		).
 			WithContext("pluginId", input.PluginId).
 			WithContext("siteId", input.SiteId)
@@ -605,8 +605,8 @@ func (s *serviceImpl) CreateMapping(context stdctx.Context, input CreateMappingI
 	}
 
 	if err := s.db.GormDb().WithContext(context).Create(&m).Error; err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrDatabaseExec, "failed to create mapping",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDatabaseExec, "failed to create mapping",
 		)
 	}
 
@@ -620,14 +620,14 @@ func (s *serviceImpl) DeleteMapping(context stdctx.Context, mappingId int64) err
 
 	result := s.db.GormDb().WithContext(context).Delete(&models.PluginMapping{}, "Id = ?", mappingId)
 	if result.Error != nil {
-		return apperror.Wrap(
-			result.Error, apperror.ErrDatabaseExec, "failed to delete mapping",
+		return appfault.Wrap(
+			result.Error, appfault.ErrDatabaseExec, "failed to delete mapping",
 		)
 	}
 
 	if result.RowsAffected == 0 {
-		return apperror.New(
-			apperror.ErrNotFound, "mapping not found",
+		return appfault.New(
+			appfault.ErrNotFound, "mapping not found",
 		)
 	}
 

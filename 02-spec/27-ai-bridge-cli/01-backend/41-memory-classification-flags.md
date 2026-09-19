@@ -416,7 +416,7 @@ type ChatRequest struct {
  ### 9.2 Updated Archive Function
  
  ```go
- func ArchiveOldChunks(sessionId string, retainDays int) *apperror.AppError {
+ func ArchiveOldChunks(sessionId string, retainDays int) *appfault.AppError {
      cutoffTime := time.Now().AddDate(0, 0, -retainDays)
      
      // NEVER archive critical chunks
@@ -431,7 +431,7 @@ type ChatRequest struct {
            AND IsPinned = 0    -- Legacy protection
      `, cutoffTime)
      if err != nil {
-         return apperror.Wrap(
+         return appfault.Wrap(
              err,
              ErrArchiveInsertFailed,
              "failed to archive chunks for session %s",
@@ -448,7 +448,7 @@ type ChatRequest struct {
            AND IsPinned = 0
      `, cutoffTime)
      if err != nil {
-         return apperror.Wrap(
+         return appfault.Wrap(
              err,
              ErrArchiveDeleteFailed,
              "failed to delete archived chunks for session %s",

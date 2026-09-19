@@ -614,13 +614,13 @@ type MigrationRunner interface {
     Migrate(context stdctx.Context, db *sql.DB, dbType string) error
     
     // Rollback last N migrations
-    Rollback(context stdctx.Context, db *sql.DB, count int) *apperror.AppError
+    Rollback(context stdctx.Context, db *sql.DB, count int) *appfault.AppError
     
     // Get current version
-    Version(context stdctx.Context, db *sql.DB) apperror.Result[string]
+    Version(context stdctx.Context, db *sql.DB) appfault.Result[string]
     
     // List pending migrations
-    Pending(context stdctx.Context, db *sql.DB, dbType string) apperror.Result[[]Migration]
+    Pending(context stdctx.Context, db *sql.DB, dbType string) appfault.Result[[]Migration]
 }
 
 type Migration struct {

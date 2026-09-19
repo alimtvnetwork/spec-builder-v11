@@ -1612,33 +1612,33 @@ type ScenarioAssertion struct {
 }
 
 // LoadScenario loads a test scenario by name
-func LoadScenario(name string) apperror.Result[TestScenario] {
+func LoadScenario(name string) appfault.Result[TestScenario] {
     data, err := MockFS.ReadFile("scenarios/" + name + ".json")
     if err != nil {
-        return apperror.Fail[TestScenario](err)
+        return appfault.Fail[TestScenario](err)
     }
     
     var scenario TestScenario
     if err := json.Unmarshal(data, &scenario); err != nil {
-        return apperror.Fail[TestScenario](err)
+        return appfault.Fail[TestScenario](err)
     }
     
-    return apperror.Ok(scenario)
+    return appfault.Ok(scenario)
 }
 
 // LoadMockResponse loads a mock response definition
-func LoadMockResponse(name string) apperror.Result[MockResponse] {
+func LoadMockResponse(name string) appfault.Result[MockResponse] {
     data, err := MockFS.ReadFile("responses/" + name)
     if err != nil {
-        return apperror.Fail[MockResponse](err)
+        return appfault.Fail[MockResponse](err)
     }
     
     var mock MockResponse
     if err := json.Unmarshal(data, &mock); err != nil {
-        return apperror.Fail[MockResponse](err)
+        return appfault.Fail[MockResponse](err)
     }
     
-    return apperror.Ok(mock)
+    return appfault.Ok(mock)
 }
 
 // CreateHttpMock creates an httpmock responder from a MockResponse
@@ -1651,7 +1651,7 @@ func (m *MockResponse) CreateHttpMock() func(req *http.Request) (*http.Response,
             if m.ProxyError {
                 return nil, &proxyError{message: m.Error}
             }
-            return nil, apperror.New(
+            return nil, appfault.New(
                 ErrProxyResponse,
                 m.Error,
             )
@@ -1797,88 +1797,88 @@ type FixtureInfo struct {
 }
 
 // LoadFixture loads a fixture file from the embedded filesystem
-func LoadFixture(path string) apperror.Result[[]byte] {
+func LoadFixture(path string) appfault.Result[[]byte] {
     data, err := FixtureFS.ReadFile(filepath.Join("fixtures", path))
     if err != nil {
-        return apperror.Fail[[]byte](err)
+        return appfault.Fail[[]byte](err)
     }
 
-    return apperror.Ok(data)
+    return appfault.Ok(data)
 }
 
 // LoadGoogleNormal loads the standard Google results fixture
-func LoadGoogleNormal() apperror.Result[string] {
+func LoadGoogleNormal() appfault.Result[string] {
     result := LoadFixture("google/results_normal.html")
     if result.HasError() {
-        return apperror.Fail[string](result.Error())
+        return appfault.Fail[string](result.Error())
     }
 
-    return apperror.Ok(string(result.Value()))
+    return appfault.Ok(string(result.Value()))
 }
 
 // LoadGoogleCaptcha loads the Google CAPTCHA page fixture
-func LoadGoogleCaptcha() apperror.Result[string] {
+func LoadGoogleCaptcha() appfault.Result[string] {
     result := LoadFixture("google/results_captcha.html")
     if result.HasError() {
-        return apperror.Fail[string](result.Error())
+        return appfault.Fail[string](result.Error())
     }
 
-    return apperror.Ok(string(result.Value()))
+    return appfault.Ok(string(result.Value()))
 }
 
 // LoadGoogleEmpty loads the Google empty results fixture
-func LoadGoogleEmpty() apperror.Result[string] {
+func LoadGoogleEmpty() appfault.Result[string] {
     result := LoadFixture("google/results_empty.html")
     if result.HasError() {
-        return apperror.Fail[string](result.Error())
+        return appfault.Fail[string](result.Error())
     }
 
-    return apperror.Ok(string(result.Value()))
+    return appfault.Ok(string(result.Value()))
 }
 
 // LoadDuckDuckGoNormal loads standard DuckDuckGo results
-func LoadDuckDuckGoNormal() apperror.Result[string] {
+func LoadDuckDuckGoNormal() appfault.Result[string] {
     result := LoadFixture("duckduckgo/results_normal.html")
     if result.HasError() {
-        return apperror.Fail[string](result.Error())
+        return appfault.Fail[string](result.Error())
     }
 
-    return apperror.Ok(string(result.Value()))
+    return appfault.Ok(string(result.Value()))
 }
 
 // LoadBingNormal loads standard Bing HTML results
-func LoadBingNormal() apperror.Result[string] {
+func LoadBingNormal() appfault.Result[string] {
     result := LoadFixture("bing/results_normal.html")
     if result.HasError() {
-        return apperror.Fail[string](result.Error())
+        return appfault.Fail[string](result.Error())
     }
 
-    return apperror.Ok(string(result.Value()))
+    return appfault.Ok(string(result.Value()))
 }
 
 // LoadBingApiResponse loads Bing API JSON response
-func LoadBingApiResponse() apperror.Result[string] {
+func LoadBingApiResponse() appfault.Result[string] {
     result := LoadFixture("bing/api_response.json")
     if result.HasError() {
-        return apperror.Fail[string](result.Error())
+        return appfault.Fail[string](result.Error())
     }
 
-    return apperror.Ok(string(result.Value()))
+    return appfault.Ok(string(result.Value()))
 }
 
 // LoadMetadata loads fixture metadata
-func LoadMetadata() apperror.Result[FixtureMetadata] {
+func LoadMetadata() appfault.Result[FixtureMetadata] {
     data, err := FixtureFS.ReadFile("metadata.json")
     if err != nil {
-        return apperror.Fail[FixtureMetadata](err)
+        return appfault.Fail[FixtureMetadata](err)
     }
     
     var meta FixtureMetadata
     if err := json.Unmarshal(data, &meta); err != nil {
-        return apperror.Fail[FixtureMetadata](err)
+        return appfault.Fail[FixtureMetadata](err)
     }
     
-    return apperror.Ok(meta)
+    return appfault.Ok(meta)
 }
 
 // ValidateFixtures validates all fixtures against current selectors
@@ -1987,7 +1987,7 @@ func runFixturesCapture(cmd *cobra.Command, args []string) error {
     case "bing":
         url = fmt.Sprintf("https://www.bing.com/search?q=%s", query)
     default:
-        return apperror.New(
+        return appfault.New(
             ErrEngineUnknown,
             "unknown engine",
         ).WithContext("engine", engine)
@@ -1999,7 +1999,7 @@ func runFixturesCapture(cmd *cobra.Command, args []string) error {
     
     resp, err := client.Do(req)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrHttpRequestFailed,
             "request failed",
@@ -2009,7 +2009,7 @@ func runFixturesCapture(cmd *cobra.Command, args []string) error {
     
     body, err := io.ReadAll(resp.Body)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrHttpReadBody,
             "read body",
@@ -2059,7 +2059,7 @@ func runFixturesValidate(cmd *cobra.Command, args []string) error {
     }
     
     if !allValid {
-        return apperror.New(
+        return appfault.New(
             ErrFixtureValidationFailed,
             "fixture validation failed",
         )

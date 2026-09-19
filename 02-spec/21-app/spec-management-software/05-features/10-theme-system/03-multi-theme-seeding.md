@@ -445,12 +445,12 @@ type ThemeService struct {
 }
 
 // GetAllThemes returns all available themes
-func (s *ThemeService) GetAllThemes(context stdctx.Context) apperror.Result[[]Theme] {
+func (s *ThemeService) GetAllThemes(context stdctx.Context) appfault.Result[[]Theme] {
     return s.themeRepo.FindAllOrdered(context)
 }
 
 // GetUserTheme returns the theme for a user
-func (s *ThemeService) GetUserTheme(context stdctx.Context, userId string) apperror.Result[*Theme] {
+func (s *ThemeService) GetUserTheme(context stdctx.Context, userId string) appfault.Result[*Theme] {
     pref, err := s.prefRepo.FindByUserId(context, userId)
     if err != nil {
         // Return default theme
@@ -463,7 +463,7 @@ func (s *ThemeService) GetUserTheme(context stdctx.Context, userId string) apper
 func (s *ThemeService) SetUserTheme(context stdctx.Context, userId, themeId string) error {
     // Validate theme exists
     if _, err := s.themeRepo.FindById(context, themeId); err != nil {
-        return apperror.New(
+        return appfault.New(
             ErrThemeNotFound,
             "theme not found",
         ).WithContext("themeId", themeId)

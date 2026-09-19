@@ -149,7 +149,7 @@ func (v *BuildVerifier) Verify(
     repoPath string,
     languages []string,
     runId string,
-) apperror.Result[BuildVerificationResult] {
+) appfault.Result[BuildVerificationResult] {
     
     result := &BuildVerificationResult{
         LanguageResults: make(map[string]*LanguageBuildResult),
@@ -170,7 +170,7 @@ func (v *BuildVerifier) Verify(
                 result.Success = false
                 result.Duration = time.Since(startTime)
 
-                return apperror.Ok(*result)
+                return appfault.Ok(*result)
             }
             
             // Update result after successful fix
@@ -194,7 +194,7 @@ func (v *BuildVerifier) Verify(
         },
     })
     
-    return apperror.Ok(*result)
+    return appfault.Ok(*result)
 }
 
 func (v *BuildVerifier) verifyLanguage(
@@ -285,7 +285,7 @@ func (s *AIFixService) AttemptFix(
     lang string,
     errors []BuildError,
     guidelines *ResolvedGuidelines,
-) apperror.Result[FixAttempt] {
+) appfault.Result[FixAttempt] {
     
     attempt := &FixAttempt{
         Errors: errors,
@@ -333,7 +333,7 @@ func (s *AIFixService) AttemptFix(
     attempt.Success = len(attempt.FilesFixed) > 0
     attempt.Duration = time.Since(startTime)
     
-    return apperror.Ok(*attempt)
+    return appfault.Ok(*attempt)
 }
 
 func (s *AIFixService) groupErrorsByFile(errors []BuildError) map[string][]BuildError {
@@ -509,7 +509,7 @@ type BrunError struct {
     Suggestion string `json:"suggestion,omitempty"`
 }
 
-func (r *BrunRunner) Check(context stdctx.Context, opts CheckOptions) apperror.Result[string] {
+func (r *BrunRunner) Check(context stdctx.Context, opts CheckOptions) appfault.Result[string] {
     args := []string{"check"}
     
     if opts.Language != "" {
@@ -524,14 +524,14 @@ func (r *BrunRunner) Check(context stdctx.Context, opts CheckOptions) apperror.R
     
     output, err := cmd.CombinedOutput()
     if err != nil {
-        return apperror.FailWrap[string](
+        return appfault.FailWrap[string](
             err,
             "E8400",
             "brun check failed",
         )
     }
 
-    return apperror.Ok(string(output))
+    return appfault.Ok(string(output))
 }
 ```
 

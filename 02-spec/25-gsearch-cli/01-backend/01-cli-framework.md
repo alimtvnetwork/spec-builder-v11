@@ -106,7 +106,7 @@ import (
     "time"
     
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // ShutdownConfig configures shutdown behavior
@@ -186,7 +186,7 @@ func (sm *ShutdownManager) Start() {
             select {
             case <-sigCh:
             log.Warn().Msg("Received second signal, forcing exit")
-                os.Exit(apperror.ExitShutdown)
+                os.Exit(appfault.ExitShutdown)
             case <-sm.doneCh:
                 // Normal shutdown completed
             }
@@ -201,7 +201,7 @@ func (sm *ShutdownManager) Start() {
         <-sm.shutdownCh
         time.Sleep(sm.config.ForceExitTimeout)
         log.Error().Msg("Force exit timeout reached, terminating")
-        os.Exit(apperror.ExitShutdown)
+        os.Exit(appfault.ExitShutdown)
     }()
 }
 
@@ -331,7 +331,7 @@ func (sm *ShutdownManager) TrackOperation() (done func()) {
 // RunWithTracking executes a function with operation tracking
 func (sm *ShutdownManager) RunWithTracking(fn func(context stdctx.Context) error) error {
     if sm.IsShuttingDown() {
-        return apperror.New("shutdown in progress")
+        return appfault.New("shutdown in progress")
     }
     
     done := sm.TrackOperation()
@@ -359,7 +359,7 @@ import (
     "time"
     
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // ResourceConfig configures resource limits
@@ -414,7 +414,7 @@ func NewResourceLimiter(config ResourceConfig) *ResourceLimiter {
 }
 
 // Acquire acquires a resource slot (blocks until available or timeout)
-func (r *ResourceLimiter) Acquire(context stdctx.Context) *apperror.AppError {
+func (r *ResourceLimiter) Acquire(context stdctx.Context) *appfault.AppError {
     // Check memory before acquiring
     if err := r.checkMemory(); err != nil {
         return err
@@ -429,7 +429,7 @@ func (r *ResourceLimiter) Acquire(context stdctx.Context) *apperror.AppError {
         return nil
         
     case <-context.Done():
-        return apperror.Wrap(
+        return appfault.Wrap(
             context.Err(),
             "context cancelled waiting for resource",
         )
@@ -438,7 +438,7 @@ func (r *ResourceLimiter) Acquire(context stdctx.Context) *apperror.AppError {
         r.mu.Lock()
         r.timeoutCount++
         r.mu.Unlock()
-        return apperror.New(
+        return appfault.New(
             "timed out waiting for resource slot",
         )
     }
@@ -481,7 +481,7 @@ func (r *ResourceLimiter) WithResource(context stdctx.Context, fn func() error) 
 }
 
 // checkMemory verifies memory is within limits
-func (r *ResourceLimiter) checkMemory() *apperror.AppError {
+func (r *ResourceLimiter) checkMemory() *appfault.AppError {
     var m runtime.MemStats
     runtime.ReadMemStats(&m)
     
@@ -505,7 +505,7 @@ func (r *ResourceLimiter) checkMemory() *apperror.AppError {
             r.memoryAlerts++
             r.mu.Unlock()
             
-            return apperror.New(
+            return appfault.New(
                 "memory limit exceeded after GC",
             )
         }
@@ -582,7 +582,7 @@ import (
     stdctx "context"
     
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "gsearch/pkg/auth"
     "gsearch/pkg/config"
     "gsearch/pkg/database"
@@ -598,7 +598,7 @@ type Application struct {
 }
 
 // NewApplication creates and initializes the application
-func NewApplication(cfg *config.Config) apperror.Result[*Application] {
+func NewApplication(cfg *config.Config) appfault.Result[*Application] {
     app := &Application{
         Config:          cfg,
         ShutdownManager: NewShutdownManager(cfg.Shutdown),
@@ -608,7 +608,7 @@ func NewApplication(cfg *config.Config) apperror.Result[*Application] {
     // Initialize database
     dbResult := database.NewDatabase(cfg.Database.Path)
     if !dbResult.IsSuccess {
-        return apperror.Fail[*Application](dbResult.Error)
+        return appfault.Fail[*Application](dbResult.Error)
     }
     app.DB = dbResult.Value
     
@@ -627,7 +627,7 @@ func NewApplication(cfg *config.Config) apperror.Result[*Application] {
         app.TokenManager = tokenResult.Value
     }
     
-    return apperror.OK(app)
+    return appfault.Ok(app)
 }
 
 // Start starts the application and signal handling
@@ -670,7 +670,7 @@ import (
     "github.com/spf13/cobra"
     "github.com/spf13/viper"
     "gsearch/pkg/app"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 var (
@@ -690,7 +690,7 @@ and RAG memory generation.`,
 
 func Execute() {
     if err := rootCmd.Execute(); err != nil {
-        exitCode := apperror.GetExitCode(err)
+        exitCode := appfault.GetExitCode(err)
         os.Exit(exitCode)
     }
 }
@@ -726,7 +726,7 @@ func initConfig() {
 func initApplication(cmd *cobra.Command, args []string) error {
     cfg, err := config.LoadConfig()
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "failed to load configuration",
         )

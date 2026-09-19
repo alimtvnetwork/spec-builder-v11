@@ -56,7 +56,7 @@ func (r *GuidelineResolver) Resolve(
     projectId string,
     userId string,
     languageCode string,
-) apperror.Result[ResolvedGuideline]
+) appfault.Result[ResolvedGuideline]
 ```
 
 ### 2. Plan Generator
@@ -128,7 +128,7 @@ func (e *ParallelExecutionEngine) Execute(
     context stdctx.Context,
     plan *GenerationPlan,
     guidelines *ResolvedGuidelines,
-) apperror.Result[GenerationResult]
+) appfault.Result[GenerationResult]
 ```
 
 ### 4. Code Generator
@@ -212,7 +212,7 @@ type BuildResult struct {
 func (v *BuildVerifier) Verify(
     repoPath string,
     languages []string,
-) apperror.Result[BuildVerificationResult]
+) appfault.Result[BuildVerificationResult]
 ```
 
 ### 7. Git Manager
@@ -230,7 +230,7 @@ type LocalGitOperations interface {
     Init(repoPath string) error
     Add(repoPath string, files []string) error
     Commit(repoPath string, message string) error
-    Status(repoPath string) apperror.Result[GitStatus]
+    Status(repoPath string) appfault.Result[GitStatus]
 }
 
 type RemoteGitOperations interface {
@@ -273,8 +273,8 @@ type UsageRecord struct {
 
 // Credit calculation: (inputTokens × inputRate) + (outputTokens × outputRate)
 func (c *CreditTracker) CalculateCost(inputTokens, outputTokens int64, modelId string) float64
-func (c *CreditTracker) RecordUsage(usage *UsageRecord) apperror.Result[CreditTransaction]
-func (c *CreditTracker) GetBalance(userId string) apperror.Result[CreditBalance]
+func (c *CreditTracker) RecordUsage(usage *UsageRecord) appfault.Result[CreditTransaction]
+func (c *CreditTracker) GetBalance(userId string) appfault.Result[CreditBalance]
 func (c *CreditTracker) CheckBalance(userId string, estimatedTokens int64, modelId string) error
 ```
 
@@ -364,7 +364,7 @@ type BrunIntegration struct {
     runner *BrunRunner
 }
 
-func (b *BrunIntegration) VerifyBuild(repoPath string, lang string) apperror.Result[BuildResult] {
+func (b *BrunIntegration) VerifyBuild(repoPath string, lang string) appfault.Result[BuildResult] {
     result, err := b.runner.Check(CheckOptions{
         WorkDir:  filepath.Join(repoPath, languageDir(lang)),
         Language: lang,
@@ -372,7 +372,7 @@ func (b *BrunIntegration) VerifyBuild(repoPath string, lang string) apperror.Res
     })
 
     if err != nil {
-        return apperror.FailWrap[BuildResult](
+        return appfault.FailWrap[BuildResult](
             err,
             "E5300",
             "build verification failed",
@@ -380,7 +380,7 @@ func (b *BrunIntegration) VerifyBuild(repoPath string, lang string) apperror.Res
     }
 
     // Parse structured output for AI fix loop if needed
-    return apperror.Ok(*parseBuildResult(result))
+    return appfault.Ok(*parseBuildResult(result))
 }
 ```
 
@@ -400,10 +400,10 @@ type ModelSelector struct {
     modelConfig ModelConfiguration
 }
 
-func (s *ModelSelector) SelectModel(language string, complexity string) apperror.Result[Model] {
+func (s *ModelSelector) SelectModel(language string, complexity string) appfault.Result[Model] {
     // Check language-specific model first
     if langModel := s.modelConfig.GetLanguageModel(language); langModel != nil {
-        return apperror.Ok(*langModel)
+        return appfault.Ok(*langModel)
     }
 
     // Fall back to general coding model

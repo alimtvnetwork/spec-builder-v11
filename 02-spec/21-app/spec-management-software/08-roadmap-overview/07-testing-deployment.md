@@ -94,7 +94,7 @@ type MockProjectRepo struct {
     mock.Mock
 }
 
-func (m *MockProjectRepo) FindById(context stdctx.Context, id string) apperror.Result[repository.Project] {
+func (m *MockProjectRepo) FindById(context stdctx.Context, id string) appfault.Result[repository.Project] {
     args := m.Called(context, id)
     if args.Get(0) == nil {
         return nil, args.Error(1)

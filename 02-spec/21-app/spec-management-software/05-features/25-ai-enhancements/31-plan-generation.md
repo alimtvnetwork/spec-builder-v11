@@ -166,11 +166,11 @@ Return a JSON object with this exact structure:
 - Keep steps focused (5-15 steps typical)
 - Consider rollback scenarios for risky operations`
 
-func (s *Service) GeneratePlan(context stdctx.Context, req GeneratePlanRequest) apperror.Result[ExecutionPlan] {
+func (s *Service) GeneratePlan(context stdctx.Context, req GeneratePlanRequest) appfault.Result[ExecutionPlan] {
 	// Build context from project specs
 	contextResult := s.buildContextString(context, req)
 	if contextResult.HasError() {
-		return apperror.Fail[ExecutionPlan](contextResult.Error())
+		return appfault.Fail[ExecutionPlan](contextResult.Error())
 	}
 
 	contextStr := contextResult.Value()
@@ -209,7 +209,7 @@ Generate a detailed execution plan for this request. Include a Mermaid flowchart
 	})
 	
 	if err != nil {
-		return apperror.FailWrap[ExecutionPlan](
+		return appfault.FailWrap[ExecutionPlan](
 			err,
 			"E7800",
 			"LLM completion failed",
@@ -225,7 +225,7 @@ Generate a detailed execution plan for this request. Include a Mermaid flowchart
 	}
 	
 	if err := json.Unmarshal([]byte(response.Content), &planResponse); err != nil {
-		return apperror.FailWrap[ExecutionPlan](
+		return appfault.FailWrap[ExecutionPlan](
 			err,
 			"E7801",
 			"failed to parse plan response",
@@ -259,17 +259,17 @@ Generate a detailed execution plan for this request. Include a Mermaid flowchart
 	
 	// Persist plan
 	if err := s.plans.Create(context, plan); err != nil {
-		return apperror.FailWrap[ExecutionPlan](
+		return appfault.FailWrap[ExecutionPlan](
 			err,
 			"E7802",
 			"failed to store plan",
 		)
 	}
 	
-	return apperror.Ok(*plan)
+	return appfault.Ok(*plan)
 }
 
-func (s *Service) buildContextString(context stdctx.Context, req GeneratePlanRequest) apperror.Result[string] {
+func (s *Service) buildContextString(context stdctx.Context, req GeneratePlanRequest) appfault.Result[string] {
 	var builder strings.Builder
 	
 	// Add project specs summaries
@@ -295,12 +295,12 @@ func (s *Service) buildContextString(context stdctx.Context, req GeneratePlanReq
 	// Load full spec content for key files (if needed)
 	// This can be expanded based on the user prompt analysis
 	
-	return apperror.Ok(builder.String())
+	return appfault.Ok(builder.String())
 }
 
-func (s *Service) validateMermaid(diagram string) *apperror.AppError {
+func (s *Service) validateMermaid(diagram string) *appfault.AppError {
 	if diagram == "" {
-		return apperror.New(
+		return appfault.New(
 			ErrEmptyDiagram,
 			"empty diagram",
 		)
@@ -309,7 +309,7 @@ func (s *Service) validateMermaid(diagram string) *apperror.AppError {
 	// Basic syntax validation
 	if stringutil.IsMissingPrefix(strings.TrimSpace(diagram), "flowchart") &&
 	   stringutil.IsMissingPrefix(strings.TrimSpace(diagram), "graph") {
-		return apperror.New(
+		return appfault.New(
 			ErrInvalidDiagramSyntax,
 			"diagram must start with 'flowchart' or 'graph'",
 		)
@@ -317,14 +317,14 @@ func (s *Service) validateMermaid(diagram string) *apperror.AppError {
 	
 	// Check for balanced brackets
 	if strings.Count(diagram, "[") != strings.Count(diagram, "]") {
-		return apperror.New(
+		return appfault.New(
 			ErrUnbalancedBrackets,
 			"unbalanced brackets",
 		)
 	}
 	
 	if strings.Count(diagram, "{") != strings.Count(diagram, "}") {
-		return apperror.New(
+		return appfault.New(
 			ErrUnbalancedBrackets,
 			"unbalanced braces",
 		)
@@ -392,7 +392,7 @@ func NewContextLoader(specs *storage.SpecStore, sessions *storage.SessionStore) 
 }
 
 // LoadProjectContext loads relevant context for plan generation
-func (c *ContextLoader) LoadProjectContext(context stdctx.Context, projectId string, prompt string) apperror.Result[PlanContext] {
+func (c *ContextLoader) LoadProjectContext(context stdctx.Context, projectId string, prompt string) appfault.Result[PlanContext] {
 	planCtx := PlanContext{
 		UserPreferences: make(map[string]string),
 	}
@@ -400,7 +400,7 @@ func (c *ContextLoader) LoadProjectContext(context stdctx.Context, projectId str
 	// Load project specs (summarized)
 	specs, err := c.specs.ListByProject(context, projectId)
 	if err != nil {
-		return apperror.FailWrap[PlanContext](
+		return appfault.FailWrap[PlanContext](
 			err,
 			"E7810",
 			"failed to list project specs",
@@ -420,7 +420,7 @@ func (c *ContextLoader) LoadProjectContext(context stdctx.Context, projectId str
 	// Load recent session changes
 	recentSessions, err := c.sessions.ListRecent(context, projectId, 5)
 	if err != nil {
-		return apperror.FailWrap[PlanContext](
+		return appfault.FailWrap[PlanContext](
 			err,
 			"E7811",
 			"failed to list recent sessions",
@@ -437,7 +437,7 @@ func (c *ContextLoader) LoadProjectContext(context stdctx.Context, projectId str
 		}
 	}
 	
-	return apperror.Ok(planCtx)
+	return appfault.Ok(planCtx)
 }
 
 func (c *ContextLoader) selectRelevantSpecs(specs []storage.Spec, prompt string, maxCount int) []storage.Spec {

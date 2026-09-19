@@ -381,11 +381,11 @@ type CredibilityCheckWeights struct {
     AuthorVerified  float64
 }
 
-func (cc *CredibilityClassifier) Classify(source Source, checks CredibilityChecks) apperror.Result[CredibilityResult] {
+func (cc *CredibilityClassifier) Classify(source Source, checks CredibilityChecks) appfault.Result[CredibilityResult] {
     // Get thresholds from settings using typed accessor
     thresholdsResult := GetTyped[CredibilityThresholdsConfig](cc.settings, "credibility_thresholds", "thresholds")
     if thresholdsResult.HasError() {
-        return apperror.Fail[CredibilityResult](thresholdsResult.Error())
+        return appfault.Fail[CredibilityResult](thresholdsResult.Error())
     }
 
     thresholds := thresholdsResult.Value()
@@ -393,7 +393,7 @@ func (cc *CredibilityClassifier) Classify(source Source, checks CredibilityCheck
     // Get check weights from settings using typed accessor
     weightsResult := GetTyped[CredibilityCheckWeights](cc.settings, "credibility_thresholds", "check_weights")
     if weightsResult.HasError() {
-        return apperror.Fail[CredibilityResult](weightsResult.Error())
+        return appfault.Fail[CredibilityResult](weightsResult.Error())
     }
 
     weights := weightsResult.Value()
@@ -416,7 +416,7 @@ func (cc *CredibilityClassifier) Classify(source Source, checks CredibilityCheck
         level = CredibilityHigh
     }
     
-    return apperror.Ok(CredibilityResult{
+    return appfault.Ok(CredibilityResult{
         Level:      level,
         Score:      totalScore,
         Checks:     checks,
@@ -534,25 +534,25 @@ type ConfidenceWarningsConfig struct {
     ModerateConfidenceMessage   string
 }
 
-func (ca *ConfidenceAnalyzer) AnalyzeConfidence(sources []Source) apperror.Result[ConfidenceMetrics] {
+func (ca *ConfidenceAnalyzer) AnalyzeConfidence(sources []Source) appfault.Result[ConfidenceMetrics] {
     // Get typed configs from settings
     weightsResult := GetTyped[ConfidenceWeightsConfig](ca.settings, "confidence_metrics", "weight_formula")
     if weightsResult.HasError() {
-        return apperror.Fail[ConfidenceMetrics](weightsResult.Error())
+        return appfault.Fail[ConfidenceMetrics](weightsResult.Error())
     }
 
     weights := weightsResult.Value()
     
     thresholdsResult := GetTyped[ConfidenceThresholdsConfig](ca.settings, "confidence_metrics", "thresholds")
     if thresholdsResult.HasError() {
-        return apperror.Fail[ConfidenceMetrics](thresholdsResult.Error())
+        return appfault.Fail[ConfidenceMetrics](thresholdsResult.Error())
     }
 
     thresholds := thresholdsResult.Value()
     
     warningsResult := GetTyped[ConfidenceWarningsConfig](ca.settings, "confidence_metrics", "warnings")
     if warningsResult.HasError() {
-        return apperror.Fail[ConfidenceMetrics](warningsResult.Error())
+        return appfault.Fail[ConfidenceMetrics](warningsResult.Error())
     }
 
     warnings := warningsResult.Value()
@@ -587,7 +587,7 @@ func (ca *ConfidenceAnalyzer) AnalyzeConfidence(sources []Source) apperror.Resul
         warning = warnings.ModerateConfidenceMessage
     }
     
-    return apperror.Ok(ConfidenceMetrics{
+    return appfault.Ok(ConfidenceMetrics{
         Score:               overallConfidence,
         Details:             details,
         Warning:             warning,

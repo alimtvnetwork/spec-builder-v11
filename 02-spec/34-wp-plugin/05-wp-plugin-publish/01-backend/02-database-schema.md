@@ -278,7 +278,7 @@ Application passwords are encrypted using AES-256-GCM:
 
 ```go
 // internal/services/site/encryption.go
-func EncryptPassword(plaintext string, key []byte) apperror.Result[string] {
+func EncryptPassword(plaintext string, key []byte) appfault.Result[string] {
     block, err := aes.NewCipher(key)
     if err != nil {
         return "", err

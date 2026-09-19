@@ -1047,7 +1047,7 @@ func EncodePCM16ToBase64(samples []float32) string {
 }
 
 // DecodePCM16FromBase64 decodes base64 PCM16 to float32 samples
-func DecodePCM16FromBase64(encoded string) apperror.Result[[]float32] {
+func DecodePCM16FromBase64(encoded string) appfault.Result[[]float32] {
     data, err := base64.StdEncoding.DecodeString(encoded)
     if err != nil {
         return nil, err
@@ -1084,7 +1084,7 @@ type TranscriptionProvider interface {
     Transcribe(context stdctx.Context, audio io.Reader, opts TranscribeOptions) (*TranscriptResult, error)
     
     // Streaming transcription
-    StreamTranscribe(context stdctx.Context, audioStream <-chan []byte, opts TranscribeOptions) apperror.Result[<-chan TranscriptEvent]
+    StreamTranscribe(context stdctx.Context, audioStream <-chan []byte, opts TranscribeOptions) appfault.Result[<-chan TranscriptEvent]
     
     // Close and cleanup
     Close() error
@@ -1149,12 +1149,12 @@ type WhisperConfig struct {
     GPUDevice     int
 }
 
-func NewWhisperProvider(config WhisperConfig) apperror.Result[WhisperProvider] {
+func NewWhisperProvider(config WhisperConfig) appfault.Result[WhisperProvider] {
     // Load whisper.cpp model
     model, err := whisper.LoadModel(config.ModelPath)
     if err != nil {
-        return apperror.Fail[WhisperProvider](
-            apperror.Wrap(err, apperror.ErrModelLoad, "failed to load whisper model"),
+        return appfault.Fail[WhisperProvider](
+            appfault.Wrap(err, appfault.ErrModelLoad, "failed to load whisper model"),
         )
     }
     
@@ -1165,12 +1165,12 @@ func NewWhisperProvider(config WhisperConfig) apperror.Result[WhisperProvider] {
         GPUDevice:  config.GPUDevice,
     })
     if err != nil {
-        return apperror.Fail[WhisperProvider](
-            apperror.Wrap(err, apperror.ErrProcessorCreate, "failed to create processor"),
+        return appfault.Fail[WhisperProvider](
+            appfault.Wrap(err, appfault.ErrProcessorCreate, "failed to create processor"),
         )
     }
     
-    return apperror.Ok(WhisperProvider{
+    return appfault.Ok(WhisperProvider{
         modelPath:  config.ModelPath,
         model:      model,
         processor:  processor,
@@ -1198,15 +1198,15 @@ func (w *WhisperProvider) SupportedFeatures() ProviderFeatures {
     }
 }
 
-func (w *WhisperProvider) Transcribe(context stdctx.Context, audio io.Reader, opts TranscribeOptions) apperror.Result[TranscriptResult] {
+func (w *WhisperProvider) Transcribe(context stdctx.Context, audio io.Reader, opts TranscribeOptions) appfault.Result[TranscriptResult] {
     w.mu.Lock()
     defer w.mu.Unlock()
     
     // Read and decode audio
     samples, err := w.decodeAudio(audio, opts.Encoding, opts.SampleRate)
     if err != nil {
-        return apperror.Fail[TranscriptResult](
-            apperror.Wrap(err, apperror.ErrAudioDecode, "failed to decode audio"),
+        return appfault.Fail[TranscriptResult](
+            appfault.Wrap(err, appfault.ErrAudioDecode, "failed to decode audio"),
         )
     }
     
@@ -1216,15 +1216,15 @@ func (w *WhisperProvider) Transcribe(context stdctx.Context, audio io.Reader, op
         WordTimestamps: opts.WordTimestamps,
     })
     if err != nil {
-        return apperror.Fail[TranscriptResult](
-            apperror.Wrap(err, apperror.ErrTranscription, "transcription failed"),
+        return appfault.Fail[TranscriptResult](
+            appfault.Wrap(err, appfault.ErrTranscription, "transcription failed"),
         )
     }
     
-    return apperror.Ok(*w.convertResult(result))
+    return appfault.Ok(*w.convertResult(result))
 }
 
-func (w *WhisperProvider) StreamTranscribe(context stdctx.Context, audioStream <-chan []byte, opts TranscribeOptions) apperror.Result[<-chan TranscriptEvent] {
+func (w *WhisperProvider) StreamTranscribe(context stdctx.Context, audioStream <-chan []byte, opts TranscribeOptions) appfault.Result[<-chan TranscriptEvent] {
     events := make(chan TranscriptEvent, 100)
     
     go func() {
@@ -1283,7 +1283,7 @@ type OpenAIConfig struct {
     SilenceDuration int // ms
 }
 
-func NewOpenAIRealtimeProvider(config OpenAIConfig) apperror.Result[*OpenAIRealtimeProvider] {
+func NewOpenAIRealtimeProvider(config OpenAIConfig) appfault.Result[*OpenAIRealtimeProvider] {
     if config.APIKey == "" {
         return nil, errors.New("OpenAI API key required")
     }
@@ -1318,7 +1318,7 @@ func (o *OpenAIRealtimeProvider) connect(context stdctx.Context) error {
     
     conn, _, err := websocket.DefaultDialer.DialContext(context, url, headers)
     if err != nil {
-        return apperror.Wrap(err, apperror.ErrWebSocketConnect, "failed to connect to OpenAI").
+        return appfault.Wrap(err, appfault.ErrWebSocketConnect, "failed to connect to OpenAI").
             ToError()
     }
     
@@ -1326,7 +1326,7 @@ func (o *OpenAIRealtimeProvider) connect(context stdctx.Context) error {
     return nil
 }
 
-func (o *OpenAIRealtimeProvider) StreamTranscribe(context stdctx.Context, audioStream <-chan []byte, opts TranscribeOptions) apperror.Result[<-chan TranscriptEvent] {
+func (o *OpenAIRealtimeProvider) StreamTranscribe(context stdctx.Context, audioStream <-chan []byte, opts TranscribeOptions) appfault.Result[<-chan TranscriptEvent] {
     if err := o.connect(context); err != nil {
         return nil, err
     }
@@ -1479,7 +1479,7 @@ func (o *OpenAIRealtimeProvider) handleMessages(context stdctx.Context, events c
                 if msg.Error != nil {
                     events <- TranscriptEvent{
                         Type:  "error",
-                        Error: apperror.New(apperror.ErrProviderError, msg.Error.Type+": "+msg.Error.Message),
+                        Error: appfault.New(appfault.ErrProviderError, msg.Error.Type+": "+msg.Error.Message),
                     }
                 }
             }
@@ -1505,7 +1505,7 @@ type ElevenLabsConfig struct {
     CommitStrategy string // "vad" or "manual"
 }
 
-func NewElevenLabsProvider(config ElevenLabsConfig) apperror.Result[*ElevenLabsProvider] {
+func NewElevenLabsProvider(config ElevenLabsConfig) appfault.Result[*ElevenLabsProvider] {
     if config.APIKey == "" {
         return nil, errors.New("ElevenLabs API key required")
     }
@@ -1523,7 +1523,7 @@ func NewElevenLabsProvider(config ElevenLabsConfig) apperror.Result[*ElevenLabsP
     }, nil
 }
 
-func (e *ElevenLabsProvider) getToken(context stdctx.Context) apperror.Result[string] {
+func (e *ElevenLabsProvider) getToken(context stdctx.Context) appfault.Result[string] {
     req, err := http.NewRequestWithContext(context, httpmethod.Post.String(),
         "https://api.elevenlabs.io/v1/single-use-token/realtime_scribe", nil)
     if err != nil {
@@ -1548,17 +1548,17 @@ func (e *ElevenLabsProvider) getToken(context stdctx.Context) apperror.Result[st
     return result.Token, nil
 }
 
-func (e *ElevenLabsProvider) StreamTranscribe(context stdctx.Context, audioStream <-chan []byte, opts TranscribeOptions) apperror.Result[<-chan TranscriptEvent] {
+func (e *ElevenLabsProvider) StreamTranscribe(context stdctx.Context, audioStream <-chan []byte, opts TranscribeOptions) appfault.Result[<-chan TranscriptEvent] {
     token, err := e.getToken(context)
     if err != nil {
-        return nil, apperror.Wrap(err, apperror.ErrTokenFetch, "failed to get token")
+        return nil, appfault.Wrap(err, appfault.ErrTokenFetch, "failed to get token")
     }
     
     url := fmt.Sprintf("wss://api.elevenlabs.io/v1/realtime-scribe?token=%s", token)
     
     conn, _, err := websocket.DefaultDialer.DialContext(context, url, nil)
     if err != nil {
-        return nil, apperror.Wrap(err, apperror.ErrWebSocketConnect, "failed to connect")
+        return nil, appfault.Wrap(err, appfault.ErrWebSocketConnect, "failed to connect")
     }
     
     e.wsConn = conn
@@ -1708,7 +1708,7 @@ func (e *TranscriptionEngine) Register(provider TranscriptionProvider) {
     e.providers[provider.Name()] = provider
 }
 
-func (e *TranscriptionEngine) Get(name string) apperror.Result[TranscriptionProvider] {
+func (e *TranscriptionEngine) Get(name string) appfault.Result[TranscriptionProvider] {
     e.mu.RLock()
     defer e.mu.RUnlock()
     
@@ -1718,18 +1718,18 @@ func (e *TranscriptionEngine) Get(name string) apperror.Result[TranscriptionProv
     
     provider, ok := e.providers[name]
     if !ok {
-        return apperror.Fail[TranscriptionProvider](
-            apperror.New(apperror.ErrProviderNotFound, "provider not found"),
+        return appfault.Fail[TranscriptionProvider](
+            appfault.New(appfault.ErrProviderNotFound, "provider not found"),
         )
     }
     
     if provider.IsUnavailable() {
-        return apperror.Fail[TranscriptionProvider](
-            apperror.New(apperror.ErrProviderUnavailable, "provider not available"),
+        return appfault.Fail[TranscriptionProvider](
+            appfault.New(appfault.ErrProviderUnavailable, "provider not available"),
         )
     }
     
-    return apperror.Ok[TranscriptionProvider](provider)
+    return appfault.Ok[TranscriptionProvider](provider)
 }
 
 func (e *TranscriptionEngine) ListProviders() []ProviderInfo {
@@ -1776,16 +1776,16 @@ type CaptureConfig struct {
     AutoGainControl  bool
 }
 
-func NewAudioCapture(config CaptureConfig) apperror.Result[AudioCapture] {
+func NewAudioCapture(config CaptureConfig) appfault.Result[AudioCapture] {
     if err := portaudio.Initialize(); err != nil {
-        return apperror.Fail[AudioCapture](
-            apperror.Wrap(err, apperror.ErrAudioInit, "failed to initialize PortAudio"),
+        return appfault.Fail[AudioCapture](
+            appfault.Wrap(err, appfault.ErrAudioInit, "failed to initialize PortAudio"),
         )
     }
     
     device, err := findDevice(config.DeviceName)
     if err != nil {
-        return apperror.Fail[AudioCapture](err)
+        return appfault.Fail[AudioCapture](err)
     }
     
     ac := AudioCapture{
@@ -1808,13 +1808,13 @@ func NewAudioCapture(config CaptureConfig) apperror.Result[AudioCapture] {
     
     stream, err := portaudio.OpenStream(inputParams, ac.processAudio)
     if err != nil {
-        return apperror.Fail[AudioCapture](
-            apperror.Wrap(err, apperror.ErrAudioStream, "failed to open stream"),
+        return appfault.Fail[AudioCapture](
+            appfault.Wrap(err, appfault.ErrAudioStream, "failed to open stream"),
         )
     }
     
     ac.stream = stream
-    return apperror.Ok(ac)
+    return appfault.Ok(ac)
 }
 
 func (ac *AudioCapture) Start() error {
@@ -2106,7 +2106,7 @@ func NewCommandParser(grammar *CommandGrammar, llmClient *LLMClient) *CommandPar
     }
 }
 
-func (p *CommandParser) Parse(context stdctx.Context, text string) apperror.Result[*ParsedCommand] {
+func (p *CommandParser) Parse(context stdctx.Context, text string) appfault.Result[*ParsedCommand] {
     normalized := strings.TrimSpace(strings.ToLower(text))
     
     // Try pattern matching first
@@ -2126,7 +2126,7 @@ func (p *CommandParser) Parse(context stdctx.Context, text string) apperror.Resu
     return nil, nil // No command recognized
 }
 
-func (p *CommandParser) buildCommand(cmdType CommandType, raw, normalized string, matches []string) apperror.Result[*ParsedCommand] {
+func (p *CommandParser) buildCommand(cmdType CommandType, raw, normalized string, matches []string) appfault.Result[*ParsedCommand] {
     cmd := &ParsedCommand{
         Type:       cmdType,
         RawText:    raw,
@@ -2177,7 +2177,7 @@ func (p *CommandParser) buildCommand(cmdType CommandType, raw, normalized string
     return cmd, nil
 }
 
-func (p *CommandParser) parseWithLlm(context stdctx.Context, text string) apperror.Result[*ParsedCommand] {
+func (p *CommandParser) parseWithLlm(context stdctx.Context, text string) appfault.Result[*ParsedCommand] {
     prompt := fmt.Sprintf(`Parse the following voice command and extract the intent and parameters.
     
 Command: "%s"
@@ -2256,7 +2256,7 @@ type NexusFlowCommandPayload struct {
     Source      string
 }
 
-func (c *NexusFlowClient) ExecuteCommand(context stdctx.Context, flowId string, cmd *ParsedCommand) apperror.Result[*CommandResult] {
+func (c *NexusFlowClient) ExecuteCommand(context stdctx.Context, flowId string, cmd *ParsedCommand) appfault.Result[*CommandResult] {
     payload := NexusFlowCommandPayload{
         CommandType: cmd.Type,
         Parameters:  cmd.Parameters,
@@ -2348,7 +2348,7 @@ func (c *SpecManagementClient) LinkConversation(context stdctx.Context, projectI
 }
 
 // Get project context for voice commands
-func (c *SpecManagementClient) GetProjectContext(context stdctx.Context, projectId string) apperror.Result[*ProjectContext] {
+func (c *SpecManagementClient) GetProjectContext(context stdctx.Context, projectId string) appfault.Result[*ProjectContext] {
     resp, err := c.get(context, fmt.Sprintf("/projects/%s/context", projectId))
     if err != nil {
         return nil, err
@@ -2363,7 +2363,7 @@ func (c *SpecManagementClient) GetProjectContext(context stdctx.Context, project
 }
 
 // Search project content using voice query
-func (c *SpecManagementClient) VoiceSearch(context stdctx.Context, projectId, query string) apperror.Result[[]SearchResult] {
+func (c *SpecManagementClient) VoiceSearch(context stdctx.Context, projectId, query string) appfault.Result[[]SearchResult] {
     resp, err := c.get(context, fmt.Sprintf("/projects/%s/search?q=%s&source=voice", projectId, url.QueryEscape(query)))
     if err != nil {
         return nil, err

@@ -224,7 +224,7 @@ func (v *VectorSearchService) Initialize(context stdctx.Context) error {
         `, v.config.Dimensions)
 
         if err := v.db.WithContext(context).Exec(createVss).Error; err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrCreateVssTable,
                 "failed to create VssEmbedding",
@@ -255,7 +255,7 @@ func (v *VectorSearchService) IndexEmbedding(context stdctx.Context, chunkId str
     }
 
     if len(embedding) != v.config.Dimensions {
-        return apperror.New(
+        return appfault.New(
             ErrDimensionMismatch,
             fmt.Sprintf("dimension mismatch: expected %d, got %d", v.config.Dimensions, len(embedding)),
         )
@@ -277,7 +277,7 @@ func (v *VectorSearchService) SearchHybrid(
     queryEmbedding []float32,
     queryText string,
     limit int,
-) apperror.Result[[]ChunkScore] {
+) appfault.Result[[]ChunkScore] {
     if limit <= 0 {
         limit = v.config.DefaultLimit
     }
@@ -293,9 +293,9 @@ func (v *VectorSearchService) SearchHybrid(
 }
 
 // SearchSemantic performs vector similarity search
-func (v *VectorSearchService) SearchSemantic(context stdctx.Context, queryEmbed []float32, limit int) apperror.Result[[]ChunkScore] {
+func (v *VectorSearchService) SearchSemantic(context stdctx.Context, queryEmbed []float32, limit int) appfault.Result[[]ChunkScore] {
     if !v.vssLoaded {
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrVssNotAvailable,
             "VSS not available",
         )
@@ -335,7 +335,7 @@ func (v *VectorSearchService) SearchSemantic(context stdctx.Context, queryEmbed 
 }
 
 // SearchKeyword performs FTS5 search
-func (v *VectorSearchService) SearchKeyword(context stdctx.Context, query string, limit int) apperror.Result[[]ChunkScore] {
+func (v *VectorSearchService) SearchKeyword(context stdctx.Context, query string, limit int) appfault.Result[[]ChunkScore] {
     var results []struct {
         ChunkId       string  `gorm:"column:chunk_id"`
         SectionAnchor string  `gorm:"column:section_anchor"`
@@ -504,7 +504,7 @@ func NewTokenCounter(tokenizer string) *TokenCounter {
 }
 
 // Count returns token count using heuristics
-func (t *TokenCounter) Count(text string) apperror.Result[int] {
+func (t *TokenCounter) Count(text string) appfault.Result[int] {
     if text == "" {
         return 0, nil
     }
@@ -624,7 +624,7 @@ func NewContextAssembler(config ContextWindowConfig, counter *TokenCounter) *Con
 }
 
 // Assemble builds context from blocks respecting token limits
-func (a *ContextAssembler) Assemble(context stdctx.Context, blocks []ContextBlock) apperror.Result[*AssembledContext] {
+func (a *ContextAssembler) Assemble(context stdctx.Context, blocks []ContextBlock) appfault.Result[*AssembledContext] {
     result := &AssembledContext{
         LayerBreakdown: make(map[ContextLayer]int),
         SourceChunks:   make([]string, 0),
@@ -662,8 +662,8 @@ func (a *ContextAssembler) Assemble(context stdctx.Context, blocks []ContextBloc
                 fmt.Sprintf("Truncated %s from %d to %d tokens", block.Type, block.TokenCount, remaining))
             remaining = 0
         } else if !a.config.AllowTruncation {
-            return apperror.Fail[*AssembledContext](
-                apperror.New(
+            return appfault.Fail[*AssembledContext](
+                appfault.New(
                     ErrContextOverflow,
                     "content exceeds model limit and truncation disabled",
                 ),
@@ -674,7 +674,7 @@ func (a *ContextAssembler) Assemble(context stdctx.Context, blocks []ContextBloc
     result.Messages = []ChatMessage{{Role: "user", Content: content.String()}}
     result.TotalTokens = available - remaining
 
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 
 func (a *ContextAssembler) truncate(content string, maxTokens int) string {
@@ -772,7 +772,7 @@ func NewSegmentationParser(counter *TokenCounter, config SegmentationConfig) *Se
 }
 
 // Parse splits instruction into sections
-func (p *SegmentationParser) Parse(context stdctx.Context, content string) apperror.Result[[]ParsedSection] {
+func (p *SegmentationParser) Parse(context stdctx.Context, content string) appfault.Result[[]ParsedSection] {
     lines := strings.Split(content, "\n")
     sections := make([]ParsedSection, 0)
 
@@ -921,7 +921,7 @@ func NewDependencyResolver(rules []KeywordRule) *DependencyResolver {
 }
 
 // TopologicalSort returns execution order
-func (r *DependencyResolver) TopologicalSort(sections []ParsedSection) apperror.Result[[]int] {
+func (r *DependencyResolver) TopologicalSort(sections []ParsedSection) appfault.Result[[]int] {
     n := len(sections)
     adjacency := make(map[int][]int)
     inDegree := make([]int, n)
@@ -959,7 +959,7 @@ func (r *DependencyResolver) TopologicalSort(sections []ParsedSection) apperror.
     }
 
     if len(order) != n {
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrCycleDetected,
             "cycle detected in dependencies",
         )
@@ -1111,7 +1111,7 @@ func DefaultMemoryCompressionConfig() MemoryCompressionConfig {
 
 // AIService interface for LLM calls
 type AIService interface {
-    Generate(context stdctx.Context, prompt string) apperror.Result[string]
+    Generate(context stdctx.Context, prompt string) appfault.Result[string]
 }
 
 // MemoryCompressionService handles compression
@@ -1143,7 +1143,7 @@ func (s *MemoryCompressionService) Compress(
     context stdctx.Context,
     content string,
     targetTokens int,
-) apperror.Result[*CompressionResult] {
+) appfault.Result[*CompressionResult] {
     if targetTokens == 0 {
         targetTokens = s.config.DefaultMaxTokens
     }
@@ -1152,7 +1152,7 @@ func (s *MemoryCompressionService) Compress(
 
     // Skip if already under target
     if originalTokens <= targetTokens {
-        return apperror.OK(&CompressionResult{
+        return appfault.Ok(&CompressionResult{
             OriginalTokens:   originalTokens,
             CompressedTokens: originalTokens,
             CompressionRatio: 1.0,
@@ -1163,8 +1163,8 @@ func (s *MemoryCompressionService) Compress(
     // Build prompt
     prompt, err := s.buildPrompt(PromptTypeExecution, content, targetTokens, "")
     if err != nil {
-        return apperror.Fail[*CompressionResult](
-            apperror.Wrap(
+        return appfault.Fail[*CompressionResult](
+            appfault.Wrap(
                 err,
                 ErrPromptBuild,
                 "prompt building failed",
@@ -1182,8 +1182,8 @@ func (s *MemoryCompressionService) Compress(
         time.Sleep(time.Duration(attempt+1) * 500 * time.Millisecond)
     }
     if err != nil {
-        return apperror.Fail[*CompressionResult](
-            apperror.Wrap(
+        return appfault.Fail[*CompressionResult](
+            appfault.Wrap(
                 err,
                 ErrCompressionFailed,
                 "compression failed after retries",
@@ -1207,7 +1207,7 @@ func (s *MemoryCompressionService) Compress(
         result.OpenQuestions = s.extractSection(summary, "Pending Items")
     }
 
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 
 // IncrementalMerge merges new content into existing summary
@@ -1215,7 +1215,7 @@ func (s *MemoryCompressionService) IncrementalMerge(
     context stdctx.Context,
     existing, newContent string,
     targetTokens int,
-) apperror.Result[string] {
+) appfault.Result[string] {
     prompt, err := s.buildPrompt(PromptTypeIncremental, newContent, targetTokens, existing)
     if err != nil {
         return "", err
@@ -1238,7 +1238,7 @@ func (s *MemoryCompressionService) buildPrompt(
     content string,
     maxTokens int,
     existingSummary string,
-) apperror.Result[string] {
+) appfault.Result[string] {
     tmplStr := SummarizationPrompts[promptType]
     tmpl, err := template.New("prompt").Parse(tmplStr)
     if err != nil {
@@ -1328,7 +1328,7 @@ func (p *RAGPipeline) ExecuteInstruction(
     context stdctx.Context,
     instruction string,
     queryEmbedding []float32,
-) apperror.Result[*PipelineResult] {
+) appfault.Result[*PipelineResult] {
     result := &PipelineResult{
         SegmentResults: make([]SegmentResult, 0),
     }
@@ -1336,8 +1336,8 @@ func (p *RAGPipeline) ExecuteInstruction(
     // Phase 1: Vector Search
     chunks, err := p.vectorSearch.SearchHybrid(context, queryEmbedding, instruction[:100], 10)
     if err != nil {
-        return apperror.Fail[*PipelineResult](
-            apperror.Wrap(
+        return appfault.Fail[*PipelineResult](
+            appfault.Wrap(
                 err,
                 ErrVectorSearch,
                 "vector search failed",
@@ -1362,8 +1362,8 @@ func (p *RAGPipeline) ExecuteInstruction(
     }
     assembledResult := p.contextMgr.Assemble(context, blocks)
     if assembledResult.IsFailure() {
-        return apperror.Fail[*PipelineResult](
-            apperror.Wrap(
+        return appfault.Fail[*PipelineResult](
+            appfault.Wrap(
                 assembledResult.Error(),
                 ErrContextAssembly,
                 "context assembly failed",
@@ -1377,8 +1377,8 @@ func (p *RAGPipeline) ExecuteInstruction(
     // Phase 3: Segmentation
     sections, err := p.segmentParser.Parse(context, instruction)
     if err != nil {
-        return apperror.Fail[*PipelineResult](
-            apperror.Wrap(
+        return appfault.Fail[*PipelineResult](
+            appfault.Wrap(
                 err,
                 ErrSegmentation,
                 "segmentation failed",
@@ -1388,8 +1388,8 @@ func (p *RAGPipeline) ExecuteInstruction(
 
     order, err := p.depResolver.TopologicalSort(sections)
     if err != nil {
-        return apperror.Fail[*PipelineResult](
-            apperror.Wrap(
+        return appfault.Fail[*PipelineResult](
+            appfault.Wrap(
                 err,
                 ErrDependencyResolution,
                 "dependency resolution failed",
@@ -1522,7 +1522,7 @@ import (
 ```go
 result, err := service.Operation(context, params)
 if err != nil {
-    return nil, apperror.Wrap(
+    return nil, appfault.Wrap(
         err,
         ErrOperationFailed,
         "operation failed",

@@ -201,25 +201,25 @@ func (p *PageContent) BeforeCreate(tx *gorm.DB) error {
 }
 
 // Helper to get keywords as slice
-func (p *PageContent) GetKeywords() apperror.Result[[]string] {
+func (p *PageContent) GetKeywords() appfault.Result[[]string] {
     var keywords []string
     if p.Keywords == "" {
-        return apperror.OK(keywords)
+        return appfault.Ok(keywords)
     }
     err := json.Unmarshal([]byte(p.Keywords), &keywords)
     if err != nil {
-        return apperror.Fail[[]string](
-            apperror.Wrap(err, "unmarshal keywords"),
+        return appfault.Fail[[]string](
+            appfault.Wrap(err, "unmarshal keywords"),
         )
     }
-    return apperror.OK(keywords)
+    return appfault.Ok(keywords)
 }
 
 // Helper to set keywords from slice
-func (p *PageContent) SetKeywords(keywords []string) *apperror.AppError {
+func (p *PageContent) SetKeywords(keywords []string) *appfault.AppError {
     data, err := json.Marshal(keywords)
     if err != nil {
-        return apperror.Wrap(err, "marshal keywords")
+        return appfault.Wrap(err, "marshal keywords")
     }
     p.Keywords = string(data)
     return nil
@@ -387,39 +387,39 @@ var (
 )
 
 // GetEncryptionKey retrieves and validates the encryption key from environment
-func GetEncryptionKey() apperror.Result[[]byte] {
+func GetEncryptionKey() appfault.Result[[]byte] {
     keyHex := os.Getenv(EnvTokenKey)
     if keyHex == "" {
-        return apperror.Fail[[]byte](
-            apperror.New("encryption key not configured"),
+        return appfault.Fail[[]byte](
+            appfault.New("encryption key not configured"),
         )
     }
     
     key, err := hex.DecodeString(keyHex)
     if err != nil {
-        return apperror.Fail[[]byte](
-            apperror.New("encryption key must be valid hex string"),
+        return appfault.Fail[[]byte](
+            appfault.New("encryption key must be valid hex string"),
         )
     }
     
     if len(key) != KeySizeBytes {
-        return apperror.Fail[[]byte](
-            apperror.New("encryption key must be 32 bytes (64 hex chars)"),
+        return appfault.Fail[[]byte](
+            appfault.New("encryption key must be 32 bytes (64 hex chars)"),
         )
     }
     
-    return apperror.OK(key)
+    return appfault.Ok(key)
 }
 
 // GenerateKey creates a new random encryption key (for initial setup)
-func GenerateKey() apperror.Result[string] {
+func GenerateKey() appfault.Result[string] {
     key := make([]byte, KeySizeBytes)
     if _, err := rand.Read(key); err != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(err, "generate key"),
+        return appfault.Fail[string](
+            appfault.Wrap(err, "generate key"),
         )
     }
-    return apperror.OK(hex.EncodeToString(key))
+    return appfault.Ok(hex.EncodeToString(key))
 }
 ```
 
@@ -453,11 +453,11 @@ type TokenEncryptor struct {
 }
 
 // NewTokenEncryptor creates a new encryptor with the provided key
-func NewTokenEncryptor(key []byte) apperror.Result[*TokenEncryptor] {
+func NewTokenEncryptor(key []byte) appfault.Result[*TokenEncryptor] {
     block, err := aes.NewCipher(key)
     if err != nil {
-        return apperror.Fail[*TokenEncryptor](
-            apperror.Wrap(
+        return appfault.Fail[*TokenEncryptor](
+            appfault.Wrap(
                 errors.ErrEncryptFailed,
                 "create cipher",
                 err,
@@ -467,8 +467,8 @@ func NewTokenEncryptor(key []byte) apperror.Result[*TokenEncryptor] {
     
     gcm, err := cipher.NewGCM(block)
     if err != nil {
-        return apperror.Fail[*TokenEncryptor](
-            apperror.Wrap(
+        return appfault.Fail[*TokenEncryptor](
+            appfault.Wrap(
                 errors.ErrEncryptFailed,
                 "create GCM",
                 err,
@@ -476,32 +476,32 @@ func NewTokenEncryptor(key []byte) apperror.Result[*TokenEncryptor] {
         )
     }
     
-    return apperror.Ok(&TokenEncryptor{
+    return appfault.Ok(&TokenEncryptor{
         key: key,
         gcm: gcm,
     })
 }
 
 // NewTokenEncryptorFromEnv creates encryptor using environment variable
-func NewTokenEncryptorFromEnv() apperror.Result[*TokenEncryptor] {
+func NewTokenEncryptorFromEnv() appfault.Result[*TokenEncryptor] {
     keyResult := GetEncryptionKey()
     if !keyResult.IsSuccess {
-        return apperror.Fail[*TokenEncryptor](keyResult.Error)
+        return appfault.Fail[*TokenEncryptor](keyResult.Error)
     }
     return NewTokenEncryptor(keyResult.Value)
 }
 
 // Encrypt encrypts plaintext and returns base64-encoded ciphertext
-func (e *TokenEncryptor) Encrypt(plaintext string) apperror.Result[string] {
+func (e *TokenEncryptor) Encrypt(plaintext string) appfault.Result[string] {
     if plaintext == "" {
-        return apperror.OK("")
+        return appfault.Ok("")
     }
     
     // Generate random nonce
     nonce := make([]byte, e.gcm.NonceSize())
     if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-        return apperror.Fail[string](
-            apperror.New("encryption failed"),
+        return appfault.Fail[string](
+            appfault.New("encryption failed"),
         )
     }
     
@@ -509,27 +509,27 @@ func (e *TokenEncryptor) Encrypt(plaintext string) apperror.Result[string] {
     ciphertext := e.gcm.Seal(nonce, nonce, []byte(plaintext), nil)
     
     // Return base64-encoded result
-    return apperror.OK(base64.StdEncoding.EncodeToString(ciphertext))
+    return appfault.Ok(base64.StdEncoding.EncodeToString(ciphertext))
 }
 
 // Decrypt decrypts base64-encoded ciphertext and returns plaintext
-func (e *TokenEncryptor) Decrypt(ciphertextB64 string) apperror.Result[string] {
+func (e *TokenEncryptor) Decrypt(ciphertextB64 string) appfault.Result[string] {
     if ciphertextB64 == "" {
-        return apperror.OK("")
+        return appfault.Ok("")
     }
     
     // Decode from base64
     ciphertext, err := base64.StdEncoding.DecodeString(ciphertextB64)
     if err != nil {
-        return apperror.Fail[string](
-            apperror.New("ciphertext appears corrupted"),
+        return appfault.Fail[string](
+            appfault.New("ciphertext appears corrupted"),
         )
     }
     
     // Validate minimum length (nonce + at least 1 byte + auth tag)
     if len(ciphertext) < e.gcm.NonceSize() + 1 {
-        return apperror.Fail[string](
-            apperror.New("ciphertext too short"),
+        return appfault.Fail[string](
+            appfault.New("ciphertext too short"),
         )
     }
     
@@ -540,12 +540,12 @@ func (e *TokenEncryptor) Decrypt(ciphertextB64 string) apperror.Result[string] {
     // Decrypt and verify authentication tag
     plaintext, err := e.gcm.Open(nil, nonce, ciphertext, nil)
     if err != nil {
-        return apperror.Fail[string](
-            apperror.New("ciphertext appears corrupted"),
+        return appfault.Fail[string](
+            appfault.New("ciphertext appears corrupted"),
         )
     }
     
-    return apperror.OK(string(plaintext))
+    return appfault.Ok(string(plaintext))
 }
 
 // RotateKey re-encrypts all tokens with a new key
@@ -610,7 +610,7 @@ import (
     stdctx "context"
     "time"
     "golang.org/x/oauth2"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "gsearch/pkg/crypto"
     "gsearch/pkg/models"
     "gorm.io/gorm"
@@ -623,28 +623,28 @@ type TokenManager struct {
 }
 
 // NewTokenManager creates a new token manager
-func NewTokenManager(db *gorm.DB) apperror.Result[*TokenManager] {
+func NewTokenManager(db *gorm.DB) appfault.Result[*TokenManager] {
     encryptorResult := crypto.NewTokenEncryptorFromEnv()
     if !encryptorResult.IsSuccess {
-        return apperror.Fail[*TokenManager](
-            apperror.Wrap(
+        return appfault.Fail[*TokenManager](
+            appfault.Wrap(
                 encryptorResult.Error,
                 "failed to initialize token encryptor",
             ),
         )
     }
     
-    return apperror.OK(&TokenManager{
+    return appfault.Ok(&TokenManager{
         db:        db,
         encryptor: encryptorResult.Value,
     })
 }
 
 // StoreToken encrypts and stores an OAuth token
-func (m *TokenManager) StoreToken(provider models.OAuthProvider, token *oauth2.Token, scope string) *apperror.AppError {
+func (m *TokenManager) StoreToken(provider models.OAuthProvider, token *oauth2.Token, scope string) *appfault.AppError {
     accessResult := m.encryptor.Encrypt(token.AccessToken)
     if !accessResult.IsSuccess {
-        return apperror.Wrap(
+        return appfault.Wrap(
             accessResult.Error,
             "failed to encrypt access token",
         )
@@ -652,7 +652,7 @@ func (m *TokenManager) StoreToken(provider models.OAuthProvider, token *oauth2.T
     
     refreshResult := m.encryptor.Encrypt(token.RefreshToken)
     if !refreshResult.IsSuccess {
-        return apperror.Wrap(
+        return appfault.Wrap(
             refreshResult.Error,
             "failed to encrypt refresh token",
         )
@@ -671,26 +671,26 @@ func (m *TokenManager) StoreToken(provider models.OAuthProvider, token *oauth2.T
     
     // Upsert - update if exists, create if not
     if err := m.db.Where("provider = ?", provider).Assign(*oauthToken).FirstOrCreate(oauthToken).Error; err != nil {
-        return apperror.Wrap(err, "store token")
+        return appfault.Wrap(err, "store token")
     }
     
     return nil
 }
 
 // GetToken retrieves and decrypts an OAuth token
-func (m *TokenManager) GetToken(provider models.OAuthProvider) apperror.Result[*oauth2.Token] {
+func (m *TokenManager) GetToken(provider models.OAuthProvider) appfault.Result[*oauth2.Token] {
     var stored models.OAuthToken
     err := m.db.Where("provider = ?", provider).First(&stored).Error
     if err != nil {
         if err == gorm.ErrRecordNotFound {
-            return apperror.Fail[*oauth2.Token](
-                apperror.New(
+            return appfault.Fail[*oauth2.Token](
+                appfault.New(
                     "no token found for provider: " + string(provider),
                 ),
             )
         }
-        return apperror.Fail[*oauth2.Token](
-            apperror.Wrap(
+        return appfault.Fail[*oauth2.Token](
+            appfault.Wrap(
                 err,
                 "failed to retrieve token",
             ),
@@ -699,8 +699,8 @@ func (m *TokenManager) GetToken(provider models.OAuthProvider) apperror.Result[*
     
     accessResult := m.encryptor.Decrypt(stored.AccessTokenEnc)
     if !accessResult.IsSuccess {
-        return apperror.Fail[*oauth2.Token](
-            apperror.Wrap(
+        return appfault.Fail[*oauth2.Token](
+            appfault.Wrap(
                 accessResult.Error,
                 "failed to decrypt access token",
             ),
@@ -709,15 +709,15 @@ func (m *TokenManager) GetToken(provider models.OAuthProvider) apperror.Result[*
     
     refreshResult := m.encryptor.Decrypt(stored.RefreshTokenEnc)
     if !refreshResult.IsSuccess {
-        return apperror.Fail[*oauth2.Token](
-            apperror.Wrap(
+        return appfault.Fail[*oauth2.Token](
+            appfault.Wrap(
                 refreshResult.Error,
                 "failed to decrypt refresh token",
             ),
         )
     }
     
-    return apperror.OK(&oauth2.Token{
+    return appfault.Ok(&oauth2.Token{
         AccessToken:  accessResult.Value,
         RefreshToken: refreshResult.Value,
         TokenType:    stored.TokenType,
@@ -726,7 +726,7 @@ func (m *TokenManager) GetToken(provider models.OAuthProvider) apperror.Result[*
 }
 
 // GetValidToken retrieves a token, refreshing if necessary
-func (m *TokenManager) GetValidToken(context stdctx.Context, provider models.OAuthProvider, config *oauth2.Config) apperror.Result[*oauth2.Token] {
+func (m *TokenManager) GetValidToken(context stdctx.Context, provider models.OAuthProvider, config *oauth2.Config) appfault.Result[*oauth2.Token] {
     tokenResult := m.GetToken(provider)
     if !tokenResult.IsSuccess {
         return tokenResult
@@ -744,14 +744,14 @@ func (m *TokenManager) GetValidToken(context stdctx.Context, provider models.OAu
         Where("provider = ?", provider).
         Update("last_used_at", time.Now())
     
-    return apperror.OK(token)
+    return appfault.Ok(token)
 }
 
 // refreshToken refreshes an expired token and stores the new one
-func (m *TokenManager) refreshToken(context stdctx.Context, provider models.OAuthProvider, token *oauth2.Token, config *oauth2.Config) apperror.Result[*oauth2.Token] {
+func (m *TokenManager) refreshToken(context stdctx.Context, provider models.OAuthProvider, token *oauth2.Token, config *oauth2.Config) appfault.Result[*oauth2.Token] {
     if token.RefreshToken == "" {
-        return apperror.Fail[*oauth2.Token](
-            apperror.New(
+        return appfault.Fail[*oauth2.Token](
+            appfault.New(
                 "token expired and no refresh token available",
             ),
         )
@@ -761,8 +761,8 @@ func (m *TokenManager) refreshToken(context stdctx.Context, provider models.OAut
     ts := config.TokenSource(context, token)
     newToken, err := ts.Token()
     if err != nil {
-        return apperror.Fail[*oauth2.Token](
-            apperror.Wrap(
+        return appfault.Fail[*oauth2.Token](
+            appfault.Wrap(
                 err,
                 "failed to refresh token",
             ),
@@ -777,29 +777,29 @@ func (m *TokenManager) refreshToken(context stdctx.Context, provider models.OAut
     }
     
     if storeErr := m.StoreToken(provider, newToken, scope); storeErr != nil {
-        return apperror.Fail[*oauth2.Token](storeErr)
+        return appfault.Fail[*oauth2.Token](storeErr)
     }
     
-    return apperror.OK(newToken)
+    return appfault.Ok(newToken)
 }
 
 // getStoredToken retrieves raw stored token without decryption
-func (m *TokenManager) getStoredToken(provider models.OAuthProvider) apperror.Result[*models.OAuthToken] {
+func (m *TokenManager) getStoredToken(provider models.OAuthProvider) appfault.Result[*models.OAuthToken] {
     var stored models.OAuthToken
     err := m.db.Where("provider = ?", provider).First(&stored).Error
     if err != nil {
-        return apperror.Fail[*models.OAuthToken](
-            apperror.Wrap(err, "get stored token"),
+        return appfault.Fail[*models.OAuthToken](
+            appfault.Wrap(err, "get stored token"),
         )
     }
-    return apperror.OK(&stored)
+    return appfault.Ok(&stored)
 }
 
 // RevokeToken removes a stored token
-func (m *TokenManager) RevokeToken(provider models.OAuthProvider) *apperror.AppError {
+func (m *TokenManager) RevokeToken(provider models.OAuthProvider) *appfault.AppError {
     result := m.db.Where("provider = ?", provider).Delete(&models.OAuthToken{})
     if result.Error != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             result.Error,
             "failed to revoke token",
         )
@@ -825,44 +825,44 @@ func (m *TokenManager) HasValidToken(provider models.OAuthProvider) bool {
 ### Get OAuth Token
 
 ```go
-func (db *DB) GetOAuthToken(provider OAuthProvider) apperror.Result[OAuthToken] {
+func (db *DB) GetOAuthToken(provider OAuthProvider) appfault.Result[OAuthToken] {
     var token OAuthToken
     err := db.Where("provider = ?", provider).First(&token).Error
     if err != nil {
-        return apperror.Fail[OAuthToken](apperror.Wrap(err, 7100, "get oauth token"))
+        return appfault.Fail[OAuthToken](appfault.Wrap(err, 7100, "get oauth token"))
     }
-    return apperror.Ok(token)
+    return appfault.Ok(token)
 }
 ```
 
 ### List All Tokens
 
 ```go
-func (db *DB) ListOAuthTokens() apperror.Result[[]OAuthToken] {
+func (db *DB) ListOAuthTokens() appfault.Result[[]OAuthToken] {
     var tokens []OAuthToken
     err := db.Find(&tokens).Error
 
     if err != nil {
-        return apperror.Fail[[]OAuthToken](apperror.Wrap(err, 7106, "list oauth tokens"))
+        return appfault.Fail[[]OAuthToken](appfault.Wrap(err, 7106, "list oauth tokens"))
     }
 
-    return apperror.Ok(tokens)
+    return appfault.Ok(tokens)
 }
 ```
 
 ### Delete Expired Tokens
 
 ```go
-func (db *DB) DeleteExpiredTokens() apperror.Result[int64] {
+func (db *DB) DeleteExpiredTokens() appfault.Result[int64] {
     // Delete tokens that are expired AND have no refresh token
     result := db.Where("expires_at < ? AND refresh_token_enc = ''", time.Now()).
         Delete(&OAuthToken{})
 
     if result.Error != nil {
-        return apperror.Fail[int64](apperror.Wrap(result.Error, 7107, "delete expired tokens"))
+        return appfault.Fail[int64](appfault.Wrap(result.Error, 7107, "delete expired tokens"))
     }
 
-    return apperror.Ok(result.RowsAffected)
+    return appfault.Ok(result.RowsAffected)
 }
 ```
 
@@ -883,12 +883,12 @@ type DB struct {
     *gorm.DB
 }
 
-func NewDatabase(dbPath string) apperror.Result[*DB] {
+func NewDatabase(dbPath string) appfault.Result[*DB] {
     db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
         Logger: logger.Default.LogMode(logger.Info),
     })
     if err != nil {
-        return apperror.Fail[*DB](apperror.Wrap(err, 7101, "open database"))
+        return appfault.Fail[*DB](appfault.Wrap(err, 7101, "open database"))
     }
     
     // Enable foreign keys
@@ -905,10 +905,10 @@ func NewDatabase(dbPath string) apperror.Result[*DB] {
         &OAuthToken{},  // Added for Phase 3
     )
     if err != nil {
-        return apperror.Fail[*DB](apperror.Wrap(err, 7102, "auto migrate"))
+        return appfault.Fail[*DB](appfault.Wrap(err, 7102, "auto migrate"))
     }
     
-    return apperror.Ok(&DB{db})
+    return appfault.Ok(&DB{db})
 }
 ```
 
@@ -919,7 +919,7 @@ func NewDatabase(dbPath string) apperror.Result[*DB] {
 ### Create Search Request
 
 ```go
-func (db *DB) CreateSearchRequest(keywords, engine, method string) apperror.Result[SearchRequest] {
+func (db *DB) CreateSearchRequest(keywords, engine, method string) appfault.Result[SearchRequest] {
     request := SearchRequest{
         Keywords:  keywords,
         Engine:    engine,
@@ -931,9 +931,9 @@ func (db *DB) CreateSearchRequest(keywords, engine, method string) apperror.Resu
     
     result := db.Create(&request)
     if result.Error != nil {
-        return apperror.Fail[SearchRequest](apperror.Wrap(result.Error, 7103, "create search request"))
+        return appfault.Fail[SearchRequest](appfault.Wrap(result.Error, 7103, "create search request"))
     }
-    return apperror.Ok(request)
+    return appfault.Ok(request)
 }
 ```
 
@@ -948,7 +948,7 @@ type SearchStatusUpdate struct {
     CompletedAt time.Time    `gorm:"column:CompletedAt;default:null"`
 }
 
-func (db *DB) UpdateSearchStatus(id string, status SearchStatus, resultCount int) *apperror.AppError {
+func (db *DB) UpdateSearchStatus(id string, status SearchStatus, resultCount int) *appfault.AppError {
     update := SearchStatusUpdate{
         Status:      status,
         ResultCount: resultCount,
@@ -962,7 +962,7 @@ func (db *DB) UpdateSearchStatus(id string, status SearchStatus, resultCount int
     err := db.Model(&SearchRequest{}).Where("id = ?", id).Updates(update).Error
 
     if err != nil {
-        return apperror.Wrap(err, 7108, "update search status")
+        return appfault.Wrap(err, 7108, "update search status")
     }
 
     return nil
@@ -972,7 +972,7 @@ func (db *DB) UpdateSearchStatus(id string, status SearchStatus, resultCount int
 ### Get Results with Page Content
 
 ```go
-func (db *DB) GetResultsWithContent(searchId string) apperror.Result[[]SearchResult] {
+func (db *DB) GetResultsWithContent(searchId string) appfault.Result[[]SearchResult] {
     var results []SearchResult
     err := db.Preload("PageContent").
         Where("search_request_id = ?", searchId).
@@ -980,17 +980,17 @@ func (db *DB) GetResultsWithContent(searchId string) apperror.Result[[]SearchRes
         Find(&results).Error
 
     if err != nil {
-        return apperror.Fail[[]SearchResult](apperror.Wrap(err, 7109, "get results with content"))
+        return appfault.Fail[[]SearchResult](appfault.Wrap(err, 7109, "get results with content"))
     }
 
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 ```
 
 ### Check Cache
 
 ```go
-func (db *DB) CheckCache(keywords, engine string) apperror.Result[CacheEntry] {
+func (db *DB) CheckCache(keywords, engine string) appfault.Result[CacheEntry] {
     hash := generateKeywordHash(keywords, engine)
     
     var entry CacheEntry
@@ -998,23 +998,23 @@ func (db *DB) CheckCache(keywords, engine string) apperror.Result[CacheEntry] {
         First(&entry).Error
     
     if err != nil {
-        return apperror.Fail[CacheEntry](apperror.Wrap(err, 7104, "check cache"))
+        return appfault.Fail[CacheEntry](appfault.Wrap(err, 7104, "check cache"))
     }
     
     if entry.IsExpired() {
         // Invalidate expired cache
         db.Model(&entry).Update("is_valid", false)
-        return apperror.Fail[CacheEntry](apperror.New(7105, "cache entry expired"))
+        return appfault.Fail[CacheEntry](appfault.New(7105, "cache entry expired"))
     }
     
-    return apperror.Ok(entry)
+    return appfault.Ok(entry)
 }
 ```
 
 ### Get Nested Search Tree
 
 ```go
-func (db *DB) GetNestedSearchTree(rootId string, maxDepth int) apperror.Result[[]NestedSearch] {
+func (db *DB) GetNestedSearchTree(rootId string, maxDepth int) appfault.Result[[]NestedSearch] {
     var nested []NestedSearch
     err := db.Where("parent_search_id = ? AND depth <= ?", rootId, maxDepth).
         Preload("ChildSearch").

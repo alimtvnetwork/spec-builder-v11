@@ -337,9 +337,9 @@ func EvaluateContextNeeds(prompt string, ragContext []Chunk) []ContextNeed {
 When web search is needed, delegate to GSearch CLI:
 
 ```go
-func FetchWebContext(need ContextNeed) apperror.Result[[]Chunk] {
+func FetchWebContext(need ContextNeed) appfault.Result[[]Chunk] {
     if need.Type != "WebSearch" {
-        return apperror.Ok([]Chunk(nil))
+        return appfault.Ok([]Chunk(nil))
     }
     
     // Call GSearch CLI
@@ -349,11 +349,11 @@ func FetchWebContext(need ContextNeed) apperror.Result[[]Chunk] {
         Type:      "web",
     })
     if err != nil {
-        return apperror.FailWrap[[]Chunk](err, 9840, "web context fetch failed")
+        return appfault.FailWrap[[]Chunk](err, 9840, "web context fetch failed")
     }
     
     // Convert to RAG chunks
-    return apperror.Ok(convertToChunks(results))
+    return appfault.Ok(convertToChunks(results))
 }
 ```
 

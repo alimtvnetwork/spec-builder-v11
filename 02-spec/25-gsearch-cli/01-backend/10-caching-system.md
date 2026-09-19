@@ -70,7 +70,7 @@ import (
     "strings"
     "time"
     
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 type CacheService struct {
@@ -120,10 +120,10 @@ func (c *CacheService) normalizeKeywords(keywords string) string {
 ### Cache Lookup
 
 ```go
-func (c *CacheService) Get(keywords, engine string) apperror.Result[*CacheResult] {
+func (c *CacheService) Get(keywords, engine string) appfault.Result[*CacheResult] {
     if !c.enabled {
-        return apperror.Fail[*CacheResult](
-            apperror.New("cache disabled"),
+        return appfault.Fail[*CacheResult](
+            appfault.New("cache disabled"),
         )
     }
     
@@ -131,32 +131,32 @@ func (c *CacheService) Get(keywords, engine string) apperror.Result[*CacheResult
     
     entryResult := c.db.GetCacheEntry(key)
     if !entryResult.IsSuccess {
-        return apperror.Fail[*CacheResult](entryResult.Error)
+        return appfault.Fail[*CacheResult](entryResult.Error)
     }
     entry := entryResult.Value
     
     // Check expiration
     if time.Now().After(entry.ExpiresAt) {
         c.Invalidate(key)
-        return apperror.Fail[*CacheResult](
-            apperror.New("cache entry expired"),
+        return appfault.Fail[*CacheResult](
+            appfault.New("cache entry expired"),
         )
     }
     
     // Check validity flag
     if !entry.IsValid {
-        return apperror.Fail[*CacheResult](
-            apperror.New("cache entry invalid"),
+        return appfault.Fail[*CacheResult](
+            appfault.New("cache entry invalid"),
         )
     }
     
     // Get associated search results
     resultsResult := c.db.GetResultsForSearch(entry.SearchRequestId)
     if !resultsResult.IsSuccess {
-        return apperror.Fail[*CacheResult](resultsResult.Error)
+        return appfault.Fail[*CacheResult](resultsResult.Error)
     }
     
-    return apperror.OK(&CacheResult{
+    return appfault.Ok(&CacheResult{
         Entry:     entry,
         Results:   resultsResult.Value,
         FromCache: true,
@@ -173,7 +173,7 @@ type CacheResult struct {
 ### Cache Storage
 
 ```go
-func (c *CacheService) Set(keywords, engine string, searchId string) *apperror.AppError {
+func (c *CacheService) Set(keywords, engine string, searchId string) *appfault.AppError {
     if !c.enabled {
         return nil
     }
@@ -199,7 +199,7 @@ func (c *CacheService) Set(keywords, engine string, searchId string) *apperror.A
     return c.db.UpsertCacheEntry(entry)
 }
 
-func (c *CacheService) enforceLimit() *apperror.AppError {
+func (c *CacheService) enforceLimit() *appfault.AppError {
     countResult := c.db.CountCacheEntries()
     if !countResult.IsSuccess {
         return countResult.Error
@@ -218,11 +218,11 @@ func (c *CacheService) enforceLimit() *apperror.AppError {
 ### Cache Invalidation
 
 ```go
-func (c *CacheService) Invalidate(key string) *apperror.AppError {
+func (c *CacheService) Invalidate(key string) *appfault.AppError {
     return c.db.UpdateCacheValidity(key, false)
 }
 
-func (c *CacheService) InvalidateByKeyword(keyword string) *apperror.AppError {
+func (c *CacheService) InvalidateByKeyword(keyword string) *appfault.AppError {
     // Find all cache entries containing this keyword
     entriesResult := c.db.FindCacheEntriesByKeyword(keyword)
     if !entriesResult.IsSuccess {
@@ -236,7 +236,7 @@ func (c *CacheService) InvalidateByKeyword(keyword string) *apperror.AppError {
     return nil
 }
 
-func (c *CacheService) InvalidateAll() *apperror.AppError {
+func (c *CacheService) InvalidateAll() *appfault.AppError {
     return c.db.InvalidateAllCache()
 }
 ```
@@ -298,82 +298,82 @@ func (j *CacheCleanupJob) cleanup() {
 ```go
 // database/cache_queries.go
 
-func (db *DB) GetCacheEntry(keyHash string) apperror.Result[*models.CacheEntry] {
+func (db *DB) GetCacheEntry(keyHash string) appfault.Result[*models.CacheEntry] {
     var entry models.CacheEntry
     if err := db.Where("keyword_hash = ?", keyHash).First(&entry).Error; err != nil {
-        return apperror.Fail[*models.CacheEntry](
-            apperror.Wrap(err, "get cache entry"),
+        return appfault.Fail[*models.CacheEntry](
+            appfault.Wrap(err, "get cache entry"),
         )
     }
-    return apperror.OK(&entry)
+    return appfault.Ok(&entry)
 }
 
-func (db *DB) UpsertCacheEntry(entry *models.CacheEntry) *apperror.AppError {
+func (db *DB) UpsertCacheEntry(entry *models.CacheEntry) *appfault.AppError {
     if err := db.Clauses(clause.OnConflict{
         Columns:   []clause.Column{{Name: "keyword_hash"}},
         UpdateAll: true,
     }).Create(entry).Error; err != nil {
-        return apperror.Wrap(err, "upsert cache entry")
+        return appfault.Wrap(err, "upsert cache entry")
     }
     return nil
 }
 
-func (db *DB) CountCacheEntries() apperror.Result[int] {
+func (db *DB) CountCacheEntries() appfault.Result[int] {
     var count int64
     if err := db.Model(&models.CacheEntry{}).Count(&count).Error; err != nil {
-        return apperror.Fail[int](
-            apperror.Wrap(err, "count cache entries"),
+        return appfault.Fail[int](
+            appfault.Wrap(err, "count cache entries"),
         )
     }
-    return apperror.OK(int(count))
+    return appfault.Ok(int(count))
 }
 
-func (db *DB) DeleteOldestCacheEntries(limit int) *apperror.AppError {
+func (db *DB) DeleteOldestCacheEntries(limit int) *appfault.AppError {
     subquery := db.Model(&models.CacheEntry{}).
         Order("cached_at ASC").
         Limit(limit).
         Select("id")
     
     if err := db.Where("id IN (?)", subquery).Delete(&models.CacheEntry{}).Error; err != nil {
-        return apperror.Wrap(err, "delete oldest cache entries")
+        return appfault.Wrap(err, "delete oldest cache entries")
     }
     return nil
 }
 
-func (db *DB) DeleteExpiredCacheEntries() *apperror.AppError {
+func (db *DB) DeleteExpiredCacheEntries() *appfault.AppError {
     if err := db.Where("expires_at < ?", time.Now()).Delete(&models.CacheEntry{}).Error; err != nil {
-        return apperror.Wrap(err, "delete expired cache entries")
+        return appfault.Wrap(err, "delete expired cache entries")
     }
     return nil
 }
 
-func (db *DB) DeleteInvalidCacheEntries(olderThan time.Duration) *apperror.AppError {
+func (db *DB) DeleteInvalidCacheEntries(olderThan time.Duration) *appfault.AppError {
     cutoff := time.Now().Add(-olderThan)
     if err := db.Where("is_valid = ? AND cached_at < ?", false, cutoff).
         Delete(&models.CacheEntry{}).Error; err != nil {
-        return apperror.Wrap(err, "delete invalid cache entries")
+        return appfault.Wrap(err, "delete invalid cache entries")
     }
     return nil
 }
 
-func (db *DB) UpdateCacheValidity(keyHash string, valid bool) *apperror.AppError {
+func (db *DB) UpdateCacheValidity(keyHash string, valid bool) *appfault.AppError {
     if err := db.Model(&models.CacheEntry{}).
         Where("keyword_hash = ?", keyHash).
         Update("is_valid", valid).Error; err != nil {
-        return apperror.Wrap(err, "update cache validity")
+        return appfault.Wrap(err, "update cache validity")
     }
     return nil
 }
 
-func (db *DB) FindCacheEntriesByKeyword(keyword string) apperror.Result[[]models.CacheEntry] {
+func (db *DB) FindCacheEntriesByKeyword(keyword string) appfault.Result[[]models.CacheEntry] {
     var entries []models.CacheEntry
     pattern := "%" + keyword + "%"
     if err := db.Where("keywords LIKE ?", pattern).Find(&entries).Error; err != nil {
-        return apperror.Fail[[]models.CacheEntry](
-            apperror.Wrap(err, "find cache entries by keyword"),
+        return appfault.Fail[[]models.CacheEntry](
+            appfault.Wrap(err, "find cache entries by keyword"),
         )
     }
-    return apperror.OK(entries)
+    return appfault.Ok(entries)
 }
 ```
 
@@ -439,7 +439,7 @@ type CacheStats struct {
     CacheMisses    int64
 }
 
-func (c *CacheService) GetStats() apperror.Result[*CacheStats] {
+func (c *CacheService) GetStats() appfault.Result[*CacheStats] {
     stats := &CacheStats{}
     
     // Count entries
@@ -451,7 +451,7 @@ func (c *CacheService) GetStats() apperror.Result[*CacheStats] {
     c.db.Model(&models.CacheEntry{}).Select("MIN(cached_at)").Scan(&stats.OldestEntry)
     c.db.Model(&models.CacheEntry{}).Select("MAX(cached_at)").Scan(&stats.NewestEntry)
     
-    return apperror.OK(stats)
+    return appfault.Ok(stats)
 }
 ```
 

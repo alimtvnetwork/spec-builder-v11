@@ -334,7 +334,7 @@ func NewServerRegistry(
 }
 
 // Initialize loads server configs and starts health monitoring
-func (r *ServerRegistry) Initialize(context stdctx.Context) *apperror.AppError {
+func (r *ServerRegistry) Initialize(context stdctx.Context) *appfault.AppError {
     // Load server configurations
     configsResult := r.loadServerConfigs(context)
     if configsResult.HasError() {
@@ -366,10 +366,10 @@ func (r *ServerRegistry) Initialize(context stdctx.Context) *apperror.AppError {
     return nil
 }
 
-func (r *ServerRegistry) loadServerConfigs(context stdctx.Context) apperror.Result[[]LLMServerConfig] {
+func (r *ServerRegistry) loadServerConfigs(context stdctx.Context) appfault.Result[[]LLMServerConfig] {
     value, err := r.configService.GetConfig(context, "llm.servers")
     if err != nil {
-        return apperror.FailWrap[[]LLMServerConfig](
+        return appfault.FailWrap[[]LLMServerConfig](
             err,
             "failed to get server config",
         )
@@ -377,13 +377,13 @@ func (r *ServerRegistry) loadServerConfigs(context stdctx.Context) apperror.Resu
     
     var configs []LLMServerConfig
     if err := json.Unmarshal([]byte(value), &configs); err != nil {
-        return apperror.FailWrap[[]LLMServerConfig](
+        return appfault.FailWrap[[]LLMServerConfig](
             err,
             "failed to parse server config JSON",
         )
     }
     
-    return apperror.Ok(configs)
+    return appfault.Ok(configs)
 }
 
 // GetServer returns a server instance by ID
@@ -410,7 +410,7 @@ func (r *ServerRegistry) GetOnlineServers() []*ServerInstance {
 }
 
 // GetServerForModel finds the best server for a given model
-func (r *ServerRegistry) GetServerForModel(modelId string) apperror.Result[*ServerInstance] {
+func (r *ServerRegistry) GetServerForModel(modelId string) appfault.Result[*ServerInstance] {
     r.mutex.RLock()
     defer r.mutex.RUnlock()
     
@@ -421,7 +421,7 @@ func (r *ServerRegistry) GetServerForModel(modelId string) apperror.Result[*Serv
         }
         for _, loaded := range server.LoadedModels {
             if loaded == modelId {
-                return apperror.Ok(server)
+                return appfault.Ok(server)
             }
         }
     }
@@ -433,13 +433,13 @@ func (r *ServerRegistry) GetServerForModel(modelId string) apperror.Result[*Serv
         }
         for _, model := range server.Config.Models {
             if model.ModelId == modelId {
-                return apperror.Ok(server)
+                return appfault.Ok(server)
             }
         }
     }
     
-    return apperror.FailNew[*ServerInstance](
-        apperror.ErrModelNotFound,
+    return appfault.FailNew[*ServerInstance](
+        appfault.ErrModelNotFound,
         "no server available for model: "+modelId,
     )
 }
@@ -517,7 +517,7 @@ func (r *ServerRegistry) pingServer(context stdctx.Context, cfg LLMServerConfig)
     case "llama-swap":
         return r.pingLlamaSwap(context, cfg)
     default:
-        return PingOutcome{Err: apperror.New(
+        return PingOutcome{Err: appfault.New(
             ErrUnknownServerType,
             "unknown server type: "+cfg.Type,
         )}
@@ -534,7 +534,7 @@ func (r *ServerRegistry) pingOllama(context stdctx.Context, cfg LLMServerConfig)
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
-        return PingOutcome{Err: apperror.New(
+        return PingOutcome{Err: appfault.New(
             ErrPingFailed,
             fmt.Sprintf("ollama returned status: %d", resp.StatusCode),
         )}
@@ -568,7 +568,7 @@ func (r *ServerRegistry) pingLlama(context stdctx.Context, cfg LLMServerConfig) 
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
-        return PingOutcome{Err: apperror.New(
+        return PingOutcome{Err: appfault.New(
             ErrPingFailed,
             fmt.Sprintf("llama-server returned status: %d", resp.StatusCode),
         )}
@@ -667,11 +667,11 @@ type ChatMessage struct {
 }
 
 // Route sends a request to the appropriate server
-func (r *ModelRouter) Route(context stdctx.Context, req ChatCompletionRequest) apperror.Result[*http.Response] {
+func (r *ModelRouter) Route(context stdctx.Context, req ChatCompletionRequest) appfault.Result[*http.Response] {
     // Resolve server for model
     serverResult := r.registry.GetServerForModel(req.Model)
     if serverResult.HasError() {
-        return apperror.Fail[*http.Response](serverResult.Error())
+        return appfault.Fail[*http.Response](serverResult.Error())
     }
     server := serverResult.Value()
     
@@ -705,10 +705,10 @@ func (r *ModelRouter) buildTargetUrl(cfg LLMServerConfig, modelId string) string
     }
 }
 
-func (r *ModelRouter) forwardRequest(context stdctx.Context, url string, req ChatCompletionRequest) apperror.Result[*http.Response] {
+func (r *ModelRouter) forwardRequest(context stdctx.Context, url string, req ChatCompletionRequest) appfault.Result[*http.Response] {
     body, err := json.Marshal(req)
     if err != nil {
-        return apperror.FailWrap[*http.Response](
+        return appfault.FailWrap[*http.Response](
             err,
             "failed to marshal request",
         )
@@ -716,7 +716,7 @@ func (r *ModelRouter) forwardRequest(context stdctx.Context, url string, req Cha
     
     httpReq, err := http.NewRequestWithContext(context, httpmethod.Post.String(), url, bytes.NewReader(body))
     if err != nil {
-        return apperror.FailWrap[*http.Response](
+        return appfault.FailWrap[*http.Response](
             err,
             "failed to create HTTP request",
         )
@@ -726,13 +726,13 @@ func (r *ModelRouter) forwardRequest(context stdctx.Context, url string, req Cha
     
     resp, err := http.DefaultClient.Do(httpReq)
     if err != nil {
-        return apperror.FailWrap[*http.Response](
+        return appfault.FailWrap[*http.Response](
             err,
             "request failed",
         )
     }
 
-    return apperror.Ok(resp)
+    return appfault.Ok(resp)
 }
 
 // EnsureModelLoaded loads a model on the appropriate server if not already loaded
@@ -784,7 +784,7 @@ func (r *ModelRouter) loadOllamaModel(context stdctx.Context, cfg LLMServerConfi
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
-        return apperror.New(
+        return appfault.New(
             ErrModelLoadFailed,
             "failed to load model: "+resp.Status,
         )
@@ -821,7 +821,7 @@ func (r *ModelRouter) loadLlamaModel(context stdctx.Context, cfg LLMServerConfig
 func (r *ModelRouter) UnloadModel(context stdctx.Context, serverId string, modelId string) error {
     server, exists := r.registry.GetServer(serverId)
     if !exists {
-        return apperror.New(
+        return appfault.New(
             ErrServerNotFound,
             "server not found: "+serverId,
         )
@@ -888,7 +888,7 @@ func NewServerLifecycle(registry *ServerRegistry, logManager *LogStreamManager) 
 func (s *ServerLifecycle) StartServer(context stdctx.Context, serverId string) error {
     server, exists := s.registry.GetServer(serverId)
     if !exists {
-        return apperror.New(
+        return appfault.New(
             ErrServerNotFound,
             "server not found: "+serverId,
         )
@@ -910,7 +910,7 @@ func (s *ServerLifecycle) StartServer(context stdctx.Context, serverId string) e
     case "llama-swap":
         cmd = s.buildLlamaSwapCommand(cfg)
     default:
-        return apperror.New(
+        return appfault.New(
             ErrUnknownServerType,
             "unsupported server type: "+cfg.Type,
         )
@@ -1299,10 +1299,10 @@ type LlamaSwapModel struct {
 func (g *LlamaSwapConfigGenerator) GenerateFromServerConfig(
     context stdctx.Context,
     serverConfig LLMServerConfig,
-) apperror.Result[*LlamaSwapConfig] {
+) appfault.Result[*LlamaSwapConfig] {
     if serverConfig.Type != "llama-swap" {
-        return apperror.FailNew[*LlamaSwapConfig](
-            apperror.ErrInvalidConfig,
+        return appfault.FailNew[*LlamaSwapConfig](
+            appfault.ErrInvalidConfig,
             "server type must be llama-swap, got: "+serverConfig.Type,
         )
     }
@@ -1402,7 +1402,7 @@ func (g *LlamaSwapConfigGenerator) GenerateFromServerConfig(
     config.Models[model.ModelId] = swapModel
     }
 
-    return apperror.Ok(config)
+    return appfault.Ok(config)
 }
 
 // GenerateConfigFile creates and writes the config.yaml file
@@ -1413,7 +1413,7 @@ func (g *LlamaSwapConfigGenerator) GenerateConfigFile(
 ) error {
     server, exists := g.serverRegistry.GetServer(serverId)
     if !exists {
-        return apperror.New(
+        return appfault.New(
             ErrServerNotFound,
             "server not found: "+serverId,
         )
@@ -1427,7 +1427,7 @@ func (g *LlamaSwapConfigGenerator) GenerateConfigFile(
     // Marshal to YAML
     data, err := yaml.Marshal(config)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrMarshalConfig,
             "failed to marshal config",
@@ -1437,7 +1437,7 @@ func (g *LlamaSwapConfigGenerator) GenerateConfigFile(
     // Ensure directory exists
     dir := filepath.Dir(outputPath)
     if err := pathutil.EnsureDir(dir, 0755); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrCreateDirectory,
             "failed to create directory",
@@ -1446,7 +1446,7 @@ func (g *LlamaSwapConfigGenerator) GenerateConfigFile(
 
     // Write file
     if err := pathutil.WriteFile(outputPath, data, 0644); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrWriteConfigFile,
             "failed to write config file",
@@ -1460,29 +1460,29 @@ func (g *LlamaSwapConfigGenerator) GenerateConfigFile(
 func (g *LlamaSwapConfigGenerator) PreviewConfig(
     context stdctx.Context,
     serverId string,
-) apperror.Result[string] {
+) appfault.Result[string] {
     server, exists := g.serverRegistry.GetServer(serverId)
     if !exists {
-        return apperror.FailNew[string](
-            apperror.ErrServerNotFound,
+        return appfault.FailNew[string](
+            appfault.ErrServerNotFound,
             "server not found: "+serverId,
         )
     }
 
     configResult := g.GenerateFromServerConfig(context, server.Config)
     if configResult.HasError() {
-        return apperror.Fail[string](configResult.Error())
+        return appfault.Fail[string](configResult.Error())
     }
 
     data, err := yaml.Marshal(configResult.Value())
     if err != nil {
-        return apperror.FailWrap[string](
+        return appfault.FailWrap[string](
             err,
             "failed to marshal config to YAML",
         )
     }
 
-    return apperror.Ok(string(data))
+    return appfault.Ok(string(data))
 }
 
 // ValidateGeneratedConfig checks if the generated config is valid

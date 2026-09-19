@@ -203,7 +203,7 @@ type FixedIssue struct {
 func (v *SpecLoopValidator) RunLoop(
     context stdctx.Context,
     projectId string,
-) apperror.Result[SpecLoopResult] {
+) appfault.Result[SpecLoopResult] {
     // Initialize result
     result := &SpecLoopResult{
         Id:          uuid.New().String(),
@@ -219,7 +219,7 @@ func (v *SpecLoopValidator) RunLoop(
     // Get initial score
     initialReport, err := v.consistencyEngine.Validate(context, projectId)
     if err != nil {
-        return apperror.FailWrap[SpecLoopResult](
+        return appfault.FailWrap[SpecLoopResult](
             err,
             "E7100",
             "initial validation failed",
@@ -334,7 +334,7 @@ func (v *SpecLoopValidator) RunLoop(
     
     // Save result
     if err := v.loopRepo.SaveSpecLoopResult(context, result); err != nil {
-        return apperror.FailWrap[SpecLoopResult](
+        return appfault.FailWrap[SpecLoopResult](
             err,
             "E7100",
             "failed to save loop result",
@@ -356,7 +356,7 @@ func (v *SpecLoopValidator) RunLoop(
         StopReason:      result.StopReason,
     })
     
-    return apperror.Ok(*result)
+    return appfault.Ok(*result)
 }
 
 // runIteration executes a single validation-fix cycle
@@ -365,7 +365,7 @@ func (v *SpecLoopValidator) runIteration(
     projectId string,
     number int,
     currentScore float64,
-) apperror.Result[SpecIteration] {
+) appfault.Result[SpecIteration] {
     context, cancel := stdctx.WithTimeout(context, v.config.IterationTimeout)
     defer cancel()
     
@@ -378,7 +378,7 @@ func (v *SpecLoopValidator) runIteration(
     // 1. Run consistency check
     report, err := v.consistencyEngine.Validate(context, projectId)
     if err != nil {
-        return apperror.FailWrap[SpecIteration](
+        return appfault.FailWrap[SpecIteration](
             err,
             "E7101",
             "validation failed",
@@ -396,13 +396,13 @@ func (v *SpecLoopValidator) runIteration(
         iteration.CompletedAt = time.Now()
         iteration.DurationMs = int(time.Since(iteration.StartedAt).Milliseconds())
 
-        return apperror.Ok(*iteration)
+        return appfault.Ok(*iteration)
     }
     
     // 3. Generate fixes with AI
     fixes, tokensUsed, err := v.generateFixes(context, projectId, fixableIssues)
     if err != nil {
-        return apperror.FailWrap[SpecIteration](
+        return appfault.FailWrap[SpecIteration](
             err,
             "E7101",
             "fix generation failed",
@@ -439,7 +439,7 @@ func (v *SpecLoopValidator) runIteration(
     // 5. Re-validate to get new score
     newReport, err := v.consistencyEngine.Validate(context, projectId)
     if err != nil {
-        return apperror.FailWrap[SpecIteration](
+        return appfault.FailWrap[SpecIteration](
             err,
             "E7101",
             "post-fix validation failed",
@@ -450,7 +450,7 @@ func (v *SpecLoopValidator) runIteration(
     iteration.CompletedAt = time.Now()
     iteration.DurationMs = int(time.Since(iteration.StartedAt).Milliseconds())
     
-    return apperror.Ok(*iteration)
+    return appfault.Ok(*iteration)
 }
 
 // filterFixableIssues returns issues that can be auto-fixed
@@ -665,7 +665,7 @@ func (v *BuildLoopValidator) RunLoop(
     context stdctx.Context,
     projectId string,
     language string,
-) apperror.Result[BuildLoopResult] {
+) appfault.Result[BuildLoopResult] {
     result := &BuildLoopResult{
         Id:          uuid.New().String(),
         ProjectId:   projectId,
@@ -684,7 +684,7 @@ func (v *BuildLoopValidator) RunLoop(
         Options:  v.config.BrunOptions,
     })
     if err != nil {
-        return apperror.FailWrap[BuildLoopResult](
+        return appfault.FailWrap[BuildLoopResult](
             err,
             "E7102",
             "initial build check failed",
@@ -763,7 +763,7 @@ func (v *BuildLoopValidator) RunLoop(
     
     // Save result
     if err := v.loopRepo.SaveBuildLoopResult(context, result); err != nil {
-        return apperror.FailWrap[BuildLoopResult](
+        return appfault.FailWrap[BuildLoopResult](
             err,
             "E7102",
             "failed to save build loop result",
@@ -784,7 +784,7 @@ func (v *BuildLoopValidator) RunLoop(
         StopReason:      result.StopReason,
     })
     
-    return apperror.Ok(*result)
+    return appfault.Ok(*result)
 }
 
 // runBuildIteration executes one build-fix cycle
@@ -794,7 +794,7 @@ func (v *BuildLoopValidator) runBuildIteration(
     language string,
     number int,
     currentErrors int,
-) apperror.Result[BuildIteration] {
+) appfault.Result[BuildIteration] {
     context, cancel := stdctx.WithTimeout(context, v.config.IterationTimeout)
     defer cancel()
     
@@ -812,7 +812,7 @@ func (v *BuildLoopValidator) runBuildIteration(
         Options:  v.config.BrunOptions,
     })
     if err != nil {
-        return apperror.FailWrap[BuildIteration](
+        return appfault.FailWrap[BuildIteration](
             err,
             "E7103",
             "brun check failed",
@@ -827,7 +827,7 @@ func (v *BuildLoopValidator) runBuildIteration(
         iteration.CompletedAt = time.Now()
         iteration.DurationMs = int(time.Since(iteration.StartedAt).Milliseconds())
 
-        return apperror.Ok(*iteration)
+        return appfault.Ok(*iteration)
     }
     
     // 2. Convert errors to markdown for AI
@@ -836,7 +836,7 @@ func (v *BuildLoopValidator) runBuildIteration(
     // 3. Generate fixes with AI
     fixes, tokensUsed, err := v.generateCodeFixes(context, projectId, language, errorContext)
     if err != nil {
-        return apperror.FailWrap[BuildIteration](
+        return appfault.FailWrap[BuildIteration](
             err,
             "E7103",
             "fix generation failed",
@@ -872,7 +872,7 @@ func (v *BuildLoopValidator) runBuildIteration(
         Options:  v.config.BrunOptions,
     })
     if err != nil {
-        return apperror.FailWrap[BuildIteration](
+        return appfault.FailWrap[BuildIteration](
             err,
             "E7103",
             "post-fix check failed",
@@ -883,7 +883,7 @@ func (v *BuildLoopValidator) runBuildIteration(
     iteration.CompletedAt = time.Now()
     iteration.DurationMs = int(time.Since(iteration.StartedAt).Milliseconds())
     
-    return apperror.Ok(*iteration)
+    return appfault.Ok(*iteration)
 }
 
 // Fix generation prompt for code
@@ -922,7 +922,7 @@ type ParallelBuildValidator struct {
 func (v *ParallelBuildValidator) RunParallel(
     context stdctx.Context,
     projectId string,
-) apperror.Result[ParallelBuildResult] {
+) appfault.Result[ParallelBuildResult] {
     result := &ParallelBuildResult{
         Id:        uuid.New().String(),
         ProjectId: projectId,
@@ -957,7 +957,7 @@ func (v *ParallelBuildValidator) RunParallel(
     })
     
     if err := g.Wait(); err != nil {
-        return apperror.FailWrap[ParallelBuildResult](
+        return appfault.FailWrap[ParallelBuildResult](
             err,
             "E7104",
             "parallel build validation failed",
@@ -976,7 +976,7 @@ func (v *ParallelBuildValidator) RunParallel(
         FrontendSuccess: frontendResult.Success,
     })
     
-    return apperror.Ok(*result)
+    return appfault.Ok(*result)
 }
 
 type ParallelBuildResult struct {

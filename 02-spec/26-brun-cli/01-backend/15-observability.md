@@ -776,7 +776,7 @@ type TracerConfig struct {
 // InitTracerOutcome wraps the result of tracer initialization
 type InitTracerOutcome struct {
     Provider *sdktrace.TracerProvider
-    Err      *apperror.AppError
+    Err      *appfault.AppError
 }
 
 // InitTracer initializes OpenTelemetry tracing
@@ -793,7 +793,7 @@ func InitTracer(initContext context.Context, cfg TracerConfig) InitTracerOutcome
     exporter, exporterErr := otlptrace.New(initContext, client)
     if exporterErr != nil {
         return InitTracerOutcome{
-            Err: apperror.Wrap(exporterErr, "failed to create exporter"),
+            Err: appfault.Wrap(exporterErr, "failed to create exporter"),
         }
     }
     
@@ -806,7 +806,7 @@ func InitTracer(initContext context.Context, cfg TracerConfig) InitTracerOutcome
     )
     if resourceErr != nil {
         return InitTracerOutcome{
-            Err: apperror.Wrap(resourceErr, "failed to create resource"),
+            Err: appfault.Wrap(resourceErr, "failed to create resource"),
         }
     }
     
@@ -940,7 +940,7 @@ type LogConfig struct {
 // InitLoggerOutcome wraps the result of logger initialization
 type InitLoggerOutcome struct {
     Logger *zap.Logger
-    Err    *apperror.AppError
+    Err    *appfault.AppError
 }
 
 // InitLogger initializes the structured logger
@@ -971,7 +971,7 @@ func InitLogger(cfg LogConfig) InitLoggerOutcome {
         file, fileErr := os.OpenFile(cfg.OutputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
         if fileErr != nil {
             return InitLoggerOutcome{
-                Err: apperror.Wrap(fileErr, "failed to open log file"),
+                Err: appfault.Wrap(fileErr, "failed to open log file"),
             }
         }
         output = zapcore.AddSync(file)

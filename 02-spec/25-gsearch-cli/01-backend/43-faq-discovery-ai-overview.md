@@ -317,14 +317,14 @@ var sgeContentSelectors2026 = struct {
     },
 }
 
-func (e *AiOverviewExtractor) Extract(context stdctx.Context, query string) apperror.Result[AiOverview] {
+func (e *AiOverviewExtractor) Extract(context stdctx.Context, query string) appfault.Result[AiOverview] {
     // 1. Perform Google search with AI Overview enabled
     page := e.scraper.NavigateGoogle(query)
     
     // 2. Detect AI Overview presence using 2026 selectors
     aiBlock, confidence := e.findAiBlock2026(page)
     if aiBlock == nil {
-        return apperror.Ok(AiOverview{Available: false})
+        return appfault.Ok(AiOverview{Available: false})
     }
     
     // 3. Determine response type
@@ -345,7 +345,7 @@ func (e *AiOverviewExtractor) Extract(context stdctx.Context, query string) appe
     // 8. Check for AI disclaimer
     hasDisclaimer := e.hasAiDisclaimer(aiBlock)
     
-    return apperror.Ok(AiOverview{
+    return appfault.Ok(AiOverview{
         Available:        true,
         Summary:          summary,
         BulletPoints:     bullets,
@@ -437,7 +437,7 @@ type PaaExtractor struct {
     depth   int
 }
 
-func (e *PaaExtractor) Extract(context stdctx.Context, query string) apperror.Result[[]Faq] {
+func (e *PaaExtractor) Extract(context stdctx.Context, query string) appfault.Result[[]Faq] {
     faqs := []Faq{}
     seen := make(map[string]bool)
     
@@ -466,7 +466,7 @@ func (e *PaaExtractor) Extract(context stdctx.Context, query string) apperror.Re
         }
     }
     
-    return apperror.Ok(e.deduplicateFaqs(faqs))
+    return appfault.Ok(e.deduplicateFaqs(faqs))
 }
 
 // 2026 PAA Container Selectors (updated February 2026)
@@ -566,17 +566,17 @@ type FAQSchemaExtractor struct {
     httpClient *http.Client
 }
 
-func (e *FAQSchemaExtractor) ExtractFromUrl(context stdctx.Context, targetUrl string) apperror.Result[[]FAQ] {
+func (e *FAQSchemaExtractor) ExtractFromUrl(context stdctx.Context, targetUrl string) appfault.Result[[]FAQ] {
     // Fetch page
     resp, err := e.httpClient.Get(targetUrl)
     if err != nil {
-        return apperror.Fail[[]FAQ](apperror.Wrap(err, "fetch page"))
+        return appfault.Fail[[]FAQ](appfault.Wrap(err, "fetch page"))
     }
     defer resp.Body.Close()
     
     doc, err := goquery.NewDocumentFromReader(resp.Body)
     if err != nil {
-        return apperror.Fail[[]FAQ](apperror.Wrap(err, "parse document"))
+        return appfault.Fail[[]FAQ](appfault.Wrap(err, "parse document"))
     }
     
     faqs := []FAQ{}
@@ -621,7 +621,7 @@ func (e *FAQSchemaExtractor) ExtractFromUrl(context stdctx.Context, targetUrl st
     // Also extract semantic FAQ patterns in HTML
     faqs = append(faqs, e.extractSemanticFaqs(doc, targetUrl)...)
     
-    return apperror.OK(faqs)
+    return appfault.Ok(faqs)
 }
 
 func (e *FaqSchemaExtractor) extractSemanticFaqs(doc *goquery.Document, url string) []Faq {
@@ -678,7 +678,7 @@ type AnswerEnricher struct {
     engines            []string
 }
 
-func (e *AnswerEnricher) EnrichFaqs(context stdctx.Context, faqs []Faq) apperror.Result[[]Faq] {
+func (e *AnswerEnricher) EnrichFaqs(context stdctx.Context, faqs []Faq) appfault.Result[[]Faq] {
     enriched := make([]Faq, len(faqs))
     copy(enriched, faqs)
     
@@ -712,7 +712,7 @@ func (e *AnswerEnricher) EnrichFaqs(context stdctx.Context, faqs []Faq) apperror
     }
     
     wg.Wait()
-    return apperror.OK(enriched)
+    return appfault.Ok(enriched)
 }
 
 func (e *AnswerEnricher) selectBestAnswer(answers []Answer) *Answer {
@@ -1105,7 +1105,7 @@ type FaqGenerationBridge struct {
     seoGenerator    *SeoFaqGenerator
 }
 
-func (b *FaqGenerationBridge) GenerateSeoFaqs(context stdctx.Context, req SeoFaqRequest) apperror.Result[*SeoFaqResponse] {
+func (b *FaqGenerationBridge) GenerateSeoFaqs(context stdctx.Context, req SeoFaqRequest) appfault.Result[*SeoFaqResponse] {
     // 1. Discover FAQs from search engines
     discoveryResult := b.discoveryEngine.Discover(context, FaqDiscoveryRequest{
         Query:          req.Keywords,
@@ -1115,7 +1115,7 @@ func (b *FaqGenerationBridge) GenerateSeoFaqs(context stdctx.Context, req SeoFaq
         Limit:          20,
     })
     if discoveryResult.HasError() {
-        return apperror.Fail[*SeoFaqResponse](discoveryResult.Error())
+        return appfault.Fail[*SeoFaqResponse](discoveryResult.Error())
     }
     
     discovered := discoveryResult.Value()

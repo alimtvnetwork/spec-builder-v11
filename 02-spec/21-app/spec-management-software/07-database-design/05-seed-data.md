@@ -132,7 +132,7 @@ func SeedConfigs(db *gorm.DB) error {
         }).Create(&config).Error
         
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrSeedConfigFailed,
                 "seed config",
@@ -202,7 +202,7 @@ func SeedLlmServers(db *gorm.DB) error {
         }).Create(&server).Error
         
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrSeedLlmServerFailed,
                 "seed llm server",
@@ -311,7 +311,7 @@ func SeedPromptPresets(db *gorm.DB, promptsDir string) error {
             if pathutil.IsNotExistError(err) {
                 continue // Skip missing categories
             }
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrSeedReadCategoryFailed,
                 "read category",
@@ -336,7 +336,7 @@ func SeedPromptPresets(db *gorm.DB, promptsDir string) error {
 func seedPresetFromFile(db *gorm.DB, category, filePath string) error {
     content, err := pathutil.ReadFile(filePath)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedReadFileFailed,
             "read preset file",
@@ -346,7 +346,7 @@ func seedPresetFromFile(db *gorm.DB, category, filePath string) error {
     // Parse frontmatter
     parts := strings.SplitN(string(content), "---", 3)
     if len(parts) < 3 {
-        return apperror.New(
+        return appfault.New(
             ErrSeedPresetFormatInvalid,
             "missing frontmatter",
         ).WithPath(filePath)
@@ -354,7 +354,7 @@ func seedPresetFromFile(db *gorm.DB, category, filePath string) error {
     
     var frontmatter PresetFrontmatter
     if err := yaml.Unmarshal([]byte(parts[1]), &frontmatter); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedParseFrontmatterFailed,
             "parse frontmatter",
@@ -383,7 +383,7 @@ func seedPresetFromFile(db *gorm.DB, category, filePath string) error {
     }).Create(&preset).Error
     
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedPresetFailed,
             "seed preset",
@@ -705,7 +705,7 @@ var CodingGuidelinePresets = []PromptPreset{
 
 ### Error Handling
 - Always check errors
-- Wrap with context: apperror.Wrap(err, ErrCode, "operation")
+- Wrap with context: appfault.Wrap(err, ErrCode, "operation")
 - Define domain errors
 
 ### GORM Guidelines
@@ -948,7 +948,7 @@ func SeedSampleProjects(db *gorm.DB) error {
         }).Create(&project).Error
         
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrSeedProjectFailed,
                 "seed project",
@@ -1023,7 +1023,7 @@ func seedProjectFiles(db *gorm.DB, projectId string) error {
         }).Create(&file).Error
         
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrSeedFileFailed,
                 "seed file",
@@ -1078,7 +1078,7 @@ func seedSnapshots(db *gorm.DB, projectId string) error {
         }).Create(&snapshot).Error
         
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrSeedSnapshotFailed,
                 "seed snapshot",
@@ -1567,7 +1567,7 @@ func (s *Seeder) Run() error {
     
     // Phase 1: Always run - System configuration
     if err := SeedConfigs(s.db); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedConfigFailed,
             "config seeding",
@@ -1576,7 +1576,7 @@ func (s *Seeder) Run() error {
     log.Info().Msg("✓ Configs seeded")
     
     if err := SeedLlmServers(s.db); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedLlmServerFailed,
             "llm server seeding",
@@ -1586,7 +1586,7 @@ func (s *Seeder) Run() error {
     
     // Phase 2: Always run - Prompt presets
     if err := SeedPromptPresets(s.db, s.promptsDir); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeedPresetFailed,
             "prompt preset seeding",
@@ -1597,7 +1597,7 @@ func (s *Seeder) Run() error {
     // Phase 3-5: Only in development/test
     if s.env != "production" {
         if err := SeedSampleProjects(s.db); err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrSeedProjectFailed,
                 "sample project seeding",
@@ -1607,21 +1607,21 @@ func (s *Seeder) Run() error {
         
         for _, projectId := range []string{"sample-spec-mgmt", "sample-ecommerce", "sample-api"} {
             if err := SeedFileRegistry(s.db, projectId); err != nil {
-                return apperror.Wrap(
+                return appfault.Wrap(
                     err,
                     ErrSeedFileFailed,
                     "file registry seeding",
                 )
             }
             if err := SeedArtifactRegistry(s.db, projectId); err != nil {
-                return apperror.Wrap(
+                return appfault.Wrap(
                     err,
                     ErrSeedArtifactFailed,
                     "artifact registry seeding",
                 )
             }
             if err := seedSnapshots(s.db, projectId); err != nil {
-                return apperror.Wrap(
+                return appfault.Wrap(
                     err,
                     ErrSeedSnapshotFailed,
                     "snapshot seeding",

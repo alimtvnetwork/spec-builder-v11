@@ -91,7 +91,7 @@ import (
     "strings"
 
     "github.com/PuerkitoBio/goquery"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // ChallengeType represents the type of CAPTCHA challenge
@@ -364,7 +364,7 @@ import (
     "context"
     "time"
 
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // SolveResult contains the solver response
@@ -379,13 +379,13 @@ type SolveResult struct {
 // Solver defines the interface for CAPTCHA solving services
 type Solver interface {
     // Solve submits a CAPTCHA challenge and returns the token
-    Solve(context context.Context, challenge DetectionResult) apperror.Result[SolveResult]
+    Solve(context context.Context, challenge DetectionResult) appfault.Result[SolveResult]
     
     // GetBalance returns the current account balance in USD
-    GetBalance(context context.Context) apperror.Result[float64]
+    GetBalance(context context.Context) appfault.Result[float64]
     
     // ReportBad reports an incorrect solve (for refund/quality improvement)
-    ReportBad(context context.Context, taskId string) *apperror.AppError
+    ReportBad(context context.Context, taskId string) *appfault.AppError
     
     // Name returns the provider name
     Name() string
@@ -409,7 +409,7 @@ import (
     "time"
 
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // RouterConfig configures solver routing behavior
@@ -466,11 +466,11 @@ func NewSolverRouter(config RouterConfig, solvers ...Solver) *SolverRouter {
 }
 
 // Solve routes a challenge to the best available provider
-func (r *SolverRouter) Solve(context context.Context, challenge DetectionResult) apperror.Result[SolveResult] {
+func (r *SolverRouter) Solve(context context.Context, challenge DetectionResult) appfault.Result[SolveResult] {
     solveContext, cancel := context.WithTimeout(context, r.config.SolveTimeout)
     defer cancel()
 
-    var lastErr *apperror.AppError
+    var lastErr *appfault.AppError
 
     for _, name := range r.config.ProviderOrder {
         solver, ok := r.solvers[name]
@@ -505,7 +505,7 @@ func (r *SolverRouter) Solve(context context.Context, challenge DetectionResult)
                 Float64("cost", solved.Cost).
                 Msg("CAPTCHA solved successfully")
 
-            return apperror.Ok(solved)
+            return appfault.Ok(solved)
         }
 
         lastErr = solveResult.Error()
@@ -524,8 +524,8 @@ func (r *SolverRouter) Solve(context context.Context, challenge DetectionResult)
     }
 
     if lastErr != nil {
-        return apperror.Fail[SolveResult](
-            apperror.Wrap(
+        return appfault.Fail[SolveResult](
+            appfault.Wrap(
                 lastErr,
                 5090,
                 "all CAPTCHA solvers failed",
@@ -533,8 +533,8 @@ func (r *SolverRouter) Solve(context context.Context, challenge DetectionResult)
         )
     }
 
-    return apperror.Fail[SolveResult](
-        apperror.New(
+    return appfault.Fail[SolveResult](
+        appfault.New(
             5091,
             "no solvers available for challenge type: "+challenge.Type.String(),
         ),
@@ -558,7 +558,7 @@ import (
     "net/url"
     "time"
 
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "gsearch/pkg/captcha"
 )
 
@@ -603,13 +603,13 @@ func (t *TwoCaptcha) SupportsType(ct captcha.ChallengeType) bool {
 }
 
 // Solve submits a task and polls for the result
-func (t *TwoCaptcha) Solve(context context.Context, challenge captcha.DetectionResult) apperror.Result[captcha.SolveResult] {
+func (t *TwoCaptcha) Solve(context context.Context, challenge captcha.DetectionResult) appfault.Result[captcha.SolveResult] {
     start := time.Now()
 
     // Step 1: Submit task via in.php
     submitResult := t.submitTask(context, challenge)
     if submitResult.HasError() {
-        return apperror.Fail[captcha.SolveResult](submitResult.Error())
+        return appfault.Fail[captcha.SolveResult](submitResult.Error())
     }
 
     taskId := submitResult.Value()
@@ -617,10 +617,10 @@ func (t *TwoCaptcha) Solve(context context.Context, challenge captcha.DetectionR
     // Step 2: Poll res.php until solved
     pollResult := t.pollResult(context, taskId)
     if pollResult.HasError() {
-        return apperror.Fail[captcha.SolveResult](pollResult.Error())
+        return appfault.Fail[captcha.SolveResult](pollResult.Error())
     }
 
-    return apperror.Ok(captcha.SolveResult{
+    return appfault.Ok(captcha.SolveResult{
         Token:     pollResult.Value(),
         SolveTime: time.Since(start),
         Provider:  "2captcha",
@@ -630,7 +630,7 @@ func (t *TwoCaptcha) Solve(context context.Context, challenge captcha.DetectionR
 }
 
 // submitTask sends the CAPTCHA to 2Captcha's in.php endpoint
-func (t *TwoCaptcha) submitTask(context context.Context, challenge captcha.DetectionResult) apperror.Result[string] {
+func (t *TwoCaptcha) submitTask(context context.Context, challenge captcha.DetectionResult) appfault.Result[string] {
     params := url.Values{
         "key":       {t.apiKey},
         "json":      {"1"},
@@ -668,8 +668,8 @@ func (t *TwoCaptcha) submitTask(context context.Context, challenge captcha.Detec
 
     resp, httpErr := t.httpClient.Do(req)
     if httpErr != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(
+        return appfault.Fail[string](
+            appfault.Wrap(
                 httpErr,
                 5092,
                 "2captcha submit request failed",
@@ -685,8 +685,8 @@ func (t *TwoCaptcha) submitTask(context context.Context, challenge captcha.Detec
 
     decErr := json.NewDecoder(resp.Body).Decode(&result)
     if decErr != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(
+        return appfault.Fail[string](
+            appfault.Wrap(
                 decErr,
                 5093,
                 "2captcha submit response decode failed",
@@ -695,19 +695,19 @@ func (t *TwoCaptcha) submitTask(context context.Context, challenge captcha.Detec
     }
 
     if result.Status != 1 {
-        return apperror.Fail[string](
-            apperror.New(
+        return appfault.Fail[string](
+            appfault.New(
                 5094,
                 "2captcha submit rejected: "+result.Request,
             ),
         )
     }
 
-    return apperror.Ok(result.Request) // result.Request is the task ID
+    return appfault.Ok(result.Request) // result.Request is the task ID
 }
 
 // pollResult polls 2Captcha until the solve is ready
-func (t *TwoCaptcha) pollResult(context context.Context, taskId string) apperror.Result[string] {
+func (t *TwoCaptcha) pollResult(context context.Context, taskId string) appfault.Result[string] {
     params := url.Values{
         "key":    {t.apiKey},
         "action": {"get"},
@@ -718,8 +718,8 @@ func (t *TwoCaptcha) pollResult(context context.Context, taskId string) apperror
     for {
         select {
         case <-context.Done():
-            return apperror.Fail[string](
-                apperror.New(
+            return appfault.Fail[string](
+                appfault.New(
                     5095,
                     "2captcha solve timeout: context cancelled",
                 ),
@@ -756,11 +756,11 @@ func (t *TwoCaptcha) pollResult(context context.Context, taskId string) apperror
         }
 
         if result.Status == 1 {
-            return apperror.Ok(result.Request) // Token
+            return appfault.Ok(result.Request) // Token
         }
 
-        return apperror.Fail[string](
-            apperror.New(
+        return appfault.Fail[string](
+            appfault.New(
                 5096,
                 "2captcha solve error: "+result.Request,
             ),
@@ -768,7 +768,7 @@ func (t *TwoCaptcha) pollResult(context context.Context, taskId string) apperror
     }
 }
 
-func (t *TwoCaptcha) GetBalance(context context.Context) apperror.Result[float64] {
+func (t *TwoCaptcha) GetBalance(context context.Context) appfault.Result[float64] {
     req, _ := http.NewRequestWithContext(
         context,
         http.MethodGet,
@@ -778,8 +778,8 @@ func (t *TwoCaptcha) GetBalance(context context.Context) apperror.Result[float64
 
     resp, httpErr := t.httpClient.Do(req)
     if httpErr != nil {
-        return apperror.Fail[float64](
-            apperror.Wrap(
+        return appfault.Fail[float64](
+            appfault.Wrap(
                 httpErr,
                 5097,
                 "2captcha balance check failed",
@@ -794,10 +794,10 @@ func (t *TwoCaptcha) GetBalance(context context.Context) apperror.Result[float64
 
     json.NewDecoder(resp.Body).Decode(&result)
 
-    return apperror.Ok(result.Request)
+    return appfault.Ok(result.Request)
 }
 
-func (t *TwoCaptcha) ReportBad(context context.Context, taskId string) *apperror.AppError {
+func (t *TwoCaptcha) ReportBad(context context.Context, taskId string) *appfault.AppError {
     req, _ := http.NewRequestWithContext(
         context,
         http.MethodGet,
@@ -807,7 +807,7 @@ func (t *TwoCaptcha) ReportBad(context context.Context, taskId string) *apperror
 
     _, httpErr := t.httpClient.Do(req)
     if httpErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             httpErr,
             5098,
             "2captcha reportbad failed",
@@ -832,7 +832,7 @@ import (
     "net/http"
     "time"
 
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "gsearch/pkg/captcha"
 )
 
@@ -877,7 +877,7 @@ func (c *CapSolver) SupportsType(ct captcha.ChallengeType) bool {
 }
 
 // Solve uses CapSolver's createTask/getTaskResult flow
-func (c *CapSolver) Solve(context context.Context, challenge captcha.DetectionResult) apperror.Result[captcha.SolveResult] {
+func (c *CapSolver) Solve(context context.Context, challenge captcha.DetectionResult) appfault.Result[captcha.SolveResult] {
     start := time.Now()
 
     // Map challenge type to CapSolver task type
@@ -923,8 +923,8 @@ func (c *CapSolver) Solve(context context.Context, challenge captcha.DetectionRe
 
     resp, httpErr := c.httpClient.Do(req)
     if httpErr != nil {
-        return apperror.Fail[captcha.SolveResult](
-            apperror.Wrap(
+        return appfault.Fail[captcha.SolveResult](
+            appfault.Wrap(
                 httpErr,
                 5100,
                 "capsolver createTask failed",
@@ -941,8 +941,8 @@ func (c *CapSolver) Solve(context context.Context, challenge captcha.DetectionRe
 
     json.NewDecoder(resp.Body).Decode(&createResult)
     if createResult.ErrorId != 0 {
-        return apperror.Fail[captcha.SolveResult](
-            apperror.New(
+        return appfault.Fail[captcha.SolveResult](
+            appfault.New(
                 5101,
                 "capsolver task rejected: "+createResult.ErrorDescription,
             ),
@@ -952,10 +952,10 @@ func (c *CapSolver) Solve(context context.Context, challenge captcha.DetectionRe
     // Step 2: poll getTaskResult
     pollResult := c.pollResult(context, createResult.TaskId)
     if pollResult.HasError() {
-        return apperror.Fail[captcha.SolveResult](pollResult.Error())
+        return appfault.Fail[captcha.SolveResult](pollResult.Error())
     }
 
-    return apperror.Ok(captcha.SolveResult{
+    return appfault.Ok(captcha.SolveResult{
         Token:     pollResult.Value(),
         SolveTime: time.Since(start),
         Provider:  "capsolver",
@@ -1024,7 +1024,7 @@ import (
     "net/url"
     "strings"
 
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // TokenInjector submits solved tokens back to the search engine
@@ -1038,7 +1038,7 @@ func (inj *TokenInjector) InjectRecaptchaV2(
     context context.Context,
     challenge DetectionResult,
     solveResult SolveResult,
-) apperror.Result[*http.Response] {
+) appfault.Result[*http.Response] {
     formData := url.Values{
         "g-recaptcha-response": {solveResult.Token},
     }
@@ -1072,8 +1072,8 @@ func (inj *TokenInjector) InjectRecaptchaV2(
 
     resp, httpErr := inj.httpClient.Do(req)
     if httpErr != nil {
-        return apperror.Fail[*http.Response](
-            apperror.Wrap(
+        return appfault.Fail[*http.Response](
+            appfault.Wrap(
                 httpErr,
                 5110,
                 "reCAPTCHA v2 token injection failed",
@@ -1081,7 +1081,7 @@ func (inj *TokenInjector) InjectRecaptchaV2(
         )
     }
 
-    return apperror.Ok(resp)
+    return appfault.Ok(resp)
 }
 ```
 
@@ -1096,7 +1096,7 @@ func (inj *TokenInjector) InjectRecaptchaV3(
     challenge DetectionResult,
     solveResult SolveResult,
     originalRequest *http.Request,
-) apperror.Result[*http.Response] {
+) appfault.Result[*http.Response] {
     // Clone the original request and add the token
     req := originalRequest.Clone(context)
     
@@ -1110,8 +1110,8 @@ func (inj *TokenInjector) InjectRecaptchaV3(
 
     resp, httpErr := inj.httpClient.Do(req)
     if httpErr != nil {
-        return apperror.Fail[*http.Response](
-            apperror.Wrap(
+        return appfault.Fail[*http.Response](
+            appfault.Wrap(
                 httpErr,
                 5111,
                 "reCAPTCHA v3 token injection failed",
@@ -1119,7 +1119,7 @@ func (inj *TokenInjector) InjectRecaptchaV3(
         )
     }
 
-    return apperror.Ok(resp)
+    return appfault.Ok(resp)
 }
 ```
 
@@ -1288,7 +1288,7 @@ import (
     "strings"
 
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // Middleware wraps the HTTP pipeline with CAPTCHA detection, solving, and cookie replay
@@ -1314,15 +1314,15 @@ func (m *Middleware) Process(
     engine string,
     proxyIp string,
     doRequest func(*http.Request) (*http.Response, error), // EXEMPTED: http.RoundTripper callback
-) apperror.Result[*http.Response] {
+) appfault.Result[*http.Response] {
     // Step 1: Apply cached cookies if available
     m.cookieStore.ApplyToRequest(req, proxyIp)
 
     // Step 2: Execute the request
     resp, requestErr := doRequest(req)
     if requestErr != nil {
-        return apperror.Fail[*http.Response](
-            apperror.Wrap(
+        return appfault.Fail[*http.Response](
+            appfault.Wrap(
                 requestErr,
                 5120,
                 "HTTP request failed",
@@ -1341,7 +1341,7 @@ func (m *Middleware) Process(
             // No CAPTCHA — return the response (re-wrap body)
             resp.Body = io.NopCloser(strings.NewReader(bodyStr))
 
-            return apperror.Ok(resp)
+            return appfault.Ok(resp)
         }
 
         log.Warn().
@@ -1355,8 +1355,8 @@ func (m *Middleware) Process(
 
         // Step 4: Handle interstitial (no solver needed — use headless browser)
         if detection.Type == ChallengeInterstitial {
-            return apperror.Fail[*http.Response](
-                apperror.New(
+            return appfault.Fail[*http.Response](
+                appfault.New(
                     5121,
                     "interstitial challenge requires headless browser — escalate to stealth scraper",
                 ),
@@ -1366,8 +1366,8 @@ func (m *Middleware) Process(
         // Step 5: Solve
         solveResult := m.router.Solve(context, detection)
         if solveResult.HasError() {
-            return apperror.Fail[*http.Response](
-                apperror.Wrap(
+            return appfault.Fail[*http.Response](
+                appfault.Wrap(
                     solveResult.Error(),
                     5122,
                     "CAPTCHA solve failed",
@@ -1383,14 +1383,14 @@ func (m *Middleware) Process(
         case ChallengeRecaptchaV2, ChallengeHCaptcha, ChallengeTurnstile:
             injResult := m.injector.InjectRecaptchaV2(context, detection, solved)
             if injResult.HasError() {
-                return apperror.Fail[*http.Response](injResult.Error())
+                return appfault.Fail[*http.Response](injResult.Error())
             }
 
             injResp = injResult.Value()
         case ChallengeRecaptchaV3:
             injResult := m.injector.InjectRecaptchaV3(context, detection, solved, req)
             if injResult.HasError() {
-                return apperror.Fail[*http.Response](injResult.Error())
+                return appfault.Fail[*http.Response](injResult.Error())
             }
 
             injResp = injResult.Value()
@@ -1408,8 +1408,8 @@ func (m *Middleware) Process(
         }
     }
 
-    return apperror.Fail[*http.Response](
-        apperror.New(
+    return appfault.Fail[*http.Response](
+        appfault.New(
             5123,
             "CAPTCHA solve exhausted max retries",
         ),

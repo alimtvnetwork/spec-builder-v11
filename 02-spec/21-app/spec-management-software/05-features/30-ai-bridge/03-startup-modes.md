@@ -291,7 +291,7 @@ var daemonStartCmd = &cobra.Command{
         
         // Check if already running
         if daemon.IsRunning(cfg.Daemon.PidFile) {
-            return apperror.New(
+            return appfault.New(
                 ErrDaemonAlreadyRunning,
                 "daemon already running",
             )
@@ -339,10 +339,10 @@ type Server struct {
     config     *config.DaemonConfig
 }
 
-func NewServer(cfg *config.Config) apperror.Result[*Server] {
+func NewServer(cfg *config.Config) appfault.Result[*Server] {
     bridgeResult := bridge.New(cfg)
     if bridgeResult.IsFailure() {
-        return apperror.Fail[*Server](bridgeResult.Error())
+        return appfault.Fail[*Server](bridgeResult.Error())
     }
     
     s := &Server{
@@ -356,7 +356,7 @@ func NewServer(cfg *config.Config) apperror.Result[*Server] {
     }
     
     s.setupRoutes()
-    return apperror.OK(s)
+    return appfault.Ok(s)
 }
 
 func (s *Server) setupRoutes() {

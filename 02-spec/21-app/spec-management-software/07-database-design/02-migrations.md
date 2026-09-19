@@ -132,12 +132,12 @@ Phase 5: Deep Dependencies
 ### First-Time Database Creation
 
 ```go
-func InitializeDatabase(dbPath string) apperror.Result[*gorm.DB] {
+func InitializeDatabase(dbPath string) appfault.Result[*gorm.DB] {
     db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
         Logger: logger.Default.LogMode(logger.Info),
     })
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrDatabaseConnect,
             "connect database",
@@ -149,7 +149,7 @@ func InitializeDatabase(dbPath string) apperror.Result[*gorm.DB] {
     
     // Run migrations
     if err := RunMigrations(db); err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrDatabaseMigrate,
             "run migrations",
@@ -176,7 +176,7 @@ func ConfigureSQLite(db *gorm.DB) error {
     
     for _, pragma := range pragmas {
         if err := db.Exec(pragma).Error; err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrDatabasePragma,
                 "set pragma",
@@ -299,7 +299,7 @@ func MigrateProjectVisibility(db *gorm.DB) error {
 Always backup before migrations in production:
 
 ```go
-func BackupDatabase(dbPath string) apperror.Result[string] {
+func BackupDatabase(dbPath string) appfault.Result[string] {
     backupPath := fmt.Sprintf("%s.backup.%d", dbPath, time.Now().Unix())
     
     src, err := pathutil.Open(dbPath)

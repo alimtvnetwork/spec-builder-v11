@@ -597,13 +597,13 @@ type MockLlmClient struct {
     mock.Mock
 }
 
-func (m *MockLlmClient) Generate(context stdctx.Context, prompt string) apperror.Result[LLMResponse] {
+func (m *MockLlmClient) Generate(context stdctx.Context, prompt string) appfault.Result[LLMResponse] {
     args := m.Called(context, prompt)
     if args.Get(0) == nil {
-        return apperror.Fail[LLMResponse](args.Get(1).(*apperror.AppError))
+        return appfault.Fail[LLMResponse](args.Get(1).(*appfault.AppError))
     }
 
-    return apperror.Ok(*args.Get(0).(*LLMResponse))
+    return appfault.Ok(*args.Get(0).(*LLMResponse))
 }
 
 func NewMockLlmWithDefaultResponse(t *testing.T) *MockLlmClient {

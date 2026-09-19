@@ -244,7 +244,7 @@ import (
 )
 
 // NormalizeUrl converts URL to canonical form for deduplication
-func NormalizeUrl(rawUrl string) apperror.Result[string] {
+func NormalizeUrl(rawUrl string) appfault.Result[string] {
     u, err := url.Parse(strings.TrimSpace(rawUrl))
     if err != nil {
         return "", err
@@ -417,14 +417,14 @@ func (m *WorkerManager) SpawnWorker(config WorkerConfig) error {
     // Write config to temp file
     configData, err := json.Marshal(config)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrMarshalConfig,
             "marshal config",
         )
     }
     if err := pathutil.WriteFile(configPath, configData, 0600); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrWriteConfig,
             "write config",
@@ -437,7 +437,7 @@ func (m *WorkerManager) SpawnWorker(config WorkerConfig) error {
     cmd.Stderr = m.getLogWriter(config.JobId)
     
     if err := cmd.Start(); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrStartWorker,
             "start worker",
@@ -446,7 +446,7 @@ func (m *WorkerManager) SpawnWorker(config WorkerConfig) error {
     
     // Update job with PID
     if err := m.db.UpdateWorkerPid(config.JobId, cmd.Process.Pid); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrUpdateWorkerPid,
             "update pid",
@@ -745,7 +745,7 @@ func (i *SpecIngester) IngestSpec(context stdctx.Context) error {
     // Discover files
     files, err := i.discoverFiles()
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrDiscoverFiles,
             "discover files",
@@ -773,7 +773,7 @@ func (i *SpecIngester) IngestSpec(context stdctx.Context) error {
     return nil
 }
 
-func (i *SpecIngester) discoverFiles() apperror.Result[[]string] {
+func (i *SpecIngester) discoverFiles() appfault.Result[[]string] {
     var files []string
     
     err := filepath.WalkDir(i.config.SpecPath, func(path string, d fs.DirEntry, err error) error {
@@ -824,7 +824,7 @@ func (i *SpecIngester) discoverFiles() apperror.Result[[]string] {
 func (i *SpecIngester) processFile(context stdctx.Context, filePath string) error {
     content, err := pathutil.ReadFile(filePath)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrReadFile,
             "read file",
@@ -838,7 +838,7 @@ func (i *SpecIngester) processFile(context stdctx.Context, filePath string) erro
     for _, chunk := range chunks {
         embedding, err := i.embedder.Embed(context, chunk.Content)
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrEmbedChunk,
                 "embed chunk",
@@ -847,7 +847,7 @@ func (i *SpecIngester) processFile(context stdctx.Context, filePath string) erro
         
         // Insert into spec_knowledge.db
         if err := i.storeChunk(chunk, embedding); err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrStoreChunk,
                 "store chunk",
@@ -1038,11 +1038,11 @@ type ChunkResult struct {
     Metadata        any     
 }
 
-func (r *KnowledgeRetriever) Retrieve(context stdctx.Context, req RetrievalRequest) apperror.Result[*RetrievalResult] {
+func (r *KnowledgeRetriever) Retrieve(context stdctx.Context, req RetrievalRequest) appfault.Result[*RetrievalResult] {
     // Generate query embedding
     queryEmbedding, err := r.embedder.Embed(context, req.Query)
     if err != nil {
-        return apperror.Fail[*RetrievalResult](err)
+        return appfault.Fail[*RetrievalResult](err)
     }
     
     var allChunks []ChunkResult
@@ -1051,7 +1051,7 @@ func (r *KnowledgeRetriever) Retrieve(context stdctx.Context, req RetrievalReque
     if slices.Contains(req.SourceTypes, "02-spec") || len(req.SourceTypes) == 0 {
         specChunks, err := r.searchSpecKnowledge(queryEmbedding, req)
         if err != nil {
-            return apperror.Fail[*RetrievalResult](err)
+            return appfault.Fail[*RetrievalResult](err)
         }
         allChunks = append(allChunks, specChunks...)
     }
@@ -1060,7 +1060,7 @@ func (r *KnowledgeRetriever) Retrieve(context stdctx.Context, req RetrievalReque
     if slices.Contains(req.SourceTypes, "url") || len(req.SourceTypes) == 0 {
         urlChunks, err := r.searchUrlKnowledge(queryEmbedding, req)
         if err != nil {
-            return apperror.Fail[*RetrievalResult](err)
+            return appfault.Fail[*RetrievalResult](err)
         }
         allChunks = append(allChunks, urlChunks...)
     }
@@ -1074,7 +1074,7 @@ func (r *KnowledgeRetriever) Retrieve(context stdctx.Context, req RetrievalReque
         allChunks = allChunks[:req.TopK]
     }
     
-    return apperror.OK(&RetrievalResult{Chunks: allChunks})
+    return appfault.Ok(&RetrievalResult{Chunks: allChunks})
 }
 ```
 
@@ -1312,7 +1312,7 @@ The Knowledge Memory System integrates with the existing instruction pipeline fr
 
 ```go
 // In instruction processing
-func (p *InstructionProcessor) ProcessWithKnowledge(context stdctx.Context, input string) apperror.Result[*ProcessedInstruction] {
+func (p *InstructionProcessor) ProcessWithKnowledge(context stdctx.Context, input string) appfault.Result[*ProcessedInstruction] {
     // 1. Retrieve relevant knowledge
     knowledgeResult := p.knowledgeRetriever.Retrieve(context, RetrievalRequest{
         Query:       input,
@@ -1321,7 +1321,7 @@ func (p *InstructionProcessor) ProcessWithKnowledge(context stdctx.Context, inpu
         TopK:        10,
     })
     if knowledgeResult.IsFailure() {
-        return apperror.Fail[*ProcessedInstruction](knowledgeResult.Error())
+        return appfault.Fail[*ProcessedInstruction](knowledgeResult.Error())
     }
     knowledge := knowledgeResult.Value()
     

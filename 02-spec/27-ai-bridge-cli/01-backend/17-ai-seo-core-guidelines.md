@@ -227,41 +227,41 @@ type ValidationDataService struct {
     cache sync.Map
 }
 
-func (s *ValidationDataService) GetSeoStringArray(key SeoKey) apperror.Result[[]string] {
+func (s *ValidationDataService) GetSeoStringArray(key SeoKey) appfault.Result[[]string] {
     cacheKey := string(CategorySeo) + ":" + string(key)
     // EXEMPTED: typed accessor internal — cache stores known []string values (§7.2)
     if cached, ok := s.cache.Load(cacheKey); ok {
-        return apperror.Ok(cached.([]string))
+        return appfault.Ok(cached.([]string))
     }
     
     var data ValidationData
     err := s.db.Where("Category = ? AND Key = ?", string(CategorySeo), string(key)).First(&data).Error
     if err != nil {
-        return apperror.FailWrap[[]string](err, 9501, "SEO validation data lookup failed")
+        return appfault.FailWrap[[]string](err, 9501, "SEO validation data lookup failed")
     }
     
     var result []string
     json.Unmarshal([]byte(data.Value), &result)
     s.cache.Store(cacheKey, result)
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
-func (s *ValidationDataService) GetSeoNumber(key SeoKey) apperror.Result[float64] {
+func (s *ValidationDataService) GetSeoNumber(key SeoKey) appfault.Result[float64] {
     cacheKey := string(CategorySeo) + ":" + string(key)
     if cached, ok := s.cache.Load(cacheKey); ok {
-        return apperror.Ok(cached.(float64))
+        return appfault.Ok(cached.(float64))
     }
     
     var data ValidationData
     err := s.db.Where("Category = ? AND Key = ?", string(CategorySeo), string(key)).First(&data).Error
     if err != nil {
-        return apperror.FailWrap[float64](err, 9501, "SEO validation data lookup failed")
+        return appfault.FailWrap[float64](err, 9501, "SEO validation data lookup failed")
     }
     
     var result float64
     json.Unmarshal([]byte(data.Value), &result)
     s.cache.Store(cacheKey, result)
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 // Rule 1: Sentence variety

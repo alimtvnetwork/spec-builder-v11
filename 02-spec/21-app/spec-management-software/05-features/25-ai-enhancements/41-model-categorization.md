@@ -246,12 +246,12 @@ func NewModelSelector(cfg *config.DiagramModelsConfig) *ModelSelector {
 }
 
 // SelectModel chooses the best model for a diagram type
-func (s *ModelSelector) SelectModel(context stdctx.Context, diagramType DiagramType, preferences *UserPreferences) apperror.Result[SelectedModel] {
+func (s *ModelSelector) SelectModel(context stdctx.Context, diagramType DiagramType, preferences *UserPreferences) appfault.Result[SelectedModel] {
 	// Check user override
 	if preferences != nil && preferences.PreferredModel != "" {
 		modelResult := s.getModel(preferences.PreferredModel)
 		if modelResult.HasError() == false && s.isModelAvailable(context, modelResult.Value().Id) {
-			return apperror.Ok(*s.buildSelectedModel(&modelResult.Value()))
+			return appfault.Ok(*s.buildSelectedModel(&modelResult.Value()))
 		}
 	}
 	
@@ -264,7 +264,7 @@ func (s *ModelSelector) SelectModel(context stdctx.Context, diagramType DiagramT
 	// Try default model
 	modelResult := s.getModel(defaultId)
 	if modelResult.HasError() == false && s.isModelAvailable(context, modelResult.Value().Id) {
-		return apperror.Ok(*s.buildSelectedModel(&modelResult.Value()))
+		return appfault.Ok(*s.buildSelectedModel(&modelResult.Value()))
 	}
 	
 	// Try fallbacks
@@ -283,18 +283,18 @@ func (s *ModelSelector) SelectModel(context stdctx.Context, diagramType DiagramT
 		}
 		
 		if s.isModelAvailable(context, model.Id) {
-			return apperror.Ok(*s.buildSelectedModel(&model))
+			return appfault.Ok(*s.buildSelectedModel(&model))
 		}
 	}
 	
-	return apperror.FailNew[SelectedModel](
+	return appfault.FailNew[SelectedModel](
 		"E4510",
 		"no available model for diagram type",
 	)
 }
 
 // SelectModelByCategory chooses a model from a specific category
-func (s *ModelSelector) SelectModelByCategory(context stdctx.Context, category string, diagramType DiagramType) apperror.Result[SelectedModel] {
+func (s *ModelSelector) SelectModelByCategory(context stdctx.Context, category string, diagramType DiagramType) appfault.Result[SelectedModel] {
 	var candidates []config.ModelConfig
 	
 	for _, model := range s.config.Models {
@@ -313,24 +313,24 @@ func (s *ModelSelector) SelectModelByCategory(context stdctx.Context, category s
 	// Find first available
 	for _, model := range candidates {
 		if s.isModelAvailable(context, model.Id) {
-			return apperror.Ok(*s.buildSelectedModel(&model))
+			return appfault.Ok(*s.buildSelectedModel(&model))
 		}
 	}
 	
-	return apperror.FailNew[SelectedModel](
+	return appfault.FailNew[SelectedModel](
 		"E4511",
 		"no available model in category",
 	)
 }
 
-func (s *ModelSelector) getModel(id string) apperror.Result[config.ModelConfig] {
+func (s *ModelSelector) getModel(id string) appfault.Result[config.ModelConfig] {
 	for _, model := range s.config.Models {
 		if model.Id == id && model.Enabled {
-			return apperror.Ok(model)
+			return appfault.Ok(model)
 		}
 	}
 
-	return apperror.FailNew[config.ModelConfig](
+	return appfault.FailNew[config.ModelConfig](
 		"E4512",
 		"model not found",
 	)

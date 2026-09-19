@@ -452,7 +452,7 @@ type AudioMetadata struct {
 }
 
 // GetMetadata extracts audio metadata using ffprobe
-func (c *AudioChunker) GetMetadata(context stdctx.Context, filePath string) apperror.Result[AudioMetadata] {
+func (c *AudioChunker) GetMetadata(context stdctx.Context, filePath string) appfault.Result[AudioMetadata] {
     cmd := exec.CommandContext(context, "ffprobe",
         "-v", "quiet",
         "-print_format", "json",
@@ -463,15 +463,15 @@ func (c *AudioChunker) GetMetadata(context stdctx.Context, filePath string) appe
     
     output, err := cmd.Output()
     if err != nil {
-        return apperror.Fail[AudioMetadata](
-            apperror.Wrap(err, apperror.ErrExternalCommand, "ffprobe failed"),
+        return appfault.Fail[AudioMetadata](
+            appfault.Wrap(err, appfault.ErrExternalCommand, "ffprobe failed"),
         )
     }
     
     // Parse JSON output and extract metadata
     // ... (parsing implementation)
     
-    return apperror.Ok(AudioMetadata{})
+    return appfault.Ok(AudioMetadata{})
 }
 
 // ChunkResult represents a single chunk
@@ -490,7 +490,7 @@ func (c *AudioChunker) ChunkAudio(
     inputPath string,
     outputDir string,
     totalDuration float64,
-) apperror.Result[[]ChunkResult] {
+) appfault.Result[[]ChunkResult] {
     var chunks []ChunkResult
     chunkIndex := 1
     currentTime := 0.0
@@ -517,8 +517,8 @@ func (c *AudioChunker) ChunkAudio(
         
         cmd := exec.CommandContext(context, c.config.FFmpegPath, args...)
         if err := cmd.Run(); err != nil {
-            return apperror.Fail[[]ChunkResult](
-                apperror.Wrap(err, apperror.ErrExternalCommand, "chunk failed"),
+            return appfault.Fail[[]ChunkResult](
+                appfault.Wrap(err, appfault.ErrExternalCommand, "chunk failed"),
             )
         }
         
@@ -538,7 +538,7 @@ func (c *AudioChunker) ChunkAudio(
         currentTime = endTime
     }
     
-    return apperror.Ok(chunks)
+    return appfault.Ok(chunks)
 }
 ```
 
@@ -561,17 +561,17 @@ type PureGoChunker struct {
 }
 
 // ChunkWav splits a WAV file using pure Go
-func (c *PureGoChunker) ChunkWav(inputPath, outputDir string) apperror.Result[[]ChunkResult] {
+func (c *PureGoChunker) ChunkWav(inputPath, outputDir string) appfault.Result[[]ChunkResult] {
     f, err := pathutil.OpenFile(inputPath)
     if err != nil {
-        return apperror.Fail[[]ChunkResult](err)
+        return appfault.Fail[[]ChunkResult](err)
     }
     defer f.Close()
     
     decoder := wav.NewDecoder(f)
     if decoder.IsInvalidFile() {
-        return apperror.Fail[[]ChunkResult](
-            apperror.New(apperror.ErrInvalidInput, "invalid WAV file"),
+        return appfault.Fail[[]ChunkResult](
+            appfault.New(appfault.ErrInvalidInput, "invalid WAV file"),
         )
     }
     
@@ -596,7 +596,7 @@ func (c *PureGoChunker) ChunkWav(inputPath, outputDir string) apperror.Result[[]
         // Write chunk to file
         chunkPath := filepath.Join(outputDir, fmt.Sprintf("chunk_%03d.wav", chunkIndex))
         if err := c.writeWav(chunkPath, buf, sampleRate); err != nil {
-            return apperror.Fail[[]ChunkResult](err)
+            return appfault.Fail[[]ChunkResult](err)
         }
         
         chunks = append(chunks, ChunkResult{
@@ -608,7 +608,7 @@ func (c *PureGoChunker) ChunkWav(inputPath, outputDir string) apperror.Result[[]
         chunkIndex++
     }
     
-    return apperror.Ok(chunks)
+    return appfault.Ok(chunks)
 }
 ```
 
@@ -691,7 +691,7 @@ func (t *ParallelTranscriber) TranscribeChunks(
     context stdctx.Context,
     voiceFileId string,
     chunks []VoiceChunk,
-) apperror.Result[[]TranscriptionResult] {
+) appfault.Result[[]TranscriptionResult] {
     // Update voice file status
     t.voiceRepo.UpdateVoiceFileStatus(context, voiceFileId, "transcribing")
     
@@ -719,8 +719,8 @@ func (t *ParallelTranscriber) TranscribeChunks(
     // Wait for all chunks
     if err := g.Wait(); err != nil {
         t.voiceRepo.UpdateVoiceFileError(context, voiceFileId, err.Error())
-        return apperror.Fail[[]TranscriptionResult](
-            apperror.Wrap(err, apperror.ErrTranscription, "transcription failed"),
+        return appfault.Fail[[]TranscriptionResult](
+            appfault.Wrap(err, appfault.ErrTranscription, "transcription failed"),
         )
     }
     close(resultsChan)
@@ -736,7 +736,7 @@ func (t *ParallelTranscriber) TranscribeChunks(
         return results[i].ChunkId < results[j].ChunkId
     })
     
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 
 // --- Typed Event Payloads (no interface{} or map[string]any) ---
@@ -785,7 +785,7 @@ type VoiceProcessingCompletedEvent struct {
 func (t *ParallelTranscriber) transcribeChunk(
     context stdctx.Context,
     chunk VoiceChunk,
-) apperror.Result[TranscriptionResult] {
+) appfault.Result[TranscriptionResult] {
     // Update chunk status
     t.voiceRepo.UpdateChunkStatus(context, chunk.Id, "processing")
     t.eventBus.Publish("voice:chunk:started", VoiceChunkStartedEvent{
@@ -841,7 +841,7 @@ func (t *ParallelTranscriber) transcribeChunk(
             DurationMs: duration,
         })
         
-        return apperror.Ok(TranscriptionResult{
+        return appfault.Ok(TranscriptionResult{
             ChunkId:          chunk.Id,
             Text:             result.Text,
             Confidence:       result.Confidence,
@@ -859,8 +859,8 @@ func (t *ParallelTranscriber) transcribeChunk(
         Error:   lastErr.Error(),
     })
     
-    return apperror.Fail[TranscriptionResult](
-        apperror.Wrap(lastErr, apperror.ErrTranscription, "chunk failed after all attempts"),
+    return appfault.Fail[TranscriptionResult](
+        appfault.Wrap(lastErr, appfault.ErrTranscription, "chunk failed after all attempts"),
     )
 }
 ```
@@ -889,7 +889,7 @@ type TranscriptionCompiler struct {
 func (c *TranscriptionCompiler) CompileTranscription(
     context stdctx.Context,
     voiceFileId string,
-) apperror.Result[VoiceTranscription] {
+) appfault.Result[VoiceTranscription] {
     // Update status
     c.voiceRepo.UpdateVoiceFileStatus(context, voiceFileId, "compiling")
     startTime := time.Now()
@@ -897,7 +897,7 @@ func (c *TranscriptionCompiler) CompileTranscription(
     // Get all chunks in order
     chunks, err := c.voiceRepo.GetChunksByVoiceFileId(context, voiceFileId)
     if err != nil {
-        return apperror.Fail[VoiceTranscription](err)
+        return appfault.Fail[VoiceTranscription](err)
     }
     
     // Sort by index
@@ -964,7 +964,7 @@ func (c *TranscriptionCompiler) CompileTranscription(
     
     // Save transcription
     if err := c.voiceRepo.CreateTranscription(context, transcription); err != nil {
-        return apperror.Fail[VoiceTranscription](err)
+        return appfault.Fail[VoiceTranscription](err)
     }
     
     // Update voice file status
@@ -976,7 +976,7 @@ func (c *TranscriptionCompiler) CompileTranscription(
         DurationMs:  transcription.CompilationDurationMs,
     })
     
-    return apperror.Ok(*transcription)
+    return appfault.Ok(*transcription)
 }
 
 // formatText adds paragraph breaks and improves readability
@@ -1031,10 +1031,10 @@ func (s *VoiceProcessingService) ProcessVoiceInput(
     audioData []byte,
     fileName string,
     options ProcessOptions,
-) apperror.Result[VoiceFile] {
+) appfault.Result[VoiceFile] {
     // 1. Validate input
     if err := s.validateInput(audioData, fileName); err != nil {
-        return apperror.Fail[VoiceFile](err)
+        return appfault.Fail[VoiceFile](err)
     }
     
     // 2. Generate file metadata
@@ -1055,19 +1055,19 @@ func (s *VoiceProcessingService) ProcessVoiceInput(
     voiceDir := filepath.Dir(absolutePath)
     err := pathutil.EnsureDir(voiceDir)
     if err != nil {
-        return apperror.Fail[VoiceFile](err)
+        return appfault.Fail[VoiceFile](err)
     }
     
     // 5. Save audio file
     err = pathutil.WriteFile(absolutePath, audioData)
     if err != nil {
-        return apperror.Fail[VoiceFile](err)
+        return appfault.Fail[VoiceFile](err)
     }
     
     // 6. Get audio metadata
     metadataResult := s.chunker.GetMetadata(context, absolutePath)
     if metadataResult.IsError() {
-        return apperror.Fail[VoiceFile](metadataResult.Error)
+        return appfault.Fail[VoiceFile](metadataResult.Error)
     }
     metadata := metadataResult.Value
     
@@ -1092,7 +1092,7 @@ func (s *VoiceProcessingService) ProcessVoiceInput(
     }
     
     if err := s.voiceRepo.CreateVoiceFile(context, voiceFile); err != nil {
-        return apperror.Fail[VoiceFile](err)
+        return appfault.Fail[VoiceFile](err)
     }
     
     s.eventBus.Publish("voice:file:created", VoiceFileCreatedEvent{
@@ -1104,7 +1104,7 @@ func (s *VoiceProcessingService) ProcessVoiceInput(
     // 8. Start async processing pipeline
     go s.processVoiceAsync(stdctx.Background(), voiceFile)
     
-    return apperror.Ok(*voiceFile)
+    return appfault.Ok(*voiceFile)
 }
 
 // processVoiceAsync runs chunking, transcription, and compilation

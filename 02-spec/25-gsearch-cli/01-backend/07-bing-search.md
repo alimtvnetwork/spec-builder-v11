@@ -44,7 +44,7 @@ import (
     "net/url"
     "time"
     
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 type BingSearch struct {
@@ -82,10 +82,10 @@ func (b *BingSearch) IsAvailable() bool {
 ### Search Execution
 
 ```go
-func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]Result] {
+func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
     if !b.quota.CanMakeRequest() {
-        return apperror.Fail[[]Result](
-            apperror.New(
+        return appfault.Fail[[]Result](
+            appfault.New(
                 "Bing Search quota exhausted",
             ),
         )
@@ -103,8 +103,8 @@ func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOpt
     
     req, err := http.NewRequestWithContext(context, httpmethod.Get.String(), reqUrl, nil)
     if err != nil {
-        return apperror.Fail[[]Result](
-            apperror.Wrap(
+        return appfault.Fail[[]Result](
+            appfault.Wrap(
                 err,
                 "create request",
             ),
@@ -115,8 +115,8 @@ func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOpt
     
     resp, err := b.client.Do(req)
     if err != nil {
-        return apperror.Fail[[]Result](
-            apperror.Wrap(
+        return appfault.Fail[[]Result](
+            appfault.Wrap(
                 err,
                 "network error",
             ),
@@ -125,22 +125,22 @@ func (b *BingSearch) Search(context stdctx.Context, query string, opts SearchOpt
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
-        return apperror.Fail[[]Result](b.handleError(resp))
+        return appfault.Fail[[]Result](b.handleError(resp))
     }
     
     b.quota.RecordRequest()
     
     var bingResp BingSearchResponse
     if err := json.NewDecoder(resp.Body).Decode(&bingResp); err != nil {
-        return apperror.Fail[[]Result](
-            apperror.Wrap(
+        return appfault.Fail[[]Result](
+            appfault.Wrap(
                 err,
                 "decode response",
             ),
         )
     }
     
-    return apperror.OK(b.parseResults(bingResp))
+    return appfault.Ok(b.parseResults(bingResp))
 }
 ```
 
@@ -203,23 +203,23 @@ func (b *BingSearch) parseResults(resp BingSearchResponse) []Result {
 ### Error Handling
 
 ```go
-func (b *BingSearch) handleError(resp *http.Response) *apperror.AppError {
+func (b *BingSearch) handleError(resp *http.Response) *appfault.AppError {
     switch resp.StatusCode {
     case 401:
-        return apperror.New(
+        return appfault.New(
             "invalid API key",
         )
     case 403:
         b.quota.MarkExhausted()
-        return apperror.New(
+        return appfault.New(
             "Bing Search quota exhausted",
         )
     case 429:
-        return apperror.New(
+        return appfault.New(
             "rate limited",
         )
     default:
-        return apperror.New(
+        return appfault.New(
             "API error from Bing",
         )
     }
@@ -240,7 +240,7 @@ type BingSearchOptions struct {
     Site       string // Limit to specific site
 }
 
-func (b *BingSearch) SearchAdvanced(context stdctx.Context, query string, opts BingSearchOptions) apperror.Result[[]Result] {
+func (b *BingSearch) SearchAdvanced(context stdctx.Context, query string, opts BingSearchOptions) appfault.Result[[]Result] {
     params := url.Values{}
     params.Set("q", b.buildAdvancedQuery(query, opts))
     params.Set("count", strconv.Itoa(opts.MaxResults))
@@ -302,11 +302,11 @@ func (r *RateLimiter) Allow() bool {
     return true
 }
 
-func (r *RateLimiter) Wait(context stdctx.Context) *apperror.AppError {
+func (r *RateLimiter) Wait(context stdctx.Context) *appfault.AppError {
     for !r.Allow() {
         select {
         case <-context.Done():
-            return apperror.Wrap(
+            return appfault.Wrap(
                 context.Err(),
                 "rate limiter wait cancelled",
             )

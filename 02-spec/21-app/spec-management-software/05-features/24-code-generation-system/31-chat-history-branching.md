@@ -256,11 +256,11 @@ func (m *BranchManager) CreateBranch(
     sessionId string,
     forkPointMessageId string,
     name string,
-) apperror.Result[Branch] {
+) appfault.Result[Branch] {
     // Get fork point message
     var forkPoint ChatMessage
     if err := m.db.First(&forkPoint, "id = ?", forkPointMessageId).Error; err != nil {
-        return apperror.FailWrap[Branch](
+        return appfault.FailWrap[Branch](
             err,
             "E7300",
             "fork point not found",
@@ -281,7 +281,7 @@ func (m *BranchManager) CreateBranch(
     }
     
     if err := m.db.Create(branch).Error; err != nil {
-        return apperror.FailWrap[Branch](
+        return appfault.FailWrap[Branch](
             err,
             "E7300",
             "failed to create branch",
@@ -298,7 +298,7 @@ func (m *BranchManager) CreateBranch(
         ActiveBranchId: branch.Id,
     })
     
-    return apperror.Ok(*branch)
+    return appfault.Ok(*branch)
 }
 
 func (m *BranchManager) SwitchBranch(sessionId, branchId string) error {
@@ -317,10 +317,10 @@ func (m *BranchManager) SwitchBranch(sessionId, branchId string) error {
         Update("active_branch_id", branchId).Error
 }
 
-func (m *BranchManager) GetBranchMessages(branchId string) apperror.Result[[]ChatMessage] {
+func (m *BranchManager) GetBranchMessages(branchId string) appfault.Result[[]ChatMessage] {
     var branch Branch
     if err := m.db.First(&branch, "id = ?", branchId).Error; err != nil {
-        return apperror.FailWrap[[]ChatMessage](
+        return appfault.FailWrap[[]ChatMessage](
             err,
             "E7301",
             "branch not found",
@@ -351,17 +351,17 @@ func (m *BranchManager) GetBranchMessages(branchId string) apperror.Result[[]Cha
         currentBranchId = *b.ParentBranchId
     }
     
-    return apperror.Ok(messages)
+    return appfault.Ok(messages)
 }
 ```
 
 ### Regenerate Response (Create Sibling)
 
 ```go
-func (m *BranchManager) RegenerateResponse(messageId string) apperror.Result[ChatMessage] {
+func (m *BranchManager) RegenerateResponse(messageId string) appfault.Result[ChatMessage] {
     var original ChatMessage
     if err := m.db.First(&original, "id = ?", messageId).Error; err != nil {
-        return apperror.FailWrap[ChatMessage](
+        return appfault.FailWrap[ChatMessage](
             err,
             "E7302",
             "message not found",
@@ -369,7 +369,7 @@ func (m *BranchManager) RegenerateResponse(messageId string) apperror.Result[Cha
     }
     
     if original.Role != "assistant" {
-        return apperror.FailNew[ChatMessage](
+        return appfault.FailNew[ChatMessage](
             "E7302",
             "can only regenerate assistant messages",
         )
@@ -378,7 +378,7 @@ func (m *BranchManager) RegenerateResponse(messageId string) apperror.Result[Cha
     // Get the parent (user message)
     var userMessage ChatMessage
     if err := m.db.First(&userMessage, "id = ?", original.ParentId).Error; err != nil {
-        return apperror.FailWrap[ChatMessage](
+        return appfault.FailWrap[ChatMessage](
             err,
             "E7302",
             "parent message not found",
@@ -414,14 +414,14 @@ func (m *BranchManager) RegenerateResponse(messageId string) apperror.Result[Cha
     m.db.Model(&original).Update("sibling_ids", append(siblings, newResponse.Id))
     
     if err := m.db.Create(newResponse).Error; err != nil {
-        return apperror.FailWrap[ChatMessage](
+        return appfault.FailWrap[ChatMessage](
             err,
             "E7302",
             "failed to create regenerated response",
         )
     }
     
-    return apperror.Ok(*newResponse)
+    return appfault.Ok(*newResponse)
 }
 ```
 

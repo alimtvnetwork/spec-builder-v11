@@ -175,10 +175,10 @@ type Service struct {
 }
 
 // NewService creates a whisper service
-func NewService(cfg Config) apperror.Result[Service] {
+func NewService(cfg Config) appfault.Result[Service] {
 	// Validate model exists
 	if pathutil.IsMissing(cfg.ModelPath) {
-		return apperror.FailNew[Service](
+		return appfault.FailNew[Service](
 			"E9500",
 			fmt.Sprintf("model not found: %s", cfg.ModelPath),
 		)
@@ -186,7 +186,7 @@ func NewService(cfg Config) apperror.Result[Service] {
 	
 	// Validate binary exists
 	if pathutil.IsMissing(cfg.WhisperBinary) {
-		return apperror.FailNew[Service](
+		return appfault.FailNew[Service](
 			"E9500",
 			fmt.Sprintf("whisper binary not found: %s", cfg.WhisperBinary),
 		)
@@ -194,7 +194,7 @@ func NewService(cfg Config) apperror.Result[Service] {
 	
 	// Create temp directory
 	if err := pathutil.EnsureDir(cfg.TempDir); err != nil {
-		return apperror.FailWrap[Service](
+		return appfault.FailWrap[Service](
 			err,
 			"E9501",
 			"failed to create temp dir",
@@ -214,11 +214,11 @@ func NewService(cfg Config) apperror.Result[Service] {
 		go s.worker(i)
 	}
 	
-	return apperror.Ok(s)
+	return appfault.Ok(s)
 }
 
 // Transcribe processes audio file synchronously
-func (s *Service) Transcribe(context stdctx.Context, audioPath, format string) apperror.Result[TranscriptionResult] {
+func (s *Service) Transcribe(context stdctx.Context, audioPath, format string) appfault.Result[TranscriptionResult] {
 	job := &TranscriptionJob{
 		Id:        generateJobId(),
 		AudioPath: audioPath,
@@ -243,7 +243,7 @@ func (s *Service) Transcribe(context stdctx.Context, audioPath, format string) a
 	select {
 	case s.jobQueue <- job:
 	case <-context.Done():
-		return apperror.FailWrap[TranscriptionResult](
+		return appfault.FailWrap[TranscriptionResult](
 			context.Err(),
 			"E9502",
 			"transcription cancelled",
@@ -254,16 +254,16 @@ func (s *Service) Transcribe(context stdctx.Context, audioPath, format string) a
 	select {
 	case result := <-job.result:
 		if result.err != nil {
-			return apperror.FailWrap[TranscriptionResult](
+			return appfault.FailWrap[TranscriptionResult](
 				result.err,
 				"E9503",
 				"transcription failed",
 			)
 		}
 
-		return apperror.Ok(*result.transcription)
+		return appfault.Ok(*result.transcription)
 	case <-context.Done():
-		return apperror.FailWrap[TranscriptionResult](
+		return appfault.FailWrap[TranscriptionResult](
 			context.Err(),
 			"E9502",
 			"transcription cancelled",
@@ -272,7 +272,7 @@ func (s *Service) Transcribe(context stdctx.Context, audioPath, format string) a
 }
 
 // TranscribeAsync returns immediately with job Id
-func (s *Service) TranscribeAsync(audioPath, format string, callback func(apperror.Result[TranscriptionResult])) string {
+func (s *Service) TranscribeAsync(audioPath, format string, callback func(appfault.Result[TranscriptionResult])) string {
 	job := &TranscriptionJob{
 		Id:        generateJobId(),
 		AudioPath: audioPath,
@@ -292,19 +292,19 @@ func (s *Service) TranscribeAsync(audioPath, format string, callback func(apperr
 }
 
 // GetJobStatus returns current status of a job
-func (s *Service) GetJobStatus(jobId string) apperror.Result[JobStatus] {
+func (s *Service) GetJobStatus(jobId string) appfault.Result[JobStatus] {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	
 	job, ok := s.activeJobs[jobId]
 	if !ok {
-		return apperror.FailNew[JobStatus](
+		return appfault.FailNew[JobStatus](
 			"E9504",
 			fmt.Sprintf("job not found: %s", jobId),
 		)
 	}
 	
-	return apperror.Ok(job.Status)
+	return appfault.Ok(job.Status)
 }
 
 // Shutdown gracefully stops the service
@@ -374,11 +374,11 @@ func (s *Service) processJob(workerId int, job *TranscriptionJob) {
 	s.deliverResult(job, nil, lastErr)
 }
 
-func (s *Service) runTranscription(context stdctx.Context, job *TranscriptionJob) apperror.Result[TranscriptionResult] {
+func (s *Service) runTranscription(context stdctx.Context, job *TranscriptionJob) appfault.Result[TranscriptionResult] {
 	// Step 1: Preprocess audio to WAV
 	wavPath, err := s.preprocessor.ToWAV(context, job.AudioPath, job.Format)
 	if err != nil {
-		return apperror.FailWrap[TranscriptionResult](
+		return appfault.FailWrap[TranscriptionResult](
 			err,
 			"E9505",
 			"preprocessing failed",
@@ -404,7 +404,7 @@ func (s *Service) runTranscription(context stdctx.Context, job *TranscriptionJob
 	cmd.Stderr = &stderr
 	
 	if err := cmd.Run(); err != nil {
-		return apperror.FailWrap[TranscriptionResult](
+		return appfault.FailWrap[TranscriptionResult](
 			err,
 			"E9506",
 			fmt.Sprintf("whisper failed, stderr: %s", stderr.String()),
@@ -414,14 +414,14 @@ func (s *Service) runTranscription(context stdctx.Context, job *TranscriptionJob
 	// Step 3: Parse output
 	result, err := parseWhisperOutput(outputPath)
 	if err != nil {
-		return apperror.FailWrap[TranscriptionResult](
+		return appfault.FailWrap[TranscriptionResult](
 			err,
 			"E9507",
 			"parsing failed",
 		)
 	}
 	
-	return apperror.Ok(*result)
+	return appfault.Ok(*result)
 }
 
 func (s *Service) deliverResult(job *TranscriptionJob, result *TranscriptionResult, err error) {
@@ -472,7 +472,7 @@ func NewPreprocessor() *Preprocessor {
 }
 
 // ToWAV converts any audio format to 16kHz mono WAV
-func (p *Preprocessor) ToWAV(context stdctx.Context, inputPath, format string) apperror.Result[string] {
+func (p *Preprocessor) ToWAV(context stdctx.Context, inputPath, format string) appfault.Result[string] {
 	// Generate output path
 	outputPath := inputPath[:len(inputPath)-len(filepath.Ext(inputPath))] + "_converted.wav"
 	
@@ -492,18 +492,18 @@ func (p *Preprocessor) ToWAV(context stdctx.Context, inputPath, format string) a
 	cmd.Stderr = &stderr
 	
 	if err := cmd.Run(); err != nil {
-		return apperror.FailWrap[string](
+		return appfault.FailWrap[string](
 			err,
 			"E9508",
 			fmt.Sprintf("ffmpeg failed, stderr: %s", stderr.String()),
 		)
 	}
 	
-	return apperror.Ok(outputPath)
+	return appfault.Ok(outputPath)
 }
 
 // NormalizeAudio applies loudness normalization
-func (p *Preprocessor) NormalizeAudio(context stdctx.Context, inputPath string) apperror.Result[string] {
+func (p *Preprocessor) NormalizeAudio(context stdctx.Context, inputPath string) appfault.Result[string] {
 	outputPath := inputPath[:len(inputPath)-len(filepath.Ext(inputPath))] + "_normalized.wav"
 	
 	// Two-pass loudness normalization to -16 LUFS
@@ -523,18 +523,18 @@ func (p *Preprocessor) NormalizeAudio(context stdctx.Context, inputPath string) 
 	cmd.Stderr = &stderr
 	
 	if err := cmd.Run(); err != nil {
-		return apperror.FailWrap[string](
+		return appfault.FailWrap[string](
 			err,
 			"E9509",
 			"normalization failed",
 		)
 	}
 	
-	return apperror.Ok(outputPath)
+	return appfault.Ok(outputPath)
 }
 
 // GetDuration returns audio duration in seconds
-func (p *Preprocessor) GetDuration(context stdctx.Context, inputPath string) apperror.Result[float64] {
+func (p *Preprocessor) GetDuration(context stdctx.Context, inputPath string) appfault.Result[float64] {
 	cmd := exec.CommandContext(context, "ffprobe",
 		"-v", "quiet",
 		"-show_entries", "format=duration",
@@ -544,7 +544,7 @@ func (p *Preprocessor) GetDuration(context stdctx.Context, inputPath string) app
 	
 	output, err := cmd.Output()
 	if err != nil {
-		return apperror.FailWrap[float64](
+		return appfault.FailWrap[float64](
 			err,
 			"E9510",
 			"ffprobe failed",
@@ -554,14 +554,14 @@ func (p *Preprocessor) GetDuration(context stdctx.Context, inputPath string) app
 	var duration float64
 	fmt.Sscanf(string(bytes.TrimSpace(output)), "%f", &duration)
 	
-	return apperror.Ok(duration)
+	return appfault.Ok(duration)
 }
 
 // SplitAudio splits audio into chunks of specified duration
-func (p *Preprocessor) SplitAudio(context stdctx.Context, inputPath string, chunkSeconds int) apperror.Result[[]string] {
+func (p *Preprocessor) SplitAudio(context stdctx.Context, inputPath string, chunkSeconds int) appfault.Result[[]string] {
 	durationResult := p.GetDuration(context, inputPath)
 	if durationResult.HasError() {
-		return apperror.Fail[[]string](durationResult.Error())
+		return appfault.Fail[[]string](durationResult.Error())
 	}
 
 	duration := durationResult.Value()
@@ -634,10 +634,10 @@ type WhisperSegment struct {
 }
 
 // parseWhisperOutput reads and parses whisper.cpp JSON output
-func parseWhisperOutput(jsonPath string) apperror.Result[TranscriptionResult] {
+func parseWhisperOutput(jsonPath string) appfault.Result[TranscriptionResult] {
 	data, err := pathutil.ReadFile(jsonPath)
 	if err != nil {
-		return apperror.FailWrap[TranscriptionResult](
+		return appfault.FailWrap[TranscriptionResult](
 			err,
 			"E9510",
 			"failed to read whisper output",
@@ -646,7 +646,7 @@ func parseWhisperOutput(jsonPath string) apperror.Result[TranscriptionResult] {
 	
 	var output WhisperOutput
 	if err := json.Unmarshal(data, &output); err != nil {
-		return apperror.FailWrap[TranscriptionResult](
+		return appfault.FailWrap[TranscriptionResult](
 			err,
 			"E9511",
 			"failed to parse whisper output",
@@ -685,7 +685,7 @@ func parseWhisperOutput(jsonPath string) apperror.Result[TranscriptionResult] {
 		result.Duration = result.Segments[len(result.Segments)-1].End
 	}
 	
-	return apperror.Ok(*result)
+	return appfault.Ok(*result)
 }
 ```
 
@@ -738,11 +738,11 @@ type TranscriptionJob struct {
 	
 	// Internal fields
 	result   chan *jobResult
-	callback func(apperror.Result[TranscriptionResult])
+	callback func(appfault.Result[TranscriptionResult])
 }
 
 type jobResult struct {
-	result apperror.Result[TranscriptionResult]
+	result appfault.Result[TranscriptionResult]
 }
 ```
 

@@ -355,11 +355,11 @@ func NewUrlNormalizer(cfg UrlNormalizationConfig) *UrlNormalizer {
 }
 
 // Normalize applies all normalization rules to a URL
-func (n *UrlNormalizer) Normalize(rawUrl string) apperror.Result[string] {
+func (n *UrlNormalizer) Normalize(rawUrl string) appfault.Result[string] {
     // Parse URL
     u, err := url.Parse(rawUrl)
     if err != nil {
-        return apperror.Fail[string](err)
+        return appfault.Fail[string](err)
     }
     
     // 1. Lowercase scheme
@@ -397,7 +397,7 @@ func (n *UrlNormalizer) Normalize(rawUrl string) apperror.Result[string] {
     // 9. Remove default ports
     u.Host = n.removeDefaultPort(u.Host, u.Scheme)
     
-    return apperror.Ok(u.String())
+    return appfault.Ok(u.String())
 }
 
 func (n *URLNormalizer) normalizeTrailingSlash(path string) string {
@@ -565,11 +565,11 @@ func NewDeduplicationService(
 }
 
 // CheckUrl determines if URL should be crawled
-func (d *DeduplicationService) CheckUrl(rawUrl string) apperror.Result[UrlCheckResult] {
+func (d *DeduplicationService) CheckUrl(rawUrl string) appfault.Result[UrlCheckResult] {
     // 1. Normalize URL
     normalizeResult := d.normalizer.Normalize(rawUrl)
     if normalizeResult.HasError() {
-        return apperror.Fail[UrlCheckResult](normalizeResult.Error())
+        return appfault.Fail[UrlCheckResult](normalizeResult.Error())
     }
 
     normalizedUrl := normalizeResult.Value()
@@ -580,7 +580,7 @@ func (d *DeduplicationService) CheckUrl(rawUrl string) apperror.Result[UrlCheckR
     if d.visited[urlHash] {
         d.visitedMu.RUnlock()
 
-        return apperror.Ok(UrlCheckResult{
+        return appfault.Ok(UrlCheckResult{
             IsDuplicate: true,
             Reason:      "visited_this_session",
             ExistingUrl: normalizedUrl,
@@ -591,7 +591,7 @@ func (d *DeduplicationService) CheckUrl(rawUrl string) apperror.Result[UrlCheckR
     // 3. Check site-local database
     var siteVisit SiteCrawlUrl
     if err := d.siteDb.Where("url_hash = ?", urlHash).First(&siteVisit).Error; err == nil {
-        return apperror.Ok(UrlCheckResult{
+        return appfault.Ok(UrlCheckResult{
             IsDuplicate: true,
             Reason:      "exists_in_site_cache",
             ExistingUrl: siteVisit.Url,
@@ -605,7 +605,7 @@ func (d *DeduplicationService) CheckUrl(rawUrl string) apperror.Result[UrlCheckR
             // Check if we already have the content
             var pageContent PageContent
             if err := d.rootDb.Where("search_result_id = ?", searchResult.Id).First(&pageContent).Error; err == nil {
-                return apperror.Ok(UrlCheckResult{
+                return appfault.Ok(UrlCheckResult{
                     IsDuplicate: true,
                     Reason:      "exists_in_root_db",
                     ExistingUrl: normalizedUrl,
@@ -619,7 +619,7 @@ func (d *DeduplicationService) CheckUrl(rawUrl string) apperror.Result[UrlCheckR
     d.visited[urlHash] = true
     d.visitedMu.Unlock()
     
-    return apperror.Ok(UrlCheckResult{
+    return appfault.Ok(UrlCheckResult{
         IsDuplicate: false,
     })
 }
@@ -694,7 +694,7 @@ func NewRedirectHandler(
 }
 
 // FollowRedirects follows redirects and checks each hop for duplicates
-func (r *RedirectHandler) FollowRedirects(initialUrl string) apperror.Result[RedirectResult] {
+func (r *RedirectHandler) FollowRedirects(initialUrl string) appfault.Result[RedirectResult] {
     client := &http.Client{
         CheckRedirect: func(req *http.Request, via []*http.Request) error {
             if len(via) >= r.maxHops {
@@ -706,14 +706,14 @@ func (r *RedirectHandler) FollowRedirects(initialUrl string) apperror.Result[Red
     
     resp, err := client.Head(initialUrl)
     if err != nil {
-        return apperror.Fail[RedirectResult](err)
+        return appfault.Fail[RedirectResult](err)
     }
     defer resp.Body.Close()
     
     finalUrl := resp.Request.URL.String()
     normalizeResult := r.normalizer.Normalize(finalUrl)
     if normalizeResult.HasError() {
-        return apperror.Fail[RedirectResult](normalizeResult.Error())
+        return appfault.Fail[RedirectResult](normalizeResult.Error())
     }
 
     normalizedFinal := normalizeResult.Value()
@@ -721,11 +721,11 @@ func (r *RedirectHandler) FollowRedirects(initialUrl string) apperror.Result[Red
     // Check if final URL is a duplicate
     dupCheck := r.dedup.CheckUrl(normalizedFinal)
     if dupCheck.HasError() {
-        return apperror.Fail[RedirectResult](dupCheck.Error())
+        return appfault.Fail[RedirectResult](dupCheck.Error())
     }
     
     if dupCheck.Value().IsDuplicate {
-        return apperror.Ok(RedirectResult{
+        return appfault.Ok(RedirectResult{
             FinalUrl:      normalizedFinal,
             HopCount:      len(resp.Request.Response.Request.URL.String()),
             WasRedirected: initialUrl != finalUrl,
@@ -734,7 +734,7 @@ func (r *RedirectHandler) FollowRedirects(initialUrl string) apperror.Result[Red
         })
     }
     
-    return apperror.Ok(RedirectResult{
+    return appfault.Ok(RedirectResult{
         FinalUrl:      normalizedFinal,
         WasRedirected: initialUrl != finalUrl,
         ShouldSkip:    false,
@@ -919,16 +919,16 @@ func NewSitemapParser(normalizer *URLNormalizer) *SitemapParser {
 }
 
 // Parse fetches and parses a sitemap, handling both index and urlset formats
-func (p *SitemapParser) Parse(sitemapUrl string) apperror.Result[[]string] {
+func (p *SitemapParser) Parse(sitemapUrl string) appfault.Result[[]string] {
     resp, err := p.client.Get(sitemapUrl)
     if err != nil {
-        return apperror.Fail[[]string](err)
+        return appfault.Fail[[]string](err)
     }
     defer resp.Body.Close()
     
     data, err := io.ReadAll(resp.Body)
     if err != nil {
-        return apperror.Fail[[]string](err)
+        return appfault.Fail[[]string](err)
     }
     
     // Try parsing as sitemap index first
@@ -945,7 +945,7 @@ func (p *SitemapParser) Parse(sitemapUrl string) apperror.Result[[]string] {
     // Parse as regular urlset
     var urlSet UrlSet
     if err := xml.Unmarshal(data, &urlSet); err != nil {
-        return apperror.Fail[[]string](err)
+        return appfault.Fail[[]string](err)
     }
     
     urls := make([]string, 0, len(urlSet.Urls))
@@ -958,10 +958,10 @@ func (p *SitemapParser) Parse(sitemapUrl string) apperror.Result[[]string] {
         urls = append(urls, normalizeResult.Value())
     }
     
-    return apperror.Ok(urls)
+    return appfault.Ok(urls)
 }
 
-func (p *SitemapParser) parseIndex(index SitemapIndex) apperror.Result[[]string] {
+func (p *SitemapParser) parseIndex(index SitemapIndex) appfault.Result[[]string] {
     var allUrls []string
     
     for _, sitemap := range index.Sitemaps {
@@ -973,11 +973,11 @@ func (p *SitemapParser) parseIndex(index SitemapIndex) apperror.Result[[]string]
         allUrls = append(allUrls, result.Value()...)
     }
     
-    return apperror.Ok(allUrls)
+    return appfault.Ok(allUrls)
 }
 
 // DiscoverSitemap attempts to find sitemap.xml for a domain
-func (p *SitemapParser) DiscoverSitemap(domain string) apperror.Result[string] {
+func (p *SitemapParser) DiscoverSitemap(domain string) appfault.Result[string] {
     candidates := []string{
         "https://" + domain + "/sitemap.xml",
         "https://" + domain + "/sitemap_index.xml",
@@ -992,11 +992,11 @@ func (p *SitemapParser) DiscoverSitemap(domain string) apperror.Result[string] {
         resp.Body.Close()
         
         if resp.StatusCode == 200 {
-            return apperror.Ok(url)
+            return appfault.Ok(url)
         }
     }
     
-    return apperror.FailNew[string](
+    return appfault.FailNew[string](
         "E6703",
         "no sitemap found for domain",
     )
@@ -1093,10 +1093,10 @@ func NewSsrfProtector() *SsrfProtector {
 }
 
 // IsUrlSafe checks if URL is safe to fetch (not internal/private)
-func (s *SsrfProtector) IsUrlSafe(rawUrl string) apperror.Result[bool] {
+func (s *SsrfProtector) IsUrlSafe(rawUrl string) appfault.Result[bool] {
     u, err := url.Parse(rawUrl)
     if err != nil {
-        return apperror.Fail[bool](err)
+        return appfault.Fail[bool](err)
     }
     
     host := u.Hostname()
@@ -1104,26 +1104,26 @@ func (s *SsrfProtector) IsUrlSafe(rawUrl string) apperror.Result[bool] {
     // Check blocked hosts
     for _, blocked := range s.blockedHosts {
         if strings.EqualFold(host, blocked) {
-            return apperror.Ok(false)
+            return appfault.Ok(false)
         }
     }
     
     // Resolve hostname
     ips, err := net.LookupIP(host)
     if err != nil {
-        return apperror.Fail[bool](err)
+        return appfault.Fail[bool](err)
     }
     
     // Check all IPs against private networks
     for _, ip := range ips {
         for _, cidr := range s.privateCIDRs {
             if cidr.Contains(ip) {
-                return apperror.Ok(false)
+                return appfault.Ok(false)
             }
         }
     }
     
-    return apperror.Ok(true)
+    return appfault.Ok(true)
 }
 ```
 

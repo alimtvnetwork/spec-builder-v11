@@ -590,7 +590,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   func (v *PathValidator) Validate(path string) error {
       // Check length
       if utf8.RuneCountInString(path) > v.MaxLength {
-          return apperror.New(
+          return appfault.New(
               ErrPathTooLong,
               fmt.Sprintf("path exceeds maximum length of %d", v.MaxLength),
           )
@@ -598,7 +598,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
 
       // Check for traversal
       if strings.Contains(path, "..") {
-          return apperror.New(
+          return appfault.New(
               ErrPathTraversal,
               "path traversal not allowed",
           )
@@ -606,7 +606,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
 
       // Check for absolute path
       if strings.HasPrefix(path, "/") || strings.HasPrefix(path, "\\") {
-          return apperror.New(
+          return appfault.New(
               ErrAbsolutePath,
               "absolute paths not allowed",
           )
@@ -616,7 +616,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       for _, r := range path {
           for _, disallowed := range v.DisallowedChars {
               if r == disallowed {
-                  return apperror.New(
+                  return appfault.New(
                       ErrDisallowedChar,
                       fmt.Sprintf("path contains disallowed character: %c", r),
                   )
@@ -632,7 +632,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
 
   func ValidateUsername(username string) error {
       if !usernameRegex.MatchString(username) {
-          return apperror.New(
+          return appfault.New(
               ErrInvalidUsername,
               "username must start with letter, 3-50 chars, alphanumeric with _ or -",
           )
@@ -645,13 +645,13 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
 
   func ValidateEmail(email string) error {
       if len(email) > 255 {
-          return apperror.New(
+          return appfault.New(
               ErrEmailTooLong,
               "email exceeds maximum length",
           )
       }
       if !emailRegex.MatchString(email) {
-          return apperror.New(
+          return appfault.New(
               ErrInvalidEmail,
               "invalid email format",
           )
@@ -664,13 +664,13 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
 
   func ValidateSlug(slug string) error {
       if len(slug) < 2 || len(slug) > 100 {
-          return apperror.New(
+          return appfault.New(
               ErrInvalidSlug,
               "slug must be 2-100 characters",
           )
       }
       if !slugRegex.MatchString(slug) {
-          return apperror.New(
+          return appfault.New(
               ErrInvalidSlug,
               "slug must be lowercase with hyphens only",
           )
@@ -681,13 +681,13 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   // ContentValidator validates content for size and encoding
   func ValidateContent(content string, maxSize int) error {
       if len(content) > maxSize {
-          return apperror.New(
+          return appfault.New(
               ErrContentTooLarge,
               fmt.Sprintf("content exceeds maximum size of %d bytes", maxSize),
           )
       }
       if !utf8.ValidString(content) {
-          return apperror.New(
+          return appfault.New(
               ErrInvalidUtf8,
               "content must be valid UTF-8",
           )
@@ -993,7 +993,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       return db.gormDb.WithContext(context).Transaction(func(tx *gorm.DB) error {
           return fn(tx)
       })
-              return apperror.Wrap(
+              return appfault.Wrap(
                   rbErr,
                   ErrRollbackFailed,
                   fmt.Sprintf("rollback failed (original error: %v)", err),
@@ -1003,7 +1003,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       }
 
       if err := tx.Commit(); err != nil {
-          return apperror.Wrap(
+          return appfault.Wrap(
               err,
               ErrCommitTransaction,
               "commit transaction",
@@ -1014,7 +1014,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // WithTransactionResult executes a function and returns a result
-  func WithTransactionResult[T any](db *DB, context stdctx.Context, fn func(tx *gorm.DB) apperror.Result[T]) apperror.Result[T] {
+  func WithTransactionResult[T any](db *DB, context stdctx.Context, fn func(tx *gorm.DB) appfault.Result[T]) appfault.Result[T] {
       var result T
       
       err := db.gormDb.WithContext(context).Transaction(func(tx *gorm.DB) error {
@@ -1246,7 +1246,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   ```go
   // ORM Policy: All database operations use GORM. Raw SQL is forbidden.
   
-  func (r *ProjectRepo) List(ownerId string, params PageParams) apperror.Result[PageResult[models.Project]] {
+  func (r *ProjectRepo) List(ownerId string, params PageParams) appfault.Result[PageResult[models.Project]] {
       var total int64
       r.db.Model(&models.Project{}).Where("owner_id = ?", ownerId).Count(&total)
 
@@ -1339,7 +1339,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // Search uses GORM's Raw for FTS5 queries (only exception to ORM policy)
-  func (r *SearchRepo) Search(projectId, query string, limit int) apperror.Result[[]SearchResult] {
+  func (r *SearchRepo) Search(projectId, query string, limit int) appfault.Result[[]SearchResult] {
       var results []SearchResult
       
       // FTS5 queries require Raw - this is the only acceptable exception
@@ -1436,10 +1436,10 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // ValidateAndSave validates an uploaded audio file and saves to temp
-  func (v *AudioValidator) ValidateAndSave(file *multipart.FileHeader) apperror.Result[string] {
+  func (v *AudioValidator) ValidateAndSave(file *multipart.FileHeader) appfault.Result[string] {
       // Check file size
       if file.Size > v.config.MaxFileSize {
-          return "", apperror.New(
+          return "", appfault.New(
               ErrFileTooLarge,
               fmt.Sprintf("file size %d exceeds maximum %d bytes", file.Size, v.config.MaxFileSize),
           )
@@ -1448,7 +1448,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       // Check MIME type
       contentType := file.Header.Get("Content-Type")
       if !v.isAllowedFormat(contentType) {
-          return "", apperror.New(
+          return "", appfault.New(
               ErrUnsupportedFormat,
               "unsupported audio format: "+contentType,
           )
@@ -1457,7 +1457,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       // Open uploaded file
       src, err := file.Open()
       if err != nil {
-          return "", apperror.Wrap(
+          return "", appfault.Wrap(
               err,
               ErrOpenUploadedFile,
               "failed to open uploaded file",
@@ -1468,14 +1468,14 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       // Validate audio header (basic magic byte check)
       header := make([]byte, 12)
       if _, err := src.Read(header); err != nil {
-          return "", apperror.Wrap(
+          return "", appfault.Wrap(
               err,
               ErrReadFileHeader,
               "failed to read file header",
           )
       }
       if !v.validateMagicBytes(header, contentType) {
-          return "", apperror.New(
+          return "", appfault.New(
               ErrContentTypeMismatch,
               "file content does not match declared type",
           )
@@ -1494,7 +1494,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       // Save to temp file
       dst, err := pathutil.Create(tempPath)
       if err != nil {
-          return "", apperror.Wrap(
+          return "", appfault.Wrap(
               err,
               ErrCreateTempFile,
               "failed to create temp file",
@@ -1504,7 +1504,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
 
       if _, err := io.Copy(dst, src); err != nil {
           pathutil.Remove(tempPath)
-          return "", apperror.Wrap(
+          return "", appfault.Wrap(
               err,
               ErrSaveAudioFile,
               "failed to save audio file",
@@ -1543,7 +1543,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // ConvertToPCM16 converts audio to 16-bit PCM at 24kHz (placeholder - use ffmpeg in production)
-  func (v *AudioValidator) ConvertToPCM16(inputPath string) apperror.Result[[]byte] {
+  func (v *AudioValidator) ConvertToPCM16(inputPath string) appfault.Result[[]byte] {
       // For production, use ffmpeg:
       // ffmpeg -i input.wav -ar 24000 -ac 1 -f s16le -acodec pcm_s16le output.raw
       
@@ -1558,17 +1558,17 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
           return v.extractWavPCM(data)
       }
 
-      return nil, apperror.New(
+      return nil, appfault.New(
           ErrFormatRequiresConversion,
           "format requires ffmpeg conversion",
       )
   }
 
-  func (v *AudioValidator) extractWavPCM(data []byte) apperror.Result[[]byte] {
+  func (v *AudioValidator) extractWavPCM(data []byte) appfault.Result[[]byte] {
       // Find "data" chunk
       dataIndex := bytes.Index(data, []byte("data"))
       if dataIndex == -1 {
-          return nil, apperror.New(
+          return nil, appfault.New(
               ErrInvalidWav,
               "invalid WAV: no data chunk",
           )
@@ -1576,7 +1576,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
 
       // Read data chunk size (4 bytes after "data")
       if len(data) < dataIndex+8 {
-          return nil, apperror.New(
+          return nil, appfault.New(
               ErrInvalidWav,
               "invalid WAV: truncated data chunk",
           )
@@ -1703,7 +1703,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // CleanupNow triggers an immediate cleanup
-  func (s *AudioCleanupService) CleanupNow() apperror.Result[int] {
+  func (s *AudioCleanupService) CleanupNow() appfault.Result[int] {
       now := time.Now()
       deleted := 0
 
@@ -2304,7 +2304,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       return r.db.Create(preset).Error
   }
 
-  func (r *PresetRepo) GetById(id string) apperror.Result[models.Preset] {
+  func (r *PresetRepo) GetById(id string) appfault.Result[models.Preset] {
       var preset models.Preset
       err := r.db.First(&preset, "id = ?", id).Error
       if err != nil {
@@ -2313,7 +2313,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       return &preset, nil
   }
 
-  func (r *PresetRepo) ListByType(presetType models.PresetType) apperror.Result[[]models.Preset] {
+  func (r *PresetRepo) ListByType(presetType models.PresetType) appfault.Result[[]models.Preset] {
       var presets []models.Preset
       err := r.db.
           Where("type = ?", presetType).
@@ -2331,7 +2331,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       return r.db.Delete(&models.Preset{}, "id = ?", id).Error
   }
 
-  func (r *PresetRepo) GetDefault(presetType models.PresetType) apperror.Result[models.Preset] {
+  func (r *PresetRepo) GetDefault(presetType models.PresetType) appfault.Result[models.Preset] {
       var preset models.Preset
       err := r.db.
           Where("type = ?", presetType).
@@ -2555,7 +2555,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       return r.db.Create(g).Error
   }
 
-  func (r *GuidelineRepo) ListForProject(projectId *string, category *models.GuidelineCategory, activeOnly bool) apperror.Result[[]models.Guideline] {
+  func (r *GuidelineRepo) ListForProject(projectId *string, category *models.GuidelineCategory, activeOnly bool) appfault.Result[[]models.Guideline] {
       var guidelines []models.Guideline
       
       query := r.db.Where("project_id = ? OR project_id IS NULL", projectId)
@@ -2775,12 +2775,12 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       lockout     *LockoutService // Add this
   }
 
-  func (s *AuthService) Login(req LoginRequest, deviceInfo string) apperror.Result[LoginOutcome] {
+  func (s *AuthService) Login(req LoginRequest, deviceInfo string) appfault.Result[LoginOutcome] {
       identifier := req.Username
 
       // Check if locked out
       if locked, remaining := s.lockout.IsLocked(identifier); locked {
-          return nil, nil, apperror.New(
+          return nil, nil, appfault.New(
               ErrAccountLocked,
               fmt.Sprintf("account temporarily locked, try again in %s", remaining.Round(time.Second)),
           )
@@ -2800,7 +2800,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
       if !utils.VerifyPassword(user.PasswordHash, req.Password) {
           locked, duration := s.lockout.RecordFailedAttempt(identifier)
           if locked {
-              return nil, nil, apperror.New(
+              return nil, nil, appfault.New(
                   ErrAccountLocked,
                   fmt.Sprintf("too many failed attempts, account locked for %s", duration.Round(time.Second)),
               )
@@ -2892,7 +2892,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // CleanupNow triggers an immediate cleanup
-  func (s *SessionCleanupService) CleanupNow() apperror.Result[int64] {
+  func (s *SessionCleanupService) CleanupNow() appfault.Result[int64] {
       return s.sessionRepo.CleanExpired()
   }
   ```
@@ -2901,7 +2901,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   // ORM Policy: All database operations use GORM. Raw SQL is forbidden.
 
   // CleanRevokedSessions removes sessions revoked more than 7 days ago
-  func (r *SessionRepo) CleanRevokedSessions() apperror.Result[int64] {
+  func (r *SessionRepo) CleanRevokedSessions() appfault.Result[int64] {
       threshold := time.Now().Add(-7 * 24 * time.Hour).UTC()
       result := r.db.
           Where("revoked_at IS NOT NULL").
@@ -2912,7 +2912,7 @@ This document provides a phase-by-phase plan to fix all identified gaps in the i
   }
 
   // GetActiveSessions returns all active sessions for a user
-  func (r *SessionRepo) GetActiveSessions(userId string) apperror.Result[[]models.Session] {
+  func (r *SessionRepo) GetActiveSessions(userId string) appfault.Result[[]models.Session] {
       var sessions []models.Session
       now := time.Now().UTC()
       
@@ -6158,14 +6158,14 @@ type BusinessMetricsCollector struct {
     mu              sync.Mutex
     updateInterval  time.Duration
     stopCh          chan struct{}
-    getProjectCount func() apperror.Result[int64]
-    getSpecCount    func() apperror.Result[int64]
-    getActiveUsers  func() apperror.Result[int64]
-    getActiveSessions func() apperror.Result[int64]
+    getProjectCount func() appfault.Result[int64]
+    getSpecCount    func() appfault.Result[int64]
+    getActiveUsers  func() appfault.Result[int64]
+    getActiveSessions func() appfault.Result[int64]
 }
 
 func NewBusinessMetricsCollector(
-    getProjectCount, getSpecCount, getActiveUsers, getActiveSessions func() apperror.Result[int64],
+    getProjectCount, getSpecCount, getActiveUsers, getActiveSessions func() appfault.Result[int64],
 ) *BusinessMetricsCollector {
     return &BusinessMetricsCollector{
         updateInterval:    1 * time.Minute,

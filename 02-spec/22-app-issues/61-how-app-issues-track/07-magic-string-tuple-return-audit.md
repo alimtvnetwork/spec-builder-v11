@@ -12,7 +12,7 @@
 Project-wide scan of all Go API client code across CLI specs for two violation categories:
 
 1. **Magic string HTTP methods** — Raw `"GET"`, `"POST"`, `"DELETE"`, `"PATCH"` literals instead of the `HttpMethod` enum defined in `02-spec/26-brun-cli/01-backend/19-enum-architecture.md`
-2. **Tuple returns** — `(*Type, error)` instead of `apperror.Result[T]` or outcome structs with `*apperror.AppError`
+2. **Tuple returns** — `(*Type, error)` instead of `appfault.Result[T]` or outcome structs with `*appfault.AppError`
 
 ---
 
@@ -60,7 +60,7 @@ req, err := http.NewRequestWithContext(ctx, HttpMethod.Get.String(), url, nil)
 
 ### Standard
 
-Per memory `architecture/coding-standards/function-design`: Every function must return exactly one value — either `apperror.Result[T]` or a dedicated outcome struct containing `*apperror.AppError`. Per memory `architecture/coding-standards/go-error-handling`: Go application code must return `*apperror.AppError` exclusively; raw `error` is restricted to library boundaries.
+Per memory `architecture/coding-standards/function-design`: Every function must return exactly one value — either `appfault.Result[T]` or a dedicated outcome struct containing `*appfault.AppError`. Per memory `architecture/coding-standards/go-error-handling`: Go application code must return `*appfault.AppError` exclusively; raw `error` is restricted to library boundaries.
 
 ### Findings
 
@@ -80,9 +80,9 @@ Per memory `architecture/coding-standards/function-design`: Every function must 
 
 | Sub-violation | Description | ~Count |
 |---------------|-------------|--------|
-| `(*Type, error)` — raw `error` | Must be `*apperror.AppError` | ~1,250 |
-| `([]Type, error)` — slice + raw error | Must be `apperror.Result[[]Type]` | ~48 |
-| `(string, error)` — primitive + raw error | Must be `apperror.Result[string]` | ~30 |
+| `(*Type, error)` — raw `error` | Must be `*appfault.AppError` | ~1,250 |
+| `([]Type, error)` — slice + raw error | Must be `appfault.Result[[]Type]` | ~48 |
+| `(string, error)` — primitive + raw error | Must be `appfault.Result[string]` | ~30 |
 
 ### Required fix pattern
 
@@ -98,13 +98,13 @@ func (c *WordPressClient) CreatePost(req PostCreateRequest) (*Post, error) {
 }
 
 // ✅ COMPLIANT — Result wrapper with AppError
-func (c *WordPressClient) CreatePost(req PostCreateRequest) apperror.Result[Post] {
+func (c *WordPressClient) CreatePost(req PostCreateRequest) appfault.Result[Post] {
     resp := c.doRequest(HttpMethod.Post, "/posts", req)
     if resp.HasError() {
-        return apperror.Fail[Post](resp.Error())
+        return appfault.Fail[Post](resp.Error())
     }
     // ...
-    return apperror.Ok(post)
+    return appfault.Ok(post)
 }
 ```
 
@@ -140,7 +140,7 @@ func (c *WordPressClient) CreatePost(req PostCreateRequest) apperror.Result[Post
 
 ### Prevention rule
 
-All new Go function signatures in spec code examples **must** use `apperror.Result[T]` (or outcome struct with `*apperror.AppError`) and the `HttpMethod` enum — no raw `error` returns or string HTTP method literals.
+All new Go function signatures in spec code examples **must** use `appfault.Result[T]` (or outcome struct with `*appfault.AppError`) and the `HttpMethod` enum — no raw `error` returns or string HTTP method literals.
 
 ### Acceptance criteria
 

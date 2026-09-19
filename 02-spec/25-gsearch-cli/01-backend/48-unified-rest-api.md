@@ -657,7 +657,7 @@ func RegisterSwagger(router *gin.Engine, cfg ApiConfig) {
 }
 
 // GenerateOpenApiSpec creates spec from route definitions
-func GenerateOpenApiSpec(router *gin.Engine) apperror.Result[[]byte] {
+func GenerateOpenApiSpec(router *gin.Engine) appfault.Result[[]byte] {
     spec := openapi3.T{
         OpenAPI: "3.1.0",
         Info: &openapi3.Info{
@@ -701,7 +701,7 @@ func NewRequestValidator() *RequestValidator {
 }
 
 // ValidateRequest validates request body using generics
-func ValidateRequest[T any](v *RequestValidator, c *gin.Context) apperror.Result[T] {
+func ValidateRequest[T any](v *RequestValidator, c *gin.Context) appfault.Result[T] {
     var req T
     if err := c.ShouldBindJSON(&req); err != nil {
         return &ValidationError{

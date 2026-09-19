@@ -534,7 +534,7 @@ type TracerShutdownFunc func(shutdownContext context.Context) error
 // InitTracerOutcome wraps the result of tracer initialization
 type InitTracerOutcome struct {
     Shutdown TracerShutdownFunc
-    Err      *apperror.AppError
+    Err      *appfault.AppError
 }
 
 // InitTracer initializes OpenTelemetry tracing
@@ -556,7 +556,7 @@ func InitTracer(cfg TracerConfig) InitTracerOutcome {
     )
     if exporterErr != nil {
         return InitTracerOutcome{
-            Err: apperror.Wrap(exporterErr, "failed to create OTLP exporter"),
+            Err: appfault.Wrap(exporterErr, "failed to create OTLP exporter"),
         }
     }
     
@@ -569,7 +569,7 @@ func InitTracer(cfg TracerConfig) InitTracerOutcome {
     )
     if resourceErr != nil {
         return InitTracerOutcome{
-            Err: apperror.Wrap(resourceErr, "failed to create resource"),
+            Err: appfault.Wrap(resourceErr, "failed to create resource"),
         }
     }
     
@@ -619,7 +619,7 @@ import (
 var tracer = otel.Tracer("gosearch/search")
 
 // Execute performs a search with tracing
-func (e *SearchEngine) Execute(searchContext context.Context, query string) apperror.Result[[]Result] {
+func (e *SearchEngine) Execute(searchContext context.Context, query string) appfault.Result[[]Result] {
     searchContext, span := tracer.Start(searchContext, "search.execute",
         trace.WithAttributes(
             attribute.String("search.query", query),
@@ -656,7 +656,7 @@ func (e *SearchEngine) Execute(searchContext context.Context, query string) appe
 }
 
 // executeSearch performs the actual search request
-func (e *SearchEngine) executeSearch(searchContext context.Context, query string) apperror.Result[[]Result] {
+func (e *SearchEngine) executeSearch(searchContext context.Context, query string) appfault.Result[[]Result] {
     searchContext, span := tracer.Start(searchContext, "search.engine.request",
         trace.WithAttributes(
             attribute.String("search.engine", e.Name()),
@@ -743,7 +743,7 @@ type StandardFields struct {
 }
 
 // NewLogger creates a configured zap logger
-func NewLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
+func NewLogger(cfg LogConfig) appfault.Result[*zap.Logger] {
     var zapCfg zap.Config
     
     if cfg.Development {
@@ -755,8 +755,8 @@ func NewLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
     // Set level
     level, levelErr := zapcore.ParseLevel(cfg.Level)
     if levelErr != nil {
-        return apperror.Fail[*zap.Logger](
-            apperror.Wrap(
+        return appfault.Fail[*zap.Logger](
+            appfault.Wrap(
                 levelErr,
                 "invalid log level: "+cfg.Level,
             ),
@@ -780,15 +780,15 @@ func NewLogger(cfg LogConfig) apperror.Result[*zap.Logger] {
     
     logger, buildErr := zapCfg.Build()
     if buildErr != nil {
-        return apperror.Fail[*zap.Logger](
-            apperror.Wrap(
+        return appfault.Fail[*zap.Logger](
+            appfault.Wrap(
                 buildErr,
                 "build zap logger",
             ),
         )
     }
 
-    return apperror.Ok(logger)
+    return appfault.Ok(logger)
 }
 ```
 

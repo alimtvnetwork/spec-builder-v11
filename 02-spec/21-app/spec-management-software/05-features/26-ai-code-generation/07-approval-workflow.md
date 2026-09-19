@@ -77,7 +77,7 @@ func (aw *ApprovalWorkflow) CreateApprovalRequest(
     taskName string,
     description string,
     code string,
-) apperror.Result[ApprovalRequest] {
+) appfault.Result[ApprovalRequest] {
     request := &ApprovalRequest{
         Id:          uuid.New().String(),
         TaskName:    taskName,
@@ -124,7 +124,7 @@ type PlannedOperation struct {
     Reversible  bool
 }
 
-func (aw *ApprovalWorkflow) RunDryRun(requestId string) apperror.Result[DryRunResult] {
+func (aw *ApprovalWorkflow) RunDryRun(requestId string) appfault.Result[DryRunResult] {
     request, err := aw.getRequest(requestId)
     if err != nil {
         return nil, err
@@ -240,14 +240,14 @@ func (aw *ApprovalWorkflow) ProcessDecision(decision ApprovalDecision) error {
 ### Phase 4: Execution
 
 ```go
-func (aw *ApprovalWorkflow) Execute(requestId string) apperror.Result[ExecutionResult] {
+func (aw *ApprovalWorkflow) Execute(requestId string) appfault.Result[ExecutionResult] {
     request, err := aw.getRequest(requestId)
     if err != nil {
         return nil, err
     }
     
     if request.Status != StatusApproved {
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrRequestNotApproved,
             "request not approved: status="+string(request.Status),
         )

@@ -365,7 +365,7 @@ type ScraperConfig struct {
     ScrollPause     time.Duration
 }
 
-func (s *MapsScraper) Search(context stdctx.Context, req MapsSearchRequest) apperror.Result[*MapsSearchResult] {
+func (s *MapsScraper) Search(context stdctx.Context, req MapsSearchRequest) appfault.Result[*MapsSearchResult] {
     // Build search URL
     searchUrl := s.buildSearchUrl(req.Query, req.Location)
     
@@ -377,8 +377,8 @@ func (s *MapsScraper) Search(context stdctx.Context, req MapsSearchRequest) appe
     
     // Navigate
     if err := page.Navigate(searchUrl); err != nil {
-        return apperror.Fail[*MapsSearchResult](
-            apperror.Wrap(
+        return appfault.Fail[*MapsSearchResult](
+            appfault.Wrap(
                 err,
                 "navigation failed",
             ),
@@ -387,8 +387,8 @@ func (s *MapsScraper) Search(context stdctx.Context, req MapsSearchRequest) appe
     
     // Wait for results
     if err := page.WaitLoad(); err != nil {
-        return apperror.Fail[*MapsSearchResult](
-            apperror.Wrap(
+        return appfault.Fail[*MapsSearchResult](
+            appfault.Wrap(
                 err,
                 "page load failed",
             ),
@@ -397,8 +397,8 @@ func (s *MapsScraper) Search(context stdctx.Context, req MapsSearchRequest) appe
     
     // Check for CAPTCHA
     if s.detectCaptcha(page) {
-        return apperror.Fail[*MapsSearchResult](
-            apperror.New(
+        return appfault.Fail[*MapsSearchResult](
+            appfault.New(
                 "CAPTCHA detected on Google Maps",
             ),
         )
@@ -407,7 +407,7 @@ func (s *MapsScraper) Search(context stdctx.Context, req MapsSearchRequest) appe
     // Extract businesses from current view
     businesses := s.extractBusinesses(page)
     
-    return apperror.OK(&MapsSearchResult{
+    return appfault.Ok(&MapsSearchResult{
         Businesses: businesses,
         HasMore:    s.hasMoreResults(page),
     })
@@ -561,14 +561,14 @@ type PaginationHandler struct {
     delay       time.Duration
 }
 
-func (p *PaginationHandler) CollectAll(context stdctx.Context, req MapsSearchRequest, resultChan chan<- Business) *apperror.AppError {
+func (p *PaginationHandler) CollectAll(context stdctx.Context, req MapsSearchRequest, resultChan chan<- Business) *appfault.AppError {
     collected := 0
     page := 0
     
     for collected < req.Limit {
         select {
         case <-context.Done():
-            return apperror.Wrap(
+            return appfault.Wrap(
                 context.Err(),
                 "collection cancelled",
             )
@@ -643,7 +643,7 @@ func NewSchedulerManager(db *sql.DB, scraper *MapsScraper, enricher *ContactAggr
     return manager
 }
 
-func (m *SchedulerManager) CreateJob(req MapsSearchRequest) apperror.Result[*MapsJob] {
+func (m *SchedulerManager) CreateJob(req MapsSearchRequest) appfault.Result[*MapsJob] {
     job := &MapsJob{
         Id:              generateJobId(),
         Query:           req.Query,
@@ -671,8 +671,8 @@ func (m *SchedulerManager) CreateJob(req MapsSearchRequest) apperror.Result[*Map
     
     // Save to database
     if err := m.saveJob(job); err != nil {
-        return apperror.Fail[*MapsJob](
-            apperror.Wrap(
+        return appfault.Fail[*MapsJob](
+            appfault.Wrap(
                 err,
                 "save job",
             ),
@@ -681,24 +681,24 @@ func (m *SchedulerManager) CreateJob(req MapsSearchRequest) apperror.Result[*Map
     
     // Schedule job
     if err := m.scheduleJob(job); err != nil {
-        return apperror.Fail[*MapsJob](
-            apperror.Wrap(
+        return appfault.Fail[*MapsJob](
+            appfault.Wrap(
                 err,
                 "schedule job",
             ),
         )
     }
     
-    return apperror.OK(job)
+    return appfault.Ok(job)
 }
 
-func (m *SchedulerManager) scheduleJob(job *MapsJob) *apperror.AppError {
+func (m *SchedulerManager) scheduleJob(job *MapsJob) *appfault.AppError {
     // Create gocron job
     cronJob, err := m.scheduler.Every(job.IntervalSeconds).Seconds().Do(func() {
         m.executeJobBatch(job.Id)
     })
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "create gocron job",
         )
@@ -880,17 +880,17 @@ func (m *SchedulerManager) handleJobError(job *MapsJob, err error) {
 ### 6.2 Job Control
 
 ```go
-func (m *SchedulerManager) PauseJob(jobId string) *apperror.AppError {
+func (m *SchedulerManager) PauseJob(jobId string) *appfault.AppError {
     job, err := m.loadJob(jobId)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "load job for pause",
         )
     }
     
     if job.Status != JobStatusRunning && job.Status != JobStatusQueued {
-        return apperror.New(
+        return appfault.New(
             "job not in running or queued state",
         )
     }
@@ -911,17 +911,17 @@ func (m *SchedulerManager) PauseJob(jobId string) *apperror.AppError {
     return m.updateJobStatus(job)
 }
 
-func (m *SchedulerManager) ResumeJob(jobId string) *apperror.AppError {
+func (m *SchedulerManager) ResumeJob(jobId string) *appfault.AppError {
     job, err := m.loadJob(jobId)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "load job for resume",
         )
     }
     
     if job.Status != JobStatusPaused {
-        return apperror.New(
+        return appfault.New(
             "job not in paused state",
         )
     }
@@ -936,10 +936,10 @@ func (m *SchedulerManager) ResumeJob(jobId string) *apperror.AppError {
     return m.scheduleJob(job)
 }
 
-func (m *SchedulerManager) CancelJob(jobId string) *apperror.AppError {
+func (m *SchedulerManager) CancelJob(jobId string) *appfault.AppError {
     job, err := m.loadJob(jobId)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "load job for cancel",
         )

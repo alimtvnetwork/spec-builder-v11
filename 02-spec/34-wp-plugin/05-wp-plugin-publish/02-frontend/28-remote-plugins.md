@@ -241,25 +241,25 @@ For detailed errors, the error is captured to the global error store with full c
 
 ```go
 // Get all plugins from remote site
-func (c *Client) ListPlugins() apperror.Result[[]PluginInfo]
+func (c *Client) ListPlugins() appfault.Result[[]PluginInfo]
 
 // Enable a plugin
-func (c *Client) EnablePlugin(slug string) *apperror.AppError
+func (c *Client) EnablePlugin(slug string) *appfault.AppError
 
 // Disable a plugin
-func (c *Client) DisablePlugin(slug string) *apperror.AppError
+func (c *Client) DisablePlugin(slug string) *appfault.AppError
 
 // Delete a plugin
-func (c *Client) DeletePlugin(slug string) *apperror.AppError
+func (c *Client) DeletePlugin(slug string) *appfault.AppError
 ```
 
 ### Site Service Methods
 
 ```go
 // Proxy methods that handle site lookup and client creation
-func (s *Service) GetRemotePlugins(siteId int64) apperror.Result[[]wordpress.PluginInfo]
-func (s *Service) EnableRemotePlugin(siteId int64, slug string) *apperror.AppError
-func (s *Service) DisableRemotePlugin(siteId int64, slug string) *apperror.AppError
+func (s *Service) GetRemotePlugins(siteId int64) appfault.Result[[]wordpress.PluginInfo]
+func (s *Service) EnableRemotePlugin(siteId int64, slug string) *appfault.AppError
+func (s *Service) DisableRemotePlugin(siteId int64, slug string) *appfault.AppError
 func (s *Service) DeleteRemotePlugin(siteId int64, slug string) error
 ```
 

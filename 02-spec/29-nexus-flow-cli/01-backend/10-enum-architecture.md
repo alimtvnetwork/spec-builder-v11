@@ -50,7 +50,7 @@ internal/enums/
 ```go
 package blocktype
 
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 
 type Variant byte
 
@@ -92,7 +92,7 @@ func (v Variant) IsFileOp() bool     { return v == FileOp }
 func All() []Variant { return []Variant{Prompt, Search, CodeGen, Validation, Transform, Http, FileOp} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7001"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -100,7 +100,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid block type: "+s,
     )
@@ -149,7 +149,7 @@ func (v Variant) SupportsStreaming() bool {
 ```go
 package stagetype
 
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 
 type Variant byte
 
@@ -192,7 +192,7 @@ func (v Variant) IsCodeExec() bool   { return v == CodeExec }
 func All() []Variant { return []Variant{Start, End, Prompt, CodeGen, Search, Transform, Validation, Http, FileOp, Condition, Loop, SubFlow, Recorder, GSearch, Voice, CodeExec} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7002"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -200,7 +200,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid stage type: "+s,
     )
@@ -245,7 +245,7 @@ func (v Variant) IsTerminal() bool { return v == Start || v == End }
 ```go
 package executionstatustype
 
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 
 type Variant byte
 
@@ -273,7 +273,7 @@ func (v Variant) IsCancelled() bool { return v == Cancelled }
 func All() []Variant { return []Variant{Pending, Running, Paused, Completed, Failed, Cancelled} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7003"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -281,7 +281,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid execution status: "+s,
     )
@@ -325,7 +325,7 @@ func (v Variant) IsActive() bool   { return v == Running || v == Paused }
 
 ```go
 package blockstatustype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (
     Invalid Variant = iota; Pending; Running; Completed; Failed; Skipped
@@ -346,7 +346,7 @@ func (v Variant) IsSkipped() bool   { return v == Skipped }
 func All() []Variant { return []Variant{Pending, Running, Completed, Failed, Skipped} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7004"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -354,7 +354,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid block status: "+s,
     )
@@ -398,7 +398,7 @@ func (v Variant) IsTerminal() bool { switch v { case Completed, Failed, Skipped:
 ```go
 package logleveltype
 
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 
 type Variant byte
 
@@ -423,7 +423,7 @@ func (v Variant) IsError() bool   { return v == Error }
 func All() []Variant { return []Variant{Debug, Info, Warn, Error} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7005"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -431,7 +431,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid log level: "+s,
     )
@@ -478,7 +478,7 @@ func (v Variant) Severity() int {
 
 ```go
 package triggertype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Manual; Scheduled; Api; Voice)
 var variantLabels = [...]string{Invalid: "Invalid", Manual: "Manual", Scheduled: "Scheduled", Api: "Api", Voice: "Voice"}
@@ -494,7 +494,7 @@ func (v Variant) IsVoice() bool     { return v == Voice }
 func All() []Variant { return []Variant{Manual, Scheduled, Api, Voice} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7006"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -502,7 +502,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid trigger type: "+s,
     )
@@ -543,7 +543,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package fileoperationtype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Read; Write; Copy; Move; Delete; Rename; Mkdir; List; Exists; Stat)
 var variantLabels = [...]string{Invalid: "Invalid", Read: "Read", Write: "Write", Copy: "Copy", Move: "Move", Delete: "Delete", Rename: "Rename", Mkdir: "Mkdir", List: "List", Exists: "Exists", Stat: "Stat"}
@@ -565,7 +565,7 @@ func (v Variant) IsStat() bool    { return v == Stat }
 func All() []Variant { return []Variant{Read, Write, Copy, Move, Delete, Rename, Mkdir, List, Exists, Stat} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7007"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -573,7 +573,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid file operation: "+s,
     )
@@ -617,7 +617,7 @@ func (v Variant) IsReadOnly() bool { switch v { case Read, List, Exists, Stat: r
 
 ```go
 package pathtype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Relative; Absolute; ProjectRelative)
 var variantLabels = [...]string{Invalid: "Invalid", Relative: "Relative", Absolute: "Absolute", ProjectRelative: "ProjectRelative"}
@@ -632,7 +632,7 @@ func (v Variant) IsProjectRelative() bool { return v == ProjectRelative }
 func All() []Variant { return []Variant{Relative, Absolute, ProjectRelative} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7008"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -640,7 +640,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid path type: "+s,
     )
@@ -681,7 +681,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package fileformattype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Json; Yaml; Toml; Text; Binary; Html; Markdown)
 var variantLabels = [...]string{Invalid: "Invalid", Json: "Json", Yaml: "Yaml", Toml: "Toml", Text: "Text", Binary: "Binary", Html: "Html", Markdown: "Markdown"}
@@ -700,7 +700,7 @@ func (v Variant) IsMarkdown() bool { return v == Markdown }
 func All() []Variant { return []Variant{Json, Yaml, Toml, Text, Binary, Html, Markdown} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7009"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -708,7 +708,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid file format: "+s,
     )
@@ -751,7 +751,7 @@ func (v Variant) IsStructured() bool { switch v { case Json, Yaml, Toml: return 
 
 ```go
 package flowreftype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Internal; External; Remote)
 var variantLabels = [...]string{Invalid: "Invalid", Internal: "Internal", External: "External", Remote: "Remote"}
@@ -766,7 +766,7 @@ func (v Variant) IsRemote() bool   { return v == Remote }
 func All() []Variant { return []Variant{Internal, External, Remote} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7010"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -774,7 +774,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid flow ref type: "+s,
     )
@@ -815,7 +815,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package variabletype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; String; Number; Boolean; Json; FilePath; Array; Object)
 var variantLabels = [...]string{Invalid: "Invalid", String: "String", Number: "Number", Boolean: "Boolean", Json: "Json", FilePath: "FilePath", Array: "Array", Object: "Object"}
@@ -834,7 +834,7 @@ func (v Variant) IsObject() bool   { return v == Object }
 func All() []Variant { return []Variant{String, Number, Boolean, Json, FilePath, Array, Object} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7011"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -842,7 +842,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid variable type: "+s,
     )
@@ -883,7 +883,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package variablescopetype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; System; Global; Flow; Stage)
 var variantLabels = [...]string{Invalid: "Invalid", System: "System", Global: "Global", Flow: "Flow", Stage: "Stage"}
@@ -899,7 +899,7 @@ func (v Variant) IsStage() bool   { return v == Stage }
 func All() []Variant { return []Variant{System, Global, Flow, Stage} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7012"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -907,7 +907,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid variable scope: "+s,
     )
@@ -948,7 +948,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package runtimetype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Go; TypeScript; JavaScript; Python; Php; Shell)
 var variantLabels = [...]string{Invalid: "Invalid", Go: "Go", TypeScript: "TypeScript", JavaScript: "JavaScript", Python: "Python", Php: "Php", Shell: "Shell"}
@@ -966,7 +966,7 @@ func (v Variant) IsShell() bool      { return v == Shell }
 func All() []Variant { return []Variant{Go, TypeScript, JavaScript, Python, Php, Shell} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7013"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -974,7 +974,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid runtime type: "+s,
     )
@@ -1022,7 +1022,7 @@ func (v Variant) DefaultExecutable() string {
 
 ```go
 package outputcapturemodetype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Stdout; Stderr; Both; Json)
 var variantLabels = [...]string{Invalid: "Invalid", Stdout: "Stdout", Stderr: "Stderr", Both: "Both", Json: "Json"}
@@ -1038,7 +1038,7 @@ func (v Variant) IsJson() bool    { return v == Json }
 func All() []Variant { return []Variant{Stdout, Stderr, Both, Json} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7014"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1046,7 +1046,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid output capture mode: "+s,
     )
@@ -1087,7 +1087,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package integrationtype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Recorder; GSearch; Voice; Rag; Http)
 var variantLabels = [...]string{Invalid: "Invalid", Recorder: "Recorder", GSearch: "GSearch", Voice: "Voice", Rag: "Rag", Http: "Http"}
@@ -1104,7 +1104,7 @@ func (v Variant) IsHttp() bool     { return v == Http }
 func All() []Variant { return []Variant{Recorder, GSearch, Voice, Rag, Http} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7015"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1112,7 +1112,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid integration type: "+s,
     )
@@ -1153,7 +1153,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package buildmodetype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Compact; Bundle; Debug)
 var variantLabels = [...]string{Invalid: "Invalid", Compact: "Compact", Bundle: "Bundle", Debug: "Debug"}
@@ -1168,7 +1168,7 @@ func (v Variant) IsDebug() bool   { return v == Debug }
 func All() []Variant { return []Variant{Compact, Bundle, Debug} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7016"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1176,7 +1176,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid build mode: "+s,
     )
@@ -1217,7 +1217,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package messagetype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (
     Invalid Variant = iota
@@ -1278,7 +1278,7 @@ func (v Variant) IsError() bool              { return v == Error }
 func All() []Variant { return []Variant{SessionConfigure, PipelineExecute, PipelineCancel, PipelinePause, PipelineResume, BlockRetry, BlockSkip, InputProvide, Ping, SessionCreated, SessionConfigured, ExecutionStarted, ExecutionProgress, ExecutionCompleted, ExecutionFailed, ExecutionCanceled, BlockStarted, BlockProgress, BlockCompleted, BlockFailed, BlockWaiting, CheckpointCreated, EscalationRequired, Pong, Error} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7017"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1286,7 +1286,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid message type: "+s,
     )
@@ -1332,7 +1332,7 @@ func (v Variant) IsServerMessage() bool { return v.IsValid() && v.IsServerMessag
 
 ```go
 package valuetype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; String; Int; Float; Bool; Json; Duration)
 var variantLabels = [...]string{Invalid: "Invalid", String: "String", Int: "Int", Float: "Float", Bool: "Bool", Json: "Json", Duration: "Duration"}
@@ -1350,7 +1350,7 @@ func (v Variant) IsDuration() bool { return v == Duration }
 func All() []Variant { return []Variant{String, Int, Float, Bool, Json, Duration} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7018"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1358,7 +1358,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid value type: "+s,
     )
@@ -1399,7 +1399,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package pipelinestatustype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Active; Archived; Deleted)
 var variantLabels = [...]string{Invalid: "Invalid", Active: "Active", Archived: "Archived", Deleted: "Deleted"}
@@ -1414,7 +1414,7 @@ func (v Variant) IsDeleted() bool  { return v == Deleted }
 func All() []Variant { return []Variant{Active, Archived, Deleted} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7019"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1422,7 +1422,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid pipeline status: "+s,
     )
@@ -1463,7 +1463,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package resetscopetype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; All; Executions; Pipeline; Checkpoints)
 var variantLabels = [...]string{Invalid: "Invalid", All: "All", Executions: "Executions", Pipeline: "Pipeline", Checkpoints: "Checkpoints"}
@@ -1479,7 +1479,7 @@ func (v Variant) IsCheckpoints() bool { return v == Checkpoints }
 func All() []Variant { return []Variant{All, Executions, Pipeline, Checkpoints} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7020"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1487,7 +1487,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid reset scope: "+s,
     )
@@ -1528,7 +1528,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package resetstatustype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Pending; Confirmed; Expired; Cancelled)
 var variantLabels = [...]string{Invalid: "Invalid", Pending: "Pending", Confirmed: "Confirmed", Expired: "Expired", Cancelled: "Cancelled"}
@@ -1544,7 +1544,7 @@ func (v Variant) IsCancelled() bool { return v == Cancelled }
 func All() []Variant { return []Variant{Pending, Confirmed, Expired, Cancelled} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7021"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1552,7 +1552,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid reset status: "+s,
     )
@@ -1595,7 +1595,7 @@ func (v Variant) IsTerminal() bool { switch v { case Confirmed, Expired, Cancell
 
 ```go
 package dbcategorytype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Pipelines; Meta; Executions; Checkpoints)
 var variantLabels = [...]string{Invalid: "Invalid", Pipelines: "Pipelines", Meta: "Meta", Executions: "Executions", Checkpoints: "Checkpoints"}
@@ -1611,7 +1611,7 @@ func (v Variant) IsCheckpoints() bool { return v == Checkpoints }
 func All() []Variant { return []Variant{Pipelines, Meta, Executions, Checkpoints} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7022"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1619,7 +1619,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid db category: "+s,
     )
@@ -1660,7 +1660,7 @@ func (v *Variant) UnmarshalJSON(data []byte) error {
 
 ```go
 package referencetype
-import ("encoding/json"; "strings"; "nexus-flow/pkg/apperror")
+import ("encoding/json"; "strings"; "nexus-flow/pkg/appfault")
 type Variant byte
 const (Invalid Variant = iota; Input; Output; Dependency)
 var variantLabels = [...]string{Invalid: "Invalid", Input: "Input", Output: "Output", Dependency: "Dependency"}
@@ -1675,7 +1675,7 @@ func (v Variant) IsDependency() bool { return v == Dependency }
 func All() []Variant { return []Variant{Input, Output, Dependency} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
 const ErrInvalidVariant = "NF7023"
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
@@ -1683,7 +1683,7 @@ func Parse(s string) apperror.Result[Variant] {
         }
     }
 
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrInvalidVariant,
         "invalid reference type: "+s,
     )

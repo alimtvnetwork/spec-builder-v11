@@ -107,13 +107,13 @@ func NewService(
 	}
 }
 
-func (s *Service) Generate(context stdctx.Context, req GenerateRequest) apperror.Result[GenerateResponse] {
+func (s *Service) Generate(context stdctx.Context, req GenerateRequest) appfault.Result[GenerateResponse] {
 	startTime := time.Now()
 	
 	// Check cache first
 	cacheKey := s.generateCacheKey(req)
 	if cached, err := s.cache.Get(context, cacheKey); err == nil {
-		return apperror.Ok(GenerateResponse{
+		return appfault.Ok(GenerateResponse{
 			ID:          cached.ID,
 			Type:        DiagramType(cached.Type),
 			Title:       cached.Title,
@@ -132,7 +132,7 @@ func (s *Service) Generate(context stdctx.Context, req GenerateRequest) apperror
 	// Select best model
 	model, err := s.modelSelector.SelectModel(context, diagramType, nil)
 	if err != nil {
-		return apperror.FailWrap[GenerateResponse](
+		return appfault.FailWrap[GenerateResponse](
 			err,
 			"E9400",
 			"model selection failed",
@@ -153,7 +153,7 @@ func (s *Service) Generate(context stdctx.Context, req GenerateRequest) apperror
 	
 	userPrompt, err := s.promptManager.BuildUserPrompt(diagramType, promptData)
 	if err != nil {
-		return apperror.FailWrap[GenerateResponse](
+		return appfault.FailWrap[GenerateResponse](
 			err,
 			"E9401",
 			"prompt building failed",
@@ -196,7 +196,7 @@ func (s *Service) Generate(context stdctx.Context, req GenerateRequest) apperror
 			break
 		}
 		
-		lastError = apperror.New(
+		lastError = appfault.New(
 			ErrValidationFailed,
 			fmt.Sprintf("validation failed: %v", validationResult.Errors),
 		)
@@ -208,7 +208,7 @@ func (s *Service) Generate(context stdctx.Context, req GenerateRequest) apperror
 	}
 	
 	if mermaidCode == "" || !s.validator.Validate(mermaidCode).Valid {
-		return apperror.FailWrap[GenerateResponse](
+		return appfault.FailWrap[GenerateResponse](
 			lastError,
 			"E9402",
 			fmt.Sprintf("diagram generation failed after %d attempts", maxRetries+1),
@@ -236,7 +236,7 @@ func (s *Service) Generate(context stdctx.Context, req GenerateRequest) apperror
 	// Cache result
 	s.cache.Set(context, cacheKey, diagram, 24*time.Hour)
 	
-	return apperror.Ok(GenerateResponse{
+	return appfault.Ok(GenerateResponse{
 		ID:           diagram.ID,
 		Type:         diagramType,
 		Title:        title,
@@ -452,7 +452,7 @@ func (v *MermaidValidator) checkBalancedBrackets(code string) error {
 		for open, close := range brackets {
 			if ch == close {
 				if len(stack) == 0 || stack[len(stack)-1] != open {
-					return apperror.New(
+					return appfault.New(
 						ErrUnbalancedBrackets,
 						fmt.Sprintf("unbalanced bracket: %c", ch),
 					)
@@ -463,7 +463,7 @@ func (v *MermaidValidator) checkBalancedBrackets(code string) error {
 	}
 	
 	if len(stack) > 0 {
-		return apperror.New(
+		return appfault.New(
 			ErrUnclosedBracket,
 			fmt.Sprintf("unclosed bracket: %c", stack[len(stack)-1]),
 		)

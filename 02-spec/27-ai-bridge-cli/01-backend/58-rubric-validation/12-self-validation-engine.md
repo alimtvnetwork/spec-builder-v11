@@ -88,12 +88,12 @@ func (e *ValidationEngine) ValidateAndReturn(
     prompt string,
     conversationHistory []Message,
     ragContext []RagChunk,
-) apperror.Result[ValidationResult] {
+) appfault.Result[ValidationResult] {
     
     // 1. Check bypass signals
     if e.shouldBypass(prompt) {
         response := e.generator.Generate(context, prompt)
-        return apperror.Ok(ValidationResult{Passed: true, BestResponse: response})
+        return appfault.Ok(ValidationResult{Passed: true, BestResponse: response})
     }
     
     // 2. Get active dimensions for profile
@@ -117,7 +117,7 @@ func (e *ValidationEngine) ValidateAndReturn(
         
         // Check if passed
         if result.Passed {
-            return apperror.Ok(result)
+            return appfault.Ok(result)
         }
         
         // Track best result
@@ -135,7 +135,7 @@ func (e *ValidationEngine) ValidateAndReturn(
     // Max retries exhausted — return best attempt with warning
     bestResult.Passed = false
 
-    return apperror.FailNew[ValidationResult](
+    return appfault.FailNew[ValidationResult](
         ErrMaxRetriesExhausted,
         "max retries exhausted",
     )

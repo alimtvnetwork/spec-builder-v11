@@ -312,22 +312,22 @@ type LogService struct {
     fileLog    zerolog.Logger
 }
 
-func NewLogService(logDir string) apperror.Result[LogService] {
+func NewLogService(logDir string) appfault.Result[LogService] {
     runId := generateRunId()
     runDir := filepath.Join(logDir, runId)
 
     if err := pathutil.EnsureDir(runDir); err != nil {
-        return apperror.Fail[LogService](err)
+        return appfault.Fail[LogService](err)
     }
 
     logFile, err := pathutil.Create(filepath.Join(runDir, "log.txt"))
     if err != nil {
-        return apperror.Fail[LogService](
-            apperror.Wrap(err, "create log file").WithSkip(1),
+        return appfault.Fail[LogService](
+            appfault.Wrap(err, "create log file").WithSkip(1),
         )
     }
 
-    return apperror.Ok(LogService{
+    return appfault.Ok(LogService{
         runId:      runId,
         logDir:     runDir,
         consoleLog: zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger(),
@@ -535,34 +535,34 @@ func (m *Manager) IsAvailable(port int) bool {
     return true
 }
 
-func (m *Manager) FindAvailable(preferred int, fallbacks []int) apperror.Result[int] {
+func (m *Manager) FindAvailable(preferred int, fallbacks []int) appfault.Result[int] {
     isPreferredAvailable := m.IsAvailable(preferred)
 
     if isPreferredAvailable {
-        return apperror.Ok(preferred)
+        return appfault.Ok(preferred)
     }
 
     for _, port := range fallbacks {
         isAvailable := m.IsAvailable(port)
 
         if isAvailable {
-            return apperror.Ok(port)
+            return appfault.Ok(port)
         }
     }
 
-    return apperror.Fail[int](
-        apperror.New("no available port found").WithSkip(1),
+    return appfault.Fail[int](
+        appfault.New("no available port found").WithSkip(1),
     )
 }
 
-func (m *Manager) WaitForPort(context stdctx.Context, port int) *apperror.AppError {
+func (m *Manager) WaitForPort(context stdctx.Context, port int) *appfault.AppError {
     ticker := time.NewTicker(500 * time.Millisecond)
     defer ticker.Stop()
 
     for {
         select {
         case <-context.Done():
-            return apperror.Wrap(context.Err(), "port wait timeout").WithSkip(1)
+            return appfault.Wrap(context.Err(), "port wait timeout").WithSkip(1)
 
         case <-ticker.C:
             conn, err := net.DialTimeout("tcp",
@@ -615,7 +615,7 @@ func NewCopier(mode CopyMode, ignore []string) *Copier {
     return &Copier{mode: mode, ignore: ignore}
 }
 
-func (c *Copier) Copy(src, dst string) *apperror.AppError {
+func (c *Copier) Copy(src, dst string) *appfault.AppError {
     switch c.mode {
     case ModeClear:
         if err := pathutil.RemoveAll(dst); err != nil {
@@ -630,7 +630,7 @@ func (c *Copier) Copy(src, dst string) *apperror.AppError {
     return c.copyDir(src, dst)
 }
 
-func (c *Copier) copyDir(src, dst string) *apperror.AppError {
+func (c *Copier) copyDir(src, dst string) *appfault.AppError {
     // EXEMPTED: stdlib boundary — filepath.Walk callback requires raw error (§7.2)
     walkErr := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
         if err != nil {
@@ -651,7 +651,7 @@ func (c *Copier) copyDir(src, dst string) *apperror.AppError {
     })
 
     if walkErr != nil {
-        return apperror.Wrap(walkErr, "walk source directory").WithSkip(1)
+        return appfault.Wrap(walkErr, "walk source directory").WithSkip(1)
     }
 
     return nil
@@ -727,9 +727,9 @@ import (
 )
 
 type Executor interface {
-    Execute(context stdctx.Context, cmd *Command) apperror.Result[Result]
-    Validate() *apperror.AppError
-    GetVersion() apperror.Result[string]
+    Execute(context stdctx.Context, cmd *Command) appfault.Result[Result]
+    Validate() *appfault.AppError
+    GetVersion() appfault.Result[string]
     RuntimeType() string
 }
 
@@ -794,22 +794,22 @@ func (e *PowerShellExecutor) RuntimeType() string {
     return "powershell"
 }
 
-func (e *PowerShellExecutor) Validate() *apperror.AppError {
+func (e *PowerShellExecutor) Validate() *appfault.AppError {
     result := e.GetVersion()
 
     return result.Err
 }
 
-func (e *PowerShellExecutor) GetVersion() apperror.Result[string] {
+func (e *PowerShellExecutor) GetVersion() appfault.Result[string] {
     cmd := exec.Command(e.executable(), "-Version")
     output, err := cmd.Output()
     if err != nil {
-        return apperror.Fail[string](
-            apperror.Wrap(err, "powershell not found").WithSkip(1),
+        return appfault.Fail[string](
+            appfault.Wrap(err, "powershell not found").WithSkip(1),
         )
     }
 
-    return apperror.Ok(string(output))
+    return appfault.Ok(string(output))
 }
 
 func (e *PowerShellExecutor) executable() string {
@@ -819,7 +819,7 @@ func (e *PowerShellExecutor) executable() string {
     return "pwsh"
 }
 
-func (e *PowerShellExecutor) Execute(context stdctx.Context, cmd *Command) apperror.Result[Result] {
+func (e *PowerShellExecutor) Execute(context stdctx.Context, cmd *Command) appfault.Result[Result] {
     startTime := time.Now()
 
     args := []string{"-NoProfile", "-NonInteractive", "-File", cmd.Script}
@@ -856,7 +856,7 @@ func (e *PowerShellExecutor) Execute(context stdctx.Context, cmd *Command) apper
     // Parse errors from output
     result.Errors = e.parser.Parse("powershell", stderr.String())
 
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -951,17 +951,17 @@ func NewChecker(timeout time.Duration) *Checker {
     }
 }
 
-func (c *Checker) Check(context stdctx.Context, app config.AppDef) *apperror.AppError {
+func (c *Checker) Check(context stdctx.Context, app config.AppDef) *appfault.AppError {
     url := fmt.Sprintf("http://%s:%d%s", app.Host, app.Port, app.HealthPath)
 
     req, err := http.NewRequestWithContext(context, httpmethod.Get.String(), url, nil)
     if err != nil {
-        return apperror.Wrap(err, "create request").WithSkip(1)
+        return appfault.Wrap(err, "create request").WithSkip(1)
     }
 
     resp, err := c.client.Do(req)
     if err != nil {
-        return apperror.Wrap(err, "health check request").WithSkip(1)
+        return appfault.Wrap(err, "health check request").WithSkip(1)
     }
 
     defer resp.Body.Close()
@@ -969,7 +969,7 @@ func (c *Checker) Check(context stdctx.Context, app config.AppDef) *apperror.App
     isUnexpectedStatus := resp.StatusCode != app.HealthCheck.ExpectedStatus
 
     if isUnexpectedStatus {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("unexpected status: %d", resp.StatusCode),
         ).WithSkip(1)
     }
@@ -977,7 +977,7 @@ func (c *Checker) Check(context stdctx.Context, app config.AppDef) *apperror.App
     return nil
 }
 
-func (c *Checker) WaitForHealthy(context stdctx.Context, app config.AppDef) *apperror.AppError {
+func (c *Checker) WaitForHealthy(context stdctx.Context, app config.AppDef) *appfault.AppError {
     hc := app.HealthCheck
 
     for i := 0; i < hc.Retries; i++ {
@@ -990,14 +990,14 @@ func (c *Checker) WaitForHealthy(context stdctx.Context, app config.AppDef) *app
 
         select {
         case <-context.Done():
-            return apperror.Wrap(context.Err(), "health check timeout").WithSkip(1)
+            return appfault.Wrap(context.Err(), "health check timeout").WithSkip(1)
 
         case <-time.After(hc.Interval):
             continue
         }
     }
 
-    return apperror.New(
+    return appfault.New(
         fmt.Sprintf("health check failed after %d retries", hc.Retries),
     ).WithSkip(1)
 }
@@ -1053,7 +1053,7 @@ func NewBuildCmd(cfg *config.Config) *cobra.Command {
             isMissing := !isFound
 
             if isMissing {
-                return apperror.New("profile not found: " + profileName).WithSkip(1)
+                return appfault.New("profile not found: " + profileName).WithSkip(1)
             }
             }
             

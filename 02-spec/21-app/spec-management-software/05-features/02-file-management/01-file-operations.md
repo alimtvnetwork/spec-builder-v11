@@ -92,21 +92,21 @@ All file operations MUST use the PathManager for path handling:
 
 ```go
 // PathManager usage in file operations
-func (s *FileService) CreateFile(context stdctx.Context, projectId, relativePath, content string) apperror.Result[*File] {
+func (s *FileService) CreateFile(context stdctx.Context, projectId, relativePath, content string) appfault.Result[*File] {
     // Validate relative path
     if err := s.pathManager.ValidateRelativePath(relativePath); err != nil {
-        return apperror.Fail[*File](err)
+        return appfault.Fail[*File](err)
     }
     
     // Convert to absolute for filesystem write
     absResult := s.pathManager.ToAbsolute(projectId, relativePath)
     if absResult.HasError() {
-        return apperror.Fail[*File](absResult.Error())
+        return appfault.Fail[*File](absResult.Error())
     }
     
     // Write to filesystem
     if err := pathutil.WriteFile(absResult.Value(), []byte(content), 0644); err != nil {
-        return apperror.FailWrap[*File](
+        return appfault.FailWrap[*File](
             err,
             "failed to write file",
         )
@@ -120,13 +120,13 @@ func (s *FileService) CreateFile(context stdctx.Context, projectId, relativePath
     }
     
     if err := s.db.Create(file).Error; err != nil {
-        return apperror.FailWrap[*File](
+        return appfault.FailWrap[*File](
             err,
             "failed to create file record",
         )
     }
     
-    return apperror.Ok(file)
+    return appfault.Ok(file)
 }
 ```
 
@@ -625,24 +625,24 @@ File operation errors use the 6xxx range as defined in [Error Management](../../
 ```go
 type FileService interface {
     // CRUD operations
-    Create(context stdctx.Context, req CreateFileRequest) apperror.Result[*File]
-    Read(context stdctx.Context, projectId, fileId string) apperror.Result[*File]
-    Update(context stdctx.Context, req UpdateFileRequest) apperror.Result[*File]
-    Delete(context stdctx.Context, projectId, fileId string, permanent bool) *apperror.AppError
-    Move(context stdctx.Context, req MoveFileRequest) apperror.Result[*File]
+    Create(context stdctx.Context, req CreateFileRequest) appfault.Result[*File]
+    Read(context stdctx.Context, projectId, fileId string) appfault.Result[*File]
+    Update(context stdctx.Context, req UpdateFileRequest) appfault.Result[*File]
+    Delete(context stdctx.Context, projectId, fileId string, permanent bool) *appfault.AppError
+    Move(context stdctx.Context, req MoveFileRequest) appfault.Result[*File]
     
     // Directory operations
-    ListDirectory(context stdctx.Context, req ListDirRequest) apperror.Result[*DirectoryListing]
-    CreateDirectory(context stdctx.Context, req CreateDirRequest) *apperror.AppError
-    DeleteDirectory(context stdctx.Context, req DeleteDirRequest) *apperror.AppError
+    ListDirectory(context stdctx.Context, req ListDirRequest) appfault.Result[*DirectoryListing]
+    CreateDirectory(context stdctx.Context, req CreateDirRequest) *appfault.AppError
+    DeleteDirectory(context stdctx.Context, req DeleteDirRequest) *appfault.AppError
     
     // Content operations
-    GetContent(context stdctx.Context, projectId, fileId string) apperror.Result[[]byte]
-    SetContent(context stdctx.Context, projectId, fileId string, content []byte) *apperror.AppError
+    GetContent(context stdctx.Context, projectId, fileId string) appfault.Result[[]byte]
+    SetContent(context stdctx.Context, projectId, fileId string, content []byte) *appfault.AppError
     
     // Validation
-    ValidatePath(path string) *apperror.AppError
-    ValidateContent(content []byte) *apperror.AppError
+    ValidatePath(path string) *appfault.AppError
+    ValidateContent(content []byte) *appfault.AppError
 }
 ```
 
@@ -657,15 +657,15 @@ type fileService struct {
     config      ConfigService
 }
 
-func (s *fileService) Create(context stdctx.Context, req CreateFileRequest) apperror.Result[*File] {
+func (s *fileService) Create(context stdctx.Context, req CreateFileRequest) appfault.Result[*File] {
     // 1. Validate path
     if err := s.ValidatePath(req.Path); err != nil {
-        return apperror.Fail[*File](err)
+        return appfault.Fail[*File](err)
     }
     
     // 2. Check file doesn't exist
     if s.fileExists(req.ProjectId, req.Path) {
-        return apperror.FailNew[*File](
+        return appfault.FailNew[*File](
             "ErrFileExists",
             "File already exists",
         )
@@ -673,20 +673,20 @@ func (s *fileService) Create(context stdctx.Context, req CreateFileRequest) appe
     
     // 3. Validate content
     if err := s.ValidateContent([]byte(req.Content)); err != nil {
-        return apperror.Fail[*File](err)
+        return appfault.Fail[*File](err)
     }
     
     // 4. Create parent directories if needed
     if req.CreateDirectories {
         if err := s.ensureDirectories(req.ProjectId, req.Path); err != nil {
-            return apperror.Fail[*File](err)
+            return appfault.Fail[*File](err)
         }
     }
     
     // 5. Write to disk
     fullPath := s.getFullPath(req.ProjectId, req.Path)
     if err := pathutil.WriteFile(fullPath, []byte(req.Content), 0644); err != nil {
-        return apperror.FailWrap[*File](
+        return appfault.FailWrap[*File](
             err,
             "failed to write file to disk",
         )
@@ -707,7 +707,7 @@ func (s *fileService) Create(context stdctx.Context, req CreateFileRequest) appe
     if err := s.insertFile(context, file); err != nil {
         // Rollback: delete file from disk
         pathutil.Remove(fullPath)
-        return apperror.Fail[*File](err)
+        return appfault.Fail[*File](err)
     }
     
     // 7. Trigger snapshot if configured
@@ -716,7 +716,7 @@ func (s *fileService) Create(context stdctx.Context, req CreateFileRequest) appe
     // 8. Schedule git commit if configured
     s.git.ScheduleCommit(context, req.ProjectId, "Created "+req.Path)
     
-    return apperror.Ok(file)
+    return appfault.Ok(file)
 }
 ```
 
@@ -972,21 +972,21 @@ interface ProjectMetadataJson {
 ```go
 type ProjectMetadataService interface {
     // Read metadata from JSON file
-    ReadFromFile(projectId string) apperror.Result[*ProjectMetadata]
+    ReadFromFile(projectId string) appfault.Result[*ProjectMetadata]
     
     // Write metadata to JSON file
-    WriteToFile(projectId string, metadata *ProjectMetadata) *apperror.AppError
+    WriteToFile(projectId string, metadata *ProjectMetadata) *appfault.AppError
     
     // Sync database ↔ filesystem
-    SyncToFile(projectId string) *apperror.AppError   // DB → JSON
-    SyncFromFile(projectId string) *apperror.AppError // JSON → DB
+    SyncToFile(projectId string) *appfault.AppError   // DB → JSON
+    SyncFromFile(projectId string) *appfault.AppError // JSON → DB
     
     // Full bidirectional sync
-    Sync(projectId string) apperror.Result[*SyncResult]
+    Sync(projectId string) appfault.Result[*SyncResult]
     
     // Watch for external changes
-    WatchFile(projectId string, onChange func()) *apperror.AppError
-    StopWatching(projectId string) *apperror.AppError
+    WatchFile(projectId string, onChange func()) *appfault.AppError
+    StopWatching(projectId string) *appfault.AppError
 }
 ```
 
@@ -997,7 +997,7 @@ type SyncResult struct {
     Direction    SyncDirection // "db_to_file", "file_to_db", "none", "conflict"
     FieldsUpdated []string
     Timestamp    time.Time
-    Error        *apperror.AppError `json:",omitempty"`
+    Error        *appfault.AppError `json:",omitempty"`
 }
 
 type SyncDirection string
@@ -1009,11 +1009,11 @@ const (
     SyncConflict   SyncDirection = "conflict"
 )
 
-func (s *metadataService) Sync(projectId string) apperror.Result[*SyncResult] {
+func (s *metadataService) Sync(projectId string) appfault.Result[*SyncResult] {
     // 1. Get DB record with timestamp
     dbResult := s.getFromDb(projectId)
     if dbResult.HasError() {
-        return apperror.Fail[*SyncResult](dbResult.Error())
+        return appfault.Fail[*SyncResult](dbResult.Error())
     }
     dbRecord := dbResult.Value()
     
@@ -1030,7 +1030,7 @@ func (s *metadataService) Sync(projectId string) apperror.Result[*SyncResult] {
     // 4. Read file content and parse
     fileContent, err := pathutil.ReadFile(filePath)
     if err != nil {
-        return apperror.FailNew[*SyncResult](
+        return appfault.FailNew[*SyncResult](
             "ErrReadFailed",
             "Failed to read metadata file",
         )
@@ -1038,7 +1038,7 @@ func (s *metadataService) Sync(projectId string) apperror.Result[*SyncResult] {
     
     var fileRecord ProjectMetadata
     if err := json.Unmarshal(fileContent, &fileRecord); err != nil {
-        return apperror.FailNew[*SyncResult](
+        return appfault.FailNew[*SyncResult](
             "ErrInvalidJson",
             "Invalid JSON in metadata file",
         )
@@ -1059,41 +1059,41 @@ func (s *metadataService) Sync(projectId string) apperror.Result[*SyncResult] {
     }
     
     // 7. No sync needed
-    return apperror.Ok(&SyncResult{
+    return appfault.Ok(&SyncResult{
         Direction: SyncNone,
         Timestamp: time.Now(),
     })
 }
 
-func (s *metadataService) syncDbToFile(projectId string, record *ProjectMetadata) apperror.Result[*SyncResult] {
+func (s *metadataService) syncDbToFile(projectId string, record *ProjectMetadata) appfault.Result[*SyncResult] {
     filePath := s.getMetadataFilePath(projectId)
     
     content, err := json.MarshalIndent(record, "", "  ")
     if err != nil {
-        return apperror.FailWrap[*SyncResult](
+        return appfault.FailWrap[*SyncResult](
             err,
             "failed to marshal metadata",
         )
     }
     
     if err := pathutil.WriteFile(filePath, content, 0644); err != nil {
-        return apperror.FailNew[*SyncResult](
+        return appfault.FailNew[*SyncResult](
             "ErrWriteFailed",
             "Failed to write metadata file",
         )
     }
     
-    return apperror.Ok(&SyncResult{
+    return appfault.Ok(&SyncResult{
         Direction:     SyncDbToFile,
         FieldsUpdated: []string{"all"},
         Timestamp:     time.Now(),
     })
 }
 
-func (s *metadataService) syncFileToDb(projectId string, record *ProjectMetadata) apperror.Result[*SyncResult] {
+func (s *metadataService) syncFileToDb(projectId string, record *ProjectMetadata) appfault.Result[*SyncResult] {
     // Validate required fields
     if record.ProjectName == "" || record.ProjectSlug == "" {
-        return apperror.FailNew[*SyncResult](
+        return appfault.FailNew[*SyncResult](
             "ErrValidationFailed",
             "Missing required fields in metadata",
         )
@@ -1101,10 +1101,10 @@ func (s *metadataService) syncFileToDb(projectId string, record *ProjectMetadata
     
     // Update database
     if err := s.updateProjectMetadata(projectId, record); err != nil {
-        return apperror.Fail[*SyncResult](err)
+        return appfault.Fail[*SyncResult](err)
     }
     
-    return apperror.Ok(&SyncResult{
+    return appfault.Ok(&SyncResult{
         Direction:     SyncFileToDb,
         FieldsUpdated: s.getChangedFields(projectId, record),
         Timestamp:     time.Now(),

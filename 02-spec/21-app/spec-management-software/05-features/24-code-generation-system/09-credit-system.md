@@ -140,7 +140,7 @@ func NewCreditTracker(db *gorm.DB, rates *CreditRates) *CreditTracker {
 }
 
 // Check if user has sufficient credits for an operation
-func (t *CreditTracker) HasSufficientCredits(userId string, estimated float64) apperror.Result[bool] {
+func (t *CreditTracker) HasSufficientCredits(userId string, estimated float64) appfault.Result[bool] {
     balance, err := t.GetBalance(userId)
     if err != nil {
         return false, err
@@ -149,7 +149,7 @@ func (t *CreditTracker) HasSufficientCredits(userId string, estimated float64) a
 }
 
 // Get current balance
-func (t *CreditTracker) GetBalance(userId string) apperror.Result[float64] {
+func (t *CreditTracker) GetBalance(userId string) appfault.Result[float64] {
     var credits UserCredits
     if err := t.db.Where("user_id = ?", userId).First(&credits).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -291,11 +291,11 @@ type CreditCheckResult struct {
 func (g *CreditGuard) CheckBeforeGeneration(
     userId string,
     plan *GenerationPlan,
-) apperror.Result[CreditCheckResult] {
+) appfault.Result[CreditCheckResult] {
     
     balanceResult := g.tracker.GetBalance(userId)
     if balanceResult.HasError() {
-        return apperror.Fail[CreditCheckResult](balanceResult.Error())
+        return appfault.Fail[CreditCheckResult](balanceResult.Error())
     }
 
     balance := balanceResult.Value()
@@ -318,7 +318,7 @@ func (g *CreditGuard) CheckBeforeGeneration(
         result.RequiresPurchase = true
     }
     
-    return apperror.Ok(*result)
+    return appfault.Ok(*result)
 }
 ```
 

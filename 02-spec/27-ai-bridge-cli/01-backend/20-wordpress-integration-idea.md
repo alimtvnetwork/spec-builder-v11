@@ -126,12 +126,12 @@ WordPress categories require:
 ```go
 // Proposed interface
 type WordPressPublisher interface {
-    Connect(config *WPConfig) *apperror.AppError
-    PublishPost(content *BlogPost) apperror.Result[*WPPost]
-    CreateCategory(name string, parent string) apperror.Result[*WPCategory]
-    CreatePage(content *Page) apperror.Result[*WPPage]
-    UploadMedia(path string) apperror.Result[*WPMedia]
-    SyncCategories(structure *CategoryStructure) *apperror.AppError
+    Connect(config *WPConfig) *appfault.AppError
+    PublishPost(content *BlogPost) appfault.Result[*WPPost]
+    CreateCategory(name string, parent string) appfault.Result[*WPCategory]
+    CreatePage(content *Page) appfault.Result[*WPPage]
+    UploadMedia(path string) appfault.Result[*WPMedia]
+    SyncCategories(structure *CategoryStructure) *appfault.AppError
 }
 ```
 

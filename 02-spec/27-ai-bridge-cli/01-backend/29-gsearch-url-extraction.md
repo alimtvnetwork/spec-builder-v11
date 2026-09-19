@@ -542,7 +542,7 @@ type NestedLink struct {
     Relation string `json:",omitempty"` // "internal", "external"
 }
 
-func ExtractWithDepth(url string, opts ExtractOptions) apperror.Result[*ExtractResult] {
+func ExtractWithDepth(url string, opts ExtractOptions) appfault.Result[*ExtractResult] {
     result := ExtractUrl(url, opts)
     
     if opts.Depth == 0 {
@@ -621,7 +621,7 @@ Ahrefs API uses Bearer token authentication:
 ```go
 const AhrefsBaseUrl = "https://api.ahrefs.com/v3/site-explorer"
 
-func newAhrefsRequest(endpoint string, params url.Values) apperror.Result[*http.Request] {
+func newAhrefsRequest(endpoint string, params url.Values) appfault.Result[*http.Request] {
     apiKey := config.Get("Ahrefs.ApiKey")
     if apiKey == "" {
         return nil, ErrAhrefsNotConfigured
@@ -676,13 +676,13 @@ func (r *AhrefsRateLimiter) Wait(context stdctx.Context) error {
     return r.limiter.Wait(ctx)
 }
 
-func (r *AhrefsRateLimiter) TrackRows(count int64) *apperror.AppError {
+func (r *AhrefsRateLimiter) TrackRows(count int64) *appfault.AppError {
     r.mu.Lock()
     defer r.mu.Unlock()
     
     r.rowsUsed += count
     if r.rowsUsed > r.rowLimit {
-        return apperror.New(
+        return appfault.New(
             ErrAhrefsRowLimitExceeded,
             "ahrefs row limit exceeded: %d/%d",
             r.rowsUsed,
@@ -718,7 +718,7 @@ func (e *AhrefsError) Error() string {
     return fmt.Sprintf("ahrefs error %d: %s", e.StatusCode, e.Message)
 }
 
-func handleAhrefsResponse(resp *http.Response) *apperror.AppError {
+func handleAhrefsResponse(resp *http.Response) *appfault.AppError {
     if resp.StatusCode == 200 {
         return nil
     }
@@ -727,33 +727,33 @@ func handleAhrefsResponse(resp *http.Response) *apperror.AppError {
     
     switch resp.StatusCode {
     case 401:
-        return apperror.New(
+        return appfault.New(
             ErrAhrefsUnauthorized,
             "invalid API key",
         ).WithStatusCode(401)
     case 403:
-        return apperror.New(
+        return appfault.New(
             ErrAhrefsForbidden,
             "insufficient plan permissions",
         ).WithStatusCode(403)
     case 404:
-        return apperror.New(
+        return appfault.New(
             ErrAhrefsNotFound,
             "no data available for target",
         ).WithStatusCode(404)
     case 429:
-        return apperror.New(
+        return appfault.New(
             ErrAhrefsRateLimited,
             "rate limit exceeded",
         ).WithStatusCode(429)
     case 500, 502, 503:
-        return apperror.New(
+        return appfault.New(
             ErrAhrefsServerError,
             "server error: %s",
             string(body),
         ).WithStatusCode(resp.StatusCode)
     default:
-        return apperror.New(
+        return appfault.New(
             ErrAhrefsUnknown,
             "unexpected response %d: %s",
             resp.StatusCode,
@@ -762,7 +762,7 @@ func handleAhrefsResponse(resp *http.Response) *apperror.AppError {
     }
 }
 
-func fetchWithRetry(req *http.Request, maxRetries int) apperror.Result[*http.Response] {
+func fetchWithRetry(req *http.Request, maxRetries int) appfault.Result[*http.Response] {
     client := &http.Client{Timeout: 30 * time.Second}
     
     for attempt := 0; attempt <= maxRetries; attempt++ {
@@ -828,7 +828,7 @@ type DomainRatingResponse struct {
     } `json:"domain_rating"`
 }
 
-func FetchDomainRating(domain string) apperror.Result[DomainRatingResult] {
+func FetchDomainRating(domain string) appfault.Result[DomainRatingResult] {
     params := url.Values{}
     params.Set("target", domain)
     params.Set("date", time.Now().Format("2006-01-02"))
@@ -887,7 +887,7 @@ type UrlRatingResponse struct {
     } `json:"url_rating"`
 }
 
-func FetchUrlRating(targetUrl string) apperror.Result[int] {
+func FetchUrlRating(targetUrl string) appfault.Result[int] {
     params := url.Values{}
     params.Set("target", targetUrl)
     params.Set("date", time.Now().Format("2006-01-02"))
@@ -953,7 +953,7 @@ type BacklinksStatsResponse struct {
     } `json:"metrics"`
 }
 
-func FetchBacklinksStats(domain string) apperror.Result[*BacklinksStatsResponse] {
+func FetchBacklinksStats(domain string) appfault.Result[*BacklinksStatsResponse] {
     params := url.Values{}
     params.Set("target", domain)
     params.Set("mode", "domain")
@@ -1021,7 +1021,7 @@ type OrganicTrafficResponse struct {
     } `json:"metrics"`
 }
 
-func FetchOrganicTraffic(domain string, country string) apperror.Result[*OrganicTrafficResponse] {
+func FetchOrganicTraffic(domain string, country string) appfault.Result[*OrganicTrafficResponse] {
     params := url.Values{}
     params.Set("target", domain)
     params.Set("mode", "domain")
@@ -1099,7 +1099,7 @@ type TopPagesResponse struct {
     } `json:"pages"`
 }
 
-func FetchTopPages(domain string, limit int) apperror.Result[[]string] {
+func FetchTopPages(domain string, limit int) appfault.Result[[]string] {
     params := url.Values{}
     params.Set("target", domain)
     params.Set("mode", "domain")
@@ -1154,10 +1154,10 @@ type AuthorityMetrics struct {
     FetchedAt         time.Time `json:",omitempty"`
 }
 
-func FetchAuthorityMetrics(targetUrl string) apperror.Result[*AuthorityMetrics] {
+func FetchAuthorityMetrics(targetUrl string) appfault.Result[*AuthorityMetrics] {
     apiKey := config.Get("Ahrefs.ApiKey")
     if apiKey == "" {
-        return apperror.Fail[*AuthorityMetrics](ErrAhrefsNotConfigured)
+        return appfault.Fail[*AuthorityMetrics](ErrAhrefsNotConfigured)
     }
     
     domain := extractDomain(targetUrl)
@@ -1168,7 +1168,7 @@ func FetchAuthorityMetrics(targetUrl string) apperror.Result[*AuthorityMetrics] 
     
     var wg sync.WaitGroup
     var mu sync.Mutex
-    errs := make([]*apperror.AppError, 0)
+    errs := make([]*appfault.AppError, 0)
     
     // 1. Domain Rating (parallel)
     wg.Add(1)
@@ -1177,7 +1177,7 @@ func FetchAuthorityMetrics(targetUrl string) apperror.Result[*AuthorityMetrics] 
         dr, rank, err := FetchDomainRating(domain)
         mu.Lock()
         if err != nil {
-            errs = append(errs, apperror.Wrap(
+            errs = append(errs, appfault.Wrap(
                 err,
                 ErrAhrefsRequestFailed,
                 "domain-rating fetch failed",
@@ -1196,7 +1196,7 @@ func FetchAuthorityMetrics(targetUrl string) apperror.Result[*AuthorityMetrics] 
         ur, err := FetchUrlRating(targetUrl)
         mu.Lock()
         if err != nil {
-            errs = append(errs, apperror.Wrap(
+            errs = append(errs, appfault.Wrap(
                 err,
                 ErrAhrefsRequestFailed,
                 "url-rating fetch failed",
@@ -1214,7 +1214,7 @@ func FetchAuthorityMetrics(targetUrl string) apperror.Result[*AuthorityMetrics] 
         stats, err := FetchBacklinksStats(domain)
         mu.Lock()
         if err != nil {
-            errs = append(errs, apperror.Wrap(
+            errs = append(errs, appfault.Wrap(
                 err,
                 ErrAhrefsRequestFailed,
                 "backlinks-stats fetch failed",
@@ -1233,7 +1233,7 @@ func FetchAuthorityMetrics(targetUrl string) apperror.Result[*AuthorityMetrics] 
         traffic, err := FetchOrganicTraffic(domain, "")
         mu.Lock()
         if err != nil {
-            errs = append(errs, apperror.Wrap(
+            errs = append(errs, appfault.Wrap(
                 err,
                 ErrAhrefsRequestFailed,
                 "organic-traffic fetch failed",
@@ -1252,7 +1252,7 @@ func FetchAuthorityMetrics(targetUrl string) apperror.Result[*AuthorityMetrics] 
         keywords, err := FetchTopPages(domain, 10)
         mu.Lock()
         if err != nil {
-            errs = append(errs, apperror.Wrap(
+            errs = append(errs, appfault.Wrap(
                 err,
                 ErrAhrefsRequestFailed,
                 "top-pages fetch failed",
@@ -1267,15 +1267,15 @@ func FetchAuthorityMetrics(targetUrl string) apperror.Result[*AuthorityMetrics] 
     
     // Log errors but don't fail if we got some data
     if len(errs) > 0 && metrics.DomainAuthority == 0 {
-        return apperror.Fail[*AuthorityMetrics](
-            apperror.New(
+        return appfault.Fail[*AuthorityMetrics](
+            appfault.New(
                 ErrAhrefsAllFailed,
                 "all ahrefs requests failed",
             ),
         )
     }
     
-    return apperror.Ok(metrics)
+    return appfault.Ok(metrics)
 }
 ```
 
@@ -1320,7 +1320,7 @@ func GetCachedAuthority(domain string) CachedAuthorityResult {
     return CachedAuthorityResult{Metrics: &metrics, Found: true}
 }
 
-func CacheAuthority(domain string, metrics *AuthorityMetrics, ttlDays int) *apperror.AppError {
+func CacheAuthority(domain string, metrics *AuthorityMetrics, ttlDays int) *appfault.AppError {
     hash := sha256Hash(domain)
     metricsJson, _ := json.Marshal(metrics)
     
@@ -1336,7 +1336,7 @@ func CacheAuthority(domain string, metrics *AuthorityMetrics, ttlDays int) *appe
         Columns:   []clause.Column{{Name: "DomainHash"}},
         UpdateAll: true,
     }).Create(&entry).Error; err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrAuthorityCacheFailed,
             "failed to cache authority metrics",
@@ -1411,7 +1411,7 @@ type OpenPageRankResponse struct {
     } `json:"response"`
 }
 
-func FetchOpenPageRank(domain string) apperror.Result[*AuthorityMetrics] {
+func FetchOpenPageRank(domain string) appfault.Result[*AuthorityMetrics] {
     apiKey := config.Get("OpenPageRank.ApiKey")
     if apiKey == "" {
         return nil, ErrOpenPageRankNotConfigured
@@ -1483,7 +1483,7 @@ type MozResponse struct {
     RootDomainsToRootDomain int `json:"root_domains_to_root_domain"`
 }
 
-func FetchMozMetrics(targetUrl string) apperror.Result[*AuthorityMetrics] {
+func FetchMozMetrics(targetUrl string) appfault.Result[*AuthorityMetrics] {
     accessId := config.Get("Moz.AccessId")
     secretKey := config.Get("Moz.SecretKey")
     
@@ -1577,7 +1577,7 @@ type AhrefsScraper struct {
     browser *rod.Browser
 }
 
-func NewAhrefsScraper() apperror.Result[*AhrefsScraper] {
+func NewAhrefsScraper() appfault.Result[*AhrefsScraper] {
     // Launch headless Chrome
     path, _ := launcher.LookPath()
     u := launcher.New().Bin(path).Headless(true).MustLaunch()
@@ -1591,7 +1591,7 @@ func (s *AhrefsScraper) Close() {
     s.browser.MustClose()
 }
 
-func (s *AhrefsScraper) FetchAuthorityChecker(domain string) apperror.Result[*AuthorityMetrics] {
+func (s *AhrefsScraper) FetchAuthorityChecker(domain string) appfault.Result[*AuthorityMetrics] {
     url := fmt.Sprintf("https://ahrefs.com/website-authority-checker?input=%s", domain)
     
     // Use stealth plugin to avoid detection
@@ -1698,7 +1698,7 @@ type CommonCrawlBacklinks struct {
     DiscoveredAt    time.Time
 }
 
-func (s *CommonCrawlStore) GetBacklinkStats(domain string) apperror.Result[*AuthorityMetrics] {
+func (s *CommonCrawlStore) GetBacklinkStats(domain string) appfault.Result[*AuthorityMetrics] {
     var stats struct {
         BacklinkCount    int64
         ReferringDomains int64
@@ -1747,15 +1747,15 @@ type AuthorityFetcher struct {
     enableScraping bool
 }
 
-func (f *AuthorityFetcher) FetchWithFallback(targetUrl string) apperror.Result[*AuthorityMetrics] {
+func (f *AuthorityFetcher) FetchWithFallback(targetUrl string) appfault.Result[*AuthorityMetrics] {
     domain := extractDomain(targetUrl)
     
     // Check cache first
     if cached, found := GetCachedAuthority(domain); found {
-        return apperror.Ok(cached)
+        return appfault.Ok(cached)
     }
     
-    var lastErr *apperror.AppError
+    var lastErr *appfault.AppError
     
     // 1. Try Ahrefs API (if configured)
     if config.Get("Ahrefs.ApiKey") != "" {
@@ -1764,7 +1764,7 @@ func (f *AuthorityFetcher) FetchWithFallback(targetUrl string) apperror.Result[*
             CacheAuthority(domain, result.Value(), 30)
             return result
         }
-        lastErr = apperror.Wrap(
+        lastErr = appfault.Wrap(
             result.Err(),
             ErrAhrefsRequestFailed,
             "ahrefs API failed",
@@ -1777,9 +1777,9 @@ func (f *AuthorityFetcher) FetchWithFallback(targetUrl string) apperror.Result[*
         metrics, err := FetchOpenPageRank(domain)
         if err == nil {
             CacheAuthority(domain, metrics, 30)
-            return apperror.Ok(metrics)
+            return appfault.Ok(metrics)
         }
-        lastErr = apperror.Wrap(
+        lastErr = appfault.Wrap(
             err,
             ErrOpenPageRankFailed,
             "openpagerank failed",
@@ -1792,9 +1792,9 @@ func (f *AuthorityFetcher) FetchWithFallback(targetUrl string) apperror.Result[*
         metrics, err := FetchMozMetrics(targetUrl)
         if err == nil {
             CacheAuthority(domain, metrics, 30)
-            return apperror.Ok(metrics)
+            return appfault.Ok(metrics)
         }
-        lastErr = apperror.Wrap(
+        lastErr = appfault.Wrap(
             err,
             ErrMozFailed,
             "moz failed",
@@ -1807,9 +1807,9 @@ func (f *AuthorityFetcher) FetchWithFallback(targetUrl string) apperror.Result[*
         metrics, err := f.ahrefsScraper.FetchAuthorityChecker(domain)
         if err == nil {
             CacheAuthority(domain, metrics, 30)
-            return apperror.Ok(metrics)
+            return appfault.Ok(metrics)
         }
-        lastErr = apperror.Wrap(
+        lastErr = appfault.Wrap(
             err,
             ErrAhrefsScrapeFailed,
             "ahrefs scraping failed",
@@ -1822,17 +1822,17 @@ func (f *AuthorityFetcher) FetchWithFallback(targetUrl string) apperror.Result[*
         metrics, err := f.commonCrawl.GetBacklinkStats(domain)
         if err == nil {
             CacheAuthority(domain, metrics, 30)
-            return apperror.Ok(metrics)
+            return appfault.Ok(metrics)
         }
-        lastErr = apperror.Wrap(
+        lastErr = appfault.Wrap(
             err,
             ErrCommonCrawlFailed,
             "commoncrawl failed",
         )
     }
     
-    return apperror.Fail[*AuthorityMetrics](
-        apperror.New(
+    return appfault.Fail[*AuthorityMetrics](
+        appfault.New(
             ErrAllAuthoritySourcesFailed,
             "all authority sources failed",
         ),
@@ -1952,7 +1952,7 @@ func NewProxyManager(config *ProxyConfig) *ProxyManager {
     return pm
 }
 
-func (pm *ProxyManager) GetProxy(targetUrl string) apperror.Result[*ProxyEntry] {
+func (pm *ProxyManager) GetProxy(targetUrl string) appfault.Result[*ProxyEntry] {
     if !pm.config.Enabled {
         return nil, nil // Direct connection
     }
@@ -2079,17 +2079,17 @@ func (pm *ProxyManager) MarkSuccess(proxy *ProxyEntry) {
 ### HTTP Client with Proxy
 
 ```go
-func (pm *ProxyManager) CreateHttpClient(targetUrl string) apperror.Result[*http.Client] {
+func (pm *ProxyManager) CreateHttpClient(targetUrl string) appfault.Result[*http.Client] {
     proxyResult := pm.GetProxy(targetUrl)
     if proxyResult.IsErr() {
-        return apperror.Fail[*http.Client](proxyResult.Err())
+        return appfault.Fail[*http.Client](proxyResult.Err())
     }
 
     proxy := proxyResult.Value()
     
     if proxy == nil {
         // Direct connection
-        return apperror.Ok(&http.Client{Timeout: 30 * time.Second})
+        return appfault.Ok(&http.Client{Timeout: 30 * time.Second})
     }
     
     transport := &http.Transport{
@@ -2098,7 +2098,7 @@ func (pm *ProxyManager) CreateHttpClient(targetUrl string) apperror.Result[*http
     
     proxyUrl, err := url.Parse(proxy.Url)
     if err != nil {
-        return apperror.FailWrap[*http.Client](
+        return appfault.FailWrap[*http.Client](
             err,
             ErrProxyInvalidUrl,
             "invalid proxy URL",
@@ -2114,7 +2114,7 @@ func (pm *ProxyManager) CreateHttpClient(targetUrl string) apperror.Result[*http
             &proxy.Auth{User: proxyUrl.User.Username(), Password: getPassword(proxyUrl.User)}, 
             proxy.Direct)
         if dialErr != nil {
-            return apperror.FailWrap[*http.Client](
+            return appfault.FailWrap[*http.Client](
                 dialErr,
                 ErrProxySocks5Setup,
                 "SOCKS5 setup failed",
@@ -2127,7 +2127,7 @@ func (pm *ProxyManager) CreateHttpClient(targetUrl string) apperror.Result[*http
         }
     }
     
-    return apperror.Ok(&http.Client{
+    return appfault.Ok(&http.Client{
         Transport: transport,
         Timeout:   30 * time.Second,
     })
@@ -2137,7 +2137,7 @@ func (pm *ProxyManager) CreateHttpClient(targetUrl string) apperror.Result[*http
 ### Rod Browser with Proxy (for Scraping)
 
 ```go
-func NewAhrefsScraperWithProxy(pm *ProxyManager, targetUrl string) apperror.Result[*AhrefsScraper] {
+func NewAhrefsScraperWithProxy(pm *ProxyManager, targetUrl string) appfault.Result[*AhrefsScraper] {
     proxy, err := pm.GetProxy(targetUrl)
     if err != nil {
         return nil, err
@@ -2225,7 +2225,7 @@ func (kpm *KeyPoolManager) RegisterPool(source string, pool *ApiKeyPool) {
     }
 }
 
-func (kpm *KeyPoolManager) GetKey(source string) apperror.Result[string] {
+func (kpm *KeyPoolManager) GetKey(source string) appfault.Result[string] {
     kpm.mu.Lock()
     defer kpm.mu.Unlock()
     
@@ -2607,28 +2607,28 @@ type TempFileManager struct {
     ttl      time.Duration // 1 hour default
 }
 
-func (tm *TempFileManager) SaveHtml(content []byte) apperror.Result[string] {
+func (tm *TempFileManager) SaveHtml(content []byte) appfault.Result[string] {
     requestId := uuid.New().String()
     filePath := filepath.Join(tm.basePath, requestId+".html")
     
     if writeErr := pathutil.WriteFile(filePath, content, 0644); writeErr != nil {
-        return apperror.FailWrap[string](
+        return appfault.FailWrap[string](
             writeErr,
             ErrTempFileSaveFailed,
             "failed to save temp HTML file",
         )
     }
     
-    return apperror.Ok(requestId)
+    return appfault.Ok(requestId)
 }
 
 func (tm *TempFileManager) GetPath(requestId string) string {
     return filepath.Join(tm.basePath, requestId+".html")
 }
 
-func (tm *TempFileManager) Cleanup(requestId string) *apperror.AppError {
+func (tm *TempFileManager) Cleanup(requestId string) *appfault.AppError {
     if removeErr := pathutil.Remove(tm.GetPath(requestId)); removeErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             removeErr,
             ErrTempFileCleanupFailed,
             "failed to cleanup temp file: %s",
@@ -2639,7 +2639,7 @@ func (tm *TempFileManager) Cleanup(requestId string) *apperror.AppError {
     return nil
 }
 
-func (tm *TempFileManager) CleanupStale() *apperror.AppError {
+func (tm *TempFileManager) CleanupStale() *appfault.AppError {
     entries, _ := pathutil.ReadDir(tm.basePath)
     cutoff := time.Now().Add(-tm.ttl)
     
@@ -2810,7 +2810,7 @@ func GenerateFormats(extracted *ExtractionResult, formats []string) *ExtractCont
 ### Complete Extraction Flow
 
 ```go
-func ExtractUrl(url string, opts ExtractOptions) apperror.Result[*ExtractResult] {
+func ExtractUrl(url string, opts ExtractOptions) appfault.Result[*ExtractResult] {
     // 1. Check cache (unless force refresh)
     if isFalse(opts.ForceRefresh) {
         cached := getFromCache(url)
@@ -3103,7 +3103,7 @@ import (
 )
 
 // ToSimpleHtml converts complex HTML to minimal h1-h6 + p only
-func ToSimpleHtml(rawHtml string) apperror.Result[string] {
+func ToSimpleHtml(rawHtml string) appfault.Result[string] {
     doc, err := goquery.NewDocumentFromReader(strings.NewReader(rawHtml))
     if err != nil {
         return "", err

@@ -146,7 +146,7 @@ func (r *GuidelineResolver) Resolve(
     projectId string,
     userId string,
     languageCode string,
-) apperror.Result[ResolvedGuidelines] {
+) appfault.Result[ResolvedGuidelines] {
     
     // 1. Load all applicable guidelines in priority order
     guidelines := r.loadGuidelines(projectId, userId, languageCode)
@@ -189,7 +189,7 @@ func (r *GuidelineResolver) Resolve(
     // 4. Merge sections into final content
     merged := r.mergeSections(sectionMap)
     
-    return apperror.Ok(ResolvedGuidelines{
+    return appfault.Ok(ResolvedGuidelines{
         MergedContent: merged,
         Sources:       sources,
         Overrides:     overrides,
@@ -314,7 +314,7 @@ Guidelines use Markdown with H2 headers as section identifiers:
 
 ## Error Handling
 - Check errors immediately after function calls
-- Wrap errors with context using apperror.Wrap or apperror.New
+- Wrap errors with context using appfault.Wrap or appfault.New
 - Define custom error types for domain errors
 - Use errors.Is() and errors.As() for error checking
 

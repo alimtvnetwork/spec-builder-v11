@@ -128,7 +128,7 @@ const (
     ResultTypeSpec    ResultType = "specification"
 )
 
-func (se *SearchEngine) Search(query SearchQuery) apperror.Result[[]SearchResult] {
+func (se *SearchEngine) Search(query SearchQuery) appfault.Result[[]SearchResult] {
     var wg sync.WaitGroup
     var lexicalResults, semanticResults []SearchResult
     var lexErr, semErr error
@@ -149,7 +149,7 @@ func (se *SearchEngine) Search(query SearchQuery) apperror.Result[[]SearchResult
     wg.Wait()
     
     if lexErr != nil && semErr != nil {
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrBothSearchesFailed,
             fmt.Sprintf("both searches failed: lexical=%v, semantic=%v", lexErr, semErr),
         )
@@ -177,7 +177,7 @@ type LexicalSearcher struct {
     db *gorm.DB
 }
 
-func (ls *LexicalSearcher) Search(query SearchQuery) apperror.Result[[]SearchResult] {
+func (ls *LexicalSearcher) Search(query SearchQuery) appfault.Result[[]SearchResult] {
     // SQLite FTS5 for full-text search
     var results []SearchResult
     
@@ -241,19 +241,19 @@ type SemanticSearcher struct {
 }
 
 type Embedder interface {
-    Embed(text string) apperror.Result[[]float32]
+    Embed(text string) appfault.Result[[]float32]
 }
 
 type VectorStore interface {
-    Search(vector []float32, limit int) apperror.Result[[]VectorResult]
+    Search(vector []float32, limit int) appfault.Result[[]VectorResult]
     Insert(id string, vector []float32, metadata map[string]string) error
 }
 
-func (ss *SemanticSearcher) Search(query SearchQuery) apperror.Result[[]SearchResult] {
+func (ss *SemanticSearcher) Search(query SearchQuery) appfault.Result[[]SearchResult] {
     // Generate embedding for query
     embedding, err := ss.embedder.Embed(query.Text)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrEmbeddingFailed,
             "embedding failed",
@@ -263,7 +263,7 @@ func (ss *SemanticSearcher) Search(query SearchQuery) apperror.Result[[]SearchRe
     // Search vector store
     vectorResults, err := ss.vectorDb.Search(embedding, query.MaxResults*2)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrVectorSearchFailed,
             "vector search failed",
@@ -674,7 +674,7 @@ type PassResult struct {
     Coverage     float64
 }
 
-func (mps *MultiPassSearcher) Search(query SearchQuery) apperror.Result[[]PassResult] {
+func (mps *MultiPassSearcher) Search(query SearchQuery) appfault.Result[[]PassResult] {
     passes := make([]PassResult, 0, mps.maxPasses)
     allResults := make(map[string]SearchResult)
     currentQuery := query.Text
@@ -789,7 +789,7 @@ type ValidationResult struct {
     ConflictingSources []string
 }
 
-func (ve *ValidationEngine) Validate(claims []string, sources []SearchResult) apperror.Result[[]ValidationResult] {
+func (ve *ValidationEngine) Validate(claims []string, sources []SearchResult) appfault.Result[[]ValidationResult] {
     results := make([]ValidationResult, len(claims))
     
     for i, claim := range claims {
@@ -921,7 +921,7 @@ type InlineCitation struct {
 func (rs *ResponseSynthesizer) Synthesize(
     results []SearchResult,
     validations []ValidationResult,
-) apperror.Result[SynthesizedResponse] {
+) appfault.Result[SynthesizedResponse] {
     // Get MMR weight from settings
     mmrWeight, _ := rs.settings.GetFloat("model_routing", "mmr_weight")
     if mmrWeight == 0 {

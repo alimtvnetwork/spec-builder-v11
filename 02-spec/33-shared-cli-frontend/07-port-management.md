@@ -110,23 +110,23 @@ func NewPortManager(primary int, fallbacks []int) *PortManager {
 }
 
 // FindAvailablePort finds first available port
-func (pm *PortManager) FindAvailablePort() apperror.Result[int] {
+func (pm *PortManager) FindAvailablePort() appfault.Result[int] {
     // Try primary first
     if pm.isPortAvailable(pm.primaryPort) {
         pm.usedPort = pm.primaryPort
-        return apperror.Succeed(pm.primaryPort)
+        return appfault.Succeed(pm.primaryPort)
     }
     
     // Try fallbacks
     for _, port := range pm.fallbackPorts {
         if pm.isPortAvailable(port) {
             pm.usedPort = port
-            return apperror.Succeed(port)
+            return appfault.Succeed(port)
         }
     }
     
-    return apperror.Fail[int](
-        apperror.New(
+    return appfault.Fail[int](
+        appfault.New(
             ErrPortUnavailable,
             "no available ports found",
         ),
@@ -143,16 +143,16 @@ func (pm *PortManager) isPortAvailable(port int) bool {
 }
 
 // CheckFirewall checks if port is blocked by firewall
-func (pm *PortManager) CheckFirewall(port int) apperror.Result[bool] {
+func (pm *PortManager) CheckFirewall(port int) appfault.Result[bool] {
     if runtime.GOOS != "windows" {
-        return apperror.Succeed(true) // Assume open on non-Windows
+        return appfault.Succeed(true) // Assume open on non-Windows
     }
     
     cmd := exec.Command("netsh", "advfirewall", "firewall", "show", "rule", 
         fmt.Sprintf("name=CLI-Port-%d", port))
     err := cmd.Run()
     
-    return apperror.Succeed(err == nil)
+    return appfault.Succeed(err == nil)
 }
 
 // EnableFirewall creates firewall rule (requires admin)

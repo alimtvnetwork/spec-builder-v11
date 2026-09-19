@@ -97,7 +97,7 @@ gsearch search "keyword" --language en                        # Language
 ```go
 type SearchEngine interface {
     Name() string
-    Search(context stdctx.Context, req SearchRequest) apperror.Result[SearchResponse]
+    Search(context stdctx.Context, req SearchRequest) appfault.Result[SearchResponse]
     IsAvailable() bool
     RateLimit() RateLimitConfig
 }
@@ -213,15 +213,15 @@ type UsageStats struct {
 }
 
 // Selection algorithm
-func (p *ApiPool) SelectProvider() apperror.Result[*ApiProvider] {
+func (p *ApiPool) SelectProvider() appfault.Result[*ApiProvider] {
     p.mu.RLock()
     defer p.mu.RUnlock()
     
     // Sort by: healthy > under-limit > priority > least-recently-used
     candidates := p.getHealthyCandidates()
     if len(candidates) == 0 {
-        return apperror.Fail[*ApiProvider](
-            apperror.New(
+        return appfault.Fail[*ApiProvider](
+            appfault.New(
                 "E5010",
                 "no available providers",
             ),
@@ -229,7 +229,7 @@ func (p *ApiPool) SelectProvider() apperror.Result[*ApiProvider] {
     }
     
     // Weighted random selection among healthy providers
-    return apperror.Ok(p.weightedSelect(candidates))
+    return appfault.Ok(p.weightedSelect(candidates))
 }
 ```
 
@@ -246,7 +246,7 @@ const (
 )
 
 // Default: FallbackScrape
-func (a *GoogleAdapter) Search(context stdctx.Context, req SearchRequest) apperror.Result[SearchResponse] {
+func (a *GoogleAdapter) Search(context stdctx.Context, req SearchRequest) appfault.Result[SearchResponse] {
     // 1. Try API pool
     if req.Method != MethodScrape {
         resp := a.tryApiPool(context, req)
@@ -262,8 +262,8 @@ func (a *GoogleAdapter) Search(context stdctx.Context, req SearchRequest) apperr
         return a.scraper.Search(context, req)
     }
     
-    return apperror.Fail[SearchResponse](
-        apperror.New(
+    return appfault.Fail[SearchResponse](
+        appfault.New(
             "E5011",
             "search failed: all methods exhausted",
         ),
@@ -300,7 +300,7 @@ type ScraperConfig struct {
 ### 6.2 Anti-Detection Measures
 
 ```go
-func (s *StealthScraper) Search(context stdctx.Context, req SearchRequest) apperror.Result[SearchResponse] {
+func (s *StealthScraper) Search(context stdctx.Context, req SearchRequest) appfault.Result[SearchResponse] {
     page := s.browser.MustPage()
     defer page.Close()
     
@@ -322,8 +322,8 @@ func (s *StealthScraper) Search(context stdctx.Context, req SearchRequest) apper
     
     // 6. Check for CAPTCHA
     if s.detectCaptcha(page) {
-        return apperror.Fail[SearchResponse](
-            apperror.New(
+        return appfault.Fail[SearchResponse](
+            appfault.New(
                 "E5001",
                 "CAPTCHA detected during stealth scraping",
             ),
@@ -454,14 +454,14 @@ type SearchCache struct {
     defaultTTL time.Duration
 }
 
-func (c *SearchCache) Get(req SearchRequest) apperror.Result[CachedResponse] {
+func (c *SearchCache) Get(req SearchRequest) appfault.Result[CachedResponse] {
     hash := c.computeHash(req)
     
     // Check if cache exists and is valid
     sessionDb := c.openSessionDb(hash)
     if sessionDb == nil {
-        return apperror.Fail[CachedResponse](
-            apperror.New(
+        return appfault.Fail[CachedResponse](
+            appfault.New(
                 "E8001",
                 "cache miss",
             ),
@@ -471,24 +471,24 @@ func (c *SearchCache) Get(req SearchRequest) apperror.Result[CachedResponse] {
     // Check TTL
     resultsResult := c.loadResults(sessionDb, req.Engines)
     if resultsResult.HasError() {
-        return apperror.Fail[CachedResponse](resultsResult.Error())
+        return appfault.Fail[CachedResponse](resultsResult.Error())
     }
 
     results := resultsResult.Value()
     
     if c.isExpired(results) {
-        return apperror.Fail[CachedResponse](
-            apperror.New(
+        return appfault.Fail[CachedResponse](
+            appfault.New(
                 "E8002",
                 "cache expired",
             ),
         )
     }
     
-    return apperror.Ok(CachedResponse{Results: results, FromCache: true})
+    return appfault.Ok(CachedResponse{Results: results, FromCache: true})
 }
 
-func (c *SearchCache) Set(req SearchRequest, resp *SearchResponse) *apperror.AppError {
+func (c *SearchCache) Set(req SearchRequest, resp *SearchResponse) *appfault.AppError {
     hash := c.computeHash(req)
     
     // Register in root DB
@@ -608,7 +608,7 @@ var defaultRetryConfig = RetryConfig{
     RetryableErrors: []int{7703, 7704, 7706, 7707, 7708},
 }
 
-func (a *Adapter) searchWithRetry(context stdctx.Context, req SearchRequest) apperror.Result[*SearchResponse] {
+func (a *Adapter) searchWithRetry(context stdctx.Context, req SearchRequest) appfault.Result[*SearchResponse] {
     var lastErr error
     
     for attempt := 0; attempt <= a.retry.MaxRetries; attempt++ {

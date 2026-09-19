@@ -86,7 +86,7 @@ type CreateProjectOptions struct {
     OutputDir   string
 }
 
-func (pm *ProjectManager) Create(opts CreateProjectOptions) apperror.Result[*Project] {
+func (pm *ProjectManager) Create(opts CreateProjectOptions) appfault.Result[*Project] {
     // 1. Validate name
     if opts.Name == "" {
         return nil, errors.New(10301, "project name required")
@@ -163,7 +163,7 @@ type ListProjectsOptions struct {
     Order   string // asc, desc
 }
 
-func (pm *ProjectManager) List(opts ListProjectsOptions) apperror.Result[[]Project] {
+func (pm *ProjectManager) List(opts ListProjectsOptions) appfault.Result[[]Project] {
     var projects []Project
     
     query := pm.rootDb.Model(&Project{})
@@ -185,7 +185,7 @@ func (pm *ProjectManager) List(opts ListProjectsOptions) apperror.Result[[]Proje
 ### Open Project
 
 ```go
-func (pm *ProjectManager) Open(name string) apperror.Result[OpenProjectOutcome] {
+func (pm *ProjectManager) Open(name string) appfault.Result[OpenProjectOutcome] {
     // 1. Find project
     var project Project
     if err := pm.rootDb.Where("name = ? OR slug = ?", name, name).
@@ -257,7 +257,7 @@ type CloneProjectOptions struct {
     IncludeHistory bool
 }
 
-func (pm *ProjectManager) Clone(sourceName, targetName string, opts CloneProjectOptions) apperror.Result[*Project] {
+func (pm *ProjectManager) Clone(sourceName, targetName string, opts CloneProjectOptions) appfault.Result[*Project] {
     // 1. Open source project
     source, sourceDb, err := pm.Open(sourceName)
     if err != nil {
@@ -314,7 +314,7 @@ type ExportProjectOptions struct {
     IncludeFiles bool
 }
 
-func (pm *ProjectManager) Export(name string, opts ExportProjectOptions) apperror.Result[string] {
+func (pm *ProjectManager) Export(name string, opts ExportProjectOptions) appfault.Result[string] {
     // 1. Open project
     project, _, err := pm.Open(name)
     if err != nil {
@@ -380,7 +380,7 @@ type ImportProjectOptions struct {
     Overwrite bool
 }
 
-func (pm *ProjectManager) Import(path string, opts ImportProjectOptions) apperror.Result[*Project] {
+func (pm *ProjectManager) Import(path string, opts ImportProjectOptions) appfault.Result[*Project] {
     // 1. Detect format
     format := detectFormat(path)
     

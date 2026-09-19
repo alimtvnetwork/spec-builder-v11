@@ -29,20 +29,20 @@ import (
 
 type Service interface {
     // CRUD operations
-    List(context stdctx.Context) apperror.Result[[]models.Site]
-    GetById(context stdctx.Context, id int64) apperror.Result[*models.Site]
-    GetByUrl(context stdctx.Context, url string) apperror.Result[*models.Site]
-    Create(context stdctx.Context, input CreateInput) apperror.Result[*models.Site]
-    Update(context stdctx.Context, id int64, input UpdateInput) apperror.Result[*models.Site]
-    Delete(context stdctx.Context, id int64) *apperror.AppError
+    List(context stdctx.Context) appfault.Result[[]models.Site]
+    GetById(context stdctx.Context, id int64) appfault.Result[*models.Site]
+    GetByUrl(context stdctx.Context, url string) appfault.Result[*models.Site]
+    Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Site]
+    Update(context stdctx.Context, id int64, input UpdateInput) appfault.Result[*models.Site]
+    Delete(context stdctx.Context, id int64) *appfault.AppError
     
     // Connection management
-    TestConnection(context stdctx.Context, id int64) apperror.Result[*ConnectionResult]
-    TestCredentials(context stdctx.Context, url, username, password string) apperror.Result[*ConnectionResult]
+    TestConnection(context stdctx.Context, id int64) appfault.Result[*ConnectionResult]
+    TestCredentials(context stdctx.Context, url, username, password string) appfault.Result[*ConnectionResult]
     
     // Status updates
-    UpdateLastSync(context stdctx.Context, id int64) *apperror.AppError
-    SetActive(context stdctx.Context, id int64, active bool) *apperror.AppError
+    UpdateLastSync(context stdctx.Context, id int64) *appfault.AppError
+    SetActive(context stdctx.Context, id int64, active bool) *appfault.AppError
 }
 ```
 
@@ -157,18 +157,18 @@ import (
     "time"
     
     "wp-plugin-publish/internal/models"
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
     
     "gorm.io/gorm"
 )
 
-func (s *serviceImpl) List(context stdctx.Context) apperror.Result[[]models.Site] {
+func (s *serviceImpl) List(context stdctx.Context) appfault.Result[[]models.Site] {
     s.log.Debug("Listing all sites")
     
     var sites []models.Site
     if err := s.db.WithContext(context).Order("Name ASC").Find(&sites).Error; err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseQuery, "failed to list sites",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseQuery, "failed to list sites",
         )
     }
     
@@ -185,19 +185,19 @@ func (s *serviceImpl) List(context stdctx.Context) apperror.Result[[]models.Site
     return sites, nil
 }
 
-func (s *serviceImpl) GetById(context stdctx.Context, id int64) apperror.Result[*models.Site] {
+func (s *serviceImpl) GetById(context stdctx.Context, id int64) appfault.Result[*models.Site] {
     s.log.Debug("Getting site by id", "siteId", id)
     
     var site models.Site
     if err := s.db.WithContext(context).First(&site, "Id = ?", id).Error; err != nil {
         if err == gorm.ErrRecordNotFound {
-            return nil, apperror.New(
-                apperror.ErrNotFound, "site not found",
+            return nil, appfault.New(
+                appfault.ErrNotFound, "site not found",
             ).
                 WithContext("siteId", id)
         }
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseQuery, "failed to get site",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseQuery, "failed to get site",
         )
     }
     
@@ -205,7 +205,7 @@ func (s *serviceImpl) GetById(context stdctx.Context, id int64) apperror.Result[
     return &site, nil
 }
 
-func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror.Result[*models.Site] {
+func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Site] {
     s.log.Info("Creating site", "name", input.Name, "url", input.Url)
     
     // Validate input
@@ -219,8 +219,8 @@ func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror
     // Check for duplicate URL
     existing, _ := s.GetByUrl(context, url)
     if existing != nil {
-        return nil, apperror.New(
-            apperror.ErrDuplicate, "site with this URL already exists",
+        return nil, appfault.New(
+            appfault.ErrDuplicate, "site with this URL already exists",
         ).
             WithContext("url", url)
     }
@@ -228,8 +228,8 @@ func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror
     // Encrypt password
     encryptedPassword, err := EncryptPassword(input.AppPassword, s.encKey)
     if err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrInternal, "failed to encrypt password",
+        return nil, appfault.Wrap(
+            err, appfault.ErrInternal, "failed to encrypt password",
         )
     }
     
@@ -245,8 +245,8 @@ func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror
     }
     
     if err := s.db.WithContext(context).Create(&site).Error; err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to create site",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to create site",
         )
     }
     
@@ -254,7 +254,7 @@ func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror
     return s.GetById(context, site.Id)
 }
 
-func (s *serviceImpl) Update(context stdctx.Context, id int64, input UpdateInput) apperror.Result[*models.Site] {
+func (s *serviceImpl) Update(context stdctx.Context, id int64, input UpdateInput) appfault.Result[*models.Site] {
     s.log.Info("Updating site", "siteId", id)
     
     // Verify site exists
@@ -276,8 +276,8 @@ func (s *serviceImpl) Update(context stdctx.Context, id int64, input UpdateInput
     if input.AppPassword != nil {
         encrypted, err := EncryptPassword(*input.AppPassword, s.encKey)
         if err != nil {
-            return nil, apperror.Wrap(
-                err, apperror.ErrInternal, "failed to encrypt password",
+            return nil, appfault.Wrap(
+                err, appfault.ErrInternal, "failed to encrypt password",
             )
         }
         existing.AppPassword = encrypted
@@ -288,8 +288,8 @@ func (s *serviceImpl) Update(context stdctx.Context, id int64, input UpdateInput
     existing.UpdatedAt = time.Now()
     
     if err := s.db.WithContext(context).Save(existing).Error; err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to update site",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to update site",
         )
     }
     
@@ -307,8 +307,8 @@ func (s *serviceImpl) Delete(context stdctx.Context, id int64) error {
     
     // Delete (cascade will handle plugins)
     if err := s.db.WithContext(context).Delete(&models.Site{}, "Id = ?", id).Error; err != nil {
-        return apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to delete site",
+        return appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to delete site",
         )
     }
     
@@ -326,27 +326,27 @@ package site
 import (
     stdctx "context"
     
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
 )
 
-func (s *serviceImpl) TestConnection(context stdctx.Context, id int64) apperror.Result[ConnectionResult] {
+func (s *serviceImpl) TestConnection(context stdctx.Context, id int64) appfault.Result[ConnectionResult] {
     s.log.Info("Testing connection", "siteId", id)
     
     site, err := s.GetById(context, id)
     if err != nil {
-        return apperror.Fail[ConnectionResult](err)
+        return appfault.Fail[ConnectionResult](err)
     }
     
     return s.TestCredentials(context, site.Url, site.Username, site.AppPassword)
 }
 
-func (s *serviceImpl) TestCredentials(context stdctx.Context, url, username, password string) apperror.Result[ConnectionResult] {
+func (s *serviceImpl) TestCredentials(context stdctx.Context, url, username, password string) appfault.Result[ConnectionResult] {
     s.log.Debug("Testing credentials", "url", url, "username", username)
     
     // Test connection via WP REST API
     info, err := s.wpClient.GetSiteInfo(context, url, username, password)
     if err != nil {
-        appErr, ok := err.(*apperror.AppError)
+        appErr, ok := err.(*appfault.AppError)
         if ok {
             return &ConnectionResult{
                 Success:   false,
@@ -357,7 +357,7 @@ func (s *serviceImpl) TestCredentials(context stdctx.Context, url, username, pas
         return &ConnectionResult{
             Success:   false,
             Error:     err.Error(),
-            ErrorCode: apperror.ErrWpConnect,
+            ErrorCode: appfault.ErrWpConnect,
         }, nil
     }
     
@@ -388,8 +388,8 @@ func (s *serviceImpl) UpdateLastSync(context stdctx.Context, id int64) error {
         id,
     )
     if err != nil {
-        return apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to update last sync",
+        return appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to update last sync",
         )
     }
     return nil
@@ -406,8 +406,8 @@ func (s *serviceImpl) SetActive(context stdctx.Context, id int64, active bool) e
         activeInt, id,
     )
     if err != nil {
-        return apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to update site active status",
+        return appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to update site active status",
         )
     }
     return nil
@@ -424,57 +424,57 @@ import (
     "net/url"
     "strings"
     
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
 )
 
 func (s *serviceImpl) validateCreateInput(input CreateInput) error {
     if strings.TrimSpace(input.Name) == "" {
-        return apperror.New(
-            apperror.ErrValidationEmpty, "site name is required",
+        return appfault.New(
+            appfault.ErrValidationEmpty, "site name is required",
         )
     }
     
     if len(input.Name) > 255 {
-        return apperror.New(
-            apperror.ErrValidationLength, "site name must be 255 characters or less",
+        return appfault.New(
+            appfault.ErrValidationLength, "site name must be 255 characters or less",
         )
     }
     
     if strings.TrimSpace(input.Url) == "" {
-        return apperror.New(
-            apperror.ErrValidationEmpty, "site URL is required",
+        return appfault.New(
+            appfault.ErrValidationEmpty, "site URL is required",
         )
     }
     
     parsedUrl, err := url.Parse(input.Url)
     if err != nil || (parsedUrl.Scheme != "http" && parsedUrl.Scheme != "https") {
-        return apperror.New(
-            apperror.ErrValidationUrl, "invalid site URL format",
+        return appfault.New(
+            appfault.ErrValidationUrl, "invalid site URL format",
         )
     }
     
     if len(input.Url) > 2048 {
-        return apperror.New(
-            apperror.ErrValidationLength, "site URL must be 2048 characters or less",
+        return appfault.New(
+            appfault.ErrValidationLength, "site URL must be 2048 characters or less",
         )
     }
     
     if strings.TrimSpace(input.Username) == "" {
-        return apperror.New(
-            apperror.ErrValidationEmpty, "username is required",
+        return appfault.New(
+            appfault.ErrValidationEmpty, "username is required",
         )
     }
     
     if strings.TrimSpace(input.AppPassword) == "" {
-        return apperror.New(
-            apperror.ErrValidationEmpty, "application password is required",
+        return appfault.New(
+            appfault.ErrValidationEmpty, "application password is required",
         )
     }
     
     // Normalize app password (remove spaces for validation)
     normalized := strings.ReplaceAll(input.AppPassword, " ", "")
     if len(normalized) != 24 {
-        return apperror.New(apperror.ErrValidationFormat, 
+        return appfault.New(appfault.ErrValidationFormat, 
             "application password must be 24 characters (format: xxxx xxxx xxxx xxxx xxxx xxxx)")
     }
     
@@ -495,28 +495,28 @@ import (
     "encoding/base64"
     "io"
     
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
 )
 
-func EncryptPassword(plaintext string, key []byte) apperror.Result[string] {
+func EncryptPassword(plaintext string, key []byte) appfault.Result[string] {
     block, err := aes.NewCipher(key)
     if err != nil {
-        return "", apperror.Wrap(
-            err, apperror.ErrInternal, "failed to create cipher",
+        return "", appfault.Wrap(
+            err, appfault.ErrInternal, "failed to create cipher",
         )
     }
     
     gcm, err := cipher.NewGCM(block)
     if err != nil {
-        return "", apperror.Wrap(
-            err, apperror.ErrInternal, "failed to create GCM",
+        return "", appfault.Wrap(
+            err, appfault.ErrInternal, "failed to create GCM",
         )
     }
     
     nonce := make([]byte, gcm.NonceSize())
     if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-        return "", apperror.Wrap(
-            err, apperror.ErrInternal, "failed to generate nonce",
+        return "", appfault.Wrap(
+            err, appfault.ErrInternal, "failed to generate nonce",
         )
     }
     
@@ -524,31 +524,31 @@ func EncryptPassword(plaintext string, key []byte) apperror.Result[string] {
     return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
-func DecryptPassword(ciphertext string, key []byte) apperror.Result[string] {
+func DecryptPassword(ciphertext string, key []byte) appfault.Result[string] {
     data, err := base64.StdEncoding.DecodeString(ciphertext)
     if err != nil {
-        return "", apperror.Wrap(
-            err, apperror.ErrInternal, "failed to decode ciphertext",
+        return "", appfault.Wrap(
+            err, appfault.ErrInternal, "failed to decode ciphertext",
         )
     }
     
     block, err := aes.NewCipher(key)
     if err != nil {
-        return "", apperror.Wrap(
-            err, apperror.ErrInternal, "failed to create cipher",
+        return "", appfault.Wrap(
+            err, appfault.ErrInternal, "failed to create cipher",
         )
     }
     
     gcm, err := cipher.NewGCM(block)
     if err != nil {
-        return "", apperror.Wrap(
-            err, apperror.ErrInternal, "failed to create GCM",
+        return "", appfault.Wrap(
+            err, appfault.ErrInternal, "failed to create GCM",
         )
     }
     
     if len(data) < gcm.NonceSize() {
-        return "", apperror.New(
-            apperror.ErrInternal, "ciphertext too short",
+        return "", appfault.New(
+            appfault.ErrInternal, "ciphertext too short",
         )
     }
     
@@ -557,8 +557,8 @@ func DecryptPassword(ciphertext string, key []byte) apperror.Result[string] {
     
     plaintext, err := gcm.Open(nil, nonce, ciphertextBytes, nil)
     if err != nil {
-        return "", apperror.Wrap(
-            err, apperror.ErrInternal, "failed to decrypt",
+        return "", appfault.Wrap(
+            err, appfault.ErrInternal, "failed to decrypt",
         )
     }
     

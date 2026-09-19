@@ -30,16 +30,16 @@ Provide a unified proxy acquisition layer that sources, validates, rotates, and 
 // proxyvendor/provider.go
 type Provider interface {
     // Acquire returns a proxy endpoint for the given requirements
-    Acquire(context context.Context, request AcquireRequest) apperror.Result[Proxy]
+    Acquire(context context.Context, request AcquireRequest) appfault.Result[Proxy]
     
     // Release marks a proxy as no longer in use
-    Release(context context.Context, proxyId string) *apperror.AppError
+    Release(context context.Context, proxyId string) *appfault.AppError
     
     // Balance returns remaining credit/bandwidth
-    Balance(context context.Context) apperror.Result[BalanceInfo]
+    Balance(context context.Context) appfault.Result[BalanceInfo]
     
     // HealthCheck validates provider API connectivity
-    HealthCheck(context context.Context) *apperror.AppError
+    HealthCheck(context context.Context) *appfault.AppError
     
     // Vendor returns the provider enum constant
     Vendor() Variant

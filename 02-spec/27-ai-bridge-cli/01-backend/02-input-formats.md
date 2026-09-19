@@ -63,11 +63,11 @@ type MarkdownFrontmatter struct {
     Variables    map[string]string `yaml:",omitempty"`
 }
 
-func (p *MarkdownParser) Parse(content []byte) apperror.Result[*NormalizedRequest] {
+func (p *MarkdownParser) Parse(content []byte) appfault.Result[*NormalizedRequest] {
     // 1. Extract frontmatter
     frontmatter, body, err := p.extractFrontmatter(content)
     if err != nil {
-        return apperror.FailNew[*NormalizedRequest](
+        return appfault.FailNew[*NormalizedRequest](
             ErrMarkdownParseFailed,
             "invalid frontmatter: %v", err,
         )
@@ -77,7 +77,7 @@ func (p *MarkdownParser) Parse(content []byte) apperror.Result[*NormalizedReques
     var fm MarkdownFrontmatter
     err = yaml.Unmarshal(frontmatter, &fm)
     if err != nil {
-        return apperror.FailNew[*NormalizedRequest](
+        return appfault.FailNew[*NormalizedRequest](
             ErrMarkdownParseFailed,
             "invalid frontmatter YAML: %v", err,
         )
@@ -90,7 +90,7 @@ func (p *MarkdownParser) Parse(content []byte) apperror.Result[*NormalizedReques
     userPrompt = p.resolveVariables(userPrompt, fm.Variables)
     systemPrompt = p.resolveVariables(systemPrompt, fm.Variables)
     
-    return apperror.Ok(&NormalizedRequest{
+    return appfault.Ok(&NormalizedRequest{
         Id:            uuid.New().String(),
         SystemPrompt:  systemPrompt,
         UserPrompt:    userPrompt,
@@ -206,11 +206,11 @@ type JsonRequest struct {
     BatchItems         []BatchItem       `json:",omitempty"`
 }
 
-func (p *JsonParser) Parse(content []byte) apperror.Result[*NormalizedRequest] {
+func (p *JsonParser) Parse(content []byte) appfault.Result[*NormalizedRequest] {
     // 1. Validate against schema
     err := p.schema.Validate(content)
     if err != nil {
-        return apperror.FailNew[*NormalizedRequest](
+        return appfault.FailNew[*NormalizedRequest](
             ErrJsonValidationFailed,
             "schema validation failed: %v", err,
         )
@@ -220,7 +220,7 @@ func (p *JsonParser) Parse(content []byte) apperror.Result[*NormalizedRequest] {
     var jr JsonRequest
     err = json.Unmarshal(content, &jr)
     if err != nil {
-        return apperror.FailNew[*NormalizedRequest](
+        return appfault.FailNew[*NormalizedRequest](
             ErrJsonParseFailed,
             "invalid JSON: %v", err,
         )
@@ -243,7 +243,7 @@ func (p *JsonParser) Parse(content []byte) apperror.Result[*NormalizedRequest] {
         }
     }
     
-    return apperror.Ok(&NormalizedRequest{
+    return appfault.Ok(&NormalizedRequest{
         Id:            uuid.New().String(),
         SystemPrompt:  jr.SystemPrompt,
         UserPrompt:    userPrompt,
@@ -345,7 +345,7 @@ type YAMLRequest struct {
     Context      []ContextItem     `yaml:",omitempty"`
 }
 
-func (p *YAMLParser) Parse(content []byte) apperror.Result[*NormalizedRequest] {
+func (p *YAMLParser) Parse(content []byte) appfault.Result[*NormalizedRequest] {
     // Check for multi-document
     if bytes.Contains(content, []byte("\n---\n")) {
         return p.parseMultiDocument(content)
@@ -353,17 +353,17 @@ func (p *YAMLParser) Parse(content []byte) apperror.Result[*NormalizedRequest] {
     return p.parseSingleDocument(content)
 }
 
-func (p *YamlParser) parseSingleDocument(content []byte) apperror.Result[*NormalizedRequest] {
+func (p *YamlParser) parseSingleDocument(content []byte) appfault.Result[*NormalizedRequest] {
     var yr YamlRequest
     err := yaml.Unmarshal(content, &yr)
     if err != nil {
-        return apperror.FailNew[*NormalizedRequest](
+        return appfault.FailNew[*NormalizedRequest](
             ErrYamlParseFailed,
             "invalid YAML: %v", err,
         )
     }
     
-    return apperror.Ok(&NormalizedRequest{
+    return appfault.Ok(&NormalizedRequest{
         Id:            uuid.New().String(),
         SystemPrompt:  yr.SystemPrompt,
         UserPrompt:    p.resolveVariables(yr.UserPrompt, yr.Variables),
@@ -383,7 +383,7 @@ func (p *YamlParser) parseSingleDocument(content []byte) apperror.Result[*Normal
     })
 }
 
-func (p *YamlParser) parseMultiDocument(content []byte) apperror.Result[*NormalizedRequest] {
+func (p *YamlParser) parseMultiDocument(content []byte) appfault.Result[*NormalizedRequest] {
     decoder := yaml.NewDecoder(bytes.NewReader(content))
     
     var requests []YamlRequest
@@ -394,7 +394,7 @@ func (p *YamlParser) parseMultiDocument(content []byte) apperror.Result[*Normali
             if err == io.EOF {
                 break
             }
-            return apperror.FailNew[*NormalizedRequest](
+            return appfault.FailNew[*NormalizedRequest](
                 ErrYamlParseFailed,
                 "invalid YAML document: %v", err,
             )
@@ -406,7 +406,7 @@ func (p *YamlParser) parseMultiDocument(content []byte) apperror.Result[*Normali
     }
     
     if len(requests) == 0 {
-        return apperror.FailNew[*NormalizedRequest](
+        return appfault.FailNew[*NormalizedRequest](
             ErrYamlEmpty,
             "no valid YAML documents found",
         )
@@ -423,7 +423,7 @@ func (p *YamlParser) parseMultiDocument(content []byte) apperror.Result[*Normali
     
     // Use first document as template
     first := requests[0]
-    return apperror.Ok(&NormalizedRequest{
+    return appfault.Ok(&NormalizedRequest{
         Id:            uuid.New().String(),
         SystemPrompt:  first.SystemPrompt,
         UserPrompt:    first.UserPrompt,
@@ -493,19 +493,19 @@ type CSVConfig struct {
     SkipHeader         bool    `yaml:",omitempty"`
 }
 
-func (p *CSVParser) Parse(content []byte) apperror.Result[*NormalizedRequest] {
-    return apperror.FailNew[*NormalizedRequest](
+func (p *CSVParser) Parse(content []byte) appfault.Result[*NormalizedRequest] {
+    return appfault.FailNew[*NormalizedRequest](
         ErrCSVRequiresConfig,
         "CSV parsing requires companion config file",
     )
 }
 
-func (p *CSVParser) ParseWithConfig(csvContent []byte, config CSVConfig) apperror.Result[*NormalizedRequest] {
+func (p *CSVParser) ParseWithConfig(csvContent []byte, config CSVConfig) appfault.Result[*NormalizedRequest] {
     // 1. Parse CSV
     reader := csv.NewReader(bytes.NewReader(csvContent))
     records, err := reader.ReadAll()
     if err != nil {
-        return apperror.FailWrap[*NormalizedRequest](
+        return appfault.FailWrap[*NormalizedRequest](
             err,
             ErrCSVParseFailed,
             "invalid CSV",
@@ -513,7 +513,7 @@ func (p *CSVParser) ParseWithConfig(csvContent []byte, config CSVConfig) apperro
     }
     
     if len(records) < 2 {
-        return apperror.FailNew[*NormalizedRequest](
+        return appfault.FailNew[*NormalizedRequest](
             ErrCSVEmpty,
             "CSV must have header and at least one data row",
         )

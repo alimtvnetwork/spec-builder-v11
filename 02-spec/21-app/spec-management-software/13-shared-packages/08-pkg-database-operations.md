@@ -91,7 +91,7 @@ type DBOperation struct {
 type DBResult struct {
     Success      bool
     AffectedRows int64
-    Error        *apperror.AppError `json:",omitempty"`
+    Error        *appfault.AppError `json:",omitempty"`
     StackTrace   []StackFrame  `json:",omitempty"`
     Duration     time.Duration
     TableName    string
@@ -151,7 +151,7 @@ func (op *DBOperation) Execute(fn func() (int64, error)) DBResult { // EXEMPTED:
     if op.ExpectedRows > 0 && int64(op.ExpectedRows) != affectedRows {
         result.Success = false
         if result.Error == nil {
-            result.Error = apperror.New(
+            result.Error = appfault.New(
                 ErrRowCountMismatch,
                 "row count mismatch",
             ).
@@ -300,7 +300,7 @@ func (r *UserRepository) Delete(userId string) error {
 ### Read Operation (No Expected Rows)
 
 ```go
-func (r *UserRepository) FindByEmail(email string) apperror.Result[User] {
+func (r *UserRepository) FindByEmail(email string) appfault.Result[User] {
     op := database.NewDbOperation("User", database.OpRead)
     
     var user User

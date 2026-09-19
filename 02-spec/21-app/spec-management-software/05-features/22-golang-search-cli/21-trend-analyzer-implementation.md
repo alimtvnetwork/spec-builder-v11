@@ -77,7 +77,7 @@ internal/
 // TrendAnalyzer orchestrates trend data collection, scoring, and visualization
 type TrendAnalyzer interface {
     // Analyze performs full trend analysis for a given type
-    Analyze(context stdctx.Context, opts AnalyzeOptions) apperror.Result[TrendReport]
+    Analyze(context stdctx.Context, opts AnalyzeOptions) appfault.Result[TrendReport]
     
     // ComputeCompositeScore calculates weighted composite score
     ComputeCompositeScore(signal TrendSignal) float64
@@ -156,19 +156,19 @@ type ReportMetadata struct {
 // SettingsService provides access to seedable configuration values
 type SettingsService interface {
     // Get retrieves a string setting value
-    Get(category, key string) apperror.Result[string]
+    Get(category, key string) appfault.Result[string]
     
     // GetFloat retrieves a float64 setting value
-    GetFloat(category, key string) apperror.Result[float64]
+    GetFloat(category, key string) appfault.Result[float64]
     
     // GetInt retrieves an int setting value
-    GetInt(category, key string) apperror.Result[int]
+    GetInt(category, key string) appfault.Result[int]
     
     // GetTyped retrieves a typed setting value using generics
-    GetTyped[T any](category, key string) apperror.Result[T]
+    GetTyped[T any](category, key string) appfault.Result[T]
     
     // GetWeights retrieves a typed weights map
-    GetWeights(category, key string) apperror.Result[map[string]float64]
+    GetWeights(category, key string) appfault.Result[map[string]float64]
     
     // Update modifies a setting value (marks as user-modified)
     Update[T any](category, key string, value T) error
@@ -177,7 +177,7 @@ type SettingsService interface {
     ResetToDefault(category, key string) error
     
     // GetCategory retrieves all settings in a category
-    GetCategory(category string) apperror.Result[[]Setting]
+    GetCategory(category string) appfault.Result[[]Setting]
     
     // SeedFromFile processes a seed JSON file
     SeedFromFile(filePath string) error
@@ -250,13 +250,13 @@ type FreshnessRequirements struct {
 
 ```go
 // LoadTrendConfig loads trend configuration from SettingsService
-func LoadTrendConfig(settings SettingsService) apperror.Result[TrendConfig] {
+func LoadTrendConfig(settings SettingsService) appfault.Result[TrendConfig] {
     config := &TrendConfig{}
     
     // Load composite weights using generic typed accessor
     weightsResult := settings.GetTyped[CompositeWeights]("trend_analysis", "composite_score_weights")
     if weightsResult.HasError() {
-        return apperror.FailWrap[TrendConfig](
+        return appfault.FailWrap[TrendConfig](
             weightsResult.Error(),
             "E6101",
             "load composite weights",
@@ -267,7 +267,7 @@ func LoadTrendConfig(settings SettingsService) apperror.Result[TrendConfig] {
     // Load normalization limits
     normResult := settings.GetTyped[SignalNormalization]("trend_analysis", "signal_normalization")
     if normResult.HasError() {
-        return apperror.FailWrap[TrendConfig](
+        return appfault.FailWrap[TrendConfig](
             normResult.Error(),
             "E6102",
             "load normalization",
@@ -277,7 +277,7 @@ func LoadTrendConfig(settings SettingsService) apperror.Result[TrendConfig] {
     
     // ... load remaining config sections using GetTyped[T]
     
-    return apperror.Ok(*config)
+    return appfault.Ok(*config)
 }
 ```
 
@@ -294,7 +294,7 @@ type Collector interface {
     Name() string
     
     // Collect fetches trend data for a given query
-    Collect(context stdctx.Context, query CollectorQuery) apperror.Result[CollectorResult]
+    Collect(context stdctx.Context, query CollectorQuery) appfault.Result[CollectorResult]
     
     // HealthCheck verifies the data source is accessible
     HealthCheck(context stdctx.Context) error
@@ -348,7 +348,7 @@ type CollectorManager struct {
 }
 
 // CollectAll fetches data from all registered collectors
-func (m *CollectorManager) CollectAll(context stdctx.Context, query CollectorQuery) apperror.Result[AggregatedResult] {
+func (m *CollectorManager) CollectAll(context stdctx.Context, query CollectorQuery) appfault.Result[AggregatedResult] {
     results := make(chan CollectorResult, len(m.collectors))
     errors := make(chan error, len(m.collectors))
     
@@ -357,7 +357,7 @@ func (m *CollectorManager) CollectAll(context stdctx.Context, query CollectorQue
         go func(n string, c Collector) {
             result := c.Collect(context, query)
             if result.HasError() {
-                errors <- apperror.Wrap(
+                errors <- appfault.Wrap(
                     result.Error(),
                     ErrCollectorFailed,
                     "collector failed",
@@ -384,7 +384,7 @@ type GitHubCollector struct {
     rateLimiter *rate.Limiter
 }
 
-func (c *GitHubCollector) Collect(context stdctx.Context, query CollectorQuery) apperror.Result[CollectorResult] {
+func (c *GitHubCollector) Collect(context stdctx.Context, query CollectorQuery) appfault.Result[CollectorResult] {
     // Get source weight from settings
     weight, _ := c.settings.GetFloat("trend_analysis", "github_api_weight")
     
@@ -397,7 +397,7 @@ func (c *GitHubCollector) Collect(context stdctx.Context, query CollectorQuery) 
             Order: "desc",
         })
         if err != nil {
-            return apperror.Fail[CollectorResult](err)
+            return appfault.Fail[CollectorResult](err)
         }
         
         for _, repo := range repos.Repositories {
@@ -410,7 +410,7 @@ func (c *GitHubCollector) Collect(context stdctx.Context, query CollectorQuery) 
         }
     }
     
-    return apperror.Ok(CollectorResult{
+    return appfault.Ok(CollectorResult{
         Source:    "github",
         Signals:   signals,
         FetchedAt: time.Now(),
@@ -431,7 +431,7 @@ type StackOverflowCollector struct {
     apiKey   string
 }
 
-func (c *StackOverflowCollector) Collect(context stdctx.Context, query CollectorQuery) apperror.Result[CollectorResult] {
+func (c *StackOverflowCollector) Collect(context stdctx.Context, query CollectorQuery) appfault.Result[CollectorResult] {
     weight, _ := c.settings.GetFloat("trend_analysis", "stackoverflow_api_weight")
     
     signals := []RawSignal{}
@@ -451,7 +451,7 @@ func (c *StackOverflowCollector) Collect(context stdctx.Context, query Collector
         })
     }
     
-    return apperror.Ok(CollectorResult{
+    return appfault.Ok(CollectorResult{
         Source:    "stackoverflow",
         Signals:   signals,
         FetchedAt: time.Now(),
@@ -472,11 +472,11 @@ type JobCollector struct {
 }
 
 type JobScraper interface {
-    Scrape(context stdctx.Context, query string) apperror.Result[[]JobPosting]
+    Scrape(context stdctx.Context, query string) appfault.Result[[]JobPosting]
     Source() string
 }
 
-func (c *JobCollector) Collect(context stdctx.Context, query CollectorQuery) apperror.Result[CollectorResult] {
+func (c *JobCollector) Collect(context stdctx.Context, query CollectorQuery) appfault.Result[CollectorResult] {
     weight, _ := c.settings.GetFloat("trend_analysis", "indeed_scraper_weight")
     
     signals := []RawSignal{}
@@ -501,7 +501,7 @@ func (c *JobCollector) Collect(context stdctx.Context, query CollectorQuery) app
         })
     }
     
-    return apperror.Ok(CollectorResult{
+    return appfault.Ok(CollectorResult{
         Source:    "jobs",
         Signals:   signals,
         FetchedAt: time.Now(),
@@ -521,7 +521,7 @@ type NPMCollector struct {
     settings SettingsService
 }
 
-func (c *NPMCollector) Collect(context stdctx.Context, query CollectorQuery) apperror.Result[CollectorResult] {
+func (c *NPMCollector) Collect(context stdctx.Context, query CollectorQuery) appfault.Result[CollectorResult] {
     weight, _ := c.settings.GetFloat("trend_analysis", "npm_registry_weight")
     
     signals := []RawSignal{}
@@ -540,7 +540,7 @@ func (c *NPMCollector) Collect(context stdctx.Context, query CollectorQuery) app
         })
     }
     
-    return apperror.Ok(CollectorResult{
+    return appfault.Ok(CollectorResult{
         Source:    "npm",
         Signals:   signals,
         FetchedAt: time.Now(),
@@ -670,16 +670,16 @@ func (c *GrowthCalculator) computePeriodGrowth(history []TrendHistory, period ti
 // Visualizer generates charts and reports from trend data
 type Visualizer interface {
     // GenerateBarChart creates a bar chart of top items
-    GenerateBarChart(data []TrendSignal, opts ChartOptions) apperror.Result[string]
+    GenerateBarChart(data []TrendSignal, opts ChartOptions) appfault.Result[string]
     
     // GenerateLineChart creates a line chart of trends over time
-    GenerateLineChart(history []TrendHistory, opts ChartOptions) apperror.Result[string]
+    GenerateLineChart(history []TrendHistory, opts ChartOptions) appfault.Result[string]
     
     // GenerateHeatmap creates a heatmap of signal correlations
-    GenerateHeatmap(signals []TrendSignal, opts ChartOptions) apperror.Result[string]
+    GenerateHeatmap(signals []TrendSignal, opts ChartOptions) appfault.Result[string]
     
     // GenerateReport creates a comprehensive PDF/HTML report
-    GenerateReport(report *TrendReport, opts ReportOptions) apperror.Result[string]
+    GenerateReport(report *TrendReport, opts ReportOptions) appfault.Result[string]
 }
 
 type ChartOptions struct {
@@ -707,7 +707,7 @@ type GoChartVisualizer struct {
     config *VisualizationConfig
 }
 
-func (v *GoChartVisualizer) GenerateBarChart(data []TrendSignal, opts ChartOptions) apperror.Result[string] {
+func (v *GoChartVisualizer) GenerateBarChart(data []TrendSignal, opts ChartOptions) appfault.Result[string] {
     // Apply config defaults
     if opts.Width == 0 {
         opts.Width = v.config.FigureWidth * 100
@@ -742,7 +742,7 @@ func (v *GoChartVisualizer) GenerateBarChart(data []TrendSignal, opts ChartOptio
     defer f.Close()
     barChart.Render(chart.PNG, f)
     
-    return apperror.Ok(opts.OutputPath)
+    return appfault.Ok(opts.OutputPath)
 }
 ```
 
@@ -813,7 +813,7 @@ func (o *TrendOutput) Render(report *TrendReport) error {
     case "chart":
         return o.renderChart(report)
     default:
-        return apperror.New(
+        return appfault.New(
             ErrFormatUnsupported,
             "unsupported format",
         ).WithContext("format", o.format)
@@ -870,7 +870,7 @@ func (e *CollectorError) Error() string {
 
 ```go
 // CollectWithFallback attempts collection with fallback on failure
-func (m *CollectorManager) CollectWithFallback(context stdctx.Context, query CollectorQuery) apperror.Result[AggregatedResult] {
+func (m *CollectorManager) CollectWithFallback(context stdctx.Context, query CollectorQuery) appfault.Result[AggregatedResult] {
     result := m.CollectAll(context, query)
     
     if result.HasError() {
@@ -881,7 +881,7 @@ func (m *CollectorManager) CollectWithFallback(context stdctx.Context, query Col
             penalty, _ := m.settings.GetFloat("trend_analysis", "stale_penalty")
             cached.ApplyPenalty(penalty)
 
-            return apperror.Ok(*cached)
+            return appfault.Ok(*cached)
         }
     }
     
@@ -890,7 +890,7 @@ func (m *CollectorManager) CollectWithFallback(context stdctx.Context, query Col
         return result
     }
     
-    return apperror.FailNew[AggregatedResult](
+    return appfault.FailNew[AggregatedResult](
         "E6103",
         "no trend data available",
     )

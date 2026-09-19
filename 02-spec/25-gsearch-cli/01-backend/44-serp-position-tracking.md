@@ -343,7 +343,7 @@ type PageIndexer struct {
     resultsPerPage  int
 }
 
-func (p *PageIndexer) IndexPages(context stdctx.Context, req SERPRequest) apperror.Result[SERPResponse] {
+func (p *PageIndexer) IndexPages(context stdctx.Context, req SERPRequest) appfault.Result[SERPResponse] {
     response := SERPResponse{
         Query:    req.Query,
         Engine:   req.Engine,
@@ -356,7 +356,7 @@ func (p *PageIndexer) IndexPages(context stdctx.Context, req SERPRequest) apperr
     
     var wg sync.WaitGroup
     var mu sync.Mutex
-    var errors []*apperror.AppError
+    var errors []*appfault.AppError
     
     for _, pageNum := range pages {
         wg.Add(1)
@@ -383,8 +383,8 @@ func (p *PageIndexer) IndexPages(context stdctx.Context, req SERPRequest) apperr
     wg.Wait()
     
     if len(errors) == len(pages) {
-        return apperror.Fail[SERPResponse](
-            apperror.New(
+        return appfault.Fail[SERPResponse](
+            appfault.New(
                 "E7003",
                 "all SERP pages failed to index",
             ),
@@ -393,10 +393,10 @@ func (p *PageIndexer) IndexPages(context stdctx.Context, req SERPRequest) apperr
     
     response.CapturedAt = time.Now()
 
-    return apperror.Ok(response)
+    return appfault.Ok(response)
 }
 
-func (p *PageIndexer) indexSinglePage(context stdctx.Context, req SERPRequest, pageNum int) apperror.Result[SERPPage] {
+func (p *PageIndexer) indexSinglePage(context stdctx.Context, req SERPRequest, pageNum int) appfault.Result[SERPPage] {
     // Calculate start offset
     start := (pageNum - 1) * p.resultsPerPage
     
@@ -414,7 +414,7 @@ func (p *PageIndexer) indexSinglePage(context stdctx.Context, req SERPRequest, p
     // Execute search
     searchResult := p.searchEngine.Search(context, searchReq)
     if searchResult.HasError() {
-        return apperror.Fail[SERPPage](searchResult.Error())
+        return appfault.Fail[SERPPage](searchResult.Error())
     }
 
     searchResp := searchResult.Value()
@@ -447,7 +447,7 @@ func (p *PageIndexer) indexSinglePage(context stdctx.Context, req SERPRequest, p
         p.enrichWithSerpFeatures(context, &serpPage, req)
     }
     
-    return apperror.Ok(serpPage)
+    return appfault.Ok(serpPage)
 }
 ```
 
@@ -459,7 +459,7 @@ type PositionFinder struct {
     maxPages    int
 }
 
-func (f *PositionFinder) FindPosition(context stdctx.Context, req SERPRequest) apperror.Result[DomainPosition] {
+func (f *PositionFinder) FindPosition(context stdctx.Context, req SERPRequest) appfault.Result[DomainPosition] {
     domain := normalizeDomain(req.FindDomain)
     maxPages := req.MaxPages
     if maxPages == 0 {
@@ -492,12 +492,12 @@ func (f *PositionFinder) FindPosition(context stdctx.Context, req SERPRequest) a
                 result.Url = r.Url
                 result.ResultType = r.ResultType
 
-                return apperror.Ok(result)
+                return appfault.Ok(result)
             }
         }
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 func matchesDomain(resultDomain, targetDomain string) bool {
@@ -559,7 +559,7 @@ const (
     JobFailed    JobStatus = "failed"
 )
 
-func (m *TrackerManager) StartTracking(req TrackingRequest) apperror.Result[TrackingJob] {
+func (m *TrackerManager) StartTracking(req TrackingRequest) appfault.Result[TrackingJob] {
     job := &TrackingJob{
         Id:        generateJobId(),
         Query:     req.Query,
@@ -572,7 +572,7 @@ func (m *TrackerManager) StartTracking(req TrackingRequest) apperror.Result[Trac
     
     // Register in database
     if saveErr := m.saveJob(job); saveErr != nil {
-        return apperror.Fail[TrackingJob](saveErr)
+        return appfault.Fail[TrackingJob](saveErr)
     }
     
     // Schedule with gocron
@@ -580,8 +580,8 @@ func (m *TrackerManager) StartTracking(req TrackingRequest) apperror.Result[Trac
         m.executeTracking(job)
     })
     if scheduleErr != nil {
-        return apperror.Fail[TrackingJob](
-            apperror.Wrap(
+        return appfault.Fail[TrackingJob](
+            appfault.Wrap(
                 scheduleErr,
                 "schedule tracking job",
             ),
@@ -595,7 +595,7 @@ func (m *TrackerManager) StartTracking(req TrackingRequest) apperror.Result[Trac
     // Execute immediately
     go m.executeTracking(job)
     
-    return apperror.Ok(*job)
+    return appfault.Ok(*job)
 }
 
 func (m *TrackerManager) executeTracking(job *TrackingJob) {
@@ -645,11 +645,11 @@ type HistoryAnalyzer struct {
     db *sql.DB
 }
 
-func (h *HistoryAnalyzer) GetHistory(query, domain, engine string) apperror.Result[PositionHistory] {
+func (h *HistoryAnalyzer) GetHistory(query, domain, engine string) appfault.Result[PositionHistory] {
     // Load records from database
     recordsResult := h.loadRecords(query, domain, engine)
     if recordsResult.HasError() {
-        return apperror.Fail[PositionHistory](recordsResult.Error())
+        return appfault.Fail[PositionHistory](recordsResult.Error())
     }
 
     records := recordsResult.Value()
@@ -664,7 +664,7 @@ func (h *HistoryAnalyzer) GetHistory(query, domain, engine string) apperror.Resu
     // Calculate summary
     history.Summary = h.calculateSummary(records)
     
-    return apperror.Ok(history)
+    return appfault.Ok(history)
 }
 
 func (h *HistoryAnalyzer) calculateSummary(records []PositionRecord) *PositionSummary {
@@ -737,7 +737,7 @@ type CompetitorAnalyzer struct {
     contactExtractor *ContactExtractor  // From Phase 4
 }
 
-func (c *CompetitorAnalyzer) DiscoverCompetitors(context stdctx.Context, req CompetitorRequest) apperror.Result[CompetitorAnalysis] {
+func (c *CompetitorAnalyzer) DiscoverCompetitors(context stdctx.Context, req CompetitorRequest) appfault.Result[CompetitorAnalysis] {
     // Fetch SERP pages
     serpResult := c.pageIndexer.IndexPages(context, SERPRequest{
         Query:     req.Query,
@@ -745,7 +745,7 @@ func (c *CompetitorAnalyzer) DiscoverCompetitors(context stdctx.Context, req Com
         PageRange: req.PageRange,
     })
     if serpResult.HasError() {
-        return apperror.Fail[CompetitorAnalysis](serpResult.Error())
+        return appfault.Fail[CompetitorAnalysis](serpResult.Error())
     }
 
     serpResp := serpResult.Value()
@@ -803,7 +803,7 @@ func (c *CompetitorAnalyzer) DiscoverCompetitors(context stdctx.Context, req Com
         competitors = competitors[:req.Limit]
     }
     
-    return apperror.Ok(CompetitorAnalysis{
+    return appfault.Ok(CompetitorAnalysis{
         Query:            req.Query,
         TargetDomain:     req.TargetDomain,
         Competitors:      competitors,

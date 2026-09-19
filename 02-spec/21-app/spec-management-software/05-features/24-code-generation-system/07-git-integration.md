@@ -137,7 +137,7 @@ func (g *GitManager) InitRepository(projectId string, projectName string) error 
     cmd := exec.Command("git", "init")
     cmd.Dir = repoPath
     if err := cmd.Run(); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrGitInitFailed,
             "git init failed",
@@ -204,7 +204,7 @@ func (g *GitManager) PreCommitSync(projectId string) error {
         // Try to resolve conflicts
         if isConflictError(err) {
             if err := g.resolveConflicts(repoPath); err != nil {
-                return apperror.Wrap(
+                return appfault.Wrap(
                     err,
                     ErrResolveConflicts,
                     "failed to resolve conflicts",
@@ -219,19 +219,19 @@ func (g *GitManager) PreCommitSync(projectId string) error {
     return g.stashPop(repoPath)
 }
 
-func (g *GitManager) hasRemote(repoPath string) apperror.Result[bool] {
+func (g *GitManager) hasRemote(repoPath string) appfault.Result[bool] {
     cmd := exec.Command("git", "remote", "-v")
     cmd.Dir = repoPath
     output, err := cmd.Output()
     if err != nil {
-        return apperror.FailWrap[bool](
+        return appfault.FailWrap[bool](
             err,
             "E8500",
             "failed to check git remote",
         )
     }
 
-    return apperror.Ok(len(strings.TrimSpace(string(output))) > 0)
+    return appfault.Ok(len(strings.TrimSpace(string(output))) > 0)
 }
 
 func (g *GitManager) pull(repoPath string) error {
@@ -347,7 +347,7 @@ func (c *GitHubOAuthClient) GetAuthUrl(state string) string {
     return "https://github.com/login/oauth/authorize?" + params.Encode()
 }
 
-func (c *GitHubOAuthClient) ExchangeCode(code string) apperror.Result[OAuthTokens] {
+func (c *GitHubOAuthClient) ExchangeCode(code string) appfault.Result[OAuthTokens] {
     data := url.Values{
         "client_id":     {c.clientId},
         "client_secret": {c.clientSecret},
@@ -359,7 +359,7 @@ func (c *GitHubOAuthClient) ExchangeCode(code string) apperror.Result[OAuthToken
         data,
     )
     if err != nil {
-        return apperror.FailWrap[OAuthTokens](
+        return appfault.FailWrap[OAuthTokens](
             err,
             "E8501",
             "OAuth token exchange failed",
@@ -371,7 +371,7 @@ func (c *GitHubOAuthClient) ExchangeCode(code string) apperror.Result[OAuthToken
     body, _ := io.ReadAll(resp.Body)
     values, _ := url.ParseQuery(string(body))
     
-    return apperror.Ok(OAuthTokens{
+    return appfault.Ok(OAuthTokens{
         AccessToken:  values.Get("access_token"),
         TokenType:    values.Get("token_type"),
         Scope:        values.Get("scope"),
@@ -382,7 +382,7 @@ func (c *GitHubOAuthClient) CreateRepository(
     token string,
     name string,
     private bool,
-) apperror.Result[RepositoryInfo] {
+) appfault.Result[RepositoryInfo] {
     // GitHubCreateRepoRequest is the typed request for GitHub's Create Repository API
     // EXEMPTED: GitHub REST API request format
     type GitHubCreateRepoRequest struct {
@@ -407,7 +407,7 @@ func (c *GitHubOAuthClient) CreateRepository(
     
     resp, err := c.httpClient.Do(req)
     if err != nil {
-        return apperror.FailWrap[RepositoryInfo](
+        return appfault.FailWrap[RepositoryInfo](
             err,
             "E8502",
             "GitHub repository creation failed",
@@ -418,7 +418,7 @@ func (c *GitHubOAuthClient) CreateRepository(
     var repoInfo RepositoryInfo
     json.NewDecoder(resp.Body).Decode(&repoInfo)
     
-    return apperror.Ok(repoInfo)
+    return appfault.Ok(repoInfo)
 }
 ```
 
@@ -481,7 +481,7 @@ func (g *GitManager) Push(projectId string, force bool) error {
     output, err := cmd.CombinedOutput()
     
     if err != nil {
-        return apperror.New(
+        return appfault.New(
             ErrGitPushFailed,
             "push failed: "+string(output),
         )
@@ -524,12 +524,12 @@ func (g *GitManager) ConnectToRemote(
     provider string,
     createNew bool,
     repoName string,
-) apperror.Result[RepositoryConnection] {
+) appfault.Result[RepositoryConnection] {
     
     // Get OAuth connection
     oauth, err := g.oauthManager.GetConnection(userId, provider)
     if err != nil {
-        return apperror.FailNew[RepositoryConnection](
+        return appfault.FailNew[RepositoryConnection](
             "E8503",
             fmt.Sprintf("no OAuth connection for %s", provider),
         )
@@ -543,7 +543,7 @@ func (g *GitManager) ConnectToRemote(
         case "github":
             repoResult := g.githubClient.CreateRepository(oauth.AccessToken, repoName, true)
             if repoResult.HasError() {
-                return apperror.Fail[RepositoryConnection](repoResult.Error())
+                return appfault.Fail[RepositoryConnection](repoResult.Error())
             }
 
             remoteUrl = repoResult.Value().CloneUrl
@@ -551,7 +551,7 @@ func (g *GitManager) ConnectToRemote(
         case "gitlab":
             repoResult := g.gitlabClient.CreateRepository(oauth.AccessToken, repoName, true)
             if repoResult.HasError() {
-                return apperror.Fail[RepositoryConnection](repoResult.Error())
+                return appfault.Fail[RepositoryConnection](repoResult.Error())
             }
 
             remoteUrl = repoResult.Value().HttpUrlToRepo
@@ -570,7 +570,7 @@ func (g *GitManager) ConnectToRemote(
         cmd = exec.Command("git", "remote", "set-url", "origin", remoteUrl)
         cmd.Dir = repoPath
         if err := cmd.Run(); err != nil {
-            return apperror.FailWrap[RepositoryConnection](
+            return appfault.FailWrap[RepositoryConnection](
                 err,
                 "E8503",
                 "failed to set git remote",
@@ -580,7 +580,7 @@ func (g *GitManager) ConnectToRemote(
     
     // Push existing commits
     if err := g.Push(projectId, true); err != nil {
-        return apperror.FailWrap[RepositoryConnection](
+        return appfault.FailWrap[RepositoryConnection](
             err,
             "E8503",
             "initial push failed",
@@ -605,14 +605,14 @@ func (g *GitManager) ConnectToRemote(
     }
     
     if err := g.db.Save(&conn).Error; err != nil {
-        return apperror.FailWrap[RepositoryConnection](
+        return appfault.FailWrap[RepositoryConnection](
             err,
             "E8503",
             "failed to save connection",
         )
     }
 
-    return apperror.Ok(conn)
+    return appfault.Ok(conn)
 }
 ```
 
@@ -632,7 +632,7 @@ type ConflictInfo struct {
     Merged      string
 }
 
-func (r *ConflictResolver) DetectConflicts(repoPath string) apperror.Result[[]ConflictInfo] {
+func (r *ConflictResolver) DetectConflicts(repoPath string) appfault.Result[[]ConflictInfo] {
     cmd := exec.Command("git", "diff", "--name-only", "--diff-filter=U")
     cmd.Dir = repoPath
     output, err := cmd.Output()

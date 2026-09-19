@@ -250,7 +250,7 @@ type FileLogger struct {
     combinedFile *os.File
 }
 
-func (l *FileLogger) Initialize() *apperror.AppError {
+func (l *FileLogger) Initialize() *appfault.AppError {
     l.runId = fmt.Sprintf("run_%s", time.Now().Format("20060102_150405"))
     l.runDir = filepath.Join(l.baseDir, l.runId)
     
@@ -301,7 +301,7 @@ type RunMetadata struct {
     Warnings  int
 }
 
-func (l *FileLogger) WriteMetadata(result *ExecutionResult) *apperror.AppError {
+func (l *FileLogger) WriteMetadata(result *ExecutionResult) *appfault.AppError {
     meta := RunMetadata{
         RunId:     l.runId,
         Success:   result.Success,
@@ -315,7 +315,7 @@ func (l *FileLogger) WriteMetadata(result *ExecutionResult) *apperror.AppError {
     
     data, marshalErr := json.MarshalIndent(meta, "", "  ")
     if marshalErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             marshalErr,
             "marshal run metadata",
         )
@@ -328,7 +328,7 @@ func (l *FileLogger) WriteMetadata(result *ExecutionResult) *apperror.AppError {
     )
 }
 
-func (l *FileLogger) Cleanup(keepRuns int) *apperror.AppError {
+func (l *FileLogger) Cleanup(keepRuns int) *appfault.AppError {
     entries, readErr := pathutil.ReadDir(l.baseDir)
     if readErr != nil {
         return readErr

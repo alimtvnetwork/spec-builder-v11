@@ -235,16 +235,16 @@ Content must be embedding-friendly:
 ```go
 type RAGValidator interface {
     // Validate single artifact
-    ValidateArtifact(context stdctx.Context, filePath string) apperror.Result[[]Finding]
+    ValidateArtifact(context stdctx.Context, filePath string) appfault.Result[[]Finding]
     
     // Validate all artifacts in project
-    ValidateAllArtifacts(context stdctx.Context, projectPath string) apperror.Result[[]Finding]
+    ValidateAllArtifacts(context stdctx.Context, projectPath string) appfault.Result[[]Finding]
     
     // Check frontmatter completeness
-    ValidateFrontmatter(content []byte) apperror.Result[[]Finding]
+    ValidateFrontmatter(content []byte) appfault.Result[[]Finding]
     
     // Analyze chunk boundaries
-    AnalyzeChunkBoundaries(content []byte) apperror.Result[*ChunkAnalysis]
+    AnalyzeChunkBoundaries(content []byte) appfault.Result[*ChunkAnalysis]
 }
 
 type ChunkAnalysis struct {
@@ -405,7 +405,7 @@ type FixResult struct {
     Failed       []AutoFix  // Could not apply
 }
 
-func ApplyFixes(fixes []AutoFix, dryRun bool) apperror.Result[*FixResult]
+func ApplyFixes(fixes []AutoFix, dryRun bool) appfault.Result[*FixResult]
 ```
 
 ---
@@ -603,35 +603,35 @@ type ConsistencySchedule struct {
 ```go
 type ConsistencyService interface {
     // Run a consistency check
-    RunCheck(context stdctx.Context, projectId string, reportType string) apperror.Result[*ConsistencyReport]
+    RunCheck(context stdctx.Context, projectId string, reportType string) appfault.Result[*ConsistencyReport]
     
     // Get latest report for a project
-    GetLatestReport(context stdctx.Context, projectId string) apperror.Result[*ConsistencyReport]
+    GetLatestReport(context stdctx.Context, projectId string) appfault.Result[*ConsistencyReport]
     
     // Get report history
-    GetReportHistory(context stdctx.Context, projectId string, limit int) apperror.Result[[]ConsistencyReport]
+    GetReportHistory(context stdctx.Context, projectId string, limit int) appfault.Result[[]ConsistencyReport]
     
     // Preview auto-fixes for a report
-    PreviewFixes(context stdctx.Context, reportId string) apperror.Result[[]AutoFix]
+    PreviewFixes(context stdctx.Context, reportId string) appfault.Result[[]AutoFix]
     
     // Apply selected fixes
-    ApplyFixes(context stdctx.Context, reportId string, fixIds []string, dryRun bool) apperror.Result[*FixResult]
+    ApplyFixes(context stdctx.Context, reportId string, fixIds []string, dryRun bool) appfault.Result[*FixResult]
     
     // Schedule periodic checks
-    ScheduleCheck(context stdctx.Context, schedule ConsistencySchedule) *apperror.AppError
+    ScheduleCheck(context stdctx.Context, schedule ConsistencySchedule) *appfault.AppError
 }
 
 type LinkValidator interface {
-    ValidateLink(context stdctx.Context, sourceFile, targetPath string) apperror.Result[*LinkValidation]
-    ValidateAllLinks(context stdctx.Context, projectPath string) apperror.Result[[]LinkValidation]
+    ValidateLink(context stdctx.Context, sourceFile, targetPath string) appfault.Result[*LinkValidation]
+    ValidateAllLinks(context stdctx.Context, projectPath string) appfault.Result[[]LinkValidation]
 }
 
 type SchemaValidator interface {
-    ValidateSchemaAlignment(context stdctx.Context, schemaPath, apiPath string) apperror.Result[[]Finding]
+    ValidateSchemaAlignment(context stdctx.Context, schemaPath, apiPath string) appfault.Result[[]Finding]
 }
 
 type TerminologyValidator interface {
-    ValidateTerms(context stdctx.Context, glossaryPath, targetPath string) apperror.Result[[]Finding]
+    ValidateTerms(context stdctx.Context, glossaryPath, targetPath string) appfault.Result[[]Finding]
 }
 ```
 
@@ -835,7 +835,7 @@ func (s *ConsistencyService) RunIterativeLoop(
     context stdctx.Context,
     projectId string,
     config IterativeLoopConfig,
-) apperror.Result[*LoopResult] {
+) appfault.Result[*LoopResult] {
     loopId := uuid.New().String()
     startTime := time.Now()
     
@@ -849,7 +849,7 @@ func (s *ConsistencyService) RunIterativeLoop(
     // Initial scan
     report, err := s.RunFullHealthCheck(context, projectId)
     if err != nil {
-        return apperror.Fail[*LoopResult](err)
+        return appfault.Fail[*LoopResult](err)
     }
     
     result.InitialScore = report.Score

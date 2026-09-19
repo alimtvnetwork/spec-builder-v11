@@ -565,7 +565,7 @@ import (
     "gorm.io/gorm"
 )
 
-func ReadSearchResults(dbPath string) apperror.Result[[]SearchResult] {
+func ReadSearchResults(dbPath string) appfault.Result[[]SearchResult] {
     db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
     if err != nil {
         return nil, err

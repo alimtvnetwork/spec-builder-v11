@@ -122,7 +122,7 @@ type CopyResult struct {
     Errors       []string `json:",omitempty"`
 }
 
-func (c *AssetCopier) Execute(config *AssetConfig) *apperror.AppError {
+func (c *AssetCopier) Execute(config *AssetConfig) *appfault.AppError {
     isDisabled := !config.Enabled
     if isDisabled {
         return nil
@@ -132,7 +132,7 @@ func (c *AssetCopier) Execute(config *AssetConfig) *apperror.AppError {
         result := c.executeOperation(op)
 
         if result.HasError() {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 result.Error(),
                 "asset operation failed",
             ).WithSkip(1)
@@ -149,31 +149,31 @@ func (c *AssetCopier) Execute(config *AssetConfig) *apperror.AppError {
     return nil
 }
 
-func (c *AssetCopier) executeOperation(op AssetOperation) apperror.Result[CopyResult] {
+func (c *AssetCopier) executeOperation(op AssetOperation) appfault.Result[CopyResult] {
     result := &CopyResult{Operation: op}
     startTime := time.Now()
 
     prepareErr := c.prepareDestination(op)
 
     if prepareErr != nil {
-        return apperror.Fail[CopyResult](prepareErr)
+        return appfault.Fail[CopyResult](prepareErr)
     }
 
     copyErr := c.copyMatchingFiles(op, result)
 
     if copyErr != nil {
-        return apperror.Fail[CopyResult](copyErr)
+        return appfault.Fail[CopyResult](copyErr)
     }
 
     result.Duration = time.Since(startTime)
-    return apperror.Ok(*result)
+    return appfault.Ok(*result)
 }
 
-func (c *AssetCopier) prepareDestination(op AssetOperation) *apperror.AppError {
+func (c *AssetCopier) prepareDestination(op AssetOperation) *appfault.AppError {
     isSourceMissing := pathutil.IsMissing(op.Source)
 
     if isSourceMissing {
-        return apperror.New(
+        return appfault.New(
             "source not found: %s",
             op.Source,
         ).WithSkip(1)
@@ -185,7 +185,7 @@ func (c *AssetCopier) prepareDestination(op AssetOperation) *apperror.AppError {
         clearErr := c.clearDirectory(op.Destination)
 
         if clearErr != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 clearErr,
                 "failed to clear destination",
             ).WithSkip(1)
@@ -195,7 +195,7 @@ func (c *AssetCopier) prepareDestination(op AssetOperation) *apperror.AppError {
     mkdirErr := pathutil.EnsureDir(op.Destination)
 
     if mkdirErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             mkdirErr,
             "failed to create destination",
         ).WithSkip(1)
@@ -204,7 +204,7 @@ func (c *AssetCopier) prepareDestination(op AssetOperation) *apperror.AppError {
     return nil
 }
 
-func (c *AssetCopier) copyMatchingFiles(op AssetOperation, result *CopyResult) *apperror.AppError {
+func (c *AssetCopier) copyMatchingFiles(op AssetOperation, result *CopyResult) *appfault.AppError {
     filesResult := c.getFilesToCopy(op)
 
     if filesResult.HasError() {
@@ -241,7 +241,7 @@ func (c *AssetCopier) copyMatchingFiles(op AssetOperation, result *CopyResult) *
 ### Pattern Support
 
 ```go
-func (c *AssetCopier) getFilesToCopy(op AssetOperation) apperror.Result[[]string] {
+func (c *AssetCopier) getFilesToCopy(op AssetOperation) appfault.Result[[]string] {
     var files []string
     
     err := filepath.Walk(op.Source, func(path string, info os.FileInfo, err error) error {

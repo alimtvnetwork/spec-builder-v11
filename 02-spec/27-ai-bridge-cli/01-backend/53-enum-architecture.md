@@ -448,7 +448,7 @@ func (v Variant) IsPublished() bool   { return v == Published }
 func (v Variant) IsArchived() bool    { return v == Archived }
 func All() []Variant { return []Variant{Draft, Generating, Published, Archived} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return apperror.Ok(Variant(i)) } }; return apperror.FailNew[Variant](ErrEnumInvalidVariant, "invalid html blog status: %q", s) }
+func Parse(s string) appfault.Result[Variant] { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return appfault.Ok(Variant(i)) } }; return appfault.FailNew[Variant](ErrEnumInvalidVariant, "invalid html blog status: %q", s) }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
     for _, s := range variantLabels[1:] {

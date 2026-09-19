@@ -107,14 +107,14 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
             return Variant(i), nil
         }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid runtime",
     ).WithContext("value", s)
@@ -239,14 +239,14 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     normalized := strings.TrimSpace(s)
     for i, label := range variantLabels {
         if strings.EqualFold(label, normalized) {
             return Variant(i), nil
         }
     }
-    return Invalid, apperror.New(
+    return Invalid, appfault.New(
         ErrEnumParseFailed,
         "invalid copy mode",
     ).WithContext("value", s)
@@ -324,7 +324,7 @@ func (v Variant) IsInfo() bool    { return v == Info }
 
 func All() []Variant { return []Variant{Error, Warning, Info} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) (Variant, error) { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return Variant(i), nil } }; return Invalid, apperror.New(ErrEnumParseFailed, "invalid severity").WithContext("value", s) }
+func Parse(s string) appfault.Result[Variant] { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return appfault.Ok(Variant(i)) } }; return appfault.Fail[Variant](appfault.New(ErrEnumParseFailed, "invalid severity").WithContext("value", s)) }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
     for _, s := range variantLabels[1:] {
@@ -400,7 +400,7 @@ func (v Variant) IsBun() bool     { return v == Bun }
 
 func All() []Variant { return []Variant{Npm, Yarn, Bun} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) (Variant, error) { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return Variant(i), nil } }; return Invalid, apperror.New(ErrEnumParseFailed, "invalid package manager").WithContext("value", s) }
+func Parse(s string) appfault.Result[Variant] { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return appfault.Ok(Variant(i)) } }; return appfault.Fail[Variant](appfault.New(ErrEnumParseFailed, "invalid package manager").WithContext("value", s)) }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
     for _, s := range variantLabels[1:] {
@@ -493,7 +493,7 @@ func (v Variant) IsForce() bool   { return v == Force }
 
 func All() []Variant { return []Variant{Skip, Run, Force} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) (Variant, error) { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return Variant(i), nil } }; return Invalid, apperror.New(ErrEnumParseFailed, "invalid mod tidy mode").WithContext("value", s) }
+func Parse(s string) appfault.Result[Variant] { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return appfault.Ok(Variant(i)) } }; return appfault.Fail[Variant](appfault.New(ErrEnumParseFailed, "invalid mod tidy mode").WithContext("value", s)) }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
     for _, s := range variantLabels[1:] {
@@ -559,7 +559,7 @@ func (v Variant) IsJson() bool    { return v == Json }
 
 func All() []Variant { return []Variant{Text, Json} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) (Variant, error) { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return Variant(i), nil } }; return Invalid, apperror.New(ErrEnumParseFailed, "invalid output format").WithContext("value", s) }
+func Parse(s string) appfault.Result[Variant] { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return appfault.Ok(Variant(i)) } }; return appfault.Fail[Variant](appfault.New(ErrEnumParseFailed, "invalid output format").WithContext("value", s)) }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
     for _, s := range variantLabels[1:] {
@@ -639,7 +639,7 @@ func (v Variant) IsHead() bool    { return v == Head }
 
 func All() []Variant { return []Variant{Get, Head} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) (Variant, error) { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return Variant(i), nil } }; return Invalid, apperror.New(ErrEnumParseFailed, "invalid http method").WithContext("value", s) }
+func Parse(s string) appfault.Result[Variant] { normalized := strings.TrimSpace(s); for i, label := range variantLabels { if strings.EqualFold(label, normalized) { return appfault.Ok(Variant(i)) } }; return appfault.Fail[Variant](appfault.New(ErrEnumParseFailed, "invalid http method").WithContext("value", s)) }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
     for _, s := range variantLabels[1:] {

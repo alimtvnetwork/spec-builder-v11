@@ -132,10 +132,14 @@ func (v Variant) IsCancelled() bool    { return v == Cancelled }
 
 func All() []Variant { return []Variant{Transcribed, Proofreading, Proofread, Planning, Planned, Reviewing, Ready, Executing, Completed, Failed, Cancelled} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) (Variant, error) {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(ErrEnumParseFailed, "invalid instruction status").WithContext("value", s)
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(ErrEnumParseFailed, r"invalid instruction status").WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)

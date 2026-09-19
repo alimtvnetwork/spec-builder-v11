@@ -1302,7 +1302,7 @@ import (
 type FirewallManager interface {
     AddException(context stdctx.Context, port int, name string) error
     RemoveException(context stdctx.Context, port int) error
-    CheckException(context stdctx.Context, port int) apperror.Result[bool]
+    CheckException(context stdctx.Context, port int) appfault.Result[bool]
 }
 
 // Windows implementation

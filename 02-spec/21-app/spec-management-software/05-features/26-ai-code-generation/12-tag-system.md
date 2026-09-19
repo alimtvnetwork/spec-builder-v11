@@ -125,12 +125,12 @@ type TagService struct {
     db *gorm.DB
 }
 
-func (ts *TagService) GetOrCreate(name string, category string) apperror.Result[*Tag] {
+func (ts *TagService) GetOrCreate(name string, category string) appfault.Result[*Tag] {
     var tag Tag
     
     err := ts.db.Where("name = ?", name).First(&tag).Error
     if err == nil {
-        return apperror.OK(&tag)
+        return appfault.Ok(&tag)
     }
     
     if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -139,19 +139,19 @@ func (ts *TagService) GetOrCreate(name string, category string) apperror.Result[
             Category: category,
         }
         if err := ts.db.Create(&tag).Error; err != nil {
-            return apperror.Fail[*Tag](
-                apperror.Wrap(
+            return appfault.Fail[*Tag](
+                appfault.Wrap(
                     err,
                     ErrDatabaseWrite,
                     "failed to create tag",
                 ),
             )
         }
-        return apperror.OK(&tag)
+        return appfault.Ok(&tag)
     }
     
-    return apperror.Fail[*Tag](
-        apperror.Wrap(
+    return appfault.Fail[*Tag](
+        appfault.Wrap(
             err,
             ErrDatabaseRead,
             "failed to query tag",

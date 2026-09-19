@@ -90,16 +90,16 @@ type VectorSearchService interface {
     IndexEmbedding(context stdctx.Context, chunkId string, embedding []float32) error
     IndexBatch(context stdctx.Context, embeddings map[string][]float32) error
     RemoveEmbedding(context stdctx.Context, chunkId string) error
-    RemoveByArtifact(context stdctx.Context, artifactId string) *apperror.AppError
+    RemoveByArtifact(context stdctx.Context, artifactId string) *appfault.AppError
     
     // Searching
-    SearchSemantic(context stdctx.Context, queryEmbedding []float32, limit int) apperror.Result[[]ChunkScore]
-    SearchKeyword(context stdctx.Context, query string, limit int) apperror.Result[[]ChunkScore]
-    SearchHybrid(context stdctx.Context, queryEmbedding []float32, queryText string, limit int) apperror.Result[[]ChunkScore]
+    SearchSemantic(context stdctx.Context, queryEmbedding []float32, limit int) appfault.Result[[]ChunkScore]
+    SearchKeyword(context stdctx.Context, query string, limit int) appfault.Result[[]ChunkScore]
+    SearchHybrid(context stdctx.Context, queryEmbedding []float32, queryText string, limit int) appfault.Result[[]ChunkScore]
     
     // Maintenance
-    ReindexProject(context stdctx.Context, projectId string) *apperror.AppError
-    GetIndexStats(context stdctx.Context, projectId string) apperror.Result[*VectorIndexStats]
+    ReindexProject(context stdctx.Context, projectId string) *appfault.AppError
+    GetIndexStats(context stdctx.Context, projectId string) appfault.Result[*VectorIndexStats]
     ClearCache(context stdctx.Context, projectId string) error
     
     // Health
@@ -192,7 +192,7 @@ func (v *VectorSearchServiceImpl) Initialize(context stdctx.Context) error {
     `, v.config.Dimensions)
     
     if err := v.db.WithContext(context).Exec(createVssTable).Error; err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrDatabaseSetup,
             "failed to create VssEmbedding table",
@@ -210,7 +210,7 @@ func (v *VectorSearchServiceImpl) Initialize(context stdctx.Context) error {
     `
     
     if err := v.db.WithContext(context).Exec(createFtsTable).Error; err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrDatabaseSetup,
             "failed to create ChunkFts table",
@@ -248,7 +248,7 @@ func (v *VectorSearchServiceImpl) IndexEmbedding(context stdctx.Context, chunkId
     }
     
     if len(embedding) != v.config.Dimensions {
-        return apperror.New(
+        return appfault.New(
             ErrEmbeddingDimension,
             fmt.Sprintf("embedding dimension mismatch: expected %d, got %d",
                 v.config.Dimensions, len(embedding)),
@@ -261,7 +261,7 @@ func (v *VectorSearchServiceImpl) IndexEmbedding(context stdctx.Context, chunkId
     if err := v.db.WithContext(context).Exec(
         `DELETE FROM VssEmbedding WHERE chunk_id = ?`, chunkId,
     ).Error; err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrEmbeddingDelete,
             "failed to remove existing embedding",
@@ -273,7 +273,7 @@ func (v *VectorSearchServiceImpl) IndexEmbedding(context stdctx.Context, chunkId
         `INSERT INTO VssEmbedding (embedding, chunk_id) VALUES (?, ?)`,
         blob, chunkId,
     ).Error; err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrEmbeddingInsert,
             "failed to index embedding",
@@ -374,9 +374,9 @@ func (v *VectorSearchServiceImpl) SearchSemantic(
     context stdctx.Context, 
     queryEmbedding []float32, 
     limit int,
-) apperror.Result[[]ChunkScore] {
+) appfault.Result[[]ChunkScore] {
     if !v.vssLoaded {
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrVssNotAvailable,
             "sqlite-vss not available",
         )
@@ -405,7 +405,7 @@ func (v *VectorSearchServiceImpl) SearchSemantic(
     `, blob, limit).Scan(&results).Error
     
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrSemanticSearch,
             "semantic search failed",
@@ -436,7 +436,7 @@ func (v *VectorSearchServiceImpl) SearchKeyword(
     context stdctx.Context,
     query string,
     limit int,
-) apperror.Result[[]ChunkScore] {
+) appfault.Result[[]ChunkScore] {
     if limit <= 0 {
         limit = v.config.DefaultLimit
     }
@@ -460,7 +460,7 @@ func (v *VectorSearchServiceImpl) SearchKeyword(
     `, query, limit).Scan(&results).Error
     
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrKeywordSearch,
             "keyword search failed",
@@ -541,7 +541,7 @@ func (v *VectorSearchServiceImpl) SearchHybrid(
     queryEmbedding []float32,
     queryText string,
     limit int,
-) apperror.Result[[]ChunkScore] {
+) appfault.Result[[]ChunkScore] {
     if limit <= 0 {
         limit = v.config.DefaultLimit
     }
@@ -680,7 +680,7 @@ func (v *VectorSearchServiceImpl) SearchHybridWeighted(
     queryEmbedding []float32,
     queryText string,
     limit int,
-) apperror.Result[[]ChunkScore] {
+) appfault.Result[[]ChunkScore] {
     fetchLimit := limit * 2
     
     semanticScores, _ := v.SearchSemantic(context, queryEmbedding, fetchLimit)
@@ -748,7 +748,7 @@ func (v *VectorSearchServiceImpl) SearchHybridWeighted(
 // ReindexProject rebuilds the vector index for a project
 func (v *VectorSearchServiceImpl) ReindexProject(context stdctx.Context, projectId string) error {
     if !v.vssLoaded {
-        return apperror.New(
+        return appfault.New(
             ErrVssNotAvailable,
             "sqlite-vss not available for reindexing",
         )
@@ -768,7 +768,7 @@ func (v *VectorSearchServiceImpl) ReindexProject(context stdctx.Context, project
     `, projectId).Scan(&chunks).Error
     
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrDatabaseRead,
             "failed to fetch chunks",
@@ -807,7 +807,7 @@ func (v *VectorSearchServiceImpl) ReindexProject(context stdctx.Context, project
 }
 
 // GetIndexStats returns statistics about the vector index
-func (v *VectorSearchServiceImpl) GetIndexStats(context stdctx.Context, projectId string) apperror.Result[*VectorIndexStats] {
+func (v *VectorSearchServiceImpl) GetIndexStats(context stdctx.Context, projectId string) appfault.Result[*VectorIndexStats] {
     var stats VectorIndexStats
     stats.ProjectId = projectId
     stats.Dimensions = v.config.Dimensions
@@ -835,7 +835,7 @@ func (v *VectorSearchServiceImpl) GetIndexStats(context stdctx.Context, projectI
         First(&metadata)
     stats.LastReindexAt = metadata.LastReindexAt
     
-    return apperror.OK(&stats)
+    return appfault.Ok(&stats)
 }
 
 // HealthCheck verifies the vector search service is operational
@@ -868,7 +868,7 @@ func (r *RAGService) RetrieveContext(
     projectId string,
     query string,
     limit int,
-) apperror.Result[[]RetrievedChunk] {
+) appfault.Result[[]RetrievedChunk] {
     // 1. Generate query embedding
     queryEmbedding, err := r.embeddingGen.Generate(context, query)
     if err != nil {
@@ -879,7 +879,7 @@ func (r *RAGService) RetrieveContext(
     // 2. Perform hybrid search
     scores, err := r.vectorSearch.SearchHybrid(context, queryEmbedding, query, limit)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrHybridSearchFailed,
             "hybrid search failed",

@@ -247,7 +247,7 @@ func NewFormatterEngine(cfg FormatterConfig) *FormatterEngine {
 }
 
 // Format processes and outputs data
-func (f *FormatterEngine) Format(envelope ResponseEnvelope) *apperror.AppError {
+func (f *FormatterEngine) Format(envelope ResponseEnvelope) *appfault.AppError {
     // Apply field selection
     data := f.selectFields(envelope)
     
@@ -278,7 +278,7 @@ func (f *FormatterEngine) Format(envelope ResponseEnvelope) *apperror.AppError {
     case FormatMinimal:
         return f.outputMinimal(data)
     default:
-        return apperror.New(
+        return appfault.New(
             "unsupported output format",
         )
     }
@@ -322,15 +322,15 @@ func (s *FieldSelector) Select(data json.RawMessage) FieldSelection {
 
 // ParseFieldSpec parses field specification
 // Examples: "Title,Url,Contact.Emails[0].Address as Email"
-func ParseFieldSpec(spec string) apperror.Result[*FieldSelector] {
+func ParseFieldSpec(spec string) appfault.Result[*FieldSelector] {
     selector := &FieldSelector{}
     
     fields := strings.Split(spec, ",")
     for _, field := range fields {
         path, err := parseFieldPath(strings.TrimSpace(field))
         if err != nil {
-            return apperror.Fail[*FieldSelector](
-                apperror.Wrap(
+            return appfault.Fail[*FieldSelector](
+                appfault.Wrap(
                     err,
                     "parse field path",
                 ),
@@ -340,7 +340,7 @@ func ParseFieldSpec(spec string) apperror.Result[*FieldSelector] {
         selector.paths = append(selector.paths, path)
     }
     
-    return apperror.OK(selector)
+    return appfault.Ok(selector)
 }
 ```
 
@@ -474,7 +474,7 @@ func (m *TtlPolicyManager) GetTtl(category string, override *time.Duration) time
 }
 
 // SetPolicy updates a TTL policy
-func (m *TtlPolicyManager) SetPolicy(category string, policy TtlPolicy) *apperror.AppError {
+func (m *TtlPolicyManager) SetPolicy(category string, policy TtlPolicy) *appfault.AppError {
     m.mu.Lock()
     defer m.mu.Unlock()
     
@@ -558,17 +558,17 @@ type CacheHitUpdate struct {
 }
 
 // Get retrieves cached data
-func (m *CacheManager) Get(key string) apperror.Result[*CacheEntry] {
+func (m *CacheManager) Get(key string) appfault.Result[*CacheEntry] {
     var entry CacheEntry
     
     result := m.rootDb.Where("Key = ? AND ExpiresAt > ?", key, time.Now()).First(&entry)
     if result.Error != nil {
         if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-            return apperror.OK[*CacheEntry](nil) // cache miss
+            return appfault.Ok[*CacheEntry](nil) // cache miss
         }
 
-        return apperror.Fail[*CacheEntry](
-            apperror.Wrap(
+        return appfault.Fail[*CacheEntry](
+            appfault.Wrap(
                 result.Error,
                 "cache read failed",
             ),
@@ -581,15 +581,15 @@ func (m *CacheManager) Get(key string) apperror.Result[*CacheEntry] {
         LastHit:  time.Now(),
     })
     
-    return apperror.OK(&entry)
+    return appfault.Ok(&entry)
 }
 
 // Set stores data in cache
-func (m *CacheManager) Set(key, category string, data json.RawMessage, ttlOverride *time.Duration) *apperror.AppError {
+func (m *CacheManager) Set(key, category string, data json.RawMessage, ttlOverride *time.Duration) *appfault.AppError {
     // Serialize and compress
     jsonData, err := json.Marshal(data)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             "marshal cache data",
         )
@@ -619,7 +619,7 @@ func (m *CacheManager) Set(key, category string, data json.RawMessage, ttlOverri
     }).Create(&entry)
 
     if dbResult.Error != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             dbResult.Error,
             "cache write failed",
         )
@@ -631,14 +631,14 @@ func (m *CacheManager) Set(key, category string, data json.RawMessage, ttlOverri
 // InvalidateOutcome holds the result of a cache invalidation
 type InvalidateOutcome struct {
     RowsAffected int64
-    Err          *apperror.AppError
+    Err          *appfault.AppError
 }
 
 // Invalidate removes cache entries
 func (m *CacheManager) Invalidate(pattern string) InvalidateOutcome {
     result := m.rootDb.Where("Key LIKE ?", pattern+"%").Delete(&CacheEntry{})
     if result.Error != nil {
-        return InvalidateOutcome{Err: apperror.Wrap(result.Error, "cache invalidate failed")}
+        return InvalidateOutcome{Err: appfault.Wrap(result.Error, "cache invalidate failed")}
     }
 
     return InvalidateOutcome{RowsAffected: result.RowsAffected}
@@ -648,7 +648,7 @@ func (m *CacheManager) Invalidate(pattern string) InvalidateOutcome {
 func (m *CacheManager) InvalidateByCategory(category string) InvalidateOutcome {
     result := m.rootDb.Where("Category = ?", category).Delete(&CacheEntry{})
     if result.Error != nil {
-        return InvalidateOutcome{Err: apperror.Wrap(result.Error, "category invalidate failed")}
+        return InvalidateOutcome{Err: appfault.Wrap(result.Error, "category invalidate failed")}
     }
 
     return InvalidateOutcome{RowsAffected: result.RowsAffected}
@@ -658,7 +658,7 @@ func (m *CacheManager) InvalidateByCategory(category string) InvalidateOutcome {
 func (m *CacheManager) Cleanup() InvalidateOutcome {
     result := m.rootDb.Where("ExpiresAt < ?", time.Now()).Delete(&CacheEntry{})
     if result.Error != nil {
-        return InvalidateOutcome{Err: apperror.Wrap(result.Error, "cache cleanup failed")}
+        return InvalidateOutcome{Err: appfault.Wrap(result.Error, "cache cleanup failed")}
     }
 
     return InvalidateOutcome{RowsAffected: result.RowsAffected}
@@ -729,7 +729,7 @@ type StaleRevalidator struct {
 type refreshJob struct {
     key      string
     category string
-    fetcher  func() apperror.Result[json.RawMessage]
+    fetcher  func() appfault.Result[json.RawMessage]
 }
 
 // RevalidateOutcome holds the result of a cache revalidation
@@ -742,12 +742,12 @@ type RevalidateOutcome struct {
 func (r *StaleRevalidator) GetWithRevalidate(
     key, category string,
     cc CacheControl,
-    fetcher func() apperror.Result[json.RawMessage],
-) apperror.Result[RevalidateOutcome] {
+    fetcher func() appfault.Result[json.RawMessage],
+) appfault.Result[RevalidateOutcome] {
     
     entry, err := r.cache.Get(key)
     if err != nil {
-        return apperror.Fail[RevalidateOutcome](apperror.Wrap(err, 7110, "get cache entry"))
+        return appfault.Fail[RevalidateOutcome](appfault.Wrap(err, 7110, "get cache entry"))
     }
     
     // Cache miss
@@ -987,7 +987,7 @@ type CacheStats struct {
 }
 
 // GetStats retrieves cache statistics
-func (m *CacheManager) GetStats(category string) apperror.Result[*CacheStats] {
+func (m *CacheManager) GetStats(category string) appfault.Result[*CacheStats] {
     var stats CacheStats
     
     query := m.rootDb.Model(&CacheEntry{})
@@ -1026,7 +1026,7 @@ func (m *CacheManager) GetStats(category string) apperror.Result[*CacheStats] {
         Where("Category = ? AND ExpiresAt < ?", category, time.Now()).
         Count(&stats.ExpiredCount)
     
-    return apperror.OK(&stats)
+    return appfault.Ok(&stats)
 }
 ```
 

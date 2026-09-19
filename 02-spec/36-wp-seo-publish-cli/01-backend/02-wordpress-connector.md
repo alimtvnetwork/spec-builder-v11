@@ -106,15 +106,15 @@ func NewWordPressClient(conn WordPressConnection, decryptedPass string) *WordPre
     }
 }
 
-func (c *WordPressClient) doRequest(method httpmethod.Variant, endpoint string, body any) apperror.Result[*http.Response] {
+func (c *WordPressClient) doRequest(method httpmethod.Variant, endpoint string, body any) appfault.Result[*http.Response] {
     c.rateLimiter.Wait()
     
     var reqBody io.Reader
     if body != nil {
         jsonBytes, err := json.Marshal(body)
         if err != nil {
-            return apperror.Fail[*http.Response](
-                apperror.Wrap(
+            return appfault.Fail[*http.Response](
+                appfault.Wrap(
                     errors.ErrJsonMarshal,
                     "marshal request body",
                     err,
@@ -126,8 +126,8 @@ func (c *WordPressClient) doRequest(method httpmethod.Variant, endpoint string, 
     
     req, err := http.NewRequest(method.String(), c.baseUrl+endpoint, reqBody)
     if err != nil {
-        return apperror.Fail[*http.Response](
-            apperror.Wrap(
+        return appfault.Fail[*http.Response](
+            appfault.Wrap(
                 errors.ErrHttpConnection,
                 "create request",
                 err,
@@ -144,15 +144,15 @@ func (c *WordPressClient) doRequest(method httpmethod.Variant, endpoint string, 
     
     resp, err := c.httpClient.Do(req)
     if err != nil {
-        return apperror.Fail[*http.Response](
-            apperror.Wrap(
+        return appfault.Fail[*http.Response](
+            appfault.Wrap(
                 errors.ErrHttpConnection,
                 "execute request",
                 err,
             ),
         )
     }
-    return apperror.Ok(resp)
+    return appfault.Ok(resp)
 }
 ```
 
@@ -170,69 +170,69 @@ type Category struct {
     Count       int    `json:",omitempty"`
 }
 
-func (c *WordPressClient) CreateCategory(cat Category) apperror.Result[*Category] {
+func (c *WordPressClient) CreateCategory(cat Category) appfault.Result[*Category] {
     resp := c.doRequest(httpmethod.Post, "/categories", cat)
     if resp.HasError() {
-        return apperror.Fail[*Category](resp.Error())
+        return appfault.Fail[*Category](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     if resp.Value().StatusCode != http.StatusCreated {
-        return apperror.Fail[*Category](parseWpAppError(resp.Value()))
+        return appfault.Fail[*Category](parseWpAppError(resp.Value()))
     }
     
     var result Category
     if err := json.NewDecoder(resp.Value().Body).Decode(&result); err != nil {
-        return apperror.Fail[*Category](
-            apperror.Wrap(
+        return appfault.Fail[*Category](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode category",
                 err,
             ),
         )
     }
-    return apperror.Ok(&result)
+    return appfault.Ok(&result)
 }
 
-func (c *WordPressClient) GetCategories() apperror.Result[[]Category] {
+func (c *WordPressClient) GetCategories() appfault.Result[[]Category] {
     resp := c.doRequest(httpmethod.Get, "/categories?per_page=100", nil)
     if resp.HasError() {
-        return apperror.Fail[[]Category](resp.Error())
+        return appfault.Fail[[]Category](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     var categories []Category
     if err := json.NewDecoder(resp.Value().Body).Decode(&categories); err != nil {
-        return apperror.Fail[[]Category](
-            apperror.Wrap(
+        return appfault.Fail[[]Category](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode categories",
                 err,
             ),
         )
     }
-    return apperror.Ok(categories)
+    return appfault.Ok(categories)
 }
 
-func (c *WordPressClient) UpdateCategory(id int, cat Category) apperror.Result[*Category] {
+func (c *WordPressClient) UpdateCategory(id int, cat Category) appfault.Result[*Category] {
     endpoint := fmt.Sprintf("/categories/%d", id)
     resp := c.doRequest(httpmethod.Post, endpoint, cat)
     if resp.HasError() {
-        return apperror.Fail[*Category](resp.Error())
+        return appfault.Fail[*Category](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     var result Category
     if err := json.NewDecoder(resp.Value().Body).Decode(&result); err != nil {
-        return apperror.Fail[*Category](
-            apperror.Wrap(
+        return appfault.Fail[*Category](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode category",
                 err,
             ),
         )
     }
-    return apperror.Ok(&result)
+    return appfault.Ok(&result)
 }
 ```
 
@@ -270,70 +270,70 @@ type PostCreateRequest struct {
     Tags       []int  `json:",omitempty"`
 }
 
-func (c *WordPressClient) CreatePost(req PostCreateRequest) apperror.Result[*Post] {
+func (c *WordPressClient) CreatePost(req PostCreateRequest) appfault.Result[*Post] {
     resp := c.doRequest(httpmethod.Post, "/posts", req)
     if resp.HasError() {
-        return apperror.Fail[*Post](resp.Error())
+        return appfault.Fail[*Post](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     if resp.Value().StatusCode != http.StatusCreated {
-        return apperror.Fail[*Post](parseWpAppError(resp.Value()))
+        return appfault.Fail[*Post](parseWpAppError(resp.Value()))
     }
     
     var result Post
     if err := json.NewDecoder(resp.Value().Body).Decode(&result); err != nil {
-        return apperror.Fail[*Post](
-            apperror.Wrap(
+        return appfault.Fail[*Post](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode post",
                 err,
             ),
         )
     }
-    return apperror.Ok(&result)
+    return appfault.Ok(&result)
 }
 
-func (c *WordPressClient) UpdatePost(id int, req PostCreateRequest) apperror.Result[*Post] {
+func (c *WordPressClient) UpdatePost(id int, req PostCreateRequest) appfault.Result[*Post] {
     endpoint := fmt.Sprintf("/posts/%d", id)
     resp := c.doRequest(httpmethod.Post, endpoint, req)
     if resp.HasError() {
-        return apperror.Fail[*Post](resp.Error())
+        return appfault.Fail[*Post](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     var result Post
     if err := json.NewDecoder(resp.Value().Body).Decode(&result); err != nil {
-        return apperror.Fail[*Post](
-            apperror.Wrap(
+        return appfault.Fail[*Post](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode post",
                 err,
             ),
         )
     }
-    return apperror.Ok(&result)
+    return appfault.Ok(&result)
 }
 
-func (c *WordPressClient) GetPost(id int) apperror.Result[*Post] {
+func (c *WordPressClient) GetPost(id int) appfault.Result[*Post] {
     endpoint := fmt.Sprintf("/posts/%d?context=edit", id)
     resp := c.doRequest(httpmethod.Get, endpoint, nil)
     if resp.HasError() {
-        return apperror.Fail[*Post](resp.Error())
+        return appfault.Fail[*Post](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     var result Post
     if err := json.NewDecoder(resp.Value().Body).Decode(&result); err != nil {
-        return apperror.Fail[*Post](
-            apperror.Wrap(
+        return appfault.Fail[*Post](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode post",
                 err,
             ),
         )
     }
-    return apperror.Ok(&result)
+    return appfault.Ok(&result)
 }
 ```
 
@@ -352,49 +352,49 @@ type Page struct {
     Link          string   `json:",omitempty"`
 }
 
-func (c *WordPressClient) CreatePage(page Page) apperror.Result[*Page] {
+func (c *WordPressClient) CreatePage(page Page) appfault.Result[*Page] {
     resp := c.doRequest(httpmethod.Post, "/pages", page)
     if resp.HasError() {
-        return apperror.Fail[*Page](resp.Error())
+        return appfault.Fail[*Page](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     if resp.Value().StatusCode != http.StatusCreated {
-        return apperror.Fail[*Page](parseWpAppError(resp.Value()))
+        return appfault.Fail[*Page](parseWpAppError(resp.Value()))
     }
     
     var result Page
     if err := json.NewDecoder(resp.Value().Body).Decode(&result); err != nil {
-        return apperror.Fail[*Page](
-            apperror.Wrap(
+        return appfault.Fail[*Page](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode page",
                 err,
             ),
         )
     }
-    return apperror.Ok(&result)
+    return appfault.Ok(&result)
 }
 
-func (c *WordPressClient) UpdatePage(id int, page Page) apperror.Result[*Page] {
+func (c *WordPressClient) UpdatePage(id int, page Page) appfault.Result[*Page] {
     endpoint := fmt.Sprintf("/pages/%d", id)
     resp := c.doRequest(httpmethod.Post, endpoint, page)
     if resp.HasError() {
-        return apperror.Fail[*Page](resp.Error())
+        return appfault.Fail[*Page](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     var result Page
     if err := json.NewDecoder(resp.Value().Body).Decode(&result); err != nil {
-        return apperror.Fail[*Page](
-            apperror.Wrap(
+        return appfault.Fail[*Page](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode page",
                 err,
             ),
         )
     }
-    return apperror.Ok(&result)
+    return appfault.Ok(&result)
 }
 ```
 
@@ -409,48 +409,48 @@ type Tag struct {
     Count       int    `json:",omitempty"`
 }
 
-func (c *WordPressClient) CreateTag(tag Tag) apperror.Result[*Tag] {
+func (c *WordPressClient) CreateTag(tag Tag) appfault.Result[*Tag] {
     resp := c.doRequest(httpmethod.Post, "/tags", tag)
     if resp.HasError() {
-        return apperror.Fail[*Tag](resp.Error())
+        return appfault.Fail[*Tag](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     if resp.Value().StatusCode != http.StatusCreated {
-        return apperror.Fail[*Tag](parseWpAppError(resp.Value()))
+        return appfault.Fail[*Tag](parseWpAppError(resp.Value()))
     }
     
     var result Tag
     if err := json.NewDecoder(resp.Value().Body).Decode(&result); err != nil {
-        return apperror.Fail[*Tag](
-            apperror.Wrap(
+        return appfault.Fail[*Tag](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode tag",
                 err,
             ),
         )
     }
-    return apperror.Ok(&result)
+    return appfault.Ok(&result)
 }
 
-func (c *WordPressClient) GetTags() apperror.Result[[]Tag] {
+func (c *WordPressClient) GetTags() appfault.Result[[]Tag] {
     resp := c.doRequest(httpmethod.Get, "/tags?per_page=100", nil)
     if resp.HasError() {
-        return apperror.Fail[[]Tag](resp.Error())
+        return appfault.Fail[[]Tag](resp.Error())
     }
     defer resp.Value().Body.Close()
     
     var tags []Tag
     if err := json.NewDecoder(resp.Value().Body).Decode(&tags); err != nil {
-        return apperror.Fail[[]Tag](
-            apperror.Wrap(
+        return appfault.Fail[[]Tag](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode tags",
                 err,
             ),
         )
     }
-    return apperror.Ok(tags)
+    return appfault.Ok(tags)
 }
 ```
 
@@ -467,10 +467,10 @@ type WpError struct {
     }
 }
 
-func parseWpAppError(resp *http.Response) *apperror.AppError {
+func parseWpAppError(resp *http.Response) *appfault.AppError {
     var wpErr WpError
     if err := json.NewDecoder(resp.Body).Decode(&wpErr); err != nil {
-        return apperror.New(
+        return appfault.New(
             fmt.Sprintf("E%d", WpErrorMapping["rest_cannot_create"]),
             fmt.Sprintf("HTTP %d: %s", resp.StatusCode, resp.Status),
         )
@@ -480,7 +480,7 @@ func parseWpAppError(resp *http.Response) *apperror.AppError {
     if code == 0 {
         code = 12199 // Unknown WP error
     }
-    return apperror.New(
+    return appfault.New(
         fmt.Sprintf("E%d", code),
         fmt.Sprintf("WordPress error [%s]: %s", wpErr.Code, wpErr.Message),
     )
@@ -512,16 +512,16 @@ type ValidationResult struct {
     Error           string    `json:",omitempty"`
 }
 
-func (c *WordPressClient) ValidateConnection() apperror.Result[*ValidationResult] {
+func (c *WordPressClient) ValidateConnection() appfault.Result[*ValidationResult] {
     // Check /users/me endpoint
     resp := c.doRequest(httpmethod.Get, "/users/me?context=edit", nil)
     if resp.HasError() {
-        return apperror.Ok(&ValidationResult{Valid: false, Error: resp.Error().Message})
+        return appfault.Ok(&ValidationResult{Valid: false, Error: resp.Error().Message})
     }
     defer resp.Value().Body.Close()
     
     if resp.Value().StatusCode == http.StatusUnauthorized {
-        return apperror.Ok(&ValidationResult{
+        return appfault.Ok(&ValidationResult{
             Valid: false,
             Error: "Invalid credentials",
         })
@@ -533,8 +533,8 @@ func (c *WordPressClient) ValidateConnection() apperror.Result[*ValidationResult
         Capabilities map[string]bool
     }
     if err := json.NewDecoder(resp.Value().Body).Decode(&user); err != nil {
-        return apperror.Fail[*ValidationResult](
-            apperror.Wrap(
+        return appfault.Fail[*ValidationResult](
+            appfault.Wrap(
                 errors.ErrJsonDecode,
                 "decode user",
                 err,
@@ -549,7 +549,7 @@ func (c *WordPressClient) ValidateConnection() apperror.Result[*ValidationResult
         }
     }
     
-    return apperror.Ok(&ValidationResult{
+    return appfault.Ok(&ValidationResult{
         Valid:           true,
         Capabilities:    caps,
         CanPublishPosts: user.Capabilities["publish_posts"],
@@ -570,24 +570,24 @@ type SiteManager struct {
     mu       sync.RWMutex
 }
 
-func (m *SiteManager) GetClient(websiteId string) apperror.Result[*WordPressClient] {
+func (m *SiteManager) GetClient(websiteId string) appfault.Result[*WordPressClient] {
     m.mu.RLock()
     client, exists := m.clients[websiteId]
     m.mu.RUnlock()
     
     if exists {
-        return apperror.Ok(client)
+        return appfault.Ok(client)
     }
     
     // Load from database
     conn := m.db.GetConnection(websiteId)
     if conn.HasError() {
-        return apperror.Fail[*WordPressClient](conn.Error())
+        return appfault.Fail[*WordPressClient](conn.Error())
     }
     
     decryptedPass := m.db.DecryptPassword(conn.Value().Id)
     if decryptedPass.HasError() {
-        return apperror.Fail[*WordPressClient](decryptedPass.Error())
+        return appfault.Fail[*WordPressClient](decryptedPass.Error())
     }
     
     client = NewWordPressClient(*conn.Value(), decryptedPass.Value())
@@ -596,7 +596,7 @@ func (m *SiteManager) GetClient(websiteId string) apperror.Result[*WordPressClie
     m.clients[websiteId] = client
     m.mu.Unlock()
     
-    return apperror.Ok(client)
+    return appfault.Ok(client)
 }
 ```
 

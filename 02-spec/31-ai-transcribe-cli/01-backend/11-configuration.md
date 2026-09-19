@@ -429,7 +429,7 @@ type ConfigLoader struct {
     envPrefix  string
 }
 
-func (l *ConfigLoader) Load() apperror.Result[Config] {
+func (l *ConfigLoader) Load() appfault.Result[Config] {
     // 1. Load defaults
     cfg := DefaultConfig()
     
@@ -451,7 +451,7 @@ func (l *ConfigLoader) Load() apperror.Result[Config] {
     
     // 5. Validate configuration
     if err := l.validate(cfg); err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrConfigInvalid,
             "validate configuration",
@@ -536,7 +536,7 @@ func (l *ConfigLoader) validate(cfg *Config) error {
     if cfg.Stt.DefaultProvider != "" {
         valid := []string{"whisper", "openai", "elevenlabs"}
         if !contains(valid, cfg.Stt.DefaultProvider) {
-            errs = append(errs, apperror.New(
+            errs = append(errs, appfault.New(
                 ErrConfigInvalid,
                 "invalid stt provider",
             ).WithContext("provider", cfg.Stt.DefaultProvider))
@@ -555,7 +555,7 @@ func (l *ConfigLoader) validate(cfg *Config) error {
     // Audio validation
     validRates := []int{8000, 16000, 22050, 44100, 48000}
     if !contains(validRates, cfg.Audio.Input.SampleRate) {
-        errs = append(errs, apperror.New(
+        errs = append(errs, appfault.New(
             ErrConfigInvalid,
             "invalid sample rate",
         ).WithContext("sampleRate", cfg.Audio.Input.SampleRate))

@@ -687,7 +687,7 @@ type DatabaseManager struct {
     mu         sync.RWMutex
 }
 
-func NewDatabaseManager(dataDir string) apperror.Result[DatabaseManager] {
+func NewDatabaseManager(dataDir string) appfault.Result[*DatabaseManager] {
     dm := &DatabaseManager{
         dataDir:    dataDir,
         websiteDbs: make(map[string]*gorm.DB),
@@ -697,7 +697,7 @@ func NewDatabaseManager(dataDir string) apperror.Result[DatabaseManager] {
     settingPath := filepath.Join(dataDir, "wpseo.db")
     db, err := gorm.Open(sqlite.Open(settingPath), &gorm.Config{})
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[*DatabaseManager](err, ErrDatabaseOpenFailed, "failed to open setting db")
     }
     dm.settingDb = db
     
@@ -711,17 +711,17 @@ func NewDatabaseManager(dataDir string) apperror.Result[DatabaseManager] {
         &AiBridgeConfig{},
         &GSearchConfig{},
     ); err != nil {
-        return nil, err
+        return appfault.FailWrap[*DatabaseManager](err, ErrDatabaseMigrateFailed, "failed to automigrate setting db")
     }
     
-    return dm, nil
+    return appfault.Ok(dm)
 }
 
-func (dm *DatabaseManager) GetWebsiteDb(websiteSlug string) apperror.Result[*gorm.DB] {
+func (dm *DatabaseManager) GetWebsiteDb(websiteSlug string) appfault.Result[*gorm.DB] {
     dm.mu.RLock()
     if db, exists := dm.websiteDbs[websiteSlug]; exists {
         dm.mu.RUnlock()
-        return db, nil
+        return appfault.Ok(db)
     }
     dm.mu.RUnlock()
     
@@ -732,13 +732,13 @@ func (dm *DatabaseManager) GetWebsiteDb(websiteSlug string) apperror.Result[*gor
     dir := filepath.Join(dm.dataDir, websiteSlug)
     err := pathutil.EnsureDir(dir)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[*gorm.DB](err, ErrDirectoryCreateFailed, "failed to create website dir")
     }
     
     dbPath := filepath.Join(dir, "website.db")
     db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[*gorm.DB](err, ErrDatabaseOpenFailed, "failed to open website db")
     }
     
     dm.websiteDbs[websiteSlug] = db
@@ -758,17 +758,17 @@ func (dm *DatabaseManager) GetWebsiteDb(websiteSlug string) apperror.Result[*gor
         &Automation{},
         &AutomationRun{},
     ); err != nil {
-        return nil, err
+        return appfault.FailWrap[*gorm.DB](err, ErrDatabaseMigrateFailed, "failed to automigrate website db")
     }
     
-    return db, nil
+    return appfault.Ok(db)
 }
 
-func (dm *DatabaseManager) CreatePublicationDb(websiteSlug, pubId string, seq int) apperror.Result[*gorm.DB] {
+func (dm *DatabaseManager) CreatePublicationDb(websiteSlug, pubId string, seq int) appfault.Result[*gorm.DB] {
     dir := filepath.Join(dm.dataDir, websiteSlug, "publications")
     err := pathutil.EnsureDir(dir)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[*gorm.DB](err, ErrDirectoryCreateFailed, "failed to create publications dir")
     }
     
     filename := fmt.Sprintf("%05d-%s.db", seq, pubId)
@@ -776,7 +776,7 @@ func (dm *DatabaseManager) CreatePublicationDb(websiteSlug, pubId string, seq in
     
     db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[*gorm.DB](err, ErrDatabaseOpenFailed, "failed to open publication db")
     }
     
     // AutoMigrate publication DB models
@@ -789,10 +789,10 @@ func (dm *DatabaseManager) CreatePublicationDb(websiteSlug, pubId string, seq in
         &Version{},
         &UsedVariable{},
     ); err != nil {
-        return nil, err
+        return appfault.FailWrap[*gorm.DB](err, ErrDatabaseMigrateFailed, "failed to automigrate publication db")
     }
     
-    return db, nil
+    return appfault.Ok(db)
 }
 ```
 

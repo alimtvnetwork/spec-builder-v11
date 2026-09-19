@@ -176,7 +176,7 @@ type MatchResult struct {
     Score       float64
 }
 
-func (tm *TaskMatcher) FindReusableCode(requestTags []string, minOverlap int) apperror.Result[[]MatchResult] {
+func (tm *TaskMatcher) FindReusableCode(requestTags []string, minOverlap int) appfault.Result[[]MatchResult] {
     if len(requestTags) == 0 {
         return nil, nil
     }
@@ -279,7 +279,7 @@ type AdaptationResult struct {
     Confidence     float64
 }
 
-func (tm *TaskMatcher) AdaptCode(original TempCodingTask, newRequest TaskRequest) apperror.Result[*AdaptationResult] {
+func (tm *TaskMatcher) AdaptCode(original TempCodingTask, newRequest TaskRequest) appfault.Result[*AdaptationResult] {
     result := &AdaptationResult{
         OriginalCode: original.GolangCode,
     }
@@ -315,7 +315,7 @@ func (tm *TaskMatcher) AdaptCode(original TempCodingTask, newRequest TaskRequest
         result.Confidence = 0.0
     }
     
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -330,7 +330,7 @@ type MatchingPipeline struct {
     threshold float64
 }
 
-func (mp *MatchingPipeline) Process(request TaskRequest) apperror.Result[*PipelineResult] {
+func (mp *MatchingPipeline) Process(request TaskRequest) appfault.Result[*PipelineResult] {
     result := &PipelineResult{}
     
     // Step 1: Extract tags from request
@@ -340,19 +340,19 @@ func (mp *MatchingPipeline) Process(request TaskRequest) apperror.Result[*Pipeli
     if len(tags) == 0 {
         result.Action = ActionGenerateNew
         result.Reason = "No tags extracted from description"
-        return apperror.OK(result)
+        return appfault.Ok(result)
     }
     
     // Step 2: Find matches
     matches, err := mp.matcher.FindReusableCode(tags, 2)
     if err != nil {
-        return apperror.Fail[*PipelineResult](err)
+        return appfault.Fail[*PipelineResult](err)
     }
     
     if len(matches) == 0 {
         result.Action = ActionGenerateNew
         result.Reason = "No matching tasks found"
-        return apperror.OK(result)
+        return appfault.Ok(result)
     }
     
     // Step 3: Evaluate best match
@@ -363,7 +363,7 @@ func (mp *MatchingPipeline) Process(request TaskRequest) apperror.Result[*Pipeli
         // Try to adapt
         adaptationResult := mp.matcher.AdaptCode(bestMatch.Task, request)
         if adaptationResult.IsFailure() {
-            return apperror.Fail[*PipelineResult](adaptationResult.Error())
+            return appfault.Fail[*PipelineResult](adaptationResult.Error())
         }
         adaptation := adaptationResult.Value()
         
@@ -380,7 +380,7 @@ func (mp *MatchingPipeline) Process(request TaskRequest) apperror.Result[*Pipeli
             bestMatch.Score, mp.threshold)
     }
     
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 
 type MatchAction string

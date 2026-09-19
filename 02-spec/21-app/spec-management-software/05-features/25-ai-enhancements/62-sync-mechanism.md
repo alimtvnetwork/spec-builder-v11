@@ -179,11 +179,11 @@ type SyncResult struct {
 }
 
 // SyncShare performs synchronization for a single share
-func (s *SyncService) SyncShare(context stdctx.Context, shareId string, direction string) apperror.Result[SyncResult] {
+func (s *SyncService) SyncShare(context stdctx.Context, shareId string, direction string) appfault.Result[SyncResult] {
 	// Get share and sync state
 	share, err := s.getShare(context, shareId)
 	if err != nil {
-		return apperror.FailWrap[SyncResult](
+		return appfault.FailWrap[SyncResult](
 			err,
 			"E9300",
 			"share not found",
@@ -204,7 +204,7 @@ func (s *SyncService) SyncShare(context stdctx.Context, shareId string, directio
 	// Detect changes
 	sourceContent, sourceHash, err := s.getContentWithHash(context, share.SourceProjectId, share.ResourcePath)
 	if err != nil {
-		return apperror.FailWrap[SyncResult](
+		return appfault.FailWrap[SyncResult](
 			err,
 			"E9301",
 			"failed to read source",
@@ -213,7 +213,7 @@ func (s *SyncService) SyncShare(context stdctx.Context, shareId string, directio
 	
 	targetContent, targetHash, err := s.getContentWithHash(context, share.TargetProjectId, share.ResourcePath)
 	if err != nil && !s.isNotFound(err) {
-		return apperror.FailWrap[SyncResult](
+		return appfault.FailWrap[SyncResult](
 			err,
 			"E9301",
 			"failed to read target",
@@ -239,7 +239,7 @@ func (s *SyncService) SyncShare(context stdctx.Context, shareId string, directio
 		// Only source changed - push to target
 		if direction != "pull" {
 			if err := s.pushToTarget(context, share, sourceContent); err != nil {
-				return apperror.FailWrap[SyncResult](
+				return appfault.FailWrap[SyncResult](
 					err,
 					"E9302",
 					"push to target failed",
@@ -253,7 +253,7 @@ func (s *SyncService) SyncShare(context stdctx.Context, shareId string, directio
 		// Only target changed - pull to source (if bidirectional)
 		if direction == "bidirectional" || direction == "pull" {
 			if err := s.pullFromTarget(context, share, targetContent); err != nil {
-				return apperror.FailWrap[SyncResult](
+				return appfault.FailWrap[SyncResult](
 					err,
 					"E9302",
 					"pull from target failed",
@@ -276,7 +276,7 @@ func (s *SyncService) SyncShare(context stdctx.Context, shareId string, directio
 		resolved, resolution := s.tryAutoResolve(conflict, share.ConflictStrategy)
 		if resolved {
 			if err := s.applyResolution(context, share, resolution, conflict); err != nil {
-				return apperror.FailWrap[SyncResult](
+				return appfault.FailWrap[SyncResult](
 					err,
 					"E9303",
 					"conflict resolution failed",
@@ -303,7 +303,7 @@ func (s *SyncService) SyncShare(context stdctx.Context, shareId string, directio
 		LastSyncContent: sourceContent,
 	})
 	
-	return apperror.Ok(*result)
+	return appfault.Ok(*result)
 }
 
 // pushToTarget copies content from source to target
@@ -348,7 +348,7 @@ func (s *SyncService) ResolveConflict(
 ) error {
 	state, err := s.getSyncState(context, shareId)
 	if err != nil || !state.HasConflict {
-		return apperror.New(
+		return appfault.New(
 			ErrNoConflict,
 			"no conflict to resolve",
 		)
@@ -367,7 +367,7 @@ func (s *SyncService) ResolveConflict(
 		
 	case "merge":
 		if mergedContent == nil {
-			return apperror.New(
+			return appfault.New(
 				ErrMergedContentRequired,
 				"merged content required for merge resolution",
 			)
@@ -391,7 +391,7 @@ func (s *SyncService) ResolveConflict(
 	return s.clearConflictState(context, shareId)
 }
 
-func (s *SyncService) getContentWithHash(context stdctx.Context, projectId, path string) apperror.Result[ContentWithHash] {
+func (s *SyncService) getContentWithHash(context stdctx.Context, projectId, path string) appfault.Result[ContentWithHash] {
 	content, err := s.files.GetContent(context, projectId, path)
 	if err != nil {
 		return "", "", err
@@ -488,7 +488,7 @@ func (w *SyncWorker) runSyncCycle(context stdctx.Context) {
 	}
 }
 
-func (w *SyncWorker) getAutoSyncShares(context stdctx.Context) apperror.Result[[]ShareWithSyncInfo] {
+func (w *SyncWorker) getAutoSyncShares(context stdctx.Context) appfault.Result[[]ShareWithSyncInfo] {
 	rows, err := w.db.QueryContext(context, `
 		SELECT 
 			ms.id, ms.source_project_id, ms.target_project_id, ms.resource_path,
@@ -968,17 +968,17 @@ type FileWatcher struct {
 	watchedDirs map[string]string // path -> projectId
 }
 
-func NewFileWatcher(sync *SyncService, db *db.DB) apperror.Result[FileWatcher] {
+func NewFileWatcher(sync *SyncService, db *db.DB) appfault.Result[FileWatcher] {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return apperror.FailWrap[FileWatcher](
+		return appfault.FailWrap[FileWatcher](
 			err,
 			"E9310",
 			"failed to create file watcher",
 		)
 	}
 	
-	return apperror.Ok(FileWatcher{
+	return appfault.Ok(FileWatcher{
 		watcher:     watcher,
 		syncService: sync,
 		db:          db,

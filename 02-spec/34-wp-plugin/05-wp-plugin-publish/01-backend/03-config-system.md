@@ -112,7 +112,7 @@ import (
     "time"
     
     "wp-plugin-publish/internal/models"
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
     
     "gorm.io/gorm"
     "gorm.io/gorm/clause"
@@ -163,8 +163,8 @@ func SeedIfNeeded(db *gorm.DB, configPath string) error {
     
     var cfg SeedConfig
     if err := json.Unmarshal(data, &cfg); err != nil {
-        return apperror.Wrap(
-            err, apperror.ErrConfigParse, "failed to parse config file",
+        return appfault.Wrap(
+            err, appfault.ErrConfigParse, "failed to parse config file",
         )
     }
     
@@ -221,7 +221,7 @@ func SeedIfNeeded(db *gorm.DB, configPath string) error {
     return nil
 }
 
-func seedSite(db *gorm.DB, site SiteSeed) apperror.Result[int64] {
+func seedSite(db *gorm.DB, site SiteSeed) appfault.Result[int64] {
     // Check if exists
     var existing models.Site
     if err := db.First(&existing, "Url = ?", site.Url).Error; err == nil {
@@ -237,8 +237,8 @@ func seedSite(db *gorm.DB, site SiteSeed) apperror.Result[int64] {
         IsActive:    true,
     }
     if err := db.Create(&newSite).Error; err != nil {
-        return 0, apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to insert site",
+        return 0, appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to insert site",
         )
     }
     
@@ -262,8 +262,8 @@ func seedPlugin(db *gorm.DB, plugin PluginSeed, siteId int64) error {
         IsActive:   true,
     }
     if err := db.Create(&newPlugin).Error; err != nil {
-        return apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to insert plugin",
+        return appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to insert plugin",
         )
     }
     
@@ -306,11 +306,11 @@ func seedSettings(db *gorm.DB, settings Settings) error {
     return nil
 }
 
-func GetSetting(db *gorm.DB, key string) apperror.Result[string] {
+func GetSetting(db *gorm.DB, key string) appfault.Result[string] {
     var config models.AppConfig
     if err := db.First(&config, "Key = ?", key).Error; err != nil {
-        return "", apperror.Wrap(
-            err, apperror.ErrDatabaseQuery, "failed to get setting: "+key,
+        return "", appfault.Wrap(
+            err, appfault.ErrDatabaseQuery, "failed to get setting: "+key,
         )
     }
     return config.Value, nil
@@ -326,8 +326,8 @@ func SetSetting(db *gorm.DB, key, value string) error {
         db.Create(&models.AppConfig{Key: key, Value: value, UpdatedAt: now})
     }
     if result.Error != nil {
-        return apperror.Wrap(
-            result.Error, apperror.ErrDatabaseExec, "failed to set setting: "+key,
+        return appfault.Wrap(
+            result.Error, appfault.ErrDatabaseExec, "failed to set setting: "+key,
         )
     }
     return nil

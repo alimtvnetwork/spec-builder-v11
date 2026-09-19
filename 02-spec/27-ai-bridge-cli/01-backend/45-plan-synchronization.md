@@ -375,10 +375,10 @@ type MarkdownPlan struct {
      NotifyConflicts bool
  }
  
- func (w *PlanWatcher) Start() *apperror.AppError {
+ func (w *PlanWatcher) Start() *appfault.AppError {
      watcher, err := fsnotify.NewWatcher()
      if err != nil {
-         return apperror.Wrap(
+         return appfault.Wrap(
              err,
              ErrPlanWatcherFailed,
              "failed to create file watcher",

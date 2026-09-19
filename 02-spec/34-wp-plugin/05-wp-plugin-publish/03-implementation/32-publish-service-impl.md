@@ -97,17 +97,17 @@ import (
 // Service interface for publish operations
 type Service interface {
 	// Publishing
-	Publish(context stdctx.Context, pluginId, siteId int64, opts PublishOptions) apperror.Result[*PublishResult]
-	PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) apperror.Result[[]PublishResult]
+	Publish(context stdctx.Context, pluginId, siteId int64, opts PublishOptions) appfault.Result[*PublishResult]
+	PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) appfault.Result[[]PublishResult]
 
 	// Packaging
-	CreatePackage(context stdctx.Context, pluginId int64, files []string) apperror.Result[*PackageInfo]
+	CreatePackage(context stdctx.Context, pluginId int64, files []string) appfault.Result[*PackageInfo]
 
 	// History
-	GetHistory(context stdctx.Context, pluginId int64, siteId *int64) apperror.Result[[]PublishResult]
+	GetHistory(context stdctx.Context, pluginId int64, siteId *int64) appfault.Result[[]PublishResult]
 
 	// Rollback
-	Rollback(context stdctx.Context, pluginId, siteId, backupId int64) apperror.Result[*PublishResult]
+	Rollback(context stdctx.Context, pluginId, siteId, backupId int64) appfault.Result[*PublishResult]
 }
 
 // Config holds publish service configuration
@@ -162,12 +162,12 @@ import (
 
 	"wp-plugin-publish/internal/models"
 	"wp-plugin-publish/internal/ws"
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 
 	"github.com/google/uuid"
 )
 
-func (s *serviceImpl) Publish(context stdctx.Context, pluginId, siteId int64, opts PublishOptions) apperror.Result[PublishResult] {
+func (s *serviceImpl) Publish(context stdctx.Context, pluginId, siteId int64, opts PublishOptions) appfault.Result[PublishResult] {
 	publishId := uuid.New().String()[:8]
 	startTime := time.Now()
 
@@ -197,8 +197,8 @@ func (s *serviceImpl) Publish(context stdctx.Context, pluginId, siteId int64, op
 	// Get site details
 	var site models.Site
 	if err := s.db.GormDb().WithContext(context).First(&site, "Id = ?", siteId).Error; err != nil {
-		return s.failPublish(result, "validate", apperror.New(
-			apperror.ErrNotFound, "site not found",
+		return s.failPublish(result, "validate", appfault.New(
+			appfault.ErrNotFound, "site not found",
 		), startTime)
 	}
 
@@ -207,8 +207,8 @@ func (s *serviceImpl) Publish(context stdctx.Context, pluginId, siteId int64, op
 	if err := s.db.GormDb().WithContext(context).
 		Where("PluginId = ? AND SiteId = ?", pluginId, siteId).
 		First(&mapping).Error; err != nil {
-		return s.failPublish(result, "validate", apperror.New(
-			apperror.ErrNotFound, "plugin not mapped to site",
+		return s.failPublish(result, "validate", appfault.New(
+			appfault.ErrNotFound, "plugin not mapped to site",
 		), startTime)
 	}
 	remoteSlug := mapping.RemoteSlug
@@ -218,7 +218,7 @@ func (s *serviceImpl) Publish(context stdctx.Context, pluginId, siteId int64, op
 		return s.pluginService.ValidatePath(context, plugin.Path)
 	}))
 	if result.Stages[0].Status == "failed" {
-		return s.failPublish(result, "validate", apperror.New(ErrPublishStageFailed, result.Stages[0].Error), startTime)
+		return s.failPublish(result, "validate", appfault.New(ErrPublishStageFailed, result.Stages[0].Error), startTime)
 	}
 
 	// Stage 2: Backup (optional)
@@ -244,7 +244,7 @@ func (s *serviceImpl) Publish(context stdctx.Context, pluginId, siteId int64, op
 		return err
 	}))
 	if result.Stages[len(result.Stages)-1].Status == "failed" {
-		return s.failPublish(result, "package", apperror.New(ErrPublishStageFailed, result.Stages[len(result.Stages)-1].Error), startTime)
+		return s.failPublish(result, "package", appfault.New(ErrPublishStageFailed, result.Stages[len(result.Stages)-1].Error), startTime)
 	}
 
 	// Dry run stops here
@@ -260,7 +260,7 @@ func (s *serviceImpl) Publish(context stdctx.Context, pluginId, siteId int64, op
 		return s.uploadPackage(context, wpClient, pkg.Path, remoteSlug)
 	}))
 	if result.Stages[len(result.Stages)-1].Status == "failed" {
-		return s.failPublish(result, "upload", apperror.New(ErrPublishStageFailed, result.Stages[len(result.Stages)-1].Error), startTime)
+		return s.failPublish(result, "upload", appfault.New(ErrPublishStageFailed, result.Stages[len(result.Stages)-1].Error), startTime)
 	}
 	result.FilesUploaded = pkg.FileCount
 	result.BytesTransferred = pkg.Size
@@ -335,7 +335,7 @@ func (s *serviceImpl) runStage(name string, fn func() error) StageResult {
 	return stage
 }
 
-func (s *serviceImpl) failPublish(result *PublishResult, stage string, err error, startTime time.Time) apperror.Result[PublishResult] {
+func (s *serviceImpl) failPublish(result *PublishResult, stage string, err error, startTime time.Time) appfault.Result[PublishResult] {
 	result.Success = false
 	result.Error = err.Error()
 	result.Duration = time.Since(startTime).Milliseconds()
@@ -346,10 +346,10 @@ func (s *serviceImpl) failPublish(result *PublishResult, stage string, err error
 		Error:     err.Error(),
 	})
 
-	return apperror.Fail[PublishResult](apperror.Wrap(err, apperror.ErrPublishFailed, stage))
+	return appfault.Fail[PublishResult](appfault.Wrap(err, appfault.ErrPublishFailed, stage))
 }
 
-func (s *serviceImpl) PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) apperror.Result[[]PublishResult] {
+func (s *serviceImpl) PublishToAll(context stdctx.Context, pluginId int64, opts PublishOptions) appfault.Result[[]PublishResult] {
 	mappings, err := s.pluginService.GetMappings(context, pluginId)
 	if err != nil {
 		return nil, err
@@ -364,14 +364,14 @@ func (s *serviceImpl) PublishToAll(context stdctx.Context, pluginId int64, opts 
 	return results, nil
 }
 
-func (s *serviceImpl) GetHistory(context stdctx.Context, pluginId int64, siteId *int64) apperror.Result[[]PublishResult] {
+func (s *serviceImpl) GetHistory(context stdctx.Context, pluginId int64, siteId *int64) appfault.Result[[]PublishResult] {
 	// TODO: Query publish history from database
 	return []PublishResult{}, nil
 }
 
-func (s *serviceImpl) Rollback(context stdctx.Context, pluginId, siteId, backupId int64) apperror.Result[PublishResult] {
+func (s *serviceImpl) Rollback(context stdctx.Context, pluginId, siteId, backupId int64) appfault.Result[PublishResult] {
 	// TODO: Implement rollback using backup
-	return apperror.Fail[PublishResult](apperror.New(apperror.ErrNotImplemented, "rollback not yet implemented"))
+	return appfault.Fail[PublishResult](appfault.New(appfault.ErrNotImplemented, "rollback not yet implemented"))
 }
 ```
 
@@ -393,10 +393,10 @@ import (
 	"strings"
 	"time"
 
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 )
 
-func (s *serviceImpl) CreatePackage(context stdctx.Context, pluginId int64, files []string) apperror.Result[PackageInfo] {
+func (s *serviceImpl) CreatePackage(context stdctx.Context, pluginId int64, files []string) appfault.Result[PackageInfo] {
 	s.log.Info("Creating package", "pluginId", pluginId, "files", len(files))
 
 	// Get plugin details
@@ -409,8 +409,8 @@ func (s *serviceImpl) CreatePackage(context stdctx.Context, pluginId int64, file
 	zipPath := filepath.Join(s.tempDir, fmt.Sprintf("plugin_%d_%d.zip", pluginId, time.Now().Unix()))
 	zipFile, err := os.Create(zipPath)
 	if err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrFileWrite, "failed to create zip file",
+		return nil, appfault.Wrap(
+			err, appfault.ErrFileWrite, "failed to create zip file",
 		)
 	}
 	defer zipFile.Close()
@@ -451,8 +451,8 @@ func (s *serviceImpl) CreatePackage(context stdctx.Context, pluginId int64, file
 			return nil
 		})
 		if err != nil {
-			return nil, apperror.Wrap(
-				err, apperror.ErrDirRead, "failed to walk plugin directory",
+			return nil, appfault.Wrap(
+				err, appfault.ErrDirRead, "failed to walk plugin directory",
 			)
 		}
 	}
@@ -525,7 +525,7 @@ import (
 	"os"
 
 	"wp-plugin-publish/internal/wordpress"
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 )
 
 func (s *serviceImpl) uploadPackage(context stdctx.Context, client *wordpress.Client, zipPath, remoteSlug string) error {
@@ -534,16 +534,16 @@ func (s *serviceImpl) uploadPackage(context stdctx.Context, client *wordpress.Cl
 	// Read zip file
 	data, readErr := pathutil.ReadFile(zipPath)
 	if readErr != nil {
-		return apperror.Wrap(
-			readErr, apperror.ErrFileRead, "failed to read package",
+		return appfault.Wrap(
+			readErr, appfault.ErrFileRead, "failed to read package",
 		)
 	}
 
 	// Upload via WordPress REST API
 	err = client.UploadPlugin(context, remoteSlug, data)
 	if err != nil {
-		return apperror.Wrap(
-			err, apperror.ErrRemoteUpload, "failed to upload to WordPress",
+		return appfault.Wrap(
+			err, appfault.ErrRemoteUpload, "failed to upload to WordPress",
 		)
 	}
 

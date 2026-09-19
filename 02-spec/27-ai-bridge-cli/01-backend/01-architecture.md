@@ -24,16 +24,16 @@ type InputRouter struct {
 }
 
 type InputParser interface {
-    Parse(input []byte) apperror.Result[NormalizedRequest]
+    Parse(input []byte) appfault.Result[NormalizedRequest]
     SupportedExtensions() []string
     ContentType() string
 }
 
-func (r *InputRouter) Route(filename string, content []byte) apperror.Result[NormalizedRequest] {
+func (r *InputRouter) Route(filename string, content []byte) appfault.Result[NormalizedRequest] {
     ext := filepath.Ext(filename)
     parser, ok := r.parsers[ext]
     if !ok {
-        return apperror.FailNew[NormalizedRequest](
+        return appfault.FailNew[NormalizedRequest](
             ErrUnsupportedFormat,
             "unsupported format: %s", ext,
         )
@@ -103,15 +103,15 @@ type BackendAdapter interface {
     IsAvailable(context stdctx.Context) bool
     
     // Synchronous generation
-    Generate(context stdctx.Context, req *NormalizedRequest) apperror.Result[Response]
+    Generate(context stdctx.Context, req *NormalizedRequest) appfault.Result[Response]
     
     // Streaming generation
-    GenerateStream(context stdctx.Context, req *NormalizedRequest) apperror.Result[<-chan StreamChunk]
+    GenerateStream(context stdctx.Context, req *NormalizedRequest) appfault.Result[<-chan StreamChunk]
     
     // Model management
-    ListModels(context stdctx.Context) apperror.Result[[]ModelInfo]
-    LoadModel(context stdctx.Context, modelId string) *apperror.AppError
-    UnloadModel(context stdctx.Context, modelId string) *apperror.AppError
+    ListModels(context stdctx.Context) appfault.Result[[]ModelInfo]
+    LoadModel(context stdctx.Context, modelId string) *appfault.AppError
+    UnloadModel(context stdctx.Context, modelId string) *appfault.AppError
 }
 
 type Response struct {
@@ -126,7 +126,7 @@ type Response struct {
 type StreamChunk struct {
     Delta        string `json:",omitempty"`
     FinishReason string `json:",omitempty"`
-    Error        *apperror.AppError `json:",omitempty"`
+    Error        *appfault.AppError `json:",omitempty"`
 }
 ```
 
@@ -169,29 +169,29 @@ When multiple backends are configured, AI Bridge uses this priority:
 4. **Config default** — Fall back to `ai.backend` config value
 
 ```go
-func (m *BackendManager) SelectBackend(context stdctx.Context, req *NormalizedRequest) apperror.Result[BackendAdapter] {
+func (m *BackendManager) SelectBackend(context stdctx.Context, req *NormalizedRequest) appfault.Result[BackendAdapter] {
     // 1. Explicit override
     if req.BackendOverride != "" {
         if backend, ok := m.backends[req.BackendOverride]; ok {
-            return apperror.Ok(backend)
+            return appfault.Ok(backend)
         }
     }
     
     // 2. Check model availability
     for _, backend := range m.backends {
         if backend.HasModel(req.ModelId) && backend.IsAvailable(context) {
-            return apperror.Ok(backend)
+            return appfault.Ok(backend)
         }
     }
     
     // 3. Health-based selection
     healthiest := m.getHealthiestBackend()
     if healthiest != nil {
-        return apperror.Ok[BackendAdapter](healthiest)
+        return appfault.Ok[BackendAdapter](healthiest)
     }
     
     // 4. Config default
-    return apperror.Ok[BackendAdapter](m.backends[m.config.DefaultBackend])
+    return appfault.Ok[BackendAdapter](m.backends[m.config.DefaultBackend])
 }
 ```
 

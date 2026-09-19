@@ -307,7 +307,7 @@ type EnumErrorContext struct {
     Value string
 }
 
-func (s *ProjectService) CreateProject(context stdctx.Context, req model.CreateProjectRequest) apperror.Result[model.Project] {
+func (s *ProjectService) CreateProject(context stdctx.Context, req model.CreateProjectRequest) appfault.Result[model.Project] {
     // CRITICAL: Validate path is safe (no traversal, allowed directory)
     if err := s.pathValidator.ValidatePath(req.Path); err != nil {
         s.logger.WarnContext(context, "invalid project path",
@@ -371,7 +371,7 @@ func (s *ProjectService) CreateProject(context stdctx.Context, req model.CreateP
 }
 
 // GetProject retrieves a project by ID
-func (s *ProjectService) GetProject(context stdctx.Context, id types.ProjectId) apperror.Result[model.Project] {
+func (s *ProjectService) GetProject(context stdctx.Context, id types.ProjectId) appfault.Result[model.Project] {
     project, err := s.projectRepo.GetById(context, id)
     if err != nil {
         s.logger.DebugContext(context, "project not found",
@@ -384,7 +384,7 @@ func (s *ProjectService) GetProject(context stdctx.Context, id types.ProjectId) 
 }
 
 // ListProjects lists all projects with pagination
-func (s *ProjectService) ListProjects(context stdctx.Context, req types.PageRequest) apperror.Result[types.PageResponse[model.Project]] {
+func (s *ProjectService) ListProjects(context stdctx.Context, req types.PageRequest) appfault.Result[types.PageResponse[model.Project]] {
     projects, total, err := s.projectRepo.List(context, req)
     if err != nil {
         return nil, err
@@ -395,7 +395,7 @@ func (s *ProjectService) ListProjects(context stdctx.Context, req types.PageRequ
 }
 
 // UpdateProject updates a project
-func (s *ProjectService) UpdateProject(context stdctx.Context, id types.ProjectId, req model.UpdateProjectRequest) apperror.Result[model.Project] {
+func (s *ProjectService) UpdateProject(context stdctx.Context, id types.ProjectId, req model.UpdateProjectRequest) appfault.Result[model.Project] {
     project, err := s.projectRepo.GetById(context, id)
     if err != nil {
         return nil, err
@@ -515,7 +515,7 @@ func NewSpecService(
 }
 
 // CreateSpec creates a new specification
-func (s *SpecService) CreateSpec(context stdctx.Context, req model.CreateSpecRequest) apperror.Result[model.Spec] {
+func (s *SpecService) CreateSpec(context stdctx.Context, req model.CreateSpecRequest) appfault.Result[model.Spec] {
     // Verify project exists
     project, err := s.projectRepo.GetById(context, req.ProjectId)
     if err != nil {
@@ -625,7 +625,7 @@ func (s *SpecService) CreateSpec(context stdctx.Context, req model.CreateSpecReq
 }
 
 // GetSpec retrieves a spec by ID
-func (s *SpecService) GetSpec(context stdctx.Context, projectId types.ProjectId, specId types.SpecId) apperror.Result[model.Spec] {
+func (s *SpecService) GetSpec(context stdctx.Context, projectId types.ProjectId, specId types.SpecId) appfault.Result[model.Spec] {
     projectDb, err := s.dbManager.GetProjectDb(context, projectId)
     if err != nil {
         return nil, err
@@ -645,7 +645,7 @@ func (s *SpecService) GetSpec(context stdctx.Context, projectId types.ProjectId,
 }
 
 // UpdateSpec updates a spec
-func (s *SpecService) UpdateSpec(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, req model.UpdateSpecRequest) apperror.Result[model.Spec] {
+func (s *SpecService) UpdateSpec(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, req model.UpdateSpecRequest) appfault.Result[model.Spec] {
     project, err := s.projectRepo.GetById(context, projectId)
     if err != nil {
         return nil, err
@@ -788,7 +788,7 @@ func (s *SpecService) DeleteSpec(context stdctx.Context, projectId types.Project
 }
 
 // ListSpecs lists specs in a project
-func (s *SpecService) ListSpecs(context stdctx.Context, projectId types.ProjectId, req types.PageRequest) apperror.Result[types.PageResponse[model.Spec]] {
+func (s *SpecService) ListSpecs(context stdctx.Context, projectId types.ProjectId, req types.PageRequest) appfault.Result[types.PageResponse[model.Spec]] {
     projectDb, err := s.dbManager.GetProjectDb(context, projectId)
     if err != nil {
         return nil, err

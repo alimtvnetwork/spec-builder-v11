@@ -267,7 +267,7 @@ type UnderstandingCheck struct {
 }
  
  // GenerateQuestions creates questions with sample answers
- func GenerateQuestions(prompt string, context []RAGChunk) apperror.Result[[]ClarifyingQuestion] {
+ func GenerateQuestions(prompt string, context []RAGChunk) appfault.Result[[]ClarifyingQuestion] {
      questions := []ClarifyingQuestion{}
      
      // Analyze prompt for ambiguities
@@ -295,14 +295,14 @@ type UnderstandingCheck struct {
          questions = append(questions, q)
      }
      
-     return apperror.Ok(questions)
+     return appfault.Ok(questions)
  }
  ```
  
  ### 6.3 Reasoning Flow Executor
  
  ```go
- func ExecuteReasoningFlow(prompt string, session *Session) apperror.Result[*ReasoningResult] {
+ func ExecuteReasoningFlow(prompt string, session *Session) appfault.Result[*ReasoningResult] {
      config := session.GetReasoningConfig()
      
      // STEP 1: Always reason first (no skip unless explicit signal)
@@ -311,18 +311,18 @@ type UnderstandingCheck struct {
          // Load prioritized RAG context (Critical > Important > Regular)
          contextResult := LoadPrioritizedContext(session)
          if contextResult.HasError() {
-             return apperror.Fail[*ReasoningResult](contextResult.Error())
+             return appfault.Fail[*ReasoningResult](contextResult.Error())
          }
          
          // Generate clarifying questions with sample answers
          questionsResult := GenerateQuestions(prompt, contextResult.Value())
          if questionsResult.HasError() {
-             return apperror.Fail[*ReasoningResult](questionsResult.Error())
+             return appfault.Fail[*ReasoningResult](questionsResult.Error())
          }
          
          // If questions exist, return them for user response
         if len(questionsResult.Value()) > 0 {
-              return apperror.Ok(&ReasoningResult{
+              return appfault.Ok(&ReasoningResult{
                   Status:     ReasoningStatusNeedsInput,
                   Questions:  questionsResult.Value(),
                   WaitingFor: "UserResponse",
@@ -333,7 +333,7 @@ type UnderstandingCheck struct {
       // STEP 2: Generate understanding check (if enabled)
       if config.RequireUnderstandingCheck {
           understanding := GenerateUnderstandingCheck(prompt, session)
-          return apperror.Ok(&ReasoningResult{
+          return appfault.Ok(&ReasoningResult{
               Status:       ReasoningStatusConfirmUnderstanding,
               Understanding: understanding,
               WaitingFor:   "UserConfirmation",

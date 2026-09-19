@@ -38,7 +38,7 @@ import (
     "time"
     
     "github.com/PuerkitoBio/goquery"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 type DuckDuckGoSearch struct {
@@ -71,7 +71,7 @@ func (d *DuckDuckGoSearch) RequiresApi() bool { return false }
 ### Search Execution
 
 ```go
-func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]Result] {
+func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
     // Build form data (DDG uses POST)
     formData := url.Values{}
     formData.Set("q", query)
@@ -80,8 +80,8 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
     
     req, err := http.NewRequestWithContext(context, httpmethod.Post.String(), d.endpoint, strings.NewReader(formData.Encode()))
     if err != nil {
-        return apperror.Fail[[]Result](
-            apperror.Wrap(
+        return appfault.Fail[[]Result](
+            appfault.Wrap(
                 err,
                 "create request",
             ),
@@ -95,8 +95,8 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
     
     resp, err := d.client.Do(req)
     if err != nil {
-        return apperror.Fail[[]Result](
-            apperror.Wrap(
+        return appfault.Fail[[]Result](
+            appfault.Wrap(
                 err,
                 "network error",
             ),
@@ -105,8 +105,8 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
     defer resp.Body.Close()
     
     if resp.StatusCode != http.StatusOK {
-        return apperror.Fail[[]Result](
-            apperror.New(
+        return appfault.Fail[[]Result](
+            appfault.New(
                 "unexpected status from DuckDuckGo",
             ),
         )
@@ -114,15 +114,15 @@ func (d *DuckDuckGoSearch) Search(context stdctx.Context, query string, opts Sea
     
     doc, err := goquery.NewDocumentFromReader(resp.Body)
     if err != nil {
-        return apperror.Fail[[]Result](
-            apperror.Wrap(
+        return appfault.Fail[[]Result](
+            appfault.Wrap(
                 err,
                 "parse HTML",
             ),
         )
     }
     
-    return apperror.OK(d.parseResults(doc, opts.MaxResults))
+    return appfault.Ok(d.parseResults(doc, opts.MaxResults))
 }
 ```
 
@@ -221,7 +221,7 @@ type InstantAnswer struct {
     }
 }
 
-func (d *DuckDuckGoSearch) GetInstantAnswer(context stdctx.Context, query string) apperror.Result[*InstantAnswer] {
+func (d *DuckDuckGoSearch) GetInstantAnswer(context stdctx.Context, query string) appfault.Result[*InstantAnswer] {
     params := url.Values{}
     params.Set("q", query)
     params.Set("format", "json")
@@ -232,8 +232,8 @@ func (d *DuckDuckGoSearch) GetInstantAnswer(context stdctx.Context, query string
     
     req, err := http.NewRequestWithContext(context, httpmethod.Get.String(), reqUrl, nil)
     if err != nil {
-        return apperror.Fail[*InstantAnswer](
-            apperror.Wrap(
+        return appfault.Fail[*InstantAnswer](
+            appfault.Wrap(
                 err,
                 "create request",
             ),
@@ -244,8 +244,8 @@ func (d *DuckDuckGoSearch) GetInstantAnswer(context stdctx.Context, query string
     
     resp, err := d.client.Do(req)
     if err != nil {
-        return apperror.Fail[*InstantAnswer](
-            apperror.Wrap(
+        return appfault.Fail[*InstantAnswer](
+            appfault.Wrap(
                 err,
                 "network error",
             ),
@@ -255,15 +255,15 @@ func (d *DuckDuckGoSearch) GetInstantAnswer(context stdctx.Context, query string
     
     var answer InstantAnswer
     if err := json.NewDecoder(resp.Body).Decode(&answer); err != nil {
-        return apperror.Fail[*InstantAnswer](
-            apperror.Wrap(
+        return appfault.Fail[*InstantAnswer](
+            appfault.Wrap(
                 err,
                 "decode instant answer",
             ),
         )
     }
     
-    return apperror.OK(&answer)
+    return appfault.Ok(&answer)
 }
 ```
 
@@ -282,7 +282,7 @@ var ddgRegions = map[string]string{
     "global": "wt-wt", // No region preference
 }
 
-func (d *DuckDuckGoSearch) SearchWithRegion(context stdctx.Context, query, region string, opts SearchOptions) apperror.Result[[]Result] {
+func (d *DuckDuckGoSearch) SearchWithRegion(context stdctx.Context, query, region string, opts SearchOptions) appfault.Result[[]Result] {
     kl, ok := ddgRegions[region]
     if !ok {
         kl = "us-en"

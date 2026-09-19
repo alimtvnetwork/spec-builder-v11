@@ -270,10 +270,10 @@ type FileProcessor struct {
     dependencies map[string][]string
 }
 
-func (p *FileProcessor) ProcessFile(path string) *apperror.AppError {
+func (p *FileProcessor) ProcessFile(path string) *appfault.AppError {
     // Check for cycle
     if p.processing[path] {
-        return apperror.New(
+        return appfault.New(
             ErrSeoCircularDependency,
             "circular dependency detected: %s",
             path,

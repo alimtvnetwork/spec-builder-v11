@@ -102,7 +102,7 @@ type GeneratedFile struct {
 ### Main Entry Point
 
 ```go
-func (g *CodeGenerator) Generate(req GenerationRequest) apperror.Result[*GenerationResult] {
+func (g *CodeGenerator) Generate(req GenerationRequest) appfault.Result[*GenerationResult] {
     result := &GenerationResult{
         Stats: GenerationStats{StartedAt: time.Now()},
     }
@@ -172,7 +172,7 @@ func (g *CodeGenerator) Generate(req GenerationRequest) apperror.Result[*Generat
 ### Prompt Building
 
 ```go
-func (g *CodeGenerator) generateComponent(req GenerationRequest, comp Component) apperror.Result[[]GeneratedFile] {
+func (g *CodeGenerator) generateComponent(req GenerationRequest, comp Component) appfault.Result[[]GeneratedFile] {
     // 1. Build RAG context
     context, err := g.ragService.BuildContext(comp.Description, ContextOptions{
         TopK: 5,
@@ -282,7 +282,7 @@ Generate complete, production-ready code following all WordPress and PHP best pr
 ## Response Parsing
 
 ```go
-func (g *CodeGenerator) parseResponse(response string, comp Component) apperror.Result[[]GeneratedFile] {
+func (g *CodeGenerator) parseResponse(response string, comp Component) appfault.Result[[]GeneratedFile] {
     var files []GeneratedFile
     
     // Match code blocks with file paths
@@ -325,7 +325,7 @@ func (g *CodeGenerator) parseResponse(response string, comp Component) apperror.
 ## File Writing
 
 ```go
-func (g *CodeGenerator) writeFile(file GeneratedFile, opts GenerationConfig) apperror.Result[GeneratedFile] {
+func (g *CodeGenerator) writeFile(file GeneratedFile, opts GenerationConfig) appfault.Result[GeneratedFile] {
     // Check if file exists
     exists := fileExists(file.Path)
     

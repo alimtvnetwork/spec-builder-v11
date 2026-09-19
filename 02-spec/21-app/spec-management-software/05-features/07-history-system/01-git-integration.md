@@ -206,7 +206,7 @@ func (q *CommitQueue) flush() {
 func (g *GitService) StageFiles(paths []string) error {
     worktree, err := g.repo.Worktree()
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrGit6001,
             "failed to get worktree",
@@ -255,7 +255,7 @@ func (g *GitService) Commit(entries map[string]*CommitQueueEntry) error {
     
     if err != nil {
         log.Error("Git commit failed", "error", err)
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrGit6001,
             "git commit failed",

@@ -80,7 +80,7 @@ type FileNode struct {
     Batch        int           // Assigned batch number
 }
 
-func (g *DependencyGraph) TopologicalSort() apperror.Result[[][]string] {
+func (g *DependencyGraph) TopologicalSort() appfault.Result[[][]string] {
     batches := [][]string{}
     inDegree := make(map[string]int)
     
@@ -273,7 +273,7 @@ func (e *ParallelExecutionEngine) Execute(
     context stdctx.Context,
     plan *GenerationPlan,
     guidelines *ResolvedGuidelines,
-) apperror.Result[ExecutionResult] {
+) appfault.Result[ExecutionResult] {
     
     execCtx := &ExecutionContext{
         ProjectId:      plan.ProjectId,
@@ -288,7 +288,7 @@ func (e *ParallelExecutionEngine) Execute(
         getProjectWorkerLimit(plan.ProjectId))
     
     if workers == 0 {
-        return apperror.FailNew[ExecutionResult](
+        return appfault.FailNew[ExecutionResult](
             "E8300",
             "no workers available",
         )
@@ -303,7 +303,7 @@ func (e *ParallelExecutionEngine) Execute(
         batchResult := e.executeBatch(context, execCtx, batch)
         
         if batchResult.HasCriticalErrors {
-            return apperror.Ok(ExecutionResult{
+            return appfault.Ok(ExecutionResult{
                 Success:   false,
                 Errors:    execCtx.Errors,
                 StoppedAt: batchNum,
@@ -316,7 +316,7 @@ func (e *ParallelExecutionEngine) Execute(
         }
     }
     
-    return apperror.Ok(ExecutionResult{
+    return appfault.Ok(ExecutionResult{
         Success:        true,
         GeneratedFiles: execCtx.GeneratedFiles,
         TotalTokens:    e.calculateTotalTokens(execCtx),
@@ -562,7 +562,7 @@ type ConsistencyIssue struct {
 func (c *ConsistencyChecker) Check(
     repoPath string,
     generatedFiles map[string]string,
-) apperror.Result[ConsistencyReport] {
+) appfault.Result[ConsistencyReport] {
     
     report := &ConsistencyReport{
         TotalFiles: len(generatedFiles),
@@ -595,7 +595,7 @@ func (c *ConsistencyChecker) Check(
     
     report.GeneratedAt = time.Now()
 
-    return apperror.Ok(*report)
+    return appfault.Ok(*report)
 }
 ```
 

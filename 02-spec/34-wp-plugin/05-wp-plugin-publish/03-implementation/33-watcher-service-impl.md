@@ -130,16 +130,16 @@ import (
 // Service interface for file scanning (no polling - event-driven)
 type Service interface {
 	// Manual scan - triggered by user clicking refresh
-	TriggerScan(context stdctx.Context, pluginId int64) apperror.Result[*ScanResult]
+	TriggerScan(context stdctx.Context, pluginId int64) appfault.Result[*ScanResult]
 	
 	// Git-triggered scan - called after successful git pull
-	ScanAfterGitPull(context stdctx.Context, pluginId int64) apperror.Result[*ScanResult]
+	ScanAfterGitPull(context stdctx.Context, pluginId int64) appfault.Result[*ScanResult]
 	
 	// Batch operations
-	ScanAll(context stdctx.Context) apperror.Result[[]ScanResult]
+	ScanAll(context stdctx.Context) appfault.Result[[]ScanResult]
 	
 	// Cache management
-	InitializeCache(context stdctx.Context, pluginId int64) *apperror.AppError
+	InitializeCache(context stdctx.Context, pluginId int64) *appfault.AppError
 	ClearCache(pluginId int64)
 	GetCachedPlugins() []int64
 }
@@ -202,17 +202,17 @@ func (s *serviceImpl) InitializeCache(context stdctx.Context, pluginId int64) er
 }
 
 // TriggerScan performs a manual scan (user clicked refresh)
-func (s *serviceImpl) TriggerScan(context stdctx.Context, pluginId int64) apperror.Result[ScanResult] {
+func (s *serviceImpl) TriggerScan(context stdctx.Context, pluginId int64) appfault.Result[ScanResult] {
 	return s.performScan(context, pluginId, "manual")
 }
 
 // ScanAfterGitPull performs a scan after git pull (automatic)
-func (s *serviceImpl) ScanAfterGitPull(context stdctx.Context, pluginId int64) apperror.Result[ScanResult] {
+func (s *serviceImpl) ScanAfterGitPull(context stdctx.Context, pluginId int64) appfault.Result[ScanResult] {
 	return s.performScan(context, pluginId, "git_pull")
 }
 
 // ScanAll scans all cached plugins
-func (s *serviceImpl) ScanAll(context stdctx.Context) apperror.Result[[]ScanResult] {
+func (s *serviceImpl) ScanAll(context stdctx.Context) appfault.Result[[]ScanResult] {
 	s.mu.RLock()
 	pluginIds := make([]int64, 0, len(s.cache))
 	for id := range s.cache {
@@ -249,7 +249,7 @@ func (s *serviceImpl) GetCachedPlugins() []int64 {
 }
 
 // performScan executes the actual directory scan
-func (s *serviceImpl) performScan(context stdctx.Context, pluginId int64, triggerType string) apperror.Result[ScanResult] {
+func (s *serviceImpl) performScan(context stdctx.Context, pluginId int64, triggerType string) appfault.Result[ScanResult] {
 	startTime := time.Now()
 
 	s.log.Info("Scanning plugin", "pluginId", pluginId, "trigger", triggerType)
@@ -388,7 +388,7 @@ func (s *serviceImpl) broadcastChanges(pluginId int64, changes []FileChange) {
 	}
 }
 
-func (s *serviceImpl) TriggerScan(pluginId int64) apperror.Result[ScanResult] {
+func (s *serviceImpl) TriggerScan(pluginId int64) appfault.Result[ScanResult] {
 	s.mu.RLock()
 	w, exists := s.watchers[pluginId]
 	s.mu.RUnlock()
@@ -553,7 +553,7 @@ func (s *serviceImpl) isExcluded(name string, excludes []string) bool {
 }
 
 // calculateHash computes MD5 hash of a file
-func (s *serviceImpl) calculateHash(path string) apperror.Result[string] {
+func (s *serviceImpl) calculateHash(path string) appfault.Result[string] {
 	file, err := os.Open(path)
 	if err != nil {
 		return "", err

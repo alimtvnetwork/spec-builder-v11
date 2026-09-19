@@ -100,18 +100,18 @@ import (
 // Service interface for git and build operations
 type Service interface {
 	// Git operations
-	Pull(context stdctx.Context, pluginId int64) apperror.Result[*PullResult]
-	PullAll(context stdctx.Context) apperror.Result[*BatchPullResult]
-	GetStatus(context stdctx.Context, pluginId int64) apperror.Result[*GitStatus]
+	Pull(context stdctx.Context, pluginId int64) appfault.Result[*PullResult]
+	PullAll(context stdctx.Context) appfault.Result[*BatchPullResult]
+	GetStatus(context stdctx.Context, pluginId int64) appfault.Result[*GitStatus]
 
 	// Build operations
-	Build(context stdctx.Context, pluginId int64) apperror.Result[*BuildResult]
-	PullAndBuild(context stdctx.Context, pluginId int64) apperror.Result[PullAndBuildOutcome]
-	PullAndBuildAll(context stdctx.Context) apperror.Result[PullAndBuildAllOutcome]
+	Build(context stdctx.Context, pluginId int64) appfault.Result[*BuildResult]
+	PullAndBuild(context stdctx.Context, pluginId int64) appfault.Result[PullAndBuildOutcome]
+	PullAndBuildAll(context stdctx.Context) appfault.Result[PullAndBuildAllOutcome]
 
 	// Configuration
-	GetConfig(context stdctx.Context, pluginId int64) apperror.Result[*PluginGitConfig]
-	UpdateConfig(context stdctx.Context, config PluginGitConfig) *apperror.AppError
+	GetConfig(context stdctx.Context, pluginId int64) appfault.Result[*PluginGitConfig]
+	UpdateConfig(context stdctx.Context, config PluginGitConfig) *appfault.AppError
 }
 
 // GitStatus represents current git repository status
@@ -188,10 +188,10 @@ import (
 	"time"
 
 	"wp-plugin-publish/internal/ws"
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 )
 
-func (s *serviceImpl) Pull(context stdctx.Context, pluginId int64) apperror.Result[PullResult] {
+func (s *serviceImpl) Pull(context stdctx.Context, pluginId int64) appfault.Result[PullResult] {
 	startTime := time.Now()
 
 	s.log.Info("Starting git pull", "pluginId", pluginId)
@@ -220,8 +220,8 @@ func (s *serviceImpl) Pull(context stdctx.Context, pluginId int64) apperror.Resu
 		result.Success = false
 		result.Error = "not a git repository"
 		result.Duration = time.Since(startTime).Milliseconds()
-		return result, apperror.New(
-			apperror.ErrGitNotRepo, "directory is not a git repository",
+		return result, appfault.New(
+			appfault.ErrGitNotRepo, "directory is not a git repository",
 		)
 	}
 
@@ -290,7 +290,7 @@ func (s *serviceImpl) Pull(context stdctx.Context, pluginId int64) apperror.Resu
 	return result, nil
 }
 
-func (s *serviceImpl) PullAll(context stdctx.Context) apperror.Result[BatchPullResult] {
+func (s *serviceImpl) PullAll(context stdctx.Context) appfault.Result[BatchPullResult] {
 	startTime := time.Now()
 
 	s.log.Info("Starting git pull for all plugins")
@@ -334,7 +334,7 @@ func (s *serviceImpl) PullAll(context stdctx.Context) apperror.Result[BatchPullR
 	return batch, nil
 }
 
-func (s *serviceImpl) GetStatus(context stdctx.Context, pluginId int64) apperror.Result[GitStatus] {
+func (s *serviceImpl) GetStatus(context stdctx.Context, pluginId int64) appfault.Result[GitStatus] {
 	plugin, err := s.pluginService.GetById(context, pluginId)
 	if err != nil {
 		return nil, err
@@ -381,7 +381,7 @@ func (s *serviceImpl) GetStatus(context stdctx.Context, pluginId int64) apperror
 }
 
 // runGitCommand executes a git command in the specified directory
-func (s *serviceImpl) runGitCommand(dir string, args ...string) apperror.Result[string] {
+func (s *serviceImpl) runGitCommand(dir string, args ...string) appfault.Result[string] {
 	context, cancel := stdctx.WithTimeout(stdctx.Background(), time.Duration(s.timeout)*time.Second)
 	defer cancel()
 
@@ -394,8 +394,8 @@ func (s *serviceImpl) runGitCommand(dir string, args ...string) apperror.Result[
 
 	err := cmd.Run()
 	if err != nil {
-		return stderr.String(), apperror.Wrap(
-			err, apperror.ErrGitCommand, stderr.String(),
+		return stderr.String(), appfault.Wrap(
+			err, appfault.ErrGitCommand, stderr.String(),
 		)
 	}
 
@@ -438,10 +438,10 @@ import (
 	"time"
 
 	"wp-plugin-publish/internal/ws"
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 )
 
-func (s *serviceImpl) Build(context stdctx.Context, pluginId int64) apperror.Result[BuildResult] {
+func (s *serviceImpl) Build(context stdctx.Context, pluginId int64) appfault.Result[BuildResult] {
 	startTime := time.Now()
 
 	s.log.Info("Starting build", "pluginId", pluginId)
@@ -454,8 +454,8 @@ func (s *serviceImpl) Build(context stdctx.Context, pluginId int64) apperror.Res
 
 	config, err := s.GetConfig(context, pluginId)
 	if err != nil || !config.BuildEnabled || config.BuildCommand == "" {
-		return nil, apperror.New(
-			apperror.ErrBuildNotConfigured, "build not configured for this plugin",
+		return nil, appfault.New(
+			appfault.ErrBuildNotConfigured, "build not configured for this plugin",
 		)
 	}
 
@@ -507,8 +507,8 @@ func (s *serviceImpl) Build(context stdctx.Context, pluginId int64) apperror.Res
 			ExitCode: result.ExitCode,
 		})
 
-		return result, apperror.Wrap(
-			err, apperror.ErrBuildFailed, result.Error,
+		return result, appfault.Wrap(
+			err, appfault.ErrBuildFailed, result.Error,
 		)
 	}
 
@@ -537,7 +537,7 @@ type PullAndBuildAllOutcome struct {
 	BuildResults []BuildResult
 }
 
-func (s *serviceImpl) PullAndBuild(context stdctx.Context, pluginId int64) apperror.Result[PullAndBuildOutcome] {
+func (s *serviceImpl) PullAndBuild(context stdctx.Context, pluginId int64) appfault.Result[PullAndBuildOutcome] {
 	s.log.Info("Starting pull and build", "pluginId", pluginId)
 
 	// First pull
@@ -555,7 +555,7 @@ func (s *serviceImpl) PullAndBuild(context stdctx.Context, pluginId int64) apper
 	return PullAndBuildOutcome{Pull: pullResult}, nil
 }
 
-func (s *serviceImpl) PullAndBuildAll(context stdctx.Context) apperror.Result[PullAndBuildAllOutcome] {
+func (s *serviceImpl) PullAndBuildAll(context stdctx.Context) appfault.Result[PullAndBuildAllOutcome] {
 	s.log.Info("Starting pull and build for all plugins")
 
 	plugins, err := s.pluginService.List(context)
@@ -578,7 +578,7 @@ func (s *serviceImpl) PullAndBuildAll(context stdctx.Context) apperror.Result[Pu
 	return outcome, nil
 }
 
-func (s *serviceImpl) GetConfig(context stdctx.Context, pluginId int64) apperror.Result[PluginGitConfig] {
+func (s *serviceImpl) GetConfig(context stdctx.Context, pluginId int64) appfault.Result[PluginGitConfig] {
 	var config PluginGitConfig
 	config.PluginId = pluginId
 

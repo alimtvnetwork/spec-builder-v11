@@ -87,10 +87,10 @@ internal/bi/cache/
 ```
 
 **Key Methods:**
-- `Get(category, key string) apperror.Result[CacheEntry]`
-- `Set(category, key string, data []byte, ttl time.Duration) *apperror.AppError`
-- `Invalidate(category, key string) *apperror.AppError`
-- `GetStats() apperror.Result[CacheStats]`
+- `Get(category, key string) appfault.Result[CacheEntry]`
+- `Set(category, key string, data []byte, ttl time.Duration) *appfault.AppError`
+- `Invalidate(category, key string) *appfault.AppError`
+- `GetStats() appfault.Result[CacheStats]`
 
 #### Step 4: Implement Formatter Engine
 ```
@@ -146,7 +146,7 @@ internal/bi/search/
 ```go
 type SearchEngine interface {
     Name() string
-    Search(context stdctx.Context, req SearchRequest) apperror.Result[SearchResponse]
+    Search(context stdctx.Context, req SearchRequest) appfault.Result[SearchResponse]
     IsAvailable() bool
     RateLimit() RateLimitConfig
 }

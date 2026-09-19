@@ -178,30 +178,30 @@ func NewBuildRunRepository(db *gorm.DB) *BuildRunRepository {
     return &BuildRunRepository{db: db}
 }
 
-func (r *BuildRunRepository) Create(run *BuildRun) *apperror.AppError {
+func (r *BuildRunRepository) Create(run *BuildRun) *appfault.AppError {
     err := r.db.Create(run).Error
 
     if err != nil {
-        return apperror.Wrap(err, "failed to create build run").WithSkip(1)
+        return appfault.Wrap(err, "failed to create build run").WithSkip(1)
     }
 
     return nil
 }
 
-func (r *BuildRunRepository) GetByRunId(runId string) apperror.Result[BuildRun] {
+func (r *BuildRunRepository) GetByRunId(runId string) appfault.Result[BuildRun] {
     var run BuildRun
     err := r.db.Preload("Errors").Preload("Assets").
         Where("RunId = ?", runId).
         First(&run).Error
 
     if err != nil {
-        return apperror.FailWrap[BuildRun](err, "failed to find build run")
+        return appfault.FailWrap[BuildRun](err, "failed to find build run")
     }
 
-    return apperror.Ok(run)
+    return appfault.Ok(run)
 }
 
-func (r *BuildRunRepository) GetRecent(limit int) apperror.Result[[]BuildRun] {
+func (r *BuildRunRepository) GetRecent(limit int) appfault.Result[[]BuildRun] {
     var runs []BuildRun
     err := r.db.Preload("Errors").
         Order("CreatedAt DESC").
@@ -209,13 +209,13 @@ func (r *BuildRunRepository) GetRecent(limit int) apperror.Result[[]BuildRun] {
         Find(&runs).Error
 
     if err != nil {
-        return apperror.FailWrap[[]BuildRun](err, "failed to get recent runs")
+        return appfault.FailWrap[[]BuildRun](err, "failed to get recent runs")
     }
 
-    return apperror.Ok(runs)
+    return appfault.Ok(runs)
 }
 
-func (r *BuildRunRepository) GetByProfile(profileName string, limit int) apperror.Result[[]BuildRun] {
+func (r *BuildRunRepository) GetByProfile(profileName string, limit int) appfault.Result[[]BuildRun] {
     var runs []BuildRun
     err := r.db.Where("ProfileName = ?", profileName).
         Order("CreatedAt DESC").
@@ -223,13 +223,13 @@ func (r *BuildRunRepository) GetByProfile(profileName string, limit int) apperro
         Find(&runs).Error
 
     if err != nil {
-        return apperror.FailWrap[[]BuildRun](err, "failed to get runs by profile")
+        return appfault.FailWrap[[]BuildRun](err, "failed to get runs by profile")
     }
 
-    return apperror.Ok(runs)
+    return appfault.Ok(runs)
 }
 
-func (r *BuildRunRepository) GetFailedRuns(since time.Time) apperror.Result[[]BuildRun] {
+func (r *BuildRunRepository) GetFailedRuns(since time.Time) appfault.Result[[]BuildRun] {
     var runs []BuildRun
     err := r.db.Preload("Errors").
         Where("IsSuccess = ? AND CreatedAt > ?", false, since).
@@ -237,13 +237,13 @@ func (r *BuildRunRepository) GetFailedRuns(since time.Time) apperror.Result[[]Bu
         Find(&runs).Error
 
     if err != nil {
-        return apperror.FailWrap[[]BuildRun](err, "failed to get failed runs")
+        return appfault.FailWrap[[]BuildRun](err, "failed to get failed runs")
     }
 
-    return apperror.Ok(runs)
+    return appfault.Ok(runs)
 }
 
-func (r *BuildRunRepository) DeleteOldRuns(keepCount int) *apperror.AppError {
+func (r *BuildRunRepository) DeleteOldRuns(keepCount int) *appfault.AppError {
     var keepIds []uint
     r.db.Model(&BuildRun{}).
         Order("CreatedAt DESC").
@@ -253,13 +253,13 @@ func (r *BuildRunRepository) DeleteOldRuns(keepCount int) *apperror.AppError {
     err := r.db.Where("Id NOT IN ?", keepIds).Delete(&BuildRun{}).Error
 
     if err != nil {
-        return apperror.Wrap(err, "failed to delete old runs").WithSkip(1)
+        return appfault.Wrap(err, "failed to delete old runs").WithSkip(1)
     }
 
     return nil
 }
 
-func (r *BuildRunRepository) GetStatistics(since time.Time) apperror.Result[BuildStatistics] {
+func (r *BuildRunRepository) GetStatistics(since time.Time) appfault.Result[BuildStatistics] {
     var stats BuildStatistics
 
     r.db.Model(&BuildRun{}).
@@ -279,7 +279,7 @@ func (r *BuildRunRepository) GetStatistics(since time.Time) apperror.Result[Buil
         Select("AVG(Duration)").
         Scan(&stats.AvgDuration)
 
-    return apperror.Ok(stats)
+    return appfault.Ok(stats)
 }
 
 type BuildStatistics struct {
@@ -295,13 +295,13 @@ type BuildStatistics struct {
 ## Database Initialization
 
 ```go
-func InitDatabase(dbPath string) apperror.Result[*gorm.DB] {
+func InitDatabase(dbPath string) appfault.Result[*gorm.DB] {
     db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
         Logger: logger.Default.LogMode(logger.Warn),
     })
 
     if err != nil {
-        return apperror.FailWrap[*gorm.DB](err, "failed to open database")
+        return appfault.FailWrap[*gorm.DB](err, "failed to open database")
     }
 
     migrateErr := db.AutoMigrate(
@@ -312,14 +312,14 @@ func InitDatabase(dbPath string) apperror.Result[*gorm.DB] {
     )
 
     if migrateErr != nil {
-        return apperror.FailWrap[*gorm.DB](migrateErr, "failed to migrate database")
+        return appfault.FailWrap[*gorm.DB](migrateErr, "failed to migrate database")
     }
 
     db.Exec("CREATE INDEX IF NOT EXISTS IdxBuildRunsProfile ON BuildRuns(ProfileName)")
     db.Exec("CREATE INDEX IF NOT EXISTS IdxBuildRunsSuccess ON BuildRuns(IsSuccess)")
     db.Exec("CREATE INDEX IF NOT EXISTS IdxBuildErrorsFile ON BuildErrors(File)")
 
-    return apperror.Ok(db)
+    return appfault.Ok(db)
 }
 ```
 

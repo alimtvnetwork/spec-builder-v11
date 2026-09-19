@@ -70,7 +70,7 @@ The `filesystem-access` memory prohibits raw `os.*` calls but was not retroactiv
 ### New rules or constraints added
 
 1. **No nested `if` for error type checking** — When an operation fails, wrap and return the error. Do not check `os.IsNotExist` or similar type discriminators inside error handlers unless the business logic genuinely requires different behavior for different error types.
-2. **All `os.*` calls must use `pathutil` wrappers** — No exceptions in application code. `pathutil` methods return `*apperror.AppError` with path context automatically included.
+2. **All `os.*` calls must use `pathutil` wrappers** — No exceptions in application code. `pathutil` methods return `*appfault.AppError` with path context automatically included.
 3. **Inline `if` with nested logic is not exempt from P7** — The P7 error propagation exemption only applies to simple `if err := fn(); err != nil { return err }` patterns, not to patterns with nested conditionals inside.
 
 ### Why the fix resolves the root cause
@@ -128,7 +128,7 @@ Regex scan: `os\.(Remove|Stat|MkdirAll|WriteFile|ReadFile|Rename|RemoveAll)` in 
 if err := os.Remove(legacyPath); err != nil {
     isRealError := !os.IsNotExist(err)
     if isRealError {
-        return apperror.Wrap(err, apperror.ErrSessionDelete, "delete session log").
+        return appfault.Wrap(err, appfault.ErrSessionDelete, "delete session log").
             WithPath(legacyPath)
     }
 }

@@ -80,22 +80,22 @@ import stdctx "context"
 // ModelDownloader handles model acquisition and caching
 type ModelDownloader interface {
     // Download fetches a model with progress tracking
-    Download(context stdctx.Context, modelId string, opts DownloadOptions) apperror.Result[Model]
+    Download(context stdctx.Context, modelId string, opts DownloadOptions) appfault.Result[Model]
     
     // GetModel returns a cached model or downloads if missing
-    GetModel(context stdctx.Context, modelId string) apperror.Result[Model]
+    GetModel(context stdctx.Context, modelId string) appfault.Result[Model]
     
     // ListModels returns available models
-    ListModels(modelType ModelType) apperror.Result[[]ModelInfo]
+    ListModels(modelType ModelType) appfault.Result[[]ModelInfo]
     
     // DeleteModel removes a cached model
-    DeleteModel(modelId string) *apperror.AppError
+    DeleteModel(modelId string) *appfault.AppError
     
     // VerifyModel checks model integrity
-    VerifyModel(modelId string) apperror.Result[VerifyResult]
+    VerifyModel(modelId string) appfault.Result[VerifyResult]
     
     // GetProgress returns download progress for active downloads
-    GetProgress(modelId string) apperror.Result[DownloadProgress]
+    GetProgress(modelId string) appfault.Result[DownloadProgress]
 }
 
 type DownloadOptions struct {
@@ -113,7 +113,7 @@ type DownloadProgress struct {
     Speed         float64  // bytes/sec
     ETA           time.Duration
     Status        DownloadStatus
-    Error         *apperror.AppError `json:",omitempty"`
+    Error         *appfault.AppError `json:",omitempty"`
 }
 
 type DownloadStatus string
@@ -139,7 +139,7 @@ type modelDownloader struct {
     downloads   map[string]*activeDownload
 }
 
-func (d *modelDownloader) Download(context stdctx.Context, modelId string, opts DownloadOptions) apperror.Result[Model] {
+func (d *modelDownloader) Download(context stdctx.Context, modelId string, opts DownloadOptions) appfault.Result[Model] {
     // Check cache first
     if !opts.Force {
         if model, err := d.loadCached(modelId); err == nil {
@@ -150,7 +150,7 @@ func (d *modelDownloader) Download(context stdctx.Context, modelId string, opts 
     // Get model info from registry
     info, err := d.registry.GetModelInfo(modelId)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrModelNotFound,
             "unknown model",
@@ -205,7 +205,7 @@ func (d *modelDownloader) Download(context stdctx.Context, modelId string, opts 
     
     download.progress.Status = StatusFailed
     download.progress.Error = lastErr
-    return nil, apperror.Wrap(
+    return nil, appfault.Wrap(
         lastErr,
         ErrDownloadFailed,
         "download failed after retries",
@@ -222,10 +222,10 @@ func (d *modelDownloader) Download(context stdctx.Context, modelId string, opts 
 ```go
 // ModelRegistry provides model metadata
 type ModelRegistry interface {
-    GetModelInfo(modelId string) apperror.Result[ModelInfo]
-    ListAvailable(modelType ModelType) apperror.Result[[]ModelInfo]
-    CheckUpdates(installed []string) apperror.Result[[]UpdateInfo]
-    GetMirrors(modelId string) apperror.Result[[]MirrorInfo]
+    GetModelInfo(modelId string) appfault.Result[ModelInfo]
+    ListAvailable(modelType ModelType) appfault.Result[[]ModelInfo]
+    CheckUpdates(installed []string) appfault.Result[[]UpdateInfo]
+    GetMirrors(modelId string) appfault.Result[[]MirrorInfo]
 }
 
 type ModelInfo struct {
@@ -294,22 +294,22 @@ var builtinRegistry = map[string]ModelInfo{
 ```go
 type CacheManager interface {
     // GetCacheSize returns total cache size in bytes
-    GetCacheSize() apperror.Result[int64]
+    GetCacheSize() appfault.Result[int64]
     
     // GetModelSize returns size of specific model
-    GetModelSize(modelId string) apperror.Result[int64]
+    GetModelSize(modelId string) appfault.Result[int64]
     
     // CleanOldModels removes models not used in given duration
-    CleanOldModels(maxAge time.Duration) apperror.Result[int64]
+    CleanOldModels(maxAge time.Duration) appfault.Result[int64]
     
     // SetMaxCacheSize sets maximum cache size (LRU eviction)
-    SetMaxCacheSize(bytes int64) *apperror.AppError
+    SetMaxCacheSize(bytes int64) *appfault.AppError
     
     // GetLastUsed returns when model was last loaded
-    GetLastUsed(modelId string) apperror.Result[time.Time]
+    GetLastUsed(modelId string) appfault.Result[time.Time]
     
     // UpdateLastUsed marks model as recently used
-    UpdateLastUsed(modelId string) *apperror.AppError
+    UpdateLastUsed(modelId string) *appfault.AppError
 }
 
 type cacheManager struct {
@@ -319,7 +319,7 @@ type cacheManager struct {
     mu           sync.RWMutex
 }
 
-func (c *cacheManager) CleanOldModels(maxAge time.Duration) apperror.Result[int64] {
+func (c *cacheManager) CleanOldModels(maxAge time.Duration) appfault.Result[int64] {
     c.mu.Lock()
     defer c.mu.Unlock()
     

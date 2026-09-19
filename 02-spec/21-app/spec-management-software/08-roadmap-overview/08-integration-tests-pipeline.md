@@ -265,14 +265,14 @@ func NewMockTokenCounter() *MockTokenCounter {
     return &MockTokenCounter{CharsPerToken: 4.0}
 }
 
-func (m *MockTokenCounter) Count(text string) apperror.Result[int] {
+func (m *MockTokenCounter) Count(text string) appfault.Result[int] {
     m.mu.Lock()
     m.CountCalls = append(m.CountCalls, text)
     m.mu.Unlock()
     return int(float64(len(text)) / m.CharsPerToken), nil
 }
 
-func (m *MockTokenCounter) CountBatch(texts []string) apperror.Result[[]int] {
+func (m *MockTokenCounter) CountBatch(texts []string) appfault.Result[[]int] {
     results := make([]int, len(texts))
     for i, text := range texts {
         count, _ := m.Count(text)
@@ -281,7 +281,7 @@ func (m *MockTokenCounter) CountBatch(texts []string) apperror.Result[[]int] {
     return results, nil
 }
 
-func (m *MockTokenCounter) CountMessages(messages []ChatMessage) apperror.Result[int] {
+func (m *MockTokenCounter) CountMessages(messages []ChatMessage) appfault.Result[int] {
     total := 0
     for _, msg := range messages {
         count, _ := m.Count(msg.Content)
@@ -314,7 +314,7 @@ func NewMockAIService() *MockAIService {
     }
 }
 
-func (m *MockAIService) Generate(context stdctx.Context, prompt string, options ...AIOption) apperror.Result[string] {
+func (m *MockAIService) Generate(context stdctx.Context, prompt string, options ...AIOption) appfault.Result[string] {
     m.mu.Lock()
     m.CallCount["generate"]++
     m.mu.Unlock()
@@ -329,7 +329,7 @@ func (m *MockAIService) Generate(context stdctx.Context, prompt string, options 
     return "Default AI response for testing.", nil
 }
 
-func (m *MockAIService) Summarize(context stdctx.Context, content string, maxTokens int) apperror.Result[string] {
+func (m *MockAIService) Summarize(context stdctx.Context, content string, maxTokens int) appfault.Result[string] {
     m.mu.Lock()
     m.CallCount["summarize"]++
     m.mu.Unlock()
@@ -348,7 +348,7 @@ func (m *MockAIService) Summarize(context stdctx.Context, content string, maxTok
     return "### Summary\n" + strings.Join(words, " "), nil
 }
 
-func (m *MockAIService) Embed(context stdctx.Context, text string) apperror.Result[[]float32] {
+func (m *MockAIService) Embed(context stdctx.Context, text string) appfault.Result[[]float32] {
     m.mu.Lock()
     m.CallCount["embed"]++
     m.mu.Unlock()
@@ -1280,7 +1280,7 @@ func TestFailure_MemoryCompression_AIServiceUnavailable(t *testing.T) {
     fixtures.AIService.GenerateResponses["*"] = "" // Will cause error
     
     // Create failing AI service
-    failingAI := &testutil.FailingAIService{Error: apperror.New(
+    failingAI := &testutil.FailingAIService{Error: appfault.New(
         ErrAiServiceUnavailable,
         "AI service unavailable",
     )}
@@ -1309,7 +1309,7 @@ func TestRecovery_SegmentExecution_RetryOnFailure(t *testing.T) {
     fixtures.AIService.GenerateFunc = func(prompt string) (string, error) {
         callCount++
         if callCount < 3 {
-            return "", apperror.New(
+            return "", appfault.New(
                 ErrTransientError,
                 "transient error",
             )

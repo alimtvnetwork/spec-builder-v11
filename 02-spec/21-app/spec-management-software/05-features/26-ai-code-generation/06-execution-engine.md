@@ -70,12 +70,12 @@ func NewExecutionEngine(config ExecutionConfig) *ExecutionEngine {
     }
 }
 
-func (ee *ExecutionEngine) Prepare(code string) apperror.Result[*PreparedTask] {
+func (ee *ExecutionEngine) Prepare(code string) appfault.Result[*PreparedTask] {
     // Create isolated work directory
     workDir, err := pathutil.MkdirTemp("", "codegen-exec-*")
     if err != nil {
-        return apperror.Fail[*PreparedTask](
-            apperror.Wrap(
+        return appfault.Fail[*PreparedTask](
+            appfault.Wrap(
                 err,
                 ErrWorkDirCreate,
                 "failed to create work dir",
@@ -86,8 +86,8 @@ func (ee *ExecutionEngine) Prepare(code string) apperror.Result[*PreparedTask] {
     // Write source code
     mainPath := filepath.Join(workDir, "main.go")
     if err := pathutil.WriteFile(mainPath, []byte(code), 0644); err != nil {
-        return apperror.Fail[*PreparedTask](
-            apperror.Wrap(
+        return appfault.Fail[*PreparedTask](
+            appfault.Wrap(
                 err,
                 ErrFileWrite,
                 "failed to write source",
@@ -99,8 +99,8 @@ func (ee *ExecutionEngine) Prepare(code string) apperror.Result[*PreparedTask] {
     modContent := "module task\n\ngo 1.21\n"
     modPath := filepath.Join(workDir, "go.mod")
     if err := pathutil.WriteFile(modPath, []byte(modContent), 0644); err != nil {
-        return apperror.Fail[*PreparedTask](
-            apperror.Wrap(
+        return appfault.Fail[*PreparedTask](
+            appfault.Wrap(
                 err,
                 ErrFileWrite,
                 "failed to write go.mod",
@@ -108,7 +108,7 @@ func (ee *ExecutionEngine) Prepare(code string) apperror.Result[*PreparedTask] {
         )
     }
     
-    return apperror.OK(&PreparedTask{
+    return appfault.Ok(&PreparedTask{
         WorkDir:    workDir,
         SourcePath: mainPath,
         BinaryPath: filepath.Join(workDir, "task"),
@@ -137,7 +137,7 @@ type CompileError struct {
     Message string
 }
 
-func (c *Compiler) Compile(task *PreparedTask) apperror.Result[*CompileResult] {
+func (c *Compiler) Compile(task *PreparedTask) appfault.Result[*CompileResult] {
     startTime := time.Now()
     
     cmd := exec.Command("go", "build", "-o", task.BinaryPath, ".")
@@ -156,12 +156,12 @@ func (c *Compiler) Compile(task *PreparedTask) apperror.Result[*CompileResult] {
     if err != nil {
         result.Success = false
         result.Errors = parseCompileErrors(string(output))
-        return apperror.OK(result)
+        return appfault.Ok(result)
     }
     
     result.Success = true
     result.BinaryPath = task.BinaryPath
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 
 func parseCompileErrors(output string) []CompileError {
@@ -205,7 +205,7 @@ type SandboxLimits struct {
     AllowedPaths   []string
 }
 
-func (s *Sandbox) Execute(task *PreparedTask, args []string) apperror.Result[*ExecutionResult] {
+func (s *Sandbox) Execute(task *PreparedTask, args []string) appfault.Result[*ExecutionResult] {
     ctx, cancel := context.WithTimeout(context.Background(), s.config.Timeout)
     defer cancel()
     
@@ -246,7 +246,7 @@ func (s *Sandbox) Execute(task *PreparedTask, args []string) apperror.Result[*Ex
         result.Success = false
         result.ExitCode = -1
         result.ErrorMessage = "execution timeout exceeded"
-        return apperror.OK(result)
+        return appfault.Ok(result)
     }
     
     if err != nil {
@@ -258,7 +258,7 @@ func (s *Sandbox) Execute(task *PreparedTask, args []string) apperror.Result[*Ex
         }
         result.Success = false
         result.ErrorMessage = err.Error()
-        return apperror.OK(result)
+        return appfault.Ok(result)
     }
     
     result.Success = true
@@ -269,7 +269,7 @@ func (s *Sandbox) Execute(task *PreparedTask, args []string) apperror.Result[*Ex
         result.ParseError = err.Error()
     }
     
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -307,7 +307,7 @@ type TaskOutput struct {
 ### Compilation Error Fix Loop
 
 ```go
-func (ee *ExecutionEngine) ExecuteWithRetry(code string, maxRetries int) apperror.Result[ExecutionResult] {
+func (ee *ExecutionEngine) ExecuteWithRetry(code string, maxRetries int) appfault.Result[ExecutionResult] {
     var lastError error
     currentCode := code
     
@@ -335,7 +335,7 @@ func (ee *ExecutionEngine) ExecuteWithRetry(code string, maxRetries int) apperro
                 }
                 continue
             }
-            return nil, apperror.New(
+            return nil, appfault.New(
                 ErrCompilationFailed,
                 fmt.Sprintf("compilation failed: %v", compileResult.Errors),
             )
@@ -362,14 +362,14 @@ func (ee *ExecutionEngine) ExecuteWithRetry(code string, maxRetries int) apperro
         return result, nil
     }
     
-    return nil, apperror.Wrap(
+    return nil, appfault.Wrap(
         lastError,
         ErrExecutionFailed,
         fmt.Sprintf("execution failed after %d attempts", maxRetries),
     )
 }
 
-func (ee *ExecutionEngine) fixCodeWithAI(code string, errors []CompileError) apperror.Result[string] {
+func (ee *ExecutionEngine) fixCodeWithAI(code string, errors []CompileError) appfault.Result[string] {
     prompt := fmt.Sprintf(`
 The following Golang code has compilation errors:
 
@@ -399,7 +399,7 @@ func (ee *ExecutionEngine) Cleanup(task *PreparedTask) error {
     
     // Remove work directory
     if err := pathutil.RemoveAll(task.WorkDir); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrCleanup,
             "failed to cleanup work dir",

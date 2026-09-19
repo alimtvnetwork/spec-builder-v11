@@ -123,13 +123,13 @@ Common interface for all runtime executors.
 ```go
 type Executor interface {
     // Execute runs a command and returns the result
-    Execute(context stdctx.Context, cmd *Command) apperror.Result[*ExecutionResult]
+    Execute(context stdctx.Context, cmd *Command) appfault.Result[*ExecutionResult]
     
     // Validate checks if the runtime is available
     Validate() error
     
     // GetVersion returns the runtime version
-    GetVersion() apperror.Result[string]
+    GetVersion() appfault.Result[string]
 }
 
 type Command struct {

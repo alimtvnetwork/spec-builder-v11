@@ -688,7 +688,7 @@ func (pm *PromptManager) GetSystemPrompt(diagramType DiagramType) string {
 	return tmpl.SystemPrompt
 }
 
-func (pm *PromptManager) BuildUserPrompt(diagramType DiagramType, data PromptData) apperror.Result[string] {
+func (pm *PromptManager) BuildUserPrompt(diagramType DiagramType, data PromptData) appfault.Result[string] {
 	tmpl, ok := pm.templates[diagramType]
 	if !ok {
 		return data.Description, nil

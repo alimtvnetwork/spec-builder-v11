@@ -444,7 +444,7 @@ dbPath := paths.ParagraphDb(appName, company, seq, paraSlug)
 All path functions assume parent directories exist. Use `EnsureDir()` before creating databases:
 
 ```go
-func EnsureDir(path string) *apperror.AppError {
+func EnsureDir(path string) *appfault.AppError {
     dir := filepath.Dir(path)
     return pathutil.MkdirAll(dir, 0755)
 }

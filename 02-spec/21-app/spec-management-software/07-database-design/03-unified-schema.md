@@ -1728,7 +1728,7 @@ func CleanupOrphans(db *gorm.DB) error {
     for _, oq := range orphanQueries {
         result := db.Exec(oq.Query)
         if result.Error != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 result.Error,
                 ErrOrphanCleanupFailed,
                 "orphan cleanup",

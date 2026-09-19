@@ -247,10 +247,10 @@ func (hl *HistoryLogger) LogDelete(path string, checksumBefore string, success b
 ### Checksum Calculation
 
 ```go
-func (hl *HistoryLogger) CalculateChecksum(filePath string) apperror.Result[string] {
+func (hl *HistoryLogger) CalculateChecksum(filePath string) appfault.Result[string] {
     file, err := pathutil.Open(filePath)
     if err != nil {
-        return "", apperror.Wrap(
+        return "", appfault.Wrap(
             err,
             ErrFileOpen,
             "failed to open file",
@@ -260,7 +260,7 @@ func (hl *HistoryLogger) CalculateChecksum(filePath string) apperror.Result[stri
     
     hash := sha256.New()
     if _, err := io.Copy(hash, file); err != nil {
-        return "", apperror.Wrap(
+        return "", appfault.Wrap(
             err,
             ErrChecksumCalculation,
             "failed to calculate checksum",
@@ -270,7 +270,7 @@ func (hl *HistoryLogger) CalculateChecksum(filePath string) apperror.Result[stri
     return fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
-func (hl *HistoryLogger) CalculateChecksumWithSize(filePath string) apperror.Result[ChecksumWithSize] {
+func (hl *HistoryLogger) CalculateChecksumWithSize(filePath string) appfault.Result[ChecksumWithSize] {
     file, err := pathutil.Open(filePath)
     if err != nil {
         return "", 0, err
@@ -294,7 +294,7 @@ func (hl *HistoryLogger) CalculateChecksumWithSize(filePath string) apperror.Res
 ### History Queries
 
 ```go
-func (hl *HistoryLogger) GetTaskHistory(taskId uint) apperror.Result[[]LogEntry] {
+func (hl *HistoryLogger) GetTaskHistory(taskId uint) appfault.Result[[]LogEntry] {
     var dbEntries []FilesystemHistory
     
     err := hl.db.
@@ -325,7 +325,7 @@ func (hl *HistoryLogger) GetTaskHistory(taskId uint) apperror.Result[[]LogEntry]
     return entries, nil
 }
 
-func (hl *HistoryLogger) GetOperationsByPath(path string) apperror.Result[[]LogEntry] {
+func (hl *HistoryLogger) GetOperationsByPath(path string) appfault.Result[[]LogEntry] {
     var dbEntries []FilesystemHistory
     
     err := hl.db.
@@ -341,7 +341,7 @@ func (hl *HistoryLogger) GetOperationsByPath(path string) apperror.Result[[]LogE
     return nil, nil
 }
 
-func (hl *HistoryLogger) GetFailedOperations(since time.Time) apperror.Result[[]LogEntry] {
+func (hl *HistoryLogger) GetFailedOperations(since time.Time) appfault.Result[[]LogEntry] {
     var dbEntries []FilesystemHistory
     
     err := hl.db.

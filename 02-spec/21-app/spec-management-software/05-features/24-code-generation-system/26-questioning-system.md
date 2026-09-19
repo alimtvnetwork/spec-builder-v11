@@ -298,7 +298,7 @@ func (s *QuestioningService) AnalyzeForQuestions(
     sessionId string,
     userMessage string,
     chatContext []ChatMessage,
-) apperror.Result[ClarificationResult] {
+) appfault.Result[ClarificationResult] {
     
     // Build context from recent messages
     contextPrompt := buildContextFromMessages(chatContext)
@@ -321,7 +321,7 @@ Analyze this request and determine if clarification is needed.`,
         Temperature:  0.3, // Lower temperature for consistent analysis
     })
     if err != nil {
-        return apperror.FailWrap[ClarificationResult](
+        return appfault.FailWrap[ClarificationResult](
             err,
             "E7500",
             "AI analysis failed",
@@ -331,7 +331,7 @@ Analyze this request and determine if clarification is needed.`,
     var result ClarificationResult
     if err := json.Unmarshal([]byte(response.Json), &result); err != nil {
         // If parsing fails, assume no clarification needed
-        return apperror.Ok(ClarificationResult{
+        return appfault.Ok(ClarificationResult{
             NeedsClarification: false,
             Proceed:            true,
         })
@@ -355,7 +355,7 @@ Analyze this request and determine if clarification is needed.`,
         })
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 // ProcessAnswers handles user's answers and resumes execution
@@ -368,7 +368,7 @@ func (s *QuestioningService) ProcessAnswers(
     // Validate answers
     questions, err := s.sessionStore.GetPendingQuestions(context, sessionId)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrNoPendingQuestions,
             "no pending questions",
@@ -376,7 +376,7 @@ func (s *QuestioningService) ProcessAnswers(
     }
     
     if err := validateAnswers(questions, answers); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrInvalidAnswers,
             "invalid answers",
@@ -419,7 +419,7 @@ func validateAnswers(questions []Question, answers []QuestionAnswer) error {
         answer, exists := answerMap[q.Id]
         
         if q.Required && !exists {
-            return apperror.New(
+            return appfault.New(
                 ErrRequiredQuestionUnanswered,
                 "required question "+q.Id+" not answered",
             )
@@ -427,7 +427,7 @@ func validateAnswers(questions []Question, answers []QuestionAnswer) error {
         
         if exists {
             if err := validateAnswer(q, answer); err != nil {
-                return apperror.Wrap(
+                return appfault.Wrap(
                     err,
                     ErrInvalidAnswers,
                     "invalid answer for "+q.Id,

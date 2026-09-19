@@ -306,14 +306,14 @@ var contactLinkPatterns = []*regexp.Regexp{
     regexp.MustCompile(`(?i)support`),
 }
 
-func (f *ContactPageFinder) FindContactPages(context stdctx.Context, baseUrl string) apperror.Result[[]string] {
+func (f *ContactPageFinder) FindContactPages(context stdctx.Context, baseUrl string) appfault.Result[[]string] {
     pages := []string{baseUrl}
     
     // Parse base URL
     base, err := url.Parse(baseUrl)
     if err != nil {
-        return apperror.Fail[[]string](
-            apperror.Wrap(
+        return appfault.Fail[[]string](
+            appfault.Wrap(
                 err,
                 "parse base URL",
             ),
@@ -323,7 +323,7 @@ func (f *ContactPageFinder) FindContactPages(context stdctx.Context, baseUrl str
     // Fetch homepage
     doc, err := f.fetchPage(context, baseUrl)
     if err != nil {
-        return apperror.OK(pages) // Return just homepage on error
+        return appfault.Ok(pages) // Return just homepage on error
     }
     
     // 1. Check common URL patterns
@@ -359,7 +359,7 @@ func (f *ContactPageFinder) FindContactPages(context stdctx.Context, baseUrl str
     footerLinks := f.extractFooterLinks(doc, base)
     pages = append(pages, footerLinks...)
     
-    return apperror.OK(deduplicateStrings(pages))
+    return appfault.Ok(deduplicateStrings(pages))
 }
 
 func (f *ContactPageFinder) extractFooterLinks(doc *goquery.Document, base *url.URL) []string {
@@ -939,7 +939,7 @@ type ContactAggregator struct {
     httpClient     *http.Client
 }
 
-func (a *ContactAggregator) Extract(context stdctx.Context, req ContactExtractionRequest) apperror.Result[*ContactExtractionResponse] {
+func (a *ContactAggregator) Extract(context stdctx.Context, req ContactExtractionRequest) appfault.Result[*ContactExtractionResponse] {
     startTime := time.Now()
     
     response := &ContactExtractionResponse{
@@ -1000,7 +1000,7 @@ func (a *ContactAggregator) Extract(context stdctx.Context, req ContactExtractio
     response.ExtractionTime = time.Since(startTime)
     response.ExtractedAt = time.Now()
     
-    return apperror.OK(response)
+    return appfault.Ok(response)
 }
 
 func (a *ContactAggregator) buildContactInfo(

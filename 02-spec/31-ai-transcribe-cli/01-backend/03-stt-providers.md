@@ -31,18 +31,18 @@ import stdctx "context"
 type STTProvider interface {
     // Core operations
     Name() string
-    Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) apperror.Result[Transcript]
-    TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) apperror.Result[<-chan *PartialTranscript]
+    Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) appfault.Result[Transcript]
+    TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) appfault.Result[<-chan *PartialTranscript]
     
     // Language support
-    DetectLanguage(context stdctx.Context, audio *AudioChunk) apperror.Result[LanguageDetection]
+    DetectLanguage(context stdctx.Context, audio *AudioChunk) appfault.Result[LanguageDetection]
     SupportedLanguages() []string
     
     // Health and status
     IsAvailable() bool
     Health() ProviderStatus
-    Initialize(context stdctx.Context, config *ProviderConfig) *apperror.AppError
-    Shutdown() *apperror.AppError
+    Initialize(context stdctx.Context, config *ProviderConfig) *appfault.AppError
+    Shutdown() *appfault.AppError
 }
 
 type TranscribeOptions struct {
@@ -152,20 +152,20 @@ type WhisperProvider struct {
     isReady        bool
 }
 
-func NewWhisperProvider(config *WhisperConfig) apperror.Result[WhisperProvider] {
+func NewWhisperProvider(config *WhisperConfig) appfault.Result[WhisperProvider] {
     return &WhisperProvider{
         config: config,
     }, nil
 }
 
-func (wp *WhisperProvider) Initialize(context stdctx.Context, config *ProviderConfig) *apperror.AppError {
+func (wp *WhisperProvider) Initialize(context stdctx.Context, config *ProviderConfig) *appfault.AppError {
     wp.mu.Lock()
     defer wp.mu.Unlock()
     
     // Load model
     model, err := whisper.Load(wp.config.ModelPath)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSttModelLoadFailed,
             "load whisper model",
@@ -185,12 +185,12 @@ func (wp *WhisperProvider) Initialize(context stdctx.Context, config *ProviderCo
     return nil
 }
 
-func (wp *WhisperProvider) Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) apperror.Result[Transcript] {
+func (wp *WhisperProvider) Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) appfault.Result[Transcript] {
     wp.mu.Lock()
     defer wp.mu.Unlock()
     
     if !wp.isReady {
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrSttModelNotLoaded,
             "whisper model not initialized",
         )
@@ -209,7 +209,7 @@ func (wp *WhisperProvider) Transcribe(context stdctx.Context, audio *AudioChunk,
     
     // Process audio
     if err := wp.whisperContext.Process(samples); err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrSttTranscriptionFailed,
             "whisper processing",
@@ -264,7 +264,7 @@ func (wp *WhisperProvider) Transcribe(context stdctx.Context, audio *AudioChunk,
     }, nil
 }
 
-func (wp *WhisperProvider) TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) apperror.Result[<-chan *PartialTranscript] {
+func (wp *WhisperProvider) TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) appfault.Result[<-chan *PartialTranscript] {
     resultChan := make(chan *PartialTranscript, 100)
     
     go func() {
@@ -386,7 +386,7 @@ func (op *OpenAIRealtimeProvider) Initialize(context stdctx.Context, config *Pro
     
     conn, _, err := websocket.DefaultDialer.DialContext(context, op.config.Endpoint, headers)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSttStreamingFailed,
             "connect to openai realtime",
@@ -411,7 +411,7 @@ func (op *OpenAIRealtimeProvider) Initialize(context stdctx.Context, config *Pro
     return conn.WriteJson(sessionConfig)
 }
 
-func (op *OpenAIRealtimeProvider) TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) apperror.Result[<-chan *PartialTranscript] {
+func (op *OpenAIRealtimeProvider) TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) appfault.Result[<-chan *PartialTranscript] {
     resultChan := make(chan *PartialTranscript, 100)
     
     // Audio sender goroutine
@@ -480,7 +480,7 @@ func (op *OpenAIRealtimeProvider) TranscribeStream(context stdctx.Context, audio
     return resultChan, nil
 }
 
-func (op *OpenAIRealtimeProvider) Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) apperror.Result[Transcript] {
+func (op *OpenAIRealtimeProvider) Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) appfault.Result[Transcript] {
     // For batch transcription, use whisper-1 via REST API
     client := &http.Client{Timeout: time.Duration(op.config.Timeout) * time.Second}
     
@@ -604,7 +604,7 @@ func (ep *ElevenLabsScribeProvider) Initialize(context stdctx.Context, config *P
     
     resp, err := ep.client.Do(req)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSttApiKeyInvalid,
             "verify elevenlabs api key",
@@ -613,7 +613,7 @@ func (ep *ElevenLabsScribeProvider) Initialize(context stdctx.Context, config *P
     defer resp.Body.Close()
     
     if resp.StatusCode != 200 {
-        return apperror.New(
+        return appfault.New(
             ErrSttApiKeyInvalid,
             "elevenlabs api key invalid",
         ).WithContext("statusCode", resp.StatusCode)
@@ -623,7 +623,7 @@ func (ep *ElevenLabsScribeProvider) Initialize(context stdctx.Context, config *P
     return nil
 }
 
-func (ep *ElevenLabsScribeProvider) Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) apperror.Result[Transcript] {
+func (ep *ElevenLabsScribeProvider) Transcribe(context stdctx.Context, audio *AudioChunk, opts *TranscribeOptions) appfault.Result[Transcript] {
     // Create multipart form
     var body bytes.Buffer
     writer := multipart.NewWriter(&body)
@@ -649,7 +649,7 @@ func (ep *ElevenLabsScribeProvider) Transcribe(context stdctx.Context, audio *Au
     start := time.Now()
     resp, err := ep.client.Do(req)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrSttTranscriptionFailed,
             "elevenlabs transcription request",
@@ -659,7 +659,7 @@ func (ep *ElevenLabsScribeProvider) Transcribe(context stdctx.Context, audio *Au
     
     if resp.StatusCode != 200 {
         bodyBytes, _ := io.ReadAll(resp.Body)
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrSttTranscriptionFailed,
             "elevenlabs transcription error",
         ).
@@ -684,7 +684,7 @@ func (ep *ElevenLabsScribeProvider) Transcribe(context stdctx.Context, audio *Au
     }
     
     if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrSttTranscriptionFailed,
             "parse elevenlabs response",
@@ -734,7 +734,7 @@ func (ep *ElevenLabsScribeProvider) Transcribe(context stdctx.Context, audio *Au
     return transcript, nil
 }
 
-func (ep *ElevenLabsScribeProvider) TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) apperror.Result[<-chan *PartialTranscript] {
+func (ep *ElevenLabsScribeProvider) TranscribeStream(context stdctx.Context, audioChan <-chan *AudioChunk, opts *TranscribeOptions) appfault.Result[<-chan *PartialTranscript] {
     resultChan := make(chan *PartialTranscript, 100)
     
     // Get single-use token for realtime
@@ -747,7 +747,7 @@ func (ep *ElevenLabsScribeProvider) TranscribeStream(context stdctx.Context, aud
     conn, _, err := websocket.DefaultDialer.DialContext(context,
         "wss://api.elevenlabs.io/v1/speech-to-text/realtime?token="+token, nil)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrSttStreamingFailed,
             "connect to elevenlabs realtime",
@@ -827,7 +827,7 @@ func (ep *ElevenLabsScribeProvider) TranscribeStream(context stdctx.Context, aud
     return resultChan, nil
 }
 
-func (ep *ElevenLabsScribeProvider) getRealtimeToken(context stdctx.Context) apperror.Result[string] {
+func (ep *ElevenLabsScribeProvider) getRealtimeToken(context stdctx.Context) appfault.Result[string] {
     req, _ := http.NewRequestWithContext(context, httpmethod.Post.String(),
         ep.config.Endpoint+"/v1/single-use-token/realtime_scribe", nil)
     req.Header.Set("xi-api-key", ep.config.ApiKey)
@@ -899,7 +899,7 @@ func (r *STTProviderRegistry) Get(name string) (STTProvider, bool) {
     return provider, ok
 }
 
-func (r *STTProviderRegistry) GetPrimary() apperror.Result[STTProvider] {
+func (r *STTProviderRegistry) GetPrimary() appfault.Result[STTProvider] {
     r.mu.RLock()
     defer r.mu.RUnlock()
     
@@ -911,13 +911,13 @@ func (r *STTProviderRegistry) GetPrimary() apperror.Result[STTProvider] {
         }
     }
     
-    return nil, apperror.New(
+    return nil, appfault.New(
         ErrSttProviderUnavailable,
         "no stt provider available",
     )
 }
 
-func (r *STTProviderRegistry) GetWithFallback(preferred string) apperror.Result[STTProvider] {
+func (r *STTProviderRegistry) GetWithFallback(preferred string) appfault.Result[STTProvider] {
     // Try preferred first
     if provider, ok := r.Get(preferred); ok && provider.IsAvailable() {
         return provider, nil

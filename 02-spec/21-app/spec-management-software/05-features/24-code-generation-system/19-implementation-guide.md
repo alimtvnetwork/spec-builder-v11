@@ -57,17 +57,17 @@ This document provides a phased implementation roadmap for the AI-Powered Code G
 ```go
 // internal/codegen/interfaces.go
 type CodeGenerationService interface {
-    Generate(context stdctx.Context, request *GenerationRequest) apperror.Result[GenerationResult]
-    GetStatus(runId string) apperror.Result[GenerationStatus]
+    Generate(context stdctx.Context, request *GenerationRequest) appfault.Result[GenerationResult]
+    GetStatus(runId string) appfault.Result[GenerationStatus]
     Cancel(runId string) error
 }
 
 type PlanGenerator interface {
-    CreatePlan(projectId string, specRefs []string) apperror.Result[GenerationPlan]
+    CreatePlan(projectId string, specRefs []string) appfault.Result[GenerationPlan]
 }
 
 type GuidelineResolver interface {
-    Resolve(projectId, userId, language string) apperror.Result[ResolvedGuidelines]
+    Resolve(projectId, userId, language string) appfault.Result[ResolvedGuidelines]
 }
 ```
 
@@ -146,7 +146,7 @@ type GeneratedFile struct {
 
 ```go
 // internal/codegen/guideline/resolver.go
-func (r *Resolver) Resolve(projectId, userId, language string) apperror.Result[ResolvedGuidelines] {
+func (r *Resolver) Resolve(projectId, userId, language string) appfault.Result[ResolvedGuidelines] {
     // 1. Load guidelines in priority order
     general := r.loadGeneral()
     lang := r.loadLanguage(language)
@@ -156,7 +156,7 @@ func (r *Resolver) Resolve(projectId, userId, language string) apperror.Result[R
     // 2. Merge with override tracking
     merged, overrides := r.mergeWithOverrides(general, lang, user, project)
     
-    return apperror.Ok(ResolvedGuidelines{
+    return appfault.Ok(ResolvedGuidelines{
         MergedContent: merged,
         Overrides:     overrides,
         Sources:       r.getSources(general, lang, user, project),
@@ -205,7 +205,7 @@ type SpecAnalyzer struct {
     specReader SpecReader
 }
 
-func (a *SpecAnalyzer) Analyze(specRefs []string) apperror.Result[[]PlannedFile] {
+func (a *SpecAnalyzer) Analyze(specRefs []string) appfault.Result[[]PlannedFile] {
     var files []PlannedFile
     
     for _, ref := range specRefs {
@@ -267,14 +267,14 @@ func (a *SpecAnalyzer) Analyze(specRefs []string) apperror.Result[[]PlannedFile]
 
 ```go
 // internal/codegen/generator/code_generator.go
-func (g *CodeGenerator) Generate(context stdctx.Context, task *GenerationTask) apperror.Result[GenerationResult] {
+func (g *CodeGenerator) Generate(context stdctx.Context, task *GenerationTask) appfault.Result[GenerationResult] {
     // 1. Build prompt
     prompt := g.promptBuilder.Build(task.Guidelines, task.File, task.Context)
     
     // 2. Select model
     model, err := g.modelSelector.SelectModel(task.File.Language, "normal")
     if err != nil {
-        return apperror.FailWrap[GenerationResult](
+        return appfault.FailWrap[GenerationResult](
             err,
             "E8300",
             "model selection failed",
@@ -284,7 +284,7 @@ func (g *CodeGenerator) Generate(context stdctx.Context, task *GenerationTask) a
     // 3. Generate code
     response, err := model.Generate(ctx, prompt)
     if err != nil {
-        return apperror.FailWrap[GenerationResult](
+        return appfault.FailWrap[GenerationResult](
             err,
             "E8301",
             "code generation failed",
@@ -294,7 +294,7 @@ func (g *CodeGenerator) Generate(context stdctx.Context, task *GenerationTask) a
     // 4. Extract and validate code
     code := g.extractCode(response, task.File.Language)
     
-    return apperror.Ok(GenerationResult{
+    return appfault.Ok(GenerationResult{
         Path:       task.File.Path,
         Content:    code,
         TokensUsed: response.TokensUsed,
@@ -381,7 +381,7 @@ func (g *CodeGenerator) Generate(context stdctx.Context, task *GenerationTask) a
 
 ```go
 // internal/codegen/build/verifier.go
-func (v *BuildVerifier) Verify(repoPath string, languages []string) apperror.Result[BuildResult] {
+func (v *BuildVerifier) Verify(repoPath string, languages []string) appfault.Result[BuildResult] {
     results := make(map[string]*LanguageBuildResult)
     
     for _, lang := range languages {
@@ -399,7 +399,7 @@ func (v *BuildVerifier) Verify(repoPath string, languages []string) apperror.Res
         }
     }
     
-    return apperror.Ok(BuildResult{Results: results})
+    return appfault.Ok(BuildResult{Results: results})
 }
 ```
 

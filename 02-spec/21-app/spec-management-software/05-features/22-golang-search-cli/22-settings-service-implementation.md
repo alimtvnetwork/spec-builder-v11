@@ -108,38 +108,38 @@ gsearch/
 // SettingsService provides access to seedable configuration values
 type SettingsService interface {
     // Generic accessor - returns raw interface{}
-    Get(category ConfigCategory, key string) apperror.Result[any]
+    Get(category ConfigCategory, key string) appfault.Result[any]
     
     // Type-safe accessors
-    GetString(category ConfigCategory, key string) apperror.Result[string]
-    GetFloat(category ConfigCategory, key string) apperror.Result[float64]
-    GetInt(category ConfigCategory, key string) apperror.Result[int]
-    GetBool(category ConfigCategory, key string) apperror.Result[bool]
-    GetStringSlice(category ConfigCategory, key string) apperror.Result[[]string]
-    GetMap(category ConfigCategory, key string) apperror.Result[SettingMap]
+    GetString(category ConfigCategory, key string) appfault.Result[string]
+    GetFloat(category ConfigCategory, key string) appfault.Result[float64]
+    GetInt(category ConfigCategory, key string) appfault.Result[int]
+    GetBool(category ConfigCategory, key string) appfault.Result[bool]
+    GetStringSlice(category ConfigCategory, key string) appfault.Result[[]string]
+    GetMap(category ConfigCategory, key string) appfault.Result[SettingMap]
     
     // Mutation methods — uses SettingValue union type (see strong-typing-mandate)
-    Update(category ConfigCategory, key string, value SettingValue) *apperror.AppError
-    ResetToDefault(category ConfigCategory, key string) *apperror.AppError
-    ResetCategoryToDefault(category ConfigCategory) *apperror.AppError
+    Update(category ConfigCategory, key string, value SettingValue) *appfault.AppError
+    ResetToDefault(category ConfigCategory, key string) *appfault.AppError
+    ResetCategoryToDefault(category ConfigCategory) *appfault.AppError
     
     // Seeding methods
-    SeedFromFile(filepath string) *apperror.AppError
-    SeedAllFromDirectory(dirpath string) *apperror.AppError
-    ForceReseed(category ConfigCategory) *apperror.AppError
+    SeedFromFile(filepath string) *appfault.AppError
+    SeedAllFromDirectory(dirpath string) *appfault.AppError
+    ForceReseed(category ConfigCategory) *appfault.AppError
     
     // Query methods
-    GetByCategory(category ConfigCategory) apperror.Result[[]Setting]
-    GetAllCategories() apperror.Result[[]ConfigCategory]
-    GetCategoryVersion(category ConfigCategory) apperror.Result[string]
+    GetByCategory(category ConfigCategory) appfault.Result[[]Setting]
+    GetAllCategories() appfault.Result[[]ConfigCategory]
+    GetCategoryVersion(category ConfigCategory) appfault.Result[string]
     
     // Export methods
-    ExportCategory(category ConfigCategory) apperror.Result[SeedFile]
-    ExportAll() apperror.Result[map[ConfigCategory]*SeedFile]
+    ExportCategory(category ConfigCategory) appfault.Result[SeedFile]
+    ExportAll() appfault.Result[map[ConfigCategory]*SeedFile]
     
     // Cache management
-    InvalidateCache() *apperror.AppError
-    WarmCache() *apperror.AppError
+    InvalidateCache() *appfault.AppError
+    WarmCache() *appfault.AppError
 }
 ```
 
@@ -149,19 +149,19 @@ type SettingsService interface {
 // ConfigSeeder handles seeding from JSON files
 type ConfigSeeder interface {
     // SeedIfNeeded seeds values only if version differs
-    SeedIfNeeded(filepath string) *apperror.AppError
+    SeedIfNeeded(filepath string) *appfault.AppError
     
     // ForceSeed seeds values regardless of version
-    ForceSeed(filepath string) *apperror.AppError
+    ForceSeed(filepath string) *appfault.AppError
     
     // SeedDirectoryIfNeeded seeds all files in directory
-    SeedDirectoryIfNeeded(dirpath string) *apperror.AppError
+    SeedDirectoryIfNeeded(dirpath string) *appfault.AppError
     
     // GetSeedFileVersion returns version from seed file without seeding
-    GetSeedFileVersion(filepath string) apperror.Result[string]
+    GetSeedFileVersion(filepath string) appfault.Result[string]
     
     // ValidateSeedFile validates JSON structure
-    ValidateSeedFile(filepath string) *apperror.AppError
+    ValidateSeedFile(filepath string) *appfault.AppError
 }
 ```
 
@@ -285,7 +285,7 @@ const (
 // - ErrSettingNotFound: Key doesn't exist in category
 // - ErrCategoryNotFound: Category doesn't exist
 // - ErrValueDecodeFailed: JSON decode failed
-func (ss *SettingsServiceImpl) Get(category ConfigCategory, key string) apperror.Result[interface{}]
+func (ss *SettingsServiceImpl) Get(category ConfigCategory, key string) appfault.Result[interface{}]
 ```
 
 ### GetFloat Method
@@ -302,7 +302,7 @@ func (ss *SettingsServiceImpl) Get(category ConfigCategory, key string) apperror
 // Errors:
 // - ErrSettingNotFound: Key doesn't exist
 // - ErrTypeMismatch: Value is not numeric
-func (ss *SettingsServiceImpl) GetFloat(category ConfigCategory, key string) apperror.Result[float64]
+func (ss *SettingsServiceImpl) GetFloat(category ConfigCategory, key string) appfault.Result[float64]
 ```
 
 ### GetInt Method
@@ -320,7 +320,7 @@ func (ss *SettingsServiceImpl) GetFloat(category ConfigCategory, key string) app
 // - ErrSettingNotFound: Key doesn't exist
 // - ErrTypeMismatch: Value is not numeric
 // - ErrIntegerOverflow: Value exceeds int range
-func (ss *SettingsServiceImpl) GetInt(category ConfigCategory, key string) apperror.Result[int]
+func (ss *SettingsServiceImpl) GetInt(category ConfigCategory, key string) appfault.Result[int]
 ```
 
 ### GetString Method
@@ -336,7 +336,7 @@ func (ss *SettingsServiceImpl) GetInt(category ConfigCategory, key string) apper
 // Errors:
 // - ErrSettingNotFound: Key doesn't exist
 // - ErrTypeMismatch: Value cannot be represented as string
-func (ss *SettingsServiceImpl) GetString(category ConfigCategory, key string) apperror.Result[string]
+func (ss *SettingsServiceImpl) GetString(category ConfigCategory, key string) appfault.Result[string]
 ```
 
 ### GetBool Method
@@ -353,7 +353,7 @@ func (ss *SettingsServiceImpl) GetString(category ConfigCategory, key string) ap
 // Errors:
 // - ErrSettingNotFound: Key doesn't exist
 // - ErrTypeMismatch: Value is not boolean-coercible
-func (ss *SettingsServiceImpl) GetBool(category ConfigCategory, key string) apperror.Result[bool]
+func (ss *SettingsServiceImpl) GetBool(category ConfigCategory, key string) appfault.Result[bool]
 ```
 
 ### GetStringSlice Method
@@ -368,7 +368,7 @@ func (ss *SettingsServiceImpl) GetBool(category ConfigCategory, key string) appe
 // Errors:
 // - ErrSettingNotFound: Key doesn't exist
 // - ErrTypeMismatch: Value is not an array
-func (ss *SettingsServiceImpl) GetStringSlice(category ConfigCategory, key string) apperror.Result[[]string]
+func (ss *SettingsServiceImpl) GetStringSlice(category ConfigCategory, key string) appfault.Result[[]string]
 ```
 
 ### GetMap Method
@@ -384,7 +384,7 @@ func (ss *SettingsServiceImpl) GetStringSlice(category ConfigCategory, key strin
 // Errors:
 // - ErrSettingNotFound: Key doesn't exist
 // - ErrTypeMismatch: Value is not an object
-func (ss *SettingsServiceImpl) GetMap(category ConfigCategory, key string) apperror.Result[SettingMap]
+func (ss *SettingsServiceImpl) GetMap(category ConfigCategory, key string) appfault.Result[SettingMap]
 ```
 
 ### Update Method
@@ -527,7 +527,7 @@ func (ss *SettingsServiceImpl) ForceReseed(category ConfigCategory) error
 //
 // Errors:
 // - ErrCategoryNotFound: Category doesn't exist
-func (ss *SettingsServiceImpl) GetByCategory(category ConfigCategory) apperror.Result[[]Setting]
+func (ss *SettingsServiceImpl) GetByCategory(category ConfigCategory) appfault.Result[[]Setting]
 ```
 
 ### ExportCategory Method
@@ -545,7 +545,7 @@ func (ss *SettingsServiceImpl) GetByCategory(category ConfigCategory) apperror.R
 //
 // Errors:
 // - ErrCategoryNotFound: Category doesn't exist
-func (ss *SettingsServiceImpl) ExportCategory(category ConfigCategory) apperror.Result[SeedFile]
+func (ss *SettingsServiceImpl) ExportCategory(category ConfigCategory) appfault.Result[SeedFile]
 ```
 
 ---
@@ -650,10 +650,10 @@ func (e *SettingsError) Unwrap() error {
 
 ```go
 // InitializeSettings sets up the settings service with seeding
-func InitializeSettings(db *gorm.DB, seedDir string) apperror.Result[SettingsServiceImpl] {
+func InitializeSettings(db *gorm.DB, seedDir string) appfault.Result[SettingsServiceImpl] {
     // 1. Auto-migrate Settings table
     if err := db.AutoMigrate(&Setting{}); err != nil {
-        return apperror.FailWrap[SettingsServiceImpl](
+        return appfault.FailWrap[SettingsServiceImpl](
             err,
             "E6200",
             "failed to migrate Settings table",
@@ -679,7 +679,7 @@ func InitializeSettings(db *gorm.DB, seedDir string) apperror.Result[SettingsSer
         log.Printf("Warning: cache warming failed: %v", err)
     }
     
-    return apperror.Ok(*service)
+    return appfault.Ok(*service)
 }
 ```
 

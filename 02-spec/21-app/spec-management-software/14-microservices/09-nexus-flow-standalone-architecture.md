@@ -366,7 +366,7 @@ type PathResolver struct {
     ProjectPath string
 }
 
-func (r *PathResolver) Resolve(path string) apperror.Result[string] {
+func (r *PathResolver) Resolve(path string) appfault.Result[string] {
     switch {
     case strings.HasPrefix(path, "@project/"):
         return filepath.Join(r.ProjectPath, strings.TrimPrefix(path, "@project/")), nil
@@ -883,7 +883,7 @@ type PrerequisiteConfig struct {
     Runtimes []RuntimeType // Required runtimes
 }
 
-func (e *Engine) CheckPrerequisites(config PrerequisiteConfig) apperror.Result[[]PrerequisiteCheck] {
+func (e *Engine) CheckPrerequisites(config PrerequisiteConfig) appfault.Result[[]PrerequisiteCheck] {
     if !config.Enabled {
         return nil, nil
     }
@@ -939,7 +939,7 @@ const (
 )
 
 // Execution wrapper
-func (s *CodeExecStage) Execute(context stdctx.Context, input StageInput) apperror.Result[StageOutput] {
+func (s *CodeExecStage) Execute(context stdctx.Context, input StageInput) appfault.Result[StageOutput] {
     // Generate temp file if inline code
     var codePath string
     if s.config.Code != "" {
@@ -998,19 +998,19 @@ type RecordingSession struct {
 }
 
 // Placeholder methods - implementation pending API documentation
-func (c *RecorderClient) StartRecording(config RecordingConfig) apperror.Result[RecordingSession] {
+func (c *RecorderClient) StartRecording(config RecordingConfig) appfault.Result[RecordingSession] {
     // TODO: Implement when API documentation is available
-    return apperror.FailNew[RecordingSession](ErrNotImplemented, "recorder API not yet implemented")
+    return appfault.FailNew[RecordingSession](ErrNotImplemented, "recorder API not yet implemented")
 }
 
-func (c *RecorderClient) StopRecording(sessionId string) apperror.Result[Recording] {
+func (c *RecorderClient) StopRecording(sessionId string) appfault.Result[Recording] {
     // TODO: Implement when API documentation is available
-    return apperror.FailNew[Recording](ErrNotImplemented, "recorder API not yet implemented")
+    return appfault.FailNew[Recording](ErrNotImplemented, "recorder API not yet implemented")
 }
 
-func (c *RecorderClient) GetRecording(sessionId string) apperror.Result[Recording] {
+func (c *RecorderClient) GetRecording(sessionId string) appfault.Result[Recording] {
     // TODO: Implement when API documentation is available
-    return apperror.FailNew[Recording](ErrNotImplemented, "recorder API not yet implemented")
+    return appfault.FailNew[Recording](ErrNotImplemented, "recorder API not yet implemented")
 }
 ```
 
@@ -1039,7 +1039,7 @@ type SearchResult struct {
     PublishedAt time.Time `json:",omitempty"`
 }
 
-func (c *GSearchClient) Search(context stdctx.Context, query SearchQuery) apperror.Result[[]SearchResult] {
+func (c *GSearchClient) Search(context stdctx.Context, query SearchQuery) appfault.Result[[]SearchResult] {
     args := []string{
         "search",
         "--query", query.Query,
@@ -1076,8 +1076,8 @@ type Integration interface {
     Name() string
     Type() IntegrationType
     IsAvailable() bool
-    Initialize(config IntegrationConfig) *apperror.AppError
-    Execute(context stdctx.Context, params IntegrationParams) apperror.Result[IntegrationResult]
+    Initialize(config IntegrationConfig) *appfault.AppError
+    Execute(context stdctx.Context, params IntegrationParams) appfault.Result[IntegrationResult]
 }
 
 type IntegrationType string
@@ -1155,7 +1155,7 @@ const (
     BuildModeDebug   BuildMode = "DEBUG"
 )
 
-func (b *Builder) Build(context stdctx.Context, config BuildConfig) apperror.Result[BuildResult] {
+func (b *Builder) Build(context stdctx.Context, config BuildConfig) appfault.Result[BuildResult] {
     // 1. Collect all dependencies
     deps, err := b.collectDependencies(config.FlowId)
     if err != nil {
@@ -1201,7 +1201,7 @@ func (b *Builder) Build(context stdctx.Context, config BuildConfig) apperror.Res
 //go:embed databases/*
 var embeddedDbs embed.FS
 
-func (r *Runner) extractDatabases() apperror.Result[string] {
+func (r *Runner) extractDatabases() appfault.Result[string] {
     // Extract to temp directory
     tempDir, err := pathutil.MkdirTemp("", "nfx-run-*")
     if err != nil {
@@ -1280,7 +1280,7 @@ type ExportOptions struct {
     Compression      string // none, gzip, zstd
 }
 
-func (e *Exporter) Export(context stdctx.Context, opts ExportOptions) apperror.Result[ExportResult] {
+func (e *Exporter) Export(context stdctx.Context, opts ExportOptions) appfault.Result[ExportResult] {
     // 1. Validate flows exist
     // 2. Collect all databases
     // 3. Create manifest
@@ -1310,7 +1310,7 @@ const (
     ConflictAsk       ConflictPolicy = "ASK"
 )
 
-func (i *Importer) Import(context stdctx.Context, opts ImportOptions) apperror.Result[ImportResult] {
+func (i *Importer) Import(context stdctx.Context, opts ImportOptions) appfault.Result[ImportResult] {
     // 1. Extract archive
     // 2. Validate manifest
     // 3. Check for conflicts
@@ -1338,7 +1338,7 @@ const (
     MergeUpdate     MergeMode = "UPDATE"     // Update if exists
 )
 
-func (i *Importer) ImportMultiple(context stdctx.Context, opts MultiDbImport) apperror.Result[MultiImportResult] {
+func (i *Importer) ImportMultiple(context stdctx.Context, opts MultiDbImport) appfault.Result[MultiImportResult] {
     results := make([]*ImportResult, 0, len(opts.Archives))
     
     for _, archive := range opts.Archives {
@@ -1348,7 +1348,7 @@ func (i *Importer) ImportMultiple(context stdctx.Context, opts MultiDbImport) ap
             TargetProjectId: opts.ProjectId,
         })
         if err != nil {
-            return nil, apperror.Wrap(
+            return nil, appfault.Wrap(
                 err,
                 ErrImportFailed,
                 "import archive",
@@ -1457,7 +1457,7 @@ type WSConfirmationMessage struct {
 }
 
 // Engine waits for confirmation
-func (e *Engine) awaitConfirmation(context stdctx.Context, req ConfirmationRequest) apperror.Result[bool] {
+func (e *Engine) awaitConfirmation(context stdctx.Context, req ConfirmationRequest) appfault.Result[bool] {
     // Send via WebSocket
     e.ws.Send(WSConfirmationMessage{
         Type:    "confirmation_required",
@@ -1636,7 +1636,7 @@ type VoiceFlowBuilder struct {
 }
 
 // Convert voice transcript to flow stages
-func (b *VoiceFlowBuilder) TranscriptToFlow(context stdctx.Context, conversationId string) apperror.Result[Flow] {
+func (b *VoiceFlowBuilder) TranscriptToFlow(context stdctx.Context, conversationId string) appfault.Result[Flow] {
     // 1. Get transcript from Voice CLI
     transcript, err := b.voiceCLI.GetTranscript(conversationId)
     if err != nil {

@@ -242,7 +242,7 @@ When re-indexing completes, the following caches are invalidated:
 4. **Query cache** - Clear cached query embeddings
 
 ```go
-func (m *RAGManager) InvalidateCaches(appName string) *apperror.AppError {
+func (m *RAGManager) InvalidateCaches(appName string) *appfault.AppError {
     // 1. Clear vector index
     m.vectorIndex.Clear(appName)
     
@@ -252,7 +252,7 @@ func (m *RAGManager) InvalidateCaches(appName string) *apperror.AppError {
         WHERE app_name = ?
     `, appName)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrRagCacheInvalidationFailed,
             "failed to clear search cache for app %s",

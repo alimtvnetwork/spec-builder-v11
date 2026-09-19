@@ -299,7 +299,7 @@ func validateEnvironment() error {
     
     for _, key := range required {
         if os.Getenv(key) == "" {
-            return apperror.New(
+            return appfault.New(
                 ErrEnvMissing,
                 "required environment variable not set",
             ).WithContext("variable", key)

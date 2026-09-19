@@ -280,10 +280,10 @@ type SummarizationTemplateContext struct {
 }
 
 // BuildPrompt constructs the summarization prompt
-func (p *SummarizationPrompter) BuildPrompt(req SummarizationRequest) apperror.Result[string] {
+func (p *SummarizationPrompter) BuildPrompt(req SummarizationRequest) appfault.Result[string] {
     prompt, ok := p.prompts[req.Type]
     if !ok {
-        return "", apperror.New(
+        return "", appfault.New(
             ErrUnknownPromptType,
             "unknown prompt type: "+string(req.Type),
         )
@@ -305,7 +305,7 @@ func (p *SummarizationPrompter) BuildPrompt(req SummarizationRequest) apperror.R
     // Execute template
     tmpl, err := template.New("prompt").Parse(prompt.Template)
     if err != nil {
-        return "", apperror.Wrap(
+        return "", appfault.Wrap(
             err,
             ErrTemplateParse,
             "template parse error",
@@ -314,7 +314,7 @@ func (p *SummarizationPrompter) BuildPrompt(req SummarizationRequest) apperror.R
     
     var buf bytes.Buffer
     if err := tmpl.Execute(&buf, data); err != nil {
-        return "", apperror.Wrap(
+        return "", appfault.Wrap(
             err,
             ErrTemplateExecution,
             "template execution error",
@@ -336,7 +336,7 @@ func (p *SummarizationPrompter) RegisterPrompt(prompt SummarizationPrompt) {
 }
 
 // EstimateInputTokens estimates tokens for content
-func (p *SummarizationPrompter) EstimateInputTokens(content string) apperror.Result[int] {
+func (p *SummarizationPrompter) EstimateInputTokens(content string) appfault.Result[int] {
     return p.tokenCounter.Count(content)
 }
 ```
@@ -415,7 +415,7 @@ func (s *MemoryCompressionService) Compress(
     context stdctx.Context,
     content string,
     targetTokens int,
-) apperror.Result[string] {
+) appfault.Result[string] {
     result, err := s.CompressWithDetails(context, content, targetTokens, PromptTypeExecution)
     if err != nil {
         return "", err
@@ -429,7 +429,7 @@ func (s *MemoryCompressionService) CompressWithDetails(
     content string,
     targetTokens int,
     promptType SummarizationPromptType,
-) apperror.Result[*CompressionResult] {
+) appfault.Result[*CompressionResult] {
     startTime := time.Now()
     
     if targetTokens == 0 {
@@ -447,8 +447,8 @@ func (s *MemoryCompressionService) CompressWithDetails(
     // Count original tokens
     originalTokens, err := s.tokenCounter.Count(content)
     if err != nil {
-        return apperror.Fail[*CompressionResult](
-            apperror.Wrap(
+        return appfault.Fail[*CompressionResult](
+            appfault.Wrap(
                 err,
                 ErrTokenCount,
                 "token counting failed",
@@ -458,7 +458,7 @@ func (s *MemoryCompressionService) CompressWithDetails(
     
     // If already under target, return as-is
     if originalTokens <= targetTokens {
-        return apperror.OK(&CompressionResult{
+        return appfault.Ok(&CompressionResult{
             OriginalTokens:   originalTokens,
             CompressedTokens: originalTokens,
             CompressionRatio: 0,
@@ -474,8 +474,8 @@ func (s *MemoryCompressionService) CompressWithDetails(
         MaxTokens: targetTokens,
     })
     if err != nil {
-        return apperror.Fail[*CompressionResult](
-            apperror.Wrap(
+        return appfault.Fail[*CompressionResult](
+            appfault.Wrap(
                 err,
                 ErrPromptBuild,
                 "prompt building failed",
@@ -503,8 +503,8 @@ func (s *MemoryCompressionService) CompressWithDetails(
     }
     
     if lastErr != nil {
-        return apperror.Fail[*CompressionResult](
-            apperror.New(
+        return appfault.Fail[*CompressionResult](
+            appfault.New(
                 ErrSummarizationFailed,
                 "summarization failed after all retry attempts",
             ),
@@ -540,13 +540,13 @@ func (s *MemoryCompressionService) CompressWithDetails(
         s.cache.Store(cacheKey, result)
     }
     
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 
 // validateCompression checks if compression meets requirements
-func (s *MemoryCompressionService) validateCompression(result *CompressionResult, targetTokens int) *apperror.AppError {
+func (s *MemoryCompressionService) validateCompression(result *CompressionResult, targetTokens int) *appfault.AppError {
     if result.CompressedTokens > targetTokens {
-        return apperror.New(
+        return appfault.New(
             ErrCompressionExceedsTarget,
             fmt.Sprintf("compressed tokens (%d) exceeds target (%d)",
                 result.CompressedTokens, targetTokens),
@@ -554,7 +554,7 @@ func (s *MemoryCompressionService) validateCompression(result *CompressionResult
     }
     
     if result.CompressionRatio < s.config.MinCompressionRatio {
-        return apperror.New(
+        return appfault.New(
             ErrCompressionRatioBelowMin,
             fmt.Sprintf("compression ratio (%.2f) below minimum (%.2f)",
                 result.CompressionRatio, s.config.MinCompressionRatio),
@@ -562,7 +562,7 @@ func (s *MemoryCompressionService) validateCompression(result *CompressionResult
     }
     
     if len(result.Summary) < 50 {
-        return apperror.New(
+        return appfault.New(
             ErrSummaryTooShort,
             fmt.Sprintf("summary too short (%d chars)", len(result.Summary)),
         )
@@ -578,7 +578,7 @@ func (s *MemoryCompressionService) recompress(
     targetTokens int,
     promptType SummarizationPromptType,
     previousResult *CompressionResult,
-) apperror.Result[*CompressionResult] {
+) appfault.Result[*CompressionResult] {
     // Use half the target to ensure we hit it
     stricterTarget := targetTokens / 2
     if stricterTarget < 100 {
@@ -602,12 +602,12 @@ func (s *MemoryCompressionService) recompress(
     
     if err != nil {
         // Return previous result if recompression fails
-        return apperror.OK(previousResult)
+        return appfault.Ok(previousResult)
     }
     
     compressedTokens, _ := s.tokenCounter.Count(summary)
     
-    return apperror.OK(&CompressionResult{
+    return appfault.Ok(&CompressionResult{
         OriginalTokens:   previousResult.OriginalTokens,
         CompressedTokens: compressedTokens,
         CompressionRatio: 1.0 - (float64(compressedTokens) / float64(previousResult.OriginalTokens)),
@@ -683,7 +683,7 @@ func (s *MemoryStore) SaveMemoryEntry(context stdctx.Context, entry *models.Memo
 func (s *MemoryStore) GetMemoryEntries(
     context stdctx.Context,
     instructionId string,
-) apperror.Result[[]models.MemoryEntry] {
+) appfault.Result[[]models.MemoryEntry] {
     var entries []models.MemoryEntry
     err := s.db.WithContext(context).
         Where("instruction_id = ?", instructionId).
@@ -696,7 +696,7 @@ func (s *MemoryStore) GetMemoryEntries(
 func (s *MemoryStore) GetLatestMemory(
     context stdctx.Context,
     instructionId string,
-) apperror.Result[models.MemoryEntry] {
+) appfault.Result[models.MemoryEntry] {
     var entry models.MemoryEntry
     err := s.db.WithContext(context).
         Where("instruction_id = ?", instructionId).
@@ -713,7 +713,7 @@ func (s *MemoryStore) GetLatestMemory(
 func (s *MemoryStore) GetMemoryForSession(
     context stdctx.Context,
     sessionId string,
-) apperror.Result[[]models.MemoryEntry] {
+) appfault.Result[[]models.MemoryEntry] {
     var entries []models.MemoryEntry
     err := s.db.WithContext(context).
         Where("session_id = ?", sessionId).
@@ -728,7 +728,7 @@ func (s *MemoryStore) GetCombinedMemory(
     instructionId string,
     maxTokens int,
     tokenCounter TokenCounter,
-) apperror.Result[string] {
+) appfault.Result[string] {
     entries, err := s.GetMemoryEntries(context, instructionId)
     if err != nil {
         return "", err
@@ -777,15 +777,15 @@ func (s *MemoryStore) DeleteMemoryEntries(context stdctx.Context, instructionId 
 func (s *MemoryStore) GetCompressionStats(
     context stdctx.Context,
     instructionId string,
-) apperror.Result[*CompressionStats] {
+) appfault.Result[*CompressionStats] {
     var entries []models.MemoryEntry
     err := s.db.WithContext(context).
         Where("instruction_id = ?", instructionId).
         Find(&entries).Error
     
     if err != nil {
-        return apperror.Fail[*CompressionStats](
-            apperror.Wrap(
+        return appfault.Fail[*CompressionStats](
+            appfault.Wrap(
                 err,
                 ErrDatabaseRead,
                 "failed to query memory entries",
@@ -808,7 +808,7 @@ func (s *MemoryStore) GetCompressionStats(
     
     stats.TokensSaved = stats.TotalOriginalTokens - stats.TotalCompressedTokens
     
-    return apperror.OK(stats)
+    return appfault.Ok(stats)
 }
 
 // CompressionStats holds aggregate compression statistics
@@ -889,7 +889,7 @@ func (e *MultiTurnExecutor) ExecuteWithMemory(
         context, content, e.contextManager.GetConfig().AvailableForRetrieval())
     
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSegmentationCheck,
             "segmentation check failed",
@@ -904,7 +904,7 @@ func (e *MultiTurnExecutor) ExecuteWithMemory(
     // Segment and execute
     plan, err := e.segmentationService.Segment(context, instructionId, content)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSegmentationFailed,
             "segmentation failed",
@@ -918,7 +918,7 @@ func (e *MultiTurnExecutor) ExecuteWithMemory(
         // Build context with memory
         memoryContext, err := e.buildMemoryContext(context, instructionId, turnIndex)
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrMemoryContext,
                 fmt.Sprintf("memory context failed for turn %d", turnIndex),
@@ -928,7 +928,7 @@ func (e *MultiTurnExecutor) ExecuteWithMemory(
         // Execute segment
         output, err := e.executeSegmentWithMemory(context, segment, memoryContext)
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrSegmentExecution,
                 fmt.Sprintf("segment %d execution failed", segmentIndex),
@@ -952,7 +952,7 @@ func (e *MultiTurnExecutor) buildMemoryContext(
     context stdctx.Context,
     instructionId string,
     currentTurn int,
-) apperror.Result[string] {
+) appfault.Result[string] {
     if !e.config.EnableMemoryCompression {
         return "", nil
     }
@@ -989,7 +989,7 @@ func (e *MultiTurnExecutor) executeSegmentWithMemory(
     context stdctx.Context,
     segment *ExecutionSegment,
     memoryContext string,
-) apperror.Result[string] {
+) appfault.Result[string] {
     // Build context request
     req := AssembleRequest{
         SystemPrompt: fmt.Sprintf(
@@ -1004,7 +1004,7 @@ func (e *MultiTurnExecutor) executeSegmentWithMemory(
     
     assembled, err := e.contextManager.Assemble(context, req)
     if err != nil {
-        return "", apperror.Wrap(
+        return "", appfault.Wrap(
             err,
             ErrContextAssembly,
             "context assembly failed",
@@ -1121,21 +1121,21 @@ func (e *MultiTurnExecutor) compressAndStoreMemory(
 // MemoryCompressionServiceInterface defines the public API
 type MemoryCompressionServiceInterface interface {
     // Compression
-    Compress(context stdctx.Context, content string, targetTokens int) apperror.Result[string]
-    CompressWithDetails(context stdctx.Context, content string, targetTokens int, promptType SummarizationPromptType) apperror.Result[*CompressionResult]
+    Compress(context stdctx.Context, content string, targetTokens int) appfault.Result[string]
+    CompressWithDetails(context stdctx.Context, content string, targetTokens int, promptType SummarizationPromptType) appfault.Result[*CompressionResult]
     
     // Memory Management
-    StoreMemory(context stdctx.Context, instructionId, sessionId string, turnIndex int, output string) *apperror.AppError
-    GetMemory(context stdctx.Context, instructionId string) apperror.Result[[]models.MemoryEntry]
-    GetCombinedMemory(context stdctx.Context, instructionId string, maxTokens int) apperror.Result[string]
-    GetCompressionStats(context stdctx.Context, instructionId string) apperror.Result[*CompressionStats]
+    StoreMemory(context stdctx.Context, instructionId, sessionId string, turnIndex int, output string) *appfault.AppError
+    GetMemory(context stdctx.Context, instructionId string) appfault.Result[[]models.MemoryEntry]
+    GetCombinedMemory(context stdctx.Context, instructionId string, maxTokens int) appfault.Result[string]
+    GetCompressionStats(context stdctx.Context, instructionId string) appfault.Result[*CompressionStats]
     
     // Prompts
     GetPrompt(promptType SummarizationPromptType) (SummarizationPrompt, bool)
-    RegisterPrompt(prompt SummarizationPrompt) *apperror.AppError
+    RegisterPrompt(prompt SummarizationPrompt) *appfault.AppError
     
     // Cache
-    ClearCache() *apperror.AppError
+    ClearCache() *appfault.AppError
 }
 
 // Ensure implementation satisfies interface
@@ -1164,17 +1164,17 @@ func NewFullMemoryCompressionService(
 }
 
 // Compress delegates to compression service
-func (s *FullMemoryCompressionService) Compress(context stdctx.Context, content string, targetTokens int) apperror.Result[string] {
+func (s *FullMemoryCompressionService) Compress(context stdctx.Context, content string, targetTokens int) appfault.Result[string] {
     return s.compression.Compress(context, content, targetTokens)
 }
 
 // CompressWithDetails delegates to compression service
-func (s *FullMemoryCompressionService) CompressWithDetails(context stdctx.Context, content string, targetTokens int, promptType SummarizationPromptType) apperror.Result[*CompressionResult] {
+func (s *FullMemoryCompressionService) CompressWithDetails(context stdctx.Context, content string, targetTokens int, promptType SummarizationPromptType) appfault.Result[*CompressionResult] {
     return s.compression.CompressWithDetails(context, content, targetTokens, promptType)
 }
 
 // StoreMemory compresses and stores memory entry
-func (s *FullMemoryCompressionService) StoreMemory(context stdctx.Context, instructionId, sessionId string, turnIndex int, output string) *apperror.AppError {
+func (s *FullMemoryCompressionService) StoreMemory(context stdctx.Context, instructionId, sessionId string, turnIndex int, output string) *appfault.AppError {
     result, err := s.compression.CompressWithDetails(context, output, 500, PromptTypeExecution)
     if err != nil {
         return err
@@ -1193,17 +1193,17 @@ func (s *FullMemoryCompressionService) StoreMemory(context stdctx.Context, instr
 }
 
 // GetMemory retrieves memory entries
-func (s *FullMemoryCompressionService) GetMemory(context stdctx.Context, instructionId string) apperror.Result[[]models.MemoryEntry] {
+func (s *FullMemoryCompressionService) GetMemory(context stdctx.Context, instructionId string) appfault.Result[[]models.MemoryEntry] {
     return s.store.GetMemoryEntries(context, instructionId)
 }
 
 // GetCombinedMemory retrieves combined memory context
-func (s *FullMemoryCompressionService) GetCombinedMemory(context stdctx.Context, instructionId string, maxTokens int) apperror.Result[string] {
+func (s *FullMemoryCompressionService) GetCombinedMemory(context stdctx.Context, instructionId string, maxTokens int) appfault.Result[string] {
     return s.store.GetCombinedMemory(context, instructionId, maxTokens, s.tokenCounter)
 }
 
 // GetCompressionStats retrieves statistics
-func (s *FullMemoryCompressionService) GetCompressionStats(context stdctx.Context, instructionId string) apperror.Result[*CompressionStats] {
+func (s *FullMemoryCompressionService) GetCompressionStats(context stdctx.Context, instructionId string) appfault.Result[*CompressionStats] {
     return s.store.GetCompressionStats(context, instructionId)
 }
 

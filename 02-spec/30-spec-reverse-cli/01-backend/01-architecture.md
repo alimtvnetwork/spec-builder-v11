@@ -403,7 +403,7 @@ type RAGConfig struct {
     ChunkLimit int
 }
 
-func Load() apperror.Result[*Config] {
+func Load() appfault.Result[*Config] {
     // Load from seedable config pattern
     db, err := dbutil.Open(getDbPath())
     if err != nil {

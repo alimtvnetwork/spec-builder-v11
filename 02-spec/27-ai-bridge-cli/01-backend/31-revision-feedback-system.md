@@ -369,7 +369,7 @@ PATCH /api/v1/{contentType}/{contentId}/revisions/{version}
 
 ```go
 // In blog generation handler
-func (h *BlogHandler) GenerateWithFeedback(context stdctx.Context, req *BlogGenerateRequest) apperror.Result[*BlogResponse] {
+func (h *BlogHandler) GenerateWithFeedback(context stdctx.Context, req *BlogGenerateRequest) appfault.Result[*BlogResponse] {
     // 1. Get previous revision if exists
     prevRevision, _ := h.revisionRepo.GetActiveRevision(req.BlogId)
     
@@ -403,7 +403,7 @@ func (h *BlogHandler) GenerateWithFeedback(context stdctx.Context, req *BlogGene
     h.feedbackRepo.MarkProcessed(pendingFeedback, newRevision.Id)
     
     _ = err // Content generation errors handled by aiClient internally
-    return apperror.Ok(&BlogResponse{Revision: newRevision})
+    return appfault.Ok(&BlogResponse{Revision: newRevision})
 }
 ```
 

@@ -66,11 +66,11 @@ const (
 )
 
 // HashPassword creates an Argon2id hash of the password
-func HashPassword(password string) apperror.Result[string] {
+func HashPassword(password string) appfault.Result[string] {
     // Generate cryptographically secure salt
     salt := make([]byte, Argon2SaltLength)
     if _, err := rand.Read(salt); err != nil {
-        return "", apperror.Wrap(
+        return "", appfault.Wrap(
             err,
             ERR_CRYPTO_FAILURE,
             "failed to generate salt",
@@ -106,7 +106,7 @@ func HashPassword(password string) apperror.Result[string] {
 }
 
 // VerifyPassword checks if password matches the hash
-func VerifyPassword(password, encodedHash string) apperror.Result[bool] {
+func VerifyPassword(password, encodedHash string) appfault.Result[bool] {
     // Check if legacy bcrypt hash
     if strings.HasPrefix(encodedHash, "$2") {
         return verifyBcrypt(password, encodedHash)
@@ -160,7 +160,7 @@ func VerifyPassword(password, encodedHash string) apperror.Result[bool] {
 }
 
 // verifyBcrypt handles legacy bcrypt password verification
-func verifyBcrypt(password, hash string) apperror.Result[bool] {
+func verifyBcrypt(password, hash string) appfault.Result[bool] {
     err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
     if err == bcrypt.ErrMismatchedHashAndPassword {
         return false, nil
@@ -178,7 +178,7 @@ Salts are generated using `crypto/rand` which provides cryptographically secure 
 
 ```go
 // GenerateSalt creates a cryptographically secure random salt
-func GenerateSalt(length int) apperror.Result[[]byte] {
+func GenerateSalt(length int) appfault.Result[[]byte] {
     salt := make([]byte, length)
     _, err := rand.Read(salt)
     if err != nil {
@@ -309,11 +309,11 @@ type RegisterRequest struct {
     DisplayName string `validate:"max=100"`
 }
 
-func (s *AuthService) Register(context stdctx.Context, req RegisterRequest) apperror.Result[*AuthResponse] {
+func (s *AuthService) Register(context stdctx.Context, req RegisterRequest) appfault.Result[*AuthResponse] {
     // 1. Validate input
     if err := s.validator.Struct(req); err != nil {
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_VALIDATION,
                 err.Error(),
             ),
@@ -322,13 +322,13 @@ func (s *AuthService) Register(context stdctx.Context, req RegisterRequest) appe
     
     // 2. Validate password strength
     if err := ValidatePassword(req.Password, req.Username, req.Email); err != nil {
-        return apperror.Fail[*AuthResponse](err)
+        return appfault.Fail[*AuthResponse](err)
     }
     
     // 3. Check username uniqueness
     if s.userExists(context, "username", req.Username) {
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_USERNAME_TAKEN,
                 "Username already in use",
             ),
@@ -337,8 +337,8 @@ func (s *AuthService) Register(context stdctx.Context, req RegisterRequest) appe
     
     // 4. Check email uniqueness
     if s.userExists(context, "email", req.Email) {
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_EMAIL_TAKEN,
                 "Email already registered",
             ),
@@ -348,8 +348,8 @@ func (s *AuthService) Register(context stdctx.Context, req RegisterRequest) appe
     // 5. Hash password
     passwordHash, err := HashPassword(req.Password)
     if err != nil {
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_CRYPTO_FAILURE,
                 "Failed to hash password",
             ),
@@ -369,8 +369,8 @@ func (s *AuthService) Register(context stdctx.Context, req RegisterRequest) appe
     }
     
     if err := s.db.InsertUser(context, user); err != nil {
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_DATABASE,
                 "Failed to create user",
             ),
@@ -380,16 +380,16 @@ func (s *AuthService) Register(context stdctx.Context, req RegisterRequest) appe
     // 7. Generate tokens
     tokensResult := s.generateTokens(user)
     if tokensResult.IsFailure() {
-        return apperror.Fail[*AuthResponse](tokensResult.Error())
+        return appfault.Fail[*AuthResponse](tokensResult.Error())
     }
     tokens := tokensResult.Value()
     
     // 8. Create session
     if err := s.createSession(context, user.Id, tokens.RefreshToken, req); err != nil {
-        return apperror.Fail[*AuthResponse](err)
+        return appfault.Fail[*AuthResponse](err)
     }
     
-    return apperror.OK(&AuthResponse{
+    return appfault.Ok(&AuthResponse{
         User:   user.ToPublic(),
         Tokens: tokens,
     })
@@ -423,13 +423,13 @@ func (s *AuthService) Register(context stdctx.Context, req RegisterRequest) appe
 ### 7.4.2 Login Service
 
 ```go
-func (s *AuthService) Login(context stdctx.Context, req LoginRequest) apperror.Result[*AuthResponse] {
+func (s *AuthService) Login(context stdctx.Context, req LoginRequest) appfault.Result[*AuthResponse] {
     // 1. Find user by username or email
     userResult := s.findUserByIdentifier(context, req.Identifier)
     if userResult.IsFailure() {
         // Use same error for not found to prevent enumeration
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_INVALID_CREDENTIALS,
                 "Invalid username/email or password",
             ),
@@ -439,8 +439,8 @@ func (s *AuthService) Login(context stdctx.Context, req LoginRequest) apperror.R
     
     // 2. Check if account is locked
     if s.isAccountLocked(context, user.Id) {
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_ACCOUNT_LOCKED,
                 "Account temporarily locked due to failed attempts",
             ),
@@ -450,8 +450,8 @@ func (s *AuthService) Login(context stdctx.Context, req LoginRequest) apperror.R
     // 3. Verify password
     valid, err := VerifyPassword(req.Password, user.PasswordHash)
     if err != nil {
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_INTERNAL,
                 "Password verification failed",
             ),
@@ -461,8 +461,8 @@ func (s *AuthService) Login(context stdctx.Context, req LoginRequest) apperror.R
     if !valid {
         // Record failed attempt
         s.recordFailedAttempt(context, user.Id)
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_INVALID_CREDENTIALS,
                 "Invalid username/email or password",
             ),
@@ -477,8 +477,8 @@ func (s *AuthService) Login(context stdctx.Context, req LoginRequest) apperror.R
     
     // 5. Check if account is active
     if !user.IsActive {
-        return apperror.Fail[*AuthResponse](
-            apperror.New(
+        return appfault.Fail[*AuthResponse](
+            appfault.New(
                 ERR_ACCOUNT_DISABLED,
                 "Account is disabled",
             ),
@@ -491,19 +491,19 @@ func (s *AuthService) Login(context stdctx.Context, req LoginRequest) apperror.R
     // 7. Generate tokens
     tokensResult := s.generateTokens(user)
     if tokensResult.IsFailure() {
-        return apperror.Fail[*AuthResponse](tokensResult.Error())
+        return appfault.Fail[*AuthResponse](tokensResult.Error())
     }
     tokens := tokensResult.Value()
     
     // 8. Create session
     if err := s.createSession(context, user.Id, tokens.RefreshToken, req.DeviceInfo); err != nil {
-        return apperror.Fail[*AuthResponse](err)
+        return appfault.Fail[*AuthResponse](err)
     }
     
     // 9. Update last login
     s.updateLastLogin(context, user.Id)
     
-    return apperror.OK(&AuthResponse{
+    return appfault.Ok(&AuthResponse{
         User:   user.ToPublic(),
         Tokens: tokens,
     })
@@ -614,7 +614,7 @@ func NewTokenService(config *Config) *TokenService {
     }
 }
 
-func (s *TokenService) GenerateTokens(user *User, sessionId string) apperror.Result[*TokenPair] {
+func (s *TokenService) GenerateTokens(user *User, sessionId string) appfault.Result[*TokenPair] {
     now := time.Now()
     
     // Access token
@@ -631,8 +631,8 @@ func (s *TokenService) GenerateTokens(user *User, sessionId string) apperror.Res
     accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
     accessString, err := accessToken.SignedString(s.secretKey)
     if err != nil {
-        return apperror.Fail[*TokenPair](
-            apperror.New(
+        return appfault.Fail[*TokenPair](
+            appfault.New(
                 ERR_TOKEN_GENERATION,
                 "Failed to generate access token",
             ),
@@ -651,15 +651,15 @@ func (s *TokenService) GenerateTokens(user *User, sessionId string) apperror.Res
     refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
     refreshString, err := refreshToken.SignedString(s.secretKey)
     if err != nil {
-        return apperror.Fail[*TokenPair](
-            apperror.New(
+        return appfault.Fail[*TokenPair](
+            appfault.New(
                 ERR_TOKEN_GENERATION,
                 "Failed to generate refresh token",
             ),
         )
     }
     
-    return apperror.OK(&TokenPair{
+    return appfault.Ok(&TokenPair{
         AccessToken:  accessString,
         RefreshToken: refreshString,
         ExpiresIn:    int(s.accessExpiry.Seconds()),
@@ -671,7 +671,7 @@ func (s *TokenService) GenerateTokens(user *User, sessionId string) apperror.Res
 ### 7.5.4 Token Validation
 
 ```go
-func (s *TokenService) ValidateAccessToken(tokenString string) apperror.Result[*Claims] {
+func (s *TokenService) ValidateAccessToken(tokenString string) appfault.Result[*Claims] {
     token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
         if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
             return nil, ErrInvalidSigningMethod
@@ -681,15 +681,15 @@ func (s *TokenService) ValidateAccessToken(tokenString string) apperror.Result[*
     
     if err != nil {
         if errors.Is(err, jwt.ErrTokenExpired) {
-            return apperror.Fail[*Claims](
-                apperror.New(
+            return appfault.Fail[*Claims](
+                appfault.New(
                     ERR_TOKEN_EXPIRED,
                     "Access token expired",
                 ),
             )
         }
-        return apperror.Fail[*Claims](
-            apperror.New(
+        return appfault.Fail[*Claims](
+            appfault.New(
                 ERR_TOKEN_INVALID,
                 "Invalid access token",
             ),
@@ -698,8 +698,8 @@ func (s *TokenService) ValidateAccessToken(tokenString string) apperror.Result[*
     
     claims, ok := token.Claims.(jwt.MapClaims)
     if !ok || !token.Valid {
-        return apperror.Fail[*Claims](
-            apperror.New(
+        return appfault.Fail[*Claims](
+            appfault.New(
                 ERR_TOKEN_INVALID,
                 "Invalid token claims",
             ),
@@ -709,8 +709,8 @@ func (s *TokenService) ValidateAccessToken(tokenString string) apperror.Result[*
     // Extract typed claims via helper (no bare casts in business logic)
     parsedResult := extractClaims(claims)
     if parsedResult.IsFailure() {
-        return apperror.Fail[*Claims](
-            apperror.New(
+        return appfault.Fail[*Claims](
+            appfault.New(
                 ERR_TOKEN_INVALID,
                 parsedResult.Error().Error(),
             ),
@@ -720,19 +720,19 @@ func (s *TokenService) ValidateAccessToken(tokenString string) apperror.Result[*
     
     // Check if token is revoked
     if s.isTokenRevoked(parsed.JTI) {
-        return apperror.Fail[*Claims](
-            apperror.New(
+        return appfault.Fail[*Claims](
+            appfault.New(
                 ERR_TOKEN_REVOKED,
                 "Token has been revoked",
             ),
         )
     }
     
-    return apperror.OK(parsed)
+    return appfault.Ok(parsed)
 }
 
 // EXEMPTED: typed accessor internal — centralized JWT claim extraction (§7.2)
-func extractClaims(claims jwt.MapClaims) apperror.Result[*Claims] {
+func extractClaims(claims jwt.MapClaims) appfault.Result[*Claims] {
     jti, _ := claims["jti"].(string)
     sub, _ := claims["sub"].(string)
     username, _ := claims["username"].(string)
@@ -740,15 +740,15 @@ func extractClaims(claims jwt.MapClaims) apperror.Result[*Claims] {
     role, _ := claims["role"].(string)
     
     if sub == "" {
-        return apperror.Fail[*Claims](
-            apperror.New(
+        return appfault.Fail[*Claims](
+            appfault.New(
                 ERR_TOKEN_INVALID,
                 "missing required claim: sub",
             ),
         )
     }
     
-    return apperror.OK(&Claims{
+    return appfault.Ok(&Claims{
         JTI:      jti,
         UserId:   sub,
         Username: username,
@@ -798,7 +798,7 @@ type Session struct {
     RevokedAt    *time.Time
 }
 
-func (s *SessionService) Create(context stdctx.Context, userId string, refreshToken string, deviceInfo DeviceInfo) apperror.Result[*Session] {
+func (s *SessionService) Create(context stdctx.Context, userId string, refreshToken string, deviceInfo DeviceInfo) appfault.Result[*Session] {
     session := &Session{
         Id:           "ses_" + generateId(16),
         UserId:       userId,
@@ -812,39 +812,39 @@ func (s *SessionService) Create(context stdctx.Context, userId string, refreshTo
     }
     
     if err := s.db.InsertSession(context, session); err != nil {
-        return apperror.Fail[*Session](err)
+        return appfault.Fail[*Session](err)
     }
     
-    return apperror.OK(session)
+    return appfault.Ok(session)
 }
 
-func (s *SessionService) Validate(context stdctx.Context, sessionId string, refreshToken string) apperror.Result[*Session] {
+func (s *SessionService) Validate(context stdctx.Context, sessionId string, refreshToken string) appfault.Result[*Session] {
     session, err := s.db.GetSession(context, sessionId)
     if err != nil {
-        return apperror.Fail[*Session](
-            apperror.New(ERR_SESSION_NOT_FOUND, "Session not found"),
+        return appfault.Fail[*Session](
+            appfault.New(ERR_SESSION_NOT_FOUND, "Session not found"),
         )
     }
     
     if session.RevokedAt != nil {
-        return apperror.Fail[*Session](
-            apperror.New(ERR_SESSION_REVOKED, "Session has been revoked"),
+        return appfault.Fail[*Session](
+            appfault.New(ERR_SESSION_REVOKED, "Session has been revoked"),
         )
     }
     
     if time.Now().After(session.ExpiresAt) {
-        return apperror.Fail[*Session](
-            apperror.New(ERR_SESSION_EXPIRED, "Session has expired"),
+        return appfault.Fail[*Session](
+            appfault.New(ERR_SESSION_EXPIRED, "Session has expired"),
         )
     }
     
     if !verifyTokenHash(refreshToken, session.TokenHash) {
-        return apperror.Fail[*Session](
-            apperror.New(ERR_TOKEN_INVALID, "Invalid refresh token"),
+        return appfault.Fail[*Session](
+            appfault.New(ERR_TOKEN_INVALID, "Invalid refresh token"),
         )
     }
     
-    return apperror.OK(session)
+    return appfault.Ok(session)
 }
 
 func (s *SessionService) Revoke(context stdctx.Context, sessionId string) error {
@@ -867,26 +867,26 @@ func (s *SessionService) RevokeAllForUser(context stdctx.Context, userId string)
 **Endpoint:** `POST /api/v1/auth/refresh`
 
 ```go
-func (s *AuthService) RefreshTokens(context stdctx.Context, refreshToken string) apperror.Result[*TokenPair] {
+func (s *AuthService) RefreshTokens(context stdctx.Context, refreshToken string) appfault.Result[*TokenPair] {
     // 1. Parse refresh token
     claimsResult := s.tokens.ParseRefreshToken(refreshToken)
     if claimsResult.IsFailure() {
-        return apperror.Fail[*TokenPair](claimsResult.Error())
+        return appfault.Fail[*TokenPair](claimsResult.Error())
     }
     claims := claimsResult.Value()
     
     // 2. Validate session
     sessionResult := s.sessions.Validate(context, claims.SessionId, refreshToken)
     if sessionResult.IsFailure() {
-        return apperror.Fail[*TokenPair](sessionResult.Error())
+        return appfault.Fail[*TokenPair](sessionResult.Error())
     }
     session := sessionResult.Value()
     
     // 3. Get user
     user, err := s.db.GetUser(context, claims.UserId)
     if err != nil {
-        return apperror.Fail[*TokenPair](
-            apperror.New(
+        return appfault.Fail[*TokenPair](
+            appfault.New(
                 ERR_USER_NOT_FOUND,
                 "User not found",
             ),
@@ -896,8 +896,8 @@ func (s *AuthService) RefreshTokens(context stdctx.Context, refreshToken string)
     // 4. Check if user is still active
     if !user.IsActive {
         s.sessions.Revoke(context, session.Id)
-        return apperror.Fail[*TokenPair](
-            apperror.New(
+        return appfault.Fail[*TokenPair](
+            appfault.New(
                 ERR_ACCOUNT_DISABLED,
                 "Account is disabled",
             ),
@@ -907,7 +907,7 @@ func (s *AuthService) RefreshTokens(context stdctx.Context, refreshToken string)
     // 5. Generate new token pair (rotation)
     newTokensResult := s.tokens.GenerateTokens(user, session.Id)
     if newTokensResult.IsFailure() {
-        return apperror.Fail[*TokenPair](newTokensResult.Error())
+        return appfault.Fail[*TokenPair](newTokensResult.Error())
     }
     newTokens := newTokensResult.Value()
     
@@ -917,7 +917,7 @@ func (s *AuthService) RefreshTokens(context stdctx.Context, refreshToken string)
     // 7. Update last active time
     s.sessions.UpdateLastActive(context, session.Id)
     
-    return apperror.OK(newTokens)
+    return appfault.Ok(newTokens)
 }
 ```
 

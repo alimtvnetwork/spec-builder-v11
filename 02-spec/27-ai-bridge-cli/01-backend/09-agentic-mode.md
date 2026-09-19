@@ -353,19 +353,19 @@ data/
 ### Cache Lookup Flow
 
 ```go
-func (e *Executor) ExecuteTool(context stdctx.Context, call ToolCall) apperror.Result[*ToolCallResult] {
+func (e *Executor) ExecuteTool(context stdctx.Context, call ToolCall) appfault.Result[*ToolCallResult] {
     // 1. Check cache
     if hasMismatch(e.config.CacheMode, CacheMode.None) {
         cached := e.cache.Get(call.Name, call.Args)
         if isDefined(cached) {
-            return apperror.Ok(cached)
+            return appfault.Ok(cached)
         }
     }
     
     // 2. Execute tool
     dispatchResult := e.dispatchTool(context, call)
     if dispatchResult.IsErr() {
-        return apperror.Fail[*ToolCallResult](dispatchResult.Err())
+        return appfault.Fail[*ToolCallResult](dispatchResult.Err())
     }
 
     result := dispatchResult.Value()
@@ -380,7 +380,7 @@ func (e *Executor) ExecuteTool(context stdctx.Context, call ToolCall) apperror.R
         e.ragIndexer.Index(call, result)
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 
@@ -537,12 +537,12 @@ func (pa *PromptAnalyzer) AnalyzePrompt(
     context stdctx.Context,
     prompt string,
     sessionContext []RAGChunk,
-) apperror.Result[*SearchPlan] {
+) appfault.Result[*SearchPlan] {
     // 1. Check plan cache (same prompt in same session → reuse)
     cacheKey := generatePlanCacheKey(prompt, sessionContext)
     cached := pa.cache.Get(cacheKey)
     if cached.IsDefined() {
-        return apperror.Ok(cached)
+        return appfault.Ok(cached)
     }
 
     // 2. Build analysis request
@@ -575,7 +575,7 @@ func (pa *PromptAnalyzer) AnalyzePrompt(
         })
 
         if resp.HasError() {
-            return apperror.Fail[*SearchPlan](resp.Error())
+            return appfault.Fail[*SearchPlan](resp.Error())
         }
     }
 
@@ -583,7 +583,7 @@ func (pa *PromptAnalyzer) AnalyzePrompt(
     var plan SearchPlan
     err := json.Unmarshal([]byte(resp.Value().Content), &plan)
     if err != nil {
-        return apperror.FailWrap[*SearchPlan](
+        return appfault.FailWrap[*SearchPlan](
             err, 9509, "search plan JSON parse failed",
         )
     }
@@ -591,16 +591,16 @@ func (pa *PromptAnalyzer) AnalyzePrompt(
     // 5. Validate plan
     validateResult := validateSearchPlan(&plan)
     if validateResult.HasError() {
-        return apperror.Fail[*SearchPlan](validateResult.Error())
+        return appfault.Fail[*SearchPlan](validateResult.Error())
     }
 
     // 6. Cache and return
     pa.cache.Set(cacheKey, &plan, 10*time.Minute)
 
-    return apperror.Ok(&plan)
+    return appfault.Ok(&plan)
 }
 
-func validateSearchPlan(plan *SearchPlan) *apperror.AppError {
+func validateSearchPlan(plan *SearchPlan) *appfault.AppError {
     // Validate no circular dependencies
     allIds := map[string]bool{}
     for _, si := range plan.SearchInstructions {
@@ -613,7 +613,7 @@ func validateSearchPlan(plan *SearchPlan) *apperror.AppError {
     for _, ti := range plan.TaskChain {
         for _, dep := range ti.DependsOn {
             if !allIds[dep] {
-                return apperror.New(
+                return appfault.New(
                     9510,
                     "task %s depends on unknown step %s", ti.Id, dep,
                 )
@@ -634,7 +634,7 @@ func (e *AgenticExecutor) ExecuteSearchPlan(
     context stdctx.Context,
     plan *SearchPlan,
     session *ChainExecution,
-) apperror.Result[*PlanExecutionResult] {
+) appfault.Result[*PlanExecutionResult] {
     result := &PlanExecutionResult{
         SearchResults: map[string]*WebSearchResult{},
         TaskOutputs:   map[string]*TaskOutput{},
@@ -703,13 +703,13 @@ func (e *AgenticExecutor) ExecuteSearchPlan(
         wg.Wait()
     }
 
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 func (e *AgenticExecutor) executeSearch(
     context stdctx.Context,
     instr SearchInstruction,
-) apperror.Result[*WebSearchResult] {
+) appfault.Result[*WebSearchResult] {
     // Map SearchInstruction → GSearch CLI call
     switch instr.SearchType {
     case "web", "documentation", "news":
@@ -726,11 +726,11 @@ func (e *AgenticExecutor) executeSearch(
             Language: instr.Constraints.CodeLanguage,
         })
         if codeResult.HasError() {
-            return apperror.Fail[*WebSearchResult](codeResult.Error())
+            return appfault.Fail[*WebSearchResult](codeResult.Error())
         }
-        return apperror.Ok(convertCodeToWebResult(codeResult.Value()))
+        return appfault.Ok(convertCodeToWebResult(codeResult.Value()))
     default:
-        return apperror.FailNew[*WebSearchResult](
+        return appfault.FailNew[*WebSearchResult](
             9502, "unsupported search type: %s", instr.SearchType,
         )
     }

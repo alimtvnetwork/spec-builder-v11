@@ -228,7 +228,7 @@ type Config struct {
     Metrics    MetricsConfig    `yaml:"metrics"`
 }
 
-func Load(path string) apperror.Result[Config] {
+func Load(path string) appfault.Result[Config] {
     // 1. Load defaults
     cfg := DefaultConfig()
     

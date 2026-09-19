@@ -29,20 +29,20 @@ Priority Order:
 type TTSProvider interface {
     // Core operations
     Name() string
-    Synthesize(context context.Context, text string, opts *SynthesizeOptions) apperror.Result[AudioResult]
-    SynthesizeStream(context context.Context, text string, opts *SynthesizeOptions) apperror.Result[<-chan *AudioChunk]
+    Synthesize(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[AudioResult]
+    SynthesizeStream(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[<-chan *AudioChunk]
     
     // Voice management
-    ListVoices() apperror.Result[[]Voice]
-    GetVoice(voiceId string) apperror.Result[Voice]
-    CloneVoice(context context.Context, name string, samples [][]byte) apperror.Result[Voice]
-    DeleteVoice(voiceId string) *apperror.AppError
+    ListVoices() appfault.Result[[]Voice]
+    GetVoice(voiceId string) appfault.Result[Voice]
+    CloneVoice(context context.Context, name string, samples [][]byte) appfault.Result[Voice]
+    DeleteVoice(voiceId string) *appfault.AppError
     
     // Status
     IsAvailable() bool
     Health() ProviderStatus
-    Initialize(context context.Context, config *ProviderConfig) *apperror.AppError
-    Shutdown() *apperror.AppError
+    Initialize(context context.Context, config *ProviderConfig) *appfault.AppError
+    Shutdown() *appfault.AppError
 }
 
 type SynthesizeOptions struct {
@@ -131,14 +131,14 @@ func NewXTTSProvider(config *XTTSConfig) *XTTSProvider {
     }
 }
 
-func (xp *XTTSProvider) Initialize(context context.Context, config *ProviderConfig) *apperror.AppError {
+func (xp *XTTSProvider) Initialize(context context.Context, config *ProviderConfig) *appfault.AppError {
     xp.mu.Lock()
     defer xp.mu.Unlock()
     
     // Load XTTS model
     model, loadErr := xtts.Load(xp.config.ModelPath, xp.config.Device)
     if loadErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             loadErr,
             "E14151",
             "failed to load XTTS model",
@@ -157,7 +157,7 @@ func (xp *XTTSProvider) Initialize(context context.Context, config *ProviderConf
     return nil
 }
 
-func (xp *XTTSProvider) loadClonedVoices() *apperror.AppError {
+func (xp *XTTSProvider) loadClonedVoices() *appfault.AppError {
     entries, readErr := pathutil.ReadDir(xp.config.SpeakersDir)
     if readErr != nil {
         mkdirErr := pathutil.MkdirAll(xp.config.SpeakersDir, 0755)
@@ -190,12 +190,12 @@ func (xp *XTTSProvider) loadClonedVoices() *apperror.AppError {
     return nil
 }
 
-func (xp *XTTSProvider) Synthesize(context context.Context, text string, opts *SynthesizeOptions) apperror.Result[AudioResult] {
+func (xp *XTTSProvider) Synthesize(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[AudioResult] {
     xp.mu.RLock()
     defer xp.mu.RUnlock()
     
     if !xp.isReady {
-        return apperror.FailNew[AudioResult](
+        return appfault.FailNew[AudioResult](
             "E14151",
             "XTTS model not initialized",
         )
@@ -235,7 +235,7 @@ func (xp *XTTSProvider) Synthesize(context context.Context, text string, opts *S
     
     audioData, synthErr := xp.model.Synthesize(context, synthOpts)
     if synthErr != nil {
-        return apperror.FailWrap[AudioResult](
+        return appfault.FailWrap[AudioResult](
             synthErr,
             "E14152",
             "XTTS synthesis failed",
@@ -245,14 +245,14 @@ func (xp *XTTSProvider) Synthesize(context context.Context, text string, opts *S
     // Encode to requested format
     encoded, encodeErr := xp.encodeAudio(audioData, opts.OutputFormat, opts.SampleRate)
     if encodeErr != nil {
-        return apperror.FailWrap[AudioResult](
+        return appfault.FailWrap[AudioResult](
             encodeErr,
             "E14158",
             "audio encoding failed",
         )
     }
     
-    return apperror.Ok(AudioResult{
+    return appfault.Ok(AudioResult{
         Data:           encoded,
         Format:         opts.OutputFormat,
         SampleRate:     opts.SampleRate,
@@ -261,7 +261,7 @@ func (xp *XTTSProvider) Synthesize(context context.Context, text string, opts *S
     })
 }
 
-func (xp *XTTSProvider) SynthesizeStream(context context.Context, text string, opts *SynthesizeOptions) apperror.Result[<-chan *AudioChunk] {
+func (xp *XTTSProvider) SynthesizeStream(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[<-chan *AudioChunk] {
     resultChan := make(chan *AudioChunk, 100)
     
     go func() {
@@ -287,10 +287,10 @@ func (xp *XTTSProvider) SynthesizeStream(context context.Context, text string, o
         }
     }()
     
-    return apperror.Ok((<-chan *AudioChunk)(resultChan))
+    return appfault.Ok((<-chan *AudioChunk)(resultChan))
 }
 
-func (xp *XTTSProvider) CloneVoice(context context.Context, name string, samples [][]byte) apperror.Result[Voice] {
+func (xp *XTTSProvider) CloneVoice(context context.Context, name string, samples [][]byte) appfault.Result[Voice] {
     xp.mu.Lock()
     defer xp.mu.Unlock()
     
@@ -298,7 +298,7 @@ func (xp *XTTSProvider) CloneVoice(context context.Context, name string, samples
     voiceDir := filepath.Join(xp.config.SpeakersDir, voiceId)
     
     if mkdirErr := pathutil.MkdirAll(voiceDir, 0755); mkdirErr != nil {
-        return apperror.Fail[Voice](mkdirErr)
+        return appfault.Fail[Voice](mkdirErr)
     }
     
     // Save sample files
@@ -306,7 +306,7 @@ func (xp *XTTSProvider) CloneVoice(context context.Context, name string, samples
     for i, sample := range samples {
         samplePath := filepath.Join(voiceDir, fmt.Sprintf("sample_%d.wav", i))
         if writeErr := pathutil.WriteFile(samplePath, sample, 0644); writeErr != nil {
-            return apperror.Fail[Voice](writeErr)
+            return appfault.Fail[Voice](writeErr)
         }
         samplePaths = append(samplePaths, samplePath)
     }
@@ -314,7 +314,7 @@ func (xp *XTTSProvider) CloneVoice(context context.Context, name string, samples
     // Extract voice embedding
     embedding, embedErr := xp.model.ExtractSpeakerEmbedding(samplePaths[0])
     if embedErr != nil {
-        return apperror.FailWrap[Voice](
+        return appfault.FailWrap[Voice](
             embedErr,
             "E14154",
             "failed to extract voice embedding",
@@ -333,12 +333,12 @@ func (xp *XTTSProvider) CloneVoice(context context.Context, name string, samples
     metaPath := filepath.Join(voiceDir, "meta.json")
     metaData, _ := json.Marshal(clonedVoice)
     if writeErr := pathutil.WriteFile(metaPath, metaData, 0644); writeErr != nil {
-        return apperror.Fail[Voice](writeErr)
+        return appfault.Fail[Voice](writeErr)
     }
     
     xp.voices[voiceId] = clonedVoice
     
-    return apperror.Ok(Voice{
+    return appfault.Ok(Voice{
         Id:       voiceId,
         Name:     name,
         Provider: "xtts",
@@ -346,7 +346,7 @@ func (xp *XTTSProvider) CloneVoice(context context.Context, name string, samples
     })
 }
 
-func (xp *XTTSProvider) ListVoices() apperror.Result[[]Voice] {
+func (xp *XTTSProvider) ListVoices() appfault.Result[[]Voice] {
     xp.mu.RLock()
     defer xp.mu.RUnlock()
     
@@ -371,7 +371,7 @@ func (xp *XTTSProvider) ListVoices() apperror.Result[[]Voice] {
         })
     }
     
-    return apperror.Ok(voices)
+    return appfault.Ok(voices)
 }
 
 func (xp *XTTSProvider) Name() string {
@@ -445,7 +445,7 @@ func NewElevenLabsProvider(config *ElevenLabsConfig) *ElevenLabsProvider {
     }
 }
 
-func (ep *ElevenLabsProvider) Initialize(context context.Context, config *ProviderConfig) *apperror.AppError {
+func (ep *ElevenLabsProvider) Initialize(context context.Context, config *ProviderConfig) *appfault.AppError {
     // Verify API key and fetch voices
     voiceResult := ep.fetchVoices(context)
     if voiceResult.HasError() {
@@ -458,14 +458,14 @@ func (ep *ElevenLabsProvider) Initialize(context context.Context, config *Provid
     return nil
 }
 
-func (ep *ElevenLabsProvider) fetchVoices(context context.Context) apperror.Result[[]Voice] {
+func (ep *ElevenLabsProvider) fetchVoices(context context.Context) appfault.Result[[]Voice] {
     req, _ := http.NewRequestWithContext(context, httpmethodtype.Get.HttpVerb(),
         ep.config.Endpoint+"/v1/voices", nil)
     req.Header.Set("xi-api-key", ep.config.ApiKey)
     
     resp, doErr := ep.client.Do(req)
     if doErr != nil {
-        return apperror.FailWrap[[]Voice](
+        return appfault.FailWrap[[]Voice](
             doErr,
             "E14150",
             "ElevenLabs API request failed",
@@ -474,7 +474,7 @@ func (ep *ElevenLabsProvider) fetchVoices(context context.Context) apperror.Resu
     defer resp.Body.Close()
     
     if resp.StatusCode != 200 {
-        return apperror.FailNew[[]Voice](
+        return appfault.FailNew[[]Voice](
             "E14150",
             fmt.Sprintf("ElevenLabs API error: %d", resp.StatusCode),
         )
@@ -492,7 +492,7 @@ func (ep *ElevenLabsProvider) fetchVoices(context context.Context) apperror.Resu
     }
     
     if decodeErr := json.NewDecoder(resp.Body).Decode(&result); decodeErr != nil {
-        return apperror.FailWrap[[]Voice](
+        return appfault.FailWrap[[]Voice](
             decodeErr,
             "E14150",
             "decode ElevenLabs voices response",
@@ -513,10 +513,10 @@ func (ep *ElevenLabsProvider) fetchVoices(context context.Context) apperror.Resu
         })
     }
     
-    return apperror.Ok(voices)
+    return appfault.Ok(voices)
 }
 
-func (ep *ElevenLabsProvider) Synthesize(context context.Context, text string, opts *SynthesizeOptions) apperror.Result[AudioResult] {
+func (ep *ElevenLabsProvider) Synthesize(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[AudioResult] {
     voiceId := opts.VoiceId
     if voiceId == "" {
         voiceId = ep.config.DefaultVoice
@@ -583,7 +583,7 @@ func (ep *ElevenLabsProvider) Synthesize(context context.Context, text string, o
     
     resp, doErr := ep.client.Do(req)
     if doErr != nil {
-        return apperror.FailWrap[AudioResult](
+        return appfault.FailWrap[AudioResult](
             doErr,
             "E14152",
             "ElevenLabs request failed",
@@ -594,7 +594,7 @@ func (ep *ElevenLabsProvider) Synthesize(context context.Context, text string, o
     if resp.StatusCode != 200 {
         respBody, _ := io.ReadAll(resp.Body)
 
-        return apperror.FailNew[AudioResult](
+        return appfault.FailNew[AudioResult](
             "E14152",
             fmt.Sprintf("ElevenLabs error %d: %s", resp.StatusCode, string(respBody)),
         )
@@ -602,14 +602,14 @@ func (ep *ElevenLabsProvider) Synthesize(context context.Context, text string, o
     
     audioData, readErr := io.ReadAll(resp.Body)
     if readErr != nil {
-        return apperror.FailWrap[AudioResult](
+        return appfault.FailWrap[AudioResult](
             readErr,
             "E14158",
             "read ElevenLabs audio response",
         )
     }
     
-    return apperror.Ok(AudioResult{
+    return appfault.Ok(AudioResult{
         Data:           audioData,
         Format:         opts.OutputFormat,
         SampleRate:     opts.SampleRate,
@@ -617,7 +617,7 @@ func (ep *ElevenLabsProvider) Synthesize(context context.Context, text string, o
     })
 }
 
-func (ep *ElevenLabsProvider) SynthesizeStream(context context.Context, text string, opts *SynthesizeOptions) apperror.Result[<-chan *AudioChunk] {
+func (ep *ElevenLabsProvider) SynthesizeStream(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[<-chan *AudioChunk] {
     resultChan := make(chan *AudioChunk, 100)
     
     voiceId := opts.VoiceId
@@ -689,10 +689,10 @@ func (ep *ElevenLabsProvider) SynthesizeStream(context context.Context, text str
         }
     }()
     
-    return apperror.Ok((<-chan *AudioChunk)(resultChan))
+    return appfault.Ok((<-chan *AudioChunk)(resultChan))
 }
 
-func (ep *ElevenLabsProvider) CloneVoice(context context.Context, name string, samples [][]byte) apperror.Result[Voice] {
+func (ep *ElevenLabsProvider) CloneVoice(context context.Context, name string, samples [][]byte) appfault.Result[Voice] {
     // Create multipart form
     var body bytes.Buffer
     writer := multipart.NewWriter(&body)
@@ -704,7 +704,7 @@ func (ep *ElevenLabsProvider) CloneVoice(context context.Context, name string, s
     for i, sample := range samples {
         part, partErr := writer.CreateFormFile("files", fmt.Sprintf("sample_%d.mp3", i))
         if partErr != nil {
-            return apperror.FailWrap[Voice](
+            return appfault.FailWrap[Voice](
                 partErr,
                 "E14154",
                 "create multipart form file",
@@ -722,7 +722,7 @@ func (ep *ElevenLabsProvider) CloneVoice(context context.Context, name string, s
     
     resp, doErr := ep.client.Do(req)
     if doErr != nil {
-        return apperror.FailWrap[Voice](
+        return appfault.FailWrap[Voice](
             doErr,
             "E14154",
             "ElevenLabs voice cloning request failed",
@@ -733,7 +733,7 @@ func (ep *ElevenLabsProvider) CloneVoice(context context.Context, name string, s
     if resp.StatusCode != 200 {
         respBody, _ := io.ReadAll(resp.Body)
 
-        return apperror.FailNew[Voice](
+        return appfault.FailNew[Voice](
             "E14154",
             "voice cloning failed: "+string(respBody),
         )
@@ -745,7 +745,7 @@ func (ep *ElevenLabsProvider) CloneVoice(context context.Context, name string, s
     }
     json.NewDecoder(resp.Body).Decode(&result)
     
-    return apperror.Ok(Voice{
+    return appfault.Ok(Voice{
         Id:       result.VoiceId,
         Name:     name,
         Provider: "elevenlabs",
@@ -753,11 +753,11 @@ func (ep *ElevenLabsProvider) CloneVoice(context context.Context, name string, s
     })
 }
 
-func (ep *ElevenLabsProvider) ListVoices() apperror.Result[[]Voice] {
+func (ep *ElevenLabsProvider) ListVoices() appfault.Result[[]Voice] {
     ep.mu.RLock()
     defer ep.mu.RUnlock()
 
-    return apperror.Ok(ep.voices)
+    return appfault.Ok(ep.voices)
 }
 
 func (ep *ElevenLabsProvider) Name() string {
@@ -806,7 +806,7 @@ func NewAzureTtsProvider(config *AzureTtsConfig) *AzureTtsProvider {
     }
 }
 
-func (ap *AzureTtsProvider) Initialize(context context.Context, config *ProviderConfig) *apperror.AppError {
+func (ap *AzureTtsProvider) Initialize(context context.Context, config *ProviderConfig) *appfault.AppError {
     // Get initial auth token
     if tokenErr := ap.refreshToken(context); tokenErr != nil {
         return tokenErr
@@ -824,7 +824,7 @@ func (ap *AzureTtsProvider) Initialize(context context.Context, config *Provider
     return nil
 }
 
-func (ap *AzureTtsProvider) refreshToken(context context.Context) *apperror.AppError {
+func (ap *AzureTtsProvider) refreshToken(context context.Context) *appfault.AppError {
     ap.mu.Lock()
     defer ap.mu.Unlock()
     
@@ -841,7 +841,7 @@ func (ap *AzureTtsProvider) refreshToken(context context.Context) *apperror.AppE
     
     resp, doErr := ap.client.Do(req)
     if doErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             doErr,
             "E14156",
             "Azure token refresh request failed",
@@ -850,7 +850,7 @@ func (ap *AzureTtsProvider) refreshToken(context context.Context) *apperror.AppE
     defer resp.Body.Close()
     
     if resp.StatusCode != 200 {
-        return apperror.New(
+        return appfault.New(
             "E14156",
             fmt.Sprintf("Azure token refresh failed: %d", resp.StatusCode),
         ).WithStatusCode(resp.StatusCode)
@@ -863,9 +863,9 @@ func (ap *AzureTtsProvider) refreshToken(context context.Context) *apperror.AppE
     return nil
 }
 
-func (ap *AzureTtsProvider) Synthesize(context context.Context, text string, opts *SynthesizeOptions) apperror.Result[AudioResult] {
+func (ap *AzureTtsProvider) Synthesize(context context.Context, text string, opts *SynthesizeOptions) appfault.Result[AudioResult] {
     if tokenErr := ap.refreshToken(context); tokenErr != nil {
-        return apperror.Fail[AudioResult](tokenErr)
+        return appfault.Fail[AudioResult](tokenErr)
     }
     
     voiceName := opts.VoiceId
@@ -895,7 +895,7 @@ func (ap *AzureTtsProvider) Synthesize(context context.Context, text string, opt
     
     resp, doErr := ap.client.Do(req)
     if doErr != nil {
-        return apperror.FailWrap[AudioResult](
+        return appfault.FailWrap[AudioResult](
             doErr,
             "E14152",
             "Azure TTS request failed",
@@ -906,7 +906,7 @@ func (ap *AzureTtsProvider) Synthesize(context context.Context, text string, opt
     if resp.StatusCode != 200 {
         respBody, _ := io.ReadAll(resp.Body)
 
-        return apperror.FailNew[AudioResult](
+        return appfault.FailNew[AudioResult](
             "E14152",
             fmt.Sprintf("Azure TTS error %d: %s", resp.StatusCode, string(respBody)),
         )
@@ -914,7 +914,7 @@ func (ap *AzureTtsProvider) Synthesize(context context.Context, text string, opt
     
     audioData, _ := io.ReadAll(resp.Body)
     
-    return apperror.Ok(AudioResult{
+    return appfault.Ok(AudioResult{
         Data:           audioData,
         Format:         opts.OutputFormat,
         SampleRate:     opts.SampleRate,
@@ -958,7 +958,7 @@ func (ap *AzureTtsProvider) getOutputFormat(opts *SynthesizeOptions) string {
     }
 }
 
-func (ap *AzureTtsProvider) fetchVoices(context context.Context) apperror.Result[[]Voice] {
+func (ap *AzureTtsProvider) fetchVoices(context context.Context) appfault.Result[[]Voice] {
     endpoint := fmt.Sprintf("https://%s.tts.speech.microsoft.com/cognitiveservices/voices/list",
         ap.config.Region)
     
@@ -967,7 +967,7 @@ func (ap *AzureTtsProvider) fetchVoices(context context.Context) apperror.Result
     
     resp, doErr := ap.client.Do(req)
     if doErr != nil {
-        return apperror.FailWrap[[]Voice](
+        return appfault.FailWrap[[]Voice](
             doErr,
             "E14150",
             "Azure voice list request failed",
@@ -998,14 +998,14 @@ func (ap *AzureTtsProvider) fetchVoices(context context.Context) apperror.Result
         })
     }
     
-    return apperror.Ok(voices)
+    return appfault.Ok(voices)
 }
 
-func (ap *AzureTtsProvider) ListVoices() apperror.Result[[]Voice] {
+func (ap *AzureTtsProvider) ListVoices() appfault.Result[[]Voice] {
     ap.mu.RLock()
     defer ap.mu.RUnlock()
 
-    return apperror.Ok(ap.voices)
+    return appfault.Ok(ap.voices)
 }
 
 func (ap *AzureTtsProvider) Name() string {
@@ -1017,8 +1017,8 @@ func (ap *AzureTtsProvider) IsAvailable() bool {
 }
 
 // Azure doesn't support voice cloning via API
-func (ap *AzureTtsProvider) CloneVoice(context context.Context, name string, samples [][]byte) apperror.Result[Voice] {
-    return apperror.FailNew[Voice](
+func (ap *AzureTtsProvider) CloneVoice(context context.Context, name string, samples [][]byte) appfault.Result[Voice] {
+    return appfault.FailNew[Voice](
         "E14154",
         "voice cloning not supported by Azure TTS",
     )
@@ -1049,19 +1049,19 @@ func (r *TTSProviderRegistry) Register(provider TTSProvider) {
     r.providers[provider.Name()] = provider
 }
 
-func (r *TTSProviderRegistry) GetPrimary() apperror.Result[TTSProvider] {
+func (r *TTSProviderRegistry) GetPrimary() appfault.Result[TTSProvider] {
     r.mu.RLock()
     defer r.mu.RUnlock()
     
     for _, name := range r.priority {
         if provider, ok := r.providers[name]; ok {
             if provider.IsAvailable() {
-                return apperror.Ok(provider)
+                return appfault.Ok(provider)
             }
         }
     }
     
-    return apperror.FailNew[TTSProvider](
+    return appfault.FailNew[TTSProvider](
         "E14150",
         "no TTS provider available",
     )

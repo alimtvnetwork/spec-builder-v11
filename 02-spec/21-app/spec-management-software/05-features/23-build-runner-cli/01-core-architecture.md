@@ -131,13 +131,13 @@ Common interface for all runtime executors.
 ```go
 type Executor interface {
     // Execute runs a command and returns the result
-    Execute(context context.Context, command *Command) apperror.Result[ExecutionResult]
+    Execute(context context.Context, command *Command) appfault.Result[ExecutionResult]
     
     // Validate checks if the runtime is available
-    Validate() *apperror.AppError
+    Validate() *appfault.AppError
     
     // GetVersion returns the runtime version
-    GetVersion() apperror.Result[string]
+    GetVersion() appfault.Result[string]
 }
 
 type Command struct {

@@ -33,3 +33,4 @@
 | [01-axios-version-control-specs.md](./completed/01-axios-version-control-specs.md) | 2026-04-01 | 6 files | Strict pinning policy & drift detection specs |
 | [02-code-block-toolbar-redesign.md](./completed/02-code-block-toolbar-redesign.md) | 2026-04-19 | UI + spec | Discrete-pill pattern with Poppins button labels |
 | [03-spec-builder-restructure-and-sync.md](./completed/03-spec-builder-restructure-and-sync.md) | 2026-09-19 | System-wide | Spec restructuring (02-spec), toolchain sync, and UI compatibility |
+| [04-spec-audit-and-error-management-modernization.md](./completed/04-spec-audit-and-error-management-modernization.md) | 2026-09-19 | Folders 21–60 (290 files) | Spec audit & error management modernization to canonical `appfault` architecture |

@@ -241,7 +241,7 @@ type TaskResult struct {
     TokensOut int
 }
 
-func (pe *ParallelExecutor) Execute(graph *TaskGraph) apperror.Result[map[string]*TaskResult] {
+func (pe *ParallelExecutor) Execute(graph *TaskGraph) appfault.Result[map[string]*TaskResult] {
     var wg sync.WaitGroup
     semaphore := make(chan struct{}, pe.maxParallel)
     
@@ -552,7 +552,7 @@ type RoutingDecision struct {
     Reason          string
 }
 
-func (mr *ModelRouter) Route(query string, intent string) apperror.Result[RoutingDecision] {
+func (mr *ModelRouter) Route(query string, intent string) appfault.Result[RoutingDecision] {
     // Get threshold from settings (Seedable Config)
     threshold, err := mr.settings.GetFloat("model_routing", "complexity_threshold")
     if err != nil {
@@ -562,7 +562,7 @@ func (mr *ModelRouter) Route(query string, intent string) apperror.Result[Routin
     // Get model pool from settings
     modelPool, err := mr.settings.GetMap("model_routing", "model_pool")
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrModelPoolConfig,
             "failed to get model pool",

@@ -297,10 +297,10 @@ type Message struct {
 	CreatedAt int64
 }
 
-func (s *Service) CreateMessage(context stdctx.Context, userId string, payload SyncPayload) apperror.Result[Message] {
+func (s *Service) CreateMessage(context stdctx.Context, userId string, payload SyncPayload) appfault.Result[Message] {
 	// Validate session belongs to user
 	if !s.userOwnsSession(context, userId, payload.SessionId) {
-		return apperror.FailNew[Message](
+		return appfault.FailNew[Message](
 			"E9600",
 			"unauthorized",
 		)
@@ -320,14 +320,14 @@ func (s *Service) CreateMessage(context stdctx.Context, userId string, payload S
 	`, msg.Id, msg.SessionId, msg.Content, msg.Role, msg.CreatedAt)
 	
 	if err != nil {
-		return apperror.FailWrap[Message](
+		return appfault.FailWrap[Message](
 			err,
 			"E9601",
 			"failed to create message",
 		)
 	}
 	
-	return apperror.Ok(msg)
+	return appfault.Ok(msg)
 }
 
 func (s *Service) UpdateMessage(context stdctx.Context, userId, msgId string, payload SyncPayload) error {

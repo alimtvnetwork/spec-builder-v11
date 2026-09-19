@@ -155,7 +155,7 @@ func WithCacheSize(size int) Option {
 }
 
 // Open opens a database connection
-func Open(path string, opts ...Option) apperror.Result[DB] {
+func Open(path string, opts ...Option) appfault.Result[DB] {
     db := &DB{
         path:            path,
         logger:          logging.NewNoop(),
@@ -185,7 +185,7 @@ func Open(path string, opts ...Option) apperror.Result[DB] {
     
     sqlDb, err := sql.Open("sqlite", dsn)
     if err != nil {
-        return apperror.FailNew[DB](
+        return appfault.FailNew[DB](
             errors.ErrDatabaseConnection,
             "failed to open database",
         )
@@ -206,7 +206,7 @@ func Open(path string, opts ...Option) apperror.Result[DB] {
     if err := db.PingContext(context); err != nil {
         sqlDb.Close()
 
-        return apperror.FailNew[DB](
+        return appfault.FailNew[DB](
             errors.ErrDatabaseConnection,
             "failed to ping database",
         )
@@ -218,7 +218,7 @@ func Open(path string, opts ...Option) apperror.Result[DB] {
         "cache_size", db.cacheSize,
     )
     
-    return apperror.Ok(*db)
+    return appfault.Ok(*db)
 }
 
 // Close closes the database connection
@@ -284,12 +284,12 @@ type TxOptions struct {
 }
 
 // Begin starts a new transaction
-func (db *DB) Begin(context stdctx.Context) apperror.Result[Tx] {
+func (db *DB) Begin(context stdctx.Context) appfault.Result[Tx] {
     return db.BeginTx(context, nil)
 }
 
 // BeginTx starts a new transaction with options
-func (db *DB) BeginTx(context stdctx.Context, opts *TxOptions) apperror.Result[Tx] {
+func (db *DB) BeginTx(context stdctx.Context, opts *TxOptions) appfault.Result[Tx] {
     var sqlOpts *sql.TxOptions
     if opts != nil {
         sqlOpts = &sql.TxOptions{
@@ -300,13 +300,13 @@ func (db *DB) BeginTx(context stdctx.Context, opts *TxOptions) apperror.Result[T
     
     tx, err := db.DB.BeginTx(context, sqlOpts)
     if err != nil {
-        return apperror.FailNew[Tx](
+        return appfault.FailNew[Tx](
             errors.ErrDatabaseTransaction,
             "failed to begin transaction",
         )
     }
     
-    return apperror.Ok(Tx{
+    return appfault.Ok(Tx{
         Tx:      tx,
         db:      db,
         context: context,
@@ -374,10 +374,10 @@ func (db *DB) WithTx(context stdctx.Context, fn func(*Tx) error) error {
 }
 
 // WithTxResult executes a function within a transaction and returns a result
-func WithTxResult[T any](db *DB, context stdctx.Context, fn func(*Tx) apperror.Result[T]) apperror.Result[T] {
+func WithTxResult[T any](db *DB, context stdctx.Context, fn func(*Tx) appfault.Result[T]) appfault.Result[T] {
     txResult := db.Begin(context)
     if txResult.HasError() {
-        return apperror.Fail[T](txResult.Error())
+        return appfault.Fail[T](txResult.Error())
     }
 
     tx := txResult.Value()
@@ -474,7 +474,7 @@ type Migration struct {
 
 // MigrationSource provides migrations
 type MigrationSource interface {
-    Migrations() apperror.Result[[]Migration]
+    Migrations() appfault.Result[[]Migration]
 }
 
 // EmbedSource loads migrations from embedded files
@@ -484,12 +484,12 @@ type EmbedSource struct {
 }
 
 // Migrations loads migrations from embedded filesystem
-func (s *EmbedSource) Migrations() apperror.Result[[]Migration] {
+func (s *EmbedSource) Migrations() appfault.Result[[]Migration] {
     var migrations []Migration
     
     entries, err := fs.ReadDir(s.FS, s.Dir)
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrMigrationReadDir,
             "read migrations dir",
@@ -515,7 +515,7 @@ func (s *EmbedSource) Migrations() apperror.Result[[]Migration] {
         
         upSQL, err := fs.ReadFile(s.FS, upPath)
         if err != nil {
-            return nil, apperror.Wrap(
+            return nil, appfault.Wrap(
                 err,
                 ErrMigrationReadFile,
                 "read migration file",
@@ -642,7 +642,7 @@ func (m *Migrator) Rollback(context stdctx.Context, n int) error {
 }
 
 // Status returns the status of all migrations
-func (m *Migrator) Status(context stdctx.Context) apperror.Result[[]Migration] {
+func (m *Migrator) Status(context stdctx.Context) appfault.Result[[]Migration] {
     migrations, err := m.source.Migrations()
     if err != nil {
         return nil, err
@@ -675,7 +675,7 @@ func (m *Migrator) Status(context stdctx.Context) apperror.Result[[]Migration] {
     return migrations, nil
 }
 
-func (m *Migrator) ensureMigrationsTable(context stdctx.Context) *apperror.AppError {
+func (m *Migrator) ensureMigrationsTable(context stdctx.Context) *appfault.AppError {
     _, err := m.db.ExecContext(context, `
         CREATE TABLE IF NOT EXISTS Migrations (
             Version   INTEGER PRIMARY KEY,
@@ -686,7 +686,7 @@ func (m *Migrator) ensureMigrationsTable(context stdctx.Context) *apperror.AppEr
     return err
 }
 
-func (m *Migrator) getAppliedVersions(context stdctx.Context) apperror.Result[map[int]bool] {
+func (m *Migrator) getAppliedVersions(context stdctx.Context) appfault.Result[map[int]bool] {
     rows, err := m.db.QueryContext(context, "SELECT Version FROM Migrations")
     if err != nil {
         return nil, err
@@ -806,18 +806,18 @@ func (db *DB) HealthCheck(context stdctx.Context) Health {
 }
 
 // IntegrityCheck runs SQLite integrity check
-func (db *DB) IntegrityCheck(context stdctx.Context) apperror.Result[bool] {
+func (db *DB) IntegrityCheck(context stdctx.Context) appfault.Result[bool] {
     var result string
     err := db.QueryRowContext(context, "PRAGMA integrity_check").Scan(&result)
     if err != nil {
-        return apperror.FailWrap[bool](
+        return appfault.FailWrap[bool](
             err,
             errors.ErrDatabaseQuery,
             "integrity check failed",
         )
     }
 
-    return apperror.Ok(result == "ok")
+    return appfault.Ok(result == "ok")
 }
 
 // Vacuum runs SQLite VACUUM
@@ -978,7 +978,7 @@ func (q *QueryBuilder) CountQuery() (string, []any) {
 }
 
 // GetOne retrieves a single row
-func GetOne[T any](context stdctx.Context, e Executor, query string, args []any, scan func(*sql.Row) apperror.Result[T]) apperror.Result[T] {
+func GetOne[T any](context stdctx.Context, e Executor, query string, args []any, scan func(*sql.Row) appfault.Result[T]) appfault.Result[T] {
     row := e.QueryRowContext(context, query, args...)
     result := scan(row)
     if result.HasError() {
@@ -989,10 +989,10 @@ func GetOne[T any](context stdctx.Context, e Executor, query string, args []any,
 }
 
 // GetMany retrieves multiple rows
-func GetMany[T any](context stdctx.Context, e Executor, query string, args []any, scan func(*sql.Rows) apperror.Result[T]) apperror.Result[[]T] {
+func GetMany[T any](context stdctx.Context, e Executor, query string, args []any, scan func(*sql.Rows) appfault.Result[T]) appfault.Result[[]T] {
     rows, err := e.QueryContext(context, query, args...)
     if err != nil {
-        return apperror.FailNew[[]T](
+        return appfault.FailNew[[]T](
             errors.ErrDatabaseQuery,
             "failed to execute query",
         )
@@ -1003,34 +1003,34 @@ func GetMany[T any](context stdctx.Context, e Executor, query string, args []any
     for rows.Next() {
         itemResult := scan(rows)
         if itemResult.HasError() {
-            return apperror.Fail[[]T](itemResult.Error())
+            return appfault.Fail[[]T](itemResult.Error())
         }
 
         results = append(results, itemResult.Value())
     }
     
     if err := rows.Err(); err != nil {
-        return apperror.FailNew[[]T](
+        return appfault.FailNew[[]T](
             errors.ErrDatabaseQuery,
             "error iterating rows",
         )
     }
     
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 
 // Count returns the count of matching rows
-func Count(context stdctx.Context, e Executor, query string, args []any) apperror.Result[int] {
+func Count(context stdctx.Context, e Executor, query string, args []any) appfault.Result[int] {
     var count int
     err := e.QueryRowContext(context, query, args...).Scan(&count)
     if err != nil {
-        return apperror.FailNew[int](
+        return appfault.FailNew[int](
             errors.ErrDatabaseQuery,
             "failed to count records",
         )
     }
 
-    return apperror.Ok(count)
+    return appfault.Ok(count)
 }
     }
     return count, nil

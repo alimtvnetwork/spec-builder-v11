@@ -368,14 +368,14 @@ func NewService(modelPath string) *Service {
 }
 
 // Transcribe audio file using whisper.cpp
-func (s *Service) Transcribe(context stdctx.Context, audioData []byte, format string) apperror.Result[TranscriptionResult] {
+func (s *Service) Transcribe(context stdctx.Context, audioData []byte, format string) appfault.Result[TranscriptionResult] {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	
 	// Convert to WAV if needed (whisper.cpp works best with WAV)
 	wavResult := s.convertToWav(audioData, format)
 	if wavResult.HasError() {
-		return apperror.FailWrap[TranscriptionResult](
+		return appfault.FailWrap[TranscriptionResult](
 			wavResult.Error(),
 			"E9520",
 			"audio conversion failed",
@@ -397,7 +397,7 @@ func (s *Service) Transcribe(context stdctx.Context, audioData []byte, format st
 	cmd.Stderr = &stderr
 	
 	if err := cmd.Run(); err != nil {
-		return apperror.FailWrap[TranscriptionResult](
+		return appfault.FailWrap[TranscriptionResult](
 			err,
 			"E9521",
 			"whisper execution failed",
@@ -412,7 +412,7 @@ func (s *Service) TranscribeStream(
 	context stdctx.Context,
 	audioStream io.Reader,
 	onSegment func(Segment),
-) apperror.Result[TranscriptionResult] {
+) appfault.Result[TranscriptionResult] {
 	// Buffer audio chunks
 	var buffer bytes.Buffer
 	chunk := make([]byte, 16000*2) // 1 second of 16kHz 16-bit audio
@@ -423,7 +423,7 @@ func (s *Service) TranscribeStream(
 	for {
 		select {
 		case <-context.Done():
-			return apperror.FailWrap[TranscriptionResult](
+			return appfault.FailWrap[TranscriptionResult](
 				context.Err(),
 				"E9522",
 				"streaming transcription cancelled",
@@ -437,7 +437,7 @@ func (s *Service) TranscribeStream(
 		}
 
 		if err != nil {
-			return apperror.FailWrap[TranscriptionResult](
+			return appfault.FailWrap[TranscriptionResult](
 				err,
 				"E9523",
 				"failed to read audio stream",
@@ -476,15 +476,15 @@ func (s *Service) TranscribeStream(
 		}
 	}
 	
-	return apperror.Ok(TranscriptionResult{
+	return appfault.Ok(TranscriptionResult{
 		Text:     fullText,
 		Segments: allSegments,
 	})
 }
 
-func (s *Service) convertToWav(data []byte, format string) apperror.Result[[]byte] {
+func (s *Service) convertToWav(data []byte, format string) appfault.Result[[]byte] {
 	if format == "wav" || format == "pcm" {
-		return apperror.Ok(data)
+		return appfault.Ok(data)
 	}
 	
 	// Use ffmpeg for conversion
@@ -502,20 +502,20 @@ func (s *Service) convertToWav(data []byte, format string) apperror.Result[[]byt
 	cmd.Stdout = &stdout
 	
 	if err := cmd.Run(); err != nil {
-		return apperror.FailWrap[[]byte](
+		return appfault.FailWrap[[]byte](
 			err,
 			"E9524",
 			"ffmpeg conversion failed",
 		)
 	}
 	
-	return apperror.Ok(stdout.Bytes())
+	return appfault.Ok(stdout.Bytes())
 }
 
-func (s *Service) parseOutput(data []byte) apperror.Result[TranscriptionResult] {
+func (s *Service) parseOutput(data []byte) appfault.Result[TranscriptionResult] {
 	// Parse whisper.cpp JSON output
 	// Implementation depends on whisper.cpp output format
-	return apperror.Ok(TranscriptionResult{
+	return appfault.Ok(TranscriptionResult{
 		Text: string(data), // Simplified
 	})
 }

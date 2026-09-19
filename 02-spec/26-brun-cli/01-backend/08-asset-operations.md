@@ -116,7 +116,7 @@ type CopyResult struct {
     Errors      []string `json:",omitempty"`
 }
 
-func (c *AssetCopier) Execute(config *AssetConfig) *apperror.AppError {
+func (c *AssetCopier) Execute(config *AssetConfig) *appfault.AppError {
     if !config.Enabled {
         return nil
     }
@@ -124,7 +124,7 @@ func (c *AssetCopier) Execute(config *AssetConfig) *apperror.AppError {
     for _, op := range config.Operations {
         opResult := c.executeOperation(op)
         if opResult.IsErr() {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 opResult.Err(),
                 ErrBrunAssetCopyFailed,
                 "asset operation failed ["+op.Source+" -> "+op.Destination+"]",
@@ -143,7 +143,7 @@ func (c *AssetCopier) Execute(config *AssetConfig) *apperror.AppError {
     return nil
 }
 
-func (c *AssetCopier) executeOperation(op AssetOperation) apperror.Result[CopyResult] {
+func (c *AssetCopier) executeOperation(op AssetOperation) appfault.Result[CopyResult] {
     result := CopyResult{
         Operation: op,
     }
@@ -152,8 +152,8 @@ func (c *AssetCopier) executeOperation(op AssetOperation) apperror.Result[CopyRe
     // Validate source exists
     isSourceExists := pathutil.Exists(op.Source)
     if !isSourceExists {
-        return apperror.Fail[CopyResult](
-            apperror.New(ErrBrunAssetSourceMissing, "source not found: "+op.Source),
+        return appfault.Fail[CopyResult](
+            appfault.New(ErrBrunAssetSourceMissing, "source not found: "+op.Source),
         )
     }
     
@@ -161,8 +161,8 @@ func (c *AssetCopier) executeOperation(op AssetOperation) apperror.Result[CopyRe
     if op.Mode.IsClearCopy() {
         clearErr := pathutil.RemoveAll(op.Destination)
         if clearErr != nil {
-            return apperror.Fail[CopyResult](
-                apperror.Wrap(clearErr, ErrBrunAssetClearFailed, "failed to clear destination"),
+            return appfault.Fail[CopyResult](
+                appfault.Wrap(clearErr, ErrBrunAssetClearFailed, "failed to clear destination"),
             )
         }
     }
@@ -170,15 +170,15 @@ func (c *AssetCopier) executeOperation(op AssetOperation) apperror.Result[CopyRe
     // Ensure destination exists
     ensureErr := pathutil.EnsureDir(op.Destination)
     if ensureErr != nil {
-        return apperror.Fail[CopyResult](
-            apperror.Wrap(ensureErr, ErrBrunOutputDirFailed, "failed to create destination"),
+        return appfault.Fail[CopyResult](
+            appfault.Wrap(ensureErr, ErrBrunOutputDirFailed, "failed to create destination"),
         )
     }
     
     // Get list of files to copy
     filesResult := c.getFilesToCopy(op)
     if filesResult.IsErr() {
-        return apperror.Fail[CopyResult](filesResult.Err())
+        return appfault.Fail[CopyResult](filesResult.Err())
     }
     
     // Copy files
@@ -212,7 +212,7 @@ func (c *AssetCopier) executeOperation(op AssetOperation) apperror.Result[CopyRe
 ### Pattern Support
 
 ```go
-func (c *AssetCopier) getFilesToCopy(op AssetOperation) apperror.Result[[]string] {
+func (c *AssetCopier) getFilesToCopy(op AssetOperation) appfault.Result[[]string] {
     var files []string
     
     err := filepath.Walk(op.Source, func(path string, info os.FileInfo, err error) error {

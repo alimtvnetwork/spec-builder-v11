@@ -54,12 +54,12 @@ type PortResolution struct {
 
 ```go
 // CheckPort verifies if a port is available
-func (pm *PortManager) CheckPort(port int) apperror.Result[PortCheckResult] {
+func (pm *PortManager) CheckPort(port int) appfault.Result[PortCheckResult] {
     listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 
     if err != nil {
         processInfo := pm.getProcessOnPort(port)
-        return apperror.Ok(PortCheckResult{
+        return appfault.Ok(PortCheckResult{
             Port:        port,
             IsAvailable: false,
             Reason:      "in use",
@@ -70,14 +70,14 @@ func (pm *PortManager) CheckPort(port int) apperror.Result[PortCheckResult] {
 
     listener.Close()
 
-    return apperror.Ok(PortCheckResult{
+    return appfault.Ok(PortCheckResult{
         Port:        port,
         IsAvailable: true,
     })
 }
 
 // ResolvePort finds an available port with fallback
-func (pm *PortManager) ResolvePort(primary int, fallback []int) apperror.Result[PortResolution] {
+func (pm *PortManager) ResolvePort(primary int, fallback []int) appfault.Result[PortResolution] {
     resolution := &PortResolution{
         RequestedPort: primary,
         CheckedPorts:  make([]PortCheckResult, 0),
@@ -86,20 +86,20 @@ func (pm *PortManager) ResolvePort(primary int, fallback []int) apperror.Result[
     primaryResult := pm.CheckPort(primary)
 
     if primaryResult.HasError() {
-        return apperror.Fail[PortResolution](primaryResult.Error())
+        return appfault.Fail[PortResolution](primaryResult.Error())
     }
 
     resolution.CheckedPorts = append(resolution.CheckedPorts, primaryResult.Value())
 
     if primaryResult.Value().IsAvailable {
         resolution.AvailablePort = primary
-        return apperror.Ok(*resolution)
+        return appfault.Ok(*resolution)
     }
 
     return pm.checkFallbackPorts(resolution, fallback)
 }
 
-func (pm *PortManager) checkFallbackPorts(resolution *PortResolution, fallback []int) apperror.Result[PortResolution] {
+func (pm *PortManager) checkFallbackPorts(resolution *PortResolution, fallback []int) appfault.Result[PortResolution] {
     for _, port := range fallback {
         portResult := pm.CheckPort(port)
 
@@ -111,11 +111,11 @@ func (pm *PortManager) checkFallbackPorts(resolution *PortResolution, fallback [
 
         if portResult.Value().IsAvailable {
             resolution.AvailablePort = port
-            return apperror.Ok(*resolution)
+            return appfault.Ok(*resolution)
         }
     }
 
-    return apperror.FailNew[PortResolution](
+    return appfault.FailNew[PortResolution](
         ErrBrunPortUnavailable,
         "no available port found",
     )
@@ -211,16 +211,16 @@ type FirewallRule struct {
     IsEnabled bool
 }
 
-func (fm *FirewallManager) EnablePort(port int, name string, protocol string) *apperror.AppError
-func (fm *FirewallManager) DisablePort(port int) *apperror.AppError
-func (fm *FirewallManager) ListRules() apperror.Result[[]FirewallRule]
-func (fm *FirewallManager) RuleExists(port int) apperror.Result[bool]
+func (fm *FirewallManager) EnablePort(port int, name string, protocol string) *appfault.AppError
+func (fm *FirewallManager) DisablePort(port int) *appfault.AppError
+func (fm *FirewallManager) ListRules() appfault.Result[[]FirewallRule]
+func (fm *FirewallManager) RuleExists(port int) appfault.Result[bool]
 ```
 
 ### Windows Implementation (netsh)
 
 ```go
-func (fm *FirewallManager) enablePortWindows(port int, name string, protocol string) *apperror.AppError {
+func (fm *FirewallManager) enablePortWindows(port int, name string, protocol string) *appfault.AppError {
     ruleName := fmt.Sprintf("%s-%d", name, port)
 
     command := exec.Command("netsh", "advfirewall", "firewall", "add", "rule",
@@ -234,7 +234,7 @@ func (fm *FirewallManager) enablePortWindows(port int, name string, protocol str
     output, err := command.CombinedOutput()
 
     if err != nil {
-        return apperror.New(
+        return appfault.New(
             "failed to add firewall rule: %s",
             string(output),
         ).WithSkip(1)
@@ -244,7 +244,7 @@ func (fm *FirewallManager) enablePortWindows(port int, name string, protocol str
     return nil
 }
 
-func (fm *FirewallManager) disablePortWindows(port int) *apperror.AppError {
+func (fm *FirewallManager) disablePortWindows(port int) *appfault.AppError {
     command := exec.Command("netsh", "advfirewall", "firewall", "delete", "rule",
         fmt.Sprintf("name=%s-%d", fm.ruleName, port),
     )
@@ -252,29 +252,29 @@ func (fm *FirewallManager) disablePortWindows(port int) *apperror.AppError {
     err := command.Run()
 
     if err != nil {
-        return apperror.Wrap(err, "failed to delete firewall rule").WithSkip(1)
+        return appfault.Wrap(err, "failed to delete firewall rule").WithSkip(1)
     }
 
     return nil
 }
 
-func (fm *FirewallManager) listRulesWindows() apperror.Result[[]FirewallRule] {
+func (fm *FirewallManager) listRulesWindows() appfault.Result[[]FirewallRule] {
     command := exec.Command("netsh", "advfirewall", "firewall", "show", "rule",
         fmt.Sprintf("name=%s*", fm.ruleName))
     output, err := command.Output()
 
     if err != nil {
-        return apperror.FailWrap[[]FirewallRule](err, "failed to list firewall rules")
+        return appfault.FailWrap[[]FirewallRule](err, "failed to list firewall rules")
     }
 
-    return apperror.Ok(parseNetshOutput(string(output)))
+    return appfault.Ok(parseNetshOutput(string(output)))
 }
 ```
 
 ### Linux Implementation (iptables/ufw)
 
 ```go
-func (fm *FirewallManager) enablePortLinux(port int, name string, protocol string) *apperror.AppError {
+func (fm *FirewallManager) enablePortLinux(port int, name string, protocol string) *appfault.AppError {
     hasUfw := fm.hasUfw()
 
     if hasUfw {
@@ -284,18 +284,18 @@ func (fm *FirewallManager) enablePortLinux(port int, name string, protocol strin
     return fm.enablePortIpTables(port, protocol)
 }
 
-func (fm *FirewallManager) enablePortUfw(port int, protocol string) *apperror.AppError {
+func (fm *FirewallManager) enablePortUfw(port int, protocol string) *appfault.AppError {
     command := exec.Command("sudo", "ufw", "allow", fmt.Sprintf("%d/%s", port, protocol))
     err := command.Run()
 
     if err != nil {
-        return apperror.Wrap(err, "ufw allow failed").WithSkip(1)
+        return appfault.Wrap(err, "ufw allow failed").WithSkip(1)
     }
 
     return nil
 }
 
-func (fm *FirewallManager) enablePortIpTables(port int, protocol string) *apperror.AppError {
+func (fm *FirewallManager) enablePortIpTables(port int, protocol string) *appfault.AppError {
     command := exec.Command("sudo", "iptables", "-A", "INPUT",
         "-p", protocol,
         "--dport", strconv.Itoa(port),
@@ -305,7 +305,7 @@ func (fm *FirewallManager) enablePortIpTables(port int, protocol string) *apperr
     err := command.Run()
 
     if err != nil {
-        return apperror.Wrap(err, "iptables rule failed").WithSkip(1)
+        return appfault.Wrap(err, "iptables rule failed").WithSkip(1)
     }
 
     return nil
@@ -315,21 +315,21 @@ func (fm *FirewallManager) enablePortIpTables(port int, protocol string) *apperr
 ### macOS Implementation (pfctl)
 
 ```go
-func (fm *FirewallManager) enablePortMacOs(port int, name string, protocol string) *apperror.AppError {
+func (fm *FirewallManager) enablePortMacOs(port int, name string, protocol string) *appfault.AppError {
     rule := fmt.Sprintf("pass in proto %s from any to any port %d\n", protocol, port)
     anchorFile := fmt.Sprintf("/etc/pf.anchors/%s", fm.ruleName)
 
     writeErr := pathutil.WriteFile(anchorFile, []byte(rule), 0644)
 
     if writeErr != nil {
-        return apperror.Wrap(writeErr, "failed to write anchor file").WithSkip(1)
+        return appfault.Wrap(writeErr, "failed to write anchor file").WithSkip(1)
     }
 
     command := exec.Command("sudo", "pfctl", "-a", fm.ruleName, "-f", anchorFile)
     runErr := command.Run()
 
     if runErr != nil {
-        return apperror.Wrap(runErr, "pfctl load failed").WithSkip(1)
+        return appfault.Wrap(runErr, "pfctl load failed").WithSkip(1)
     }
 
     return nil
@@ -377,11 +377,11 @@ Available port: 8081
 ## Integration with Execution
 
 ```go
-func (e *ExecutionEngine) executeWithPort(context context.Context, command *Command, requestedPort int) apperror.Result[ExecutionResult] {
+func (e *ExecutionEngine) executeWithPort(context context.Context, command *Command, requestedPort int) appfault.Result[ExecutionResult] {
     resolution := e.portManager.ResolvePort(requestedPort, e.config.Ports.Fallback)
 
     if resolution.HasError() {
-        return apperror.Fail[ExecutionResult](resolution.Error())
+        return appfault.Fail[ExecutionResult](resolution.Error())
     }
 
     e.enableFirewallIfConfigured(resolution.Value().AvailablePort)
@@ -396,7 +396,7 @@ func (e *ExecutionEngine) executeWithPort(context context.Context, command *Comm
 
     value := result.Value()
     value.Port = resolution.Value().AvailablePort
-    return apperror.Ok(value)
+    return appfault.Ok(value)
 }
 
 func (e *ExecutionEngine) enableFirewallIfConfigured(port int) {

@@ -179,11 +179,11 @@ const (
     OpDeleteDirectory
 )
 
-func (cm *ConsentManager) RequireConsent(op OperationType, path string) apperror.Result[*ConsentRequest] {
+func (cm *ConsentManager) RequireConsent(op OperationType, path string) appfault.Result[*ConsentRequest] {
     classification := cm.classifier.Classify(path)
     
     if !classification.IsExternal {
-        return apperror.Ok[*ConsentRequest](nil) // No consent needed for internal paths
+        return appfault.Ok[*ConsentRequest](nil) // No consent needed for internal paths
     }
     
     request := &ConsentRequest{
@@ -208,7 +208,7 @@ func (cm *ConsentManager) RequireConsent(op OperationType, path string) apperror
         request.RequireFullPath = false
     }
     
-    return apperror.Ok(request)
+    return appfault.Ok(request)
 }
 ```
 
@@ -221,7 +221,7 @@ func (cm *ConsentManager) ValidateConsent(request *ConsentRequest, userInput str
     if request.RequireFullPath {
         // Must match the full path exactly
         if userInput != request.FullPath {
-            return apperror.New(
+            return appfault.New(
                 ErrConsentInvalid,
                 "path mismatch",
             ).WithContext("expected", request.FullPath)
@@ -229,7 +229,7 @@ func (cm *ConsentManager) ValidateConsent(request *ConsentRequest, userInput str
     } else {
         // Must match the confirm phrase (case-insensitive for keywords)
         if stringutil.IsMismatchFold(userInput, request.ConfirmPhrase) {
-            return apperror.New(
+            return appfault.New(
                 ErrConsentInvalid,
                 "confirm phrase mismatch",
             ).WithContext("expected", request.ConfirmPhrase)
@@ -423,7 +423,7 @@ When the AI Code Generation system (Feature 26) attempts operations on external 
 func (ee *ExecutionEngine) ExecuteWithSafetyCheck(
     context stdctx.Context,
     operation Operation,
-) apperror.Result[*ExecutionResult] {
+) appfault.Result[*ExecutionResult] {
     
     // Check each target path
     for _, path := range operation.TargetPaths {
@@ -433,12 +433,12 @@ func (ee *ExecutionEngine) ExecuteWithSafetyCheck(
             // Request consent through UI
             consentResult := ee.consentManager.RequestConsent(context, operation.Type, path)
             if consentResult.HasError() {
-                return apperror.Fail[*ExecutionResult](consentResult.Error())
+                return appfault.Fail[*ExecutionResult](consentResult.Error())
             }
             
             // Block until user provides consent
             if !consentResult.Value().Granted {
-                return apperror.FailNew[*ExecutionResult](
+                return appfault.FailNew[*ExecutionResult](
                     "ErrConsentDenied",
                     "operation cancelled: user denied consent for "+path,
                 )

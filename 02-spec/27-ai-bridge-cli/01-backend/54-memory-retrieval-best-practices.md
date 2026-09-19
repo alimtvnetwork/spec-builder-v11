@@ -81,14 +81,14 @@ func (r *Retriever) Retrieve(
     query string,
     sessionId string,
     config RetrievalConfig,
-) apperror.Result[[]RetrievalResult] {
+) appfault.Result[[]RetrievalResult] {
     // Step 1: Extract keywords
     keywords := r.ExtractKeywords(query)
 
     // Step 2: Tag pre-filter
     candidatesResult := r.TagPreFilter(sessionId, keywords, config.MaxCandidates)
     if candidatesResult.IsErr() {
-        return apperror.Fail[[]RetrievalResult](candidatesResult.Err())
+        return appfault.Fail[[]RetrievalResult](candidatesResult.Err())
     }
 
     candidates := candidatesResult.Value()
@@ -99,7 +99,7 @@ func (r *Retriever) Retrieve(
     // Step 4: Vector similarity (only on candidates)
     embedResult := r.Embed(query)
     if embedResult.IsErr() {
-        return apperror.Fail[[]RetrievalResult](embedResult.Err())
+        return appfault.Fail[[]RetrievalResult](embedResult.Err())
     }
 
     r.ApplyVectorScores(candidates, embedResult.Value())
@@ -108,7 +108,7 @@ func (r *Retriever) Retrieve(
     r.ExpandLinks(candidates, config.MaxLinkedDepth)
 
     // Step 6: Rank and budget
-    return apperror.Ok(r.RankAndBudget(candidates, config.TokenBudget, config.TopK))
+    return appfault.Ok(r.RankAndBudget(candidates, config.TokenBudget, config.TopK))
 }
 ```
 
@@ -186,10 +186,10 @@ func (te *TagExtractor) Extract(content string) []ExtractedTag {
 ### 3.4 Auto-Tagging During Ingestion
 
 ```go
-func (s *RagService) IngestChunk(chunk RagChunk) *apperror.AppError {
+func (s *RagService) IngestChunk(chunk RagChunk) *appfault.AppError {
     // 1. Save chunk via ORM
     if err := s.db.Create(&chunk).Error; err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrRagChunkIngestFailed,
             "failed to ingest chunk",

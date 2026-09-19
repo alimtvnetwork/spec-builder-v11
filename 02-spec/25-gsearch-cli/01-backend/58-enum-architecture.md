@@ -69,7 +69,7 @@ package providertype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -135,17 +135,17 @@ func ByIndex(i int) Variant {
 }
 
 // Parse converts a string to Variant (case-insensitive)
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
         if strings.EqualFold(str, trimmed) {
-            return Variant(i), nil
+            return appfault.Ok(Variant(i))
         }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid provider: "+s,
-    )
+    ))
 }
 
 // Values returns all string values for CLI help
@@ -227,7 +227,7 @@ package platformtype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -309,27 +309,33 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid platform: "+s,
-    )
+    ))
 }
 
-func ParseMultiple(s string) apperror.Result[[]Variant] {
-    if s == "" { return nil, nil }
+func ParseMultiple(s string) appfault.Result[[]Variant] {
+    if s == "" {
+        return appfault.Ok([]Variant{})
+    }
     parts := strings.Split(s, ",")
     variants := make([]Variant, 0, len(parts))
     for _, p := range parts {
-        v, err := Parse(strings.TrimSpace(p))
-        if err != nil { return nil, err }
-        variants = append(variants, v)
+        res := Parse(strings.TrimSpace(p))
+        if res.HasError() {
+            return appfault.Fail[[]Variant](res.AppError())
+        }
+        variants = append(variants, res.Value())
     }
-    return variants, nil
+    return appfault.Ok(variants)
 }
 
 func Values() []string {
@@ -414,7 +420,7 @@ package enginetype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -457,15 +463,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid engine: "+s,
-    )
+    ))
 }
 
 func Values() []string {
@@ -525,7 +533,7 @@ package searchmodetype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -568,15 +576,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid search mode: "+s,
-    )
+    ))
 }
 
 func Values() []string {
@@ -626,7 +636,7 @@ package socialmediatype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -693,15 +703,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid social media: "+s,
-    )
+    ))
 }
 
 func Values() []string {
@@ -770,7 +782,7 @@ package outputtype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -822,15 +834,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid output format: "+s,
-    )
+    ))
 }
 
 func Values() []string {
@@ -895,7 +909,7 @@ package movieprovidertype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -941,15 +955,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid movie provider: "+s,
-    )
+    ))
 }
 
 func Values() []string {
@@ -999,7 +1015,7 @@ package searchstatustype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -1047,15 +1063,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid search status: "+s,
-    )
+    ))
 }
 
 func Values() []string {
@@ -1105,7 +1123,7 @@ package logleveltype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -1151,15 +1169,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid log level: "+s,
-    )
+    ))
 }
 
 func Values() []string {
@@ -1214,7 +1234,7 @@ package proxytype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -1259,15 +1279,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid proxy type: "+s,
-    )
+    ))
 }
 
 func Values() []string {
@@ -1319,7 +1341,7 @@ package rotationstrategytype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -1367,15 +1389,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid rotation strategy: "+s,
-    )
+    ))
 }
 
 func Values() []string {
@@ -1419,7 +1443,7 @@ package jittertype
 
 import (
     "encoding/json"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "strings"
 )
 
@@ -1464,15 +1488,17 @@ func ByIndex(i int) Variant {
     return Variant(i)
 }
 
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrInvalidVariant,
         "invalid jitter type: "+s,
-    )
+    ))
 }
 
 func Values() []string {

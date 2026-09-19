@@ -161,15 +161,17 @@ func ByIndex(i int) Variant {
     if i < 0 || i >= len(variantLabels) { return Invalid }
     return Variant(i)
 }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid command type",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -253,15 +255,17 @@ func ByIndex(i int) Variant {
     if i < 0 || i >= len(variantLabels) { return Invalid }
     return Variant(i)
 }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
     for i, str := range variantLabels {
-        if strings.EqualFold(str, trimmed) { return Variant(i), nil }
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
     }
-    return Invalid, apperror.New(
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid overwrite mode",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -316,13 +320,17 @@ func (v Variant) IsSpaces() bool  { return v == Spaces }
 
 func All() []Variant { return []Variant{Tabs, Spaces} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid indent style",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -377,13 +385,17 @@ func (v Variant) IsCrlf() bool    { return v == Crlf }
 
 func All() []Variant { return []Variant{Lf, Crlf} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid line ending",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -449,13 +461,17 @@ func (v Variant) IsError() bool   { return v == Error }
 
 func All() []Variant { return []Variant{Debug, Info, Warn, Error} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid log level",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -510,13 +526,17 @@ func (v Variant) IsJson() bool    { return v == Json }
 
 func All() []Variant { return []Variant{Text, Json} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid log format",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -586,13 +606,17 @@ func (v Variant) IsGeneral() bool   { return v == General }
 
 func All() []Variant { return []Variant{Core, Admin, Api, Shortcode, Block, General} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid preset category",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -670,13 +694,17 @@ func (v Variant) IsTxt() bool     { return v == Txt }
 
 func All() []Variant { return []Variant{Php, Css, Js, Json, Md, Txt} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid file type",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -739,13 +767,17 @@ func (v Variant) IsGenerated() bool { return v == Generated }
 
 func All() []Variant { return []Variant{File, Spec, Preset, Generated} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid rag source type",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -800,13 +832,17 @@ func (v Variant) IsJson() bool     { return v == Json }
 func (v Variant) IsYaml() bool     { return v == Yaml }
 func All() []Variant { return []Variant{Markdown, Json, Yaml} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid spec format",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -862,13 +898,17 @@ func (v Variant) IsFailed() bool    { return v == Failed }
 func (v Variant) IsCancelled() bool { return v == Cancelled }
 func All() []Variant { return []Variant{Running, Success, Failed, Cancelled} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid generation status",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -932,13 +972,17 @@ func (v Variant) IsSkipped() bool { return v == Skipped }
 func (v Variant) IsBackup() bool  { return v == Backup }
 func All() []Variant { return []Variant{Created, Updated, Skipped, Backup} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid file action",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -992,13 +1036,17 @@ func (v Variant) IsRoot() bool    { return v == Root }
 func (v Variant) IsProject() bool { return v == Project }
 func All() []Variant { return []Variant{Root, Project} }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid db type",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)
@@ -1079,13 +1127,17 @@ func All() []Variant {
     return []Variant{Core, Admin, Public, Api, Shortcode, Block, Widget, Cpt, Taxonomy, Settings}
 }
 func ByIndex(i int) Variant { if i < 0 || i >= len(variantLabels) { return Invalid }; return Variant(i) }
-func Parse(s string) apperror.Result[Variant] {
+func Parse(s string) appfault.Result[Variant] {
     trimmed := strings.TrimSpace(s)
-    for i, str := range variantLabels { if strings.EqualFold(str, trimmed) { return Variant(i), nil } }
-    return Invalid, apperror.New(
+    for i, str := range variantLabels {
+        if strings.EqualFold(str, trimmed) {
+            return appfault.Ok(Variant(i))
+        }
+    }
+    return appfault.Fail[Variant](appfault.New(
         ErrEnumParseFailed,
         "invalid component type",
-    ).WithContext("value", s)
+    ).WithContext("value", s))
 }
 func Values() []string {
     result := make([]string, 0, len(variantLabels)-1)

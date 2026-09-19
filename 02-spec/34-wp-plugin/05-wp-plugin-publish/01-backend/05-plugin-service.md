@@ -29,27 +29,27 @@ import (
 
 type Service interface {
     // CRUD operations
-    List(context stdctx.Context) apperror.Result[[]models.Plugin]
-    ListBySite(context stdctx.Context, siteId int64) apperror.Result[[]models.Plugin]
-    GetById(context stdctx.Context, id int64) apperror.Result[*models.Plugin]
-    Create(context stdctx.Context, input CreateInput) apperror.Result[*models.Plugin]
-    Update(context stdctx.Context, id int64, input UpdateInput) apperror.Result[*models.Plugin]
-    Delete(context stdctx.Context, id int64) *apperror.AppError
+    List(context stdctx.Context) appfault.Result[[]models.Plugin]
+    ListBySite(context stdctx.Context, siteId int64) appfault.Result[[]models.Plugin]
+    GetById(context stdctx.Context, id int64) appfault.Result[*models.Plugin]
+    Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Plugin]
+    Update(context stdctx.Context, id int64, input UpdateInput) appfault.Result[*models.Plugin]
+    Delete(context stdctx.Context, id int64) *appfault.AppError
     
     // Directory scanning
-    ScanDirectory(context stdctx.Context, path string) apperror.Result[*DirectoryScan]
-    ValidatePath(context stdctx.Context, path string) *apperror.AppError
+    ScanDirectory(context stdctx.Context, path string) appfault.Result[*DirectoryScan]
+    ValidatePath(context stdctx.Context, path string) *appfault.AppError
     
     // Hash management
-    CalculateHash(context stdctx.Context, id int64) apperror.Result[string]
-    UpdateHash(context stdctx.Context, id int64, hash string) *apperror.AppError
+    CalculateHash(context stdctx.Context, id int64) appfault.Result[string]
+    UpdateHash(context stdctx.Context, id int64, hash string) *appfault.AppError
     
     // Watcher management
-    SetWatching(context stdctx.Context, id int64, watching bool) *apperror.AppError
-    GetWatchedPlugins(context stdctx.Context) apperror.Result[[]models.Plugin]
+    SetWatching(context stdctx.Context, id int64, watching bool) *appfault.AppError
+    GetWatchedPlugins(context stdctx.Context) appfault.Result[[]models.Plugin]
     
     // Status
-    UpdateLastPublished(context stdctx.Context, id int64) *apperror.AppError
+    UpdateLastPublished(context stdctx.Context, id int64) *appfault.AppError
 }
 ```
 
@@ -178,57 +178,57 @@ import (
     "time"
     
     "wp-plugin-publish/internal/models"
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
     
     "gorm.io/gorm"
 )
 
-func (s *serviceImpl) List(context stdctx.Context) apperror.Result[[]models.Plugin] {
+func (s *serviceImpl) List(context stdctx.Context) appfault.Result[[]models.Plugin] {
     s.log.Debug("Listing all plugins")
     
     var plugins []models.Plugin
     if err := s.db.WithContext(context).Preload("Site").Order("Name ASC").Find(&plugins).Error; err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseQuery, "failed to list plugins",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseQuery, "failed to list plugins",
         )
     }
     
     return plugins, nil
 }
 
-func (s *serviceImpl) ListBySite(context stdctx.Context, siteId int64) apperror.Result[[]models.Plugin] {
+func (s *serviceImpl) ListBySite(context stdctx.Context, siteId int64) appfault.Result[[]models.Plugin] {
     s.log.Debug("Listing plugins by site", "siteId", siteId)
     
     var plugins []models.Plugin
     if err := s.db.WithContext(context).Preload("Site").Where("SiteId = ?", siteId).Order("Name ASC").Find(&plugins).Error; err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseQuery, "failed to list plugins by site",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseQuery, "failed to list plugins by site",
         )
     }
     
     return plugins, nil
 }
 
-func (s *serviceImpl) GetById(context stdctx.Context, id int64) apperror.Result[*models.Plugin] {
+func (s *serviceImpl) GetById(context stdctx.Context, id int64) appfault.Result[*models.Plugin] {
     s.log.Debug("Getting plugin by id", "pluginId", id)
     
     var plugin models.Plugin
     if err := s.db.WithContext(context).Preload("Site").First(&plugin, "Id = ?", id).Error; err != nil {
         if err == gorm.ErrRecordNotFound {
-            return nil, apperror.New(
-                apperror.ErrNotFound, "plugin not found",
+            return nil, appfault.New(
+                appfault.ErrNotFound, "plugin not found",
             ).
                 WithContext("pluginId", id)
         }
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseQuery, "failed to get plugin",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseQuery, "failed to get plugin",
         )
     }
     
     return &plugin, nil
 }
 
-func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror.Result[*models.Plugin] {
+func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) appfault.Result[*models.Plugin] {
     s.log.Info("Creating plugin", "name", input.Name, "path", input.LocalPath)
     
     // Validate input
@@ -245,8 +245,8 @@ func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror
     var count int64
     s.db.WithContext(context).Model(&models.Plugin{}).Where("LocalPath = ? AND SiteId = ?", input.LocalPath, input.SiteId).Count(&count)
     if count > 0 {
-        return nil, apperror.New(
-            apperror.ErrDuplicate, "plugin already registered for this site",
+        return nil, appfault.New(
+            appfault.ErrDuplicate, "plugin already registered for this site",
         ).
             WithContext("path", input.LocalPath).
             WithContext("siteId", input.SiteId)
@@ -274,8 +274,8 @@ func (s *serviceImpl) Create(context stdctx.Context, input CreateInput) apperror
     }
     
     if err := s.db.WithContext(context).Create(&plugin).Error; err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to create plugin",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to create plugin",
         )
     }
     
@@ -292,8 +292,8 @@ func (s *serviceImpl) Delete(context stdctx.Context, id int64) error {
     }
     
     if err := s.db.WithContext(context).Delete(&models.Plugin{}, "Id = ?", id).Error; err != nil {
-        return apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to delete plugin",
+        return appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to delete plugin",
         )
     }
     
@@ -316,10 +316,10 @@ import (
     "regexp"
     "strings"
     
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
 )
 
-func (s *serviceImpl) ScanDirectory(context stdctx.Context, path string) apperror.Result[DirectoryScan] {
+func (s *serviceImpl) ScanDirectory(context stdctx.Context, path string) appfault.Result[DirectoryScan] {
     s.log.Debug("Scanning directory", "path", path)
     
     scan := &DirectoryScan{
@@ -336,8 +336,8 @@ func (s *serviceImpl) ScanDirectory(context stdctx.Context, path string) apperro
     }
 
     if err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDirRead, "failed to stat directory",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDirRead, "failed to stat directory",
         )
     }
 
@@ -397,8 +397,8 @@ func (s *serviceImpl) ScanDirectory(context stdctx.Context, path string) apperro
     })
     
     if err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDirRead, "failed to scan directory",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDirRead, "failed to scan directory",
         )
     }
     
@@ -419,7 +419,7 @@ func (s *serviceImpl) ValidatePath(context stdctx.Context, path string) error {
     }
     
     if !scan.IsValid {
-        return apperror.New(apperror.ErrPathInvalid, scan.Error).
+        return appfault.New(appfault.ErrPathInvalid, scan.Error).
             WithContext("path", path)
     }
     
@@ -434,12 +434,12 @@ type PluginFileOutcome struct {
 }
 
 // findMainPluginFile locates the main plugin PHP file with the plugin header
-func (s *serviceImpl) findMainPluginFile(path string) apperror.Result[PluginFileOutcome] {
+func (s *serviceImpl) findMainPluginFile(path string) appfault.Result[PluginFileOutcome] {
     entries, err := os.ReadDir(path)
     if err != nil {
-        return apperror.ResultErr[PluginFileOutcome](
-            apperror.Wrap(
-                err, apperror.ErrDirRead, "failed to read plugin directory",
+        return appfault.ResultErr[PluginFileOutcome](
+            appfault.Wrap(
+                err, appfault.ErrDirRead, "failed to read plugin directory",
             ),
         )
     }
@@ -476,7 +476,7 @@ func (s *serviceImpl) findMainPluginFile(path string) apperror.Result[PluginFile
         file.Close()
         
         if pluginName != "" {
-            return apperror.ResultOk(PluginFileOutcome{
+            return appfault.ResultOk(PluginFileOutcome{
                 FileName:   entry.Name(),
                 PluginName: pluginName,
                 Version:    version,
@@ -484,7 +484,7 @@ func (s *serviceImpl) findMainPluginFile(path string) apperror.Result[PluginFile
         }
     }
     
-    return apperror.ResultErr[PluginFileOutcome](apperror.New(apperror.ErrPathInvalid, 
+    return appfault.ResultErr[PluginFileOutcome](appfault.New(appfault.ErrPathInvalid, 
         "no valid WordPress plugin file found (missing Plugin Name header)"))
 }
 ```
@@ -505,10 +505,10 @@ import (
     "sort"
     "strings"
     
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
 )
 
-func (s *serviceImpl) CalculateHash(context stdctx.Context, id int64) apperror.Result[string] {
+func (s *serviceImpl) CalculateHash(context stdctx.Context, id int64) appfault.Result[string] {
     plugin, err := s.GetById(context, id)
     if err != nil {
         return "", err
@@ -527,14 +527,14 @@ func (s *serviceImpl) UpdateHash(context stdctx.Context, id int64, hash string) 
     now := time.Now()
     if err := s.db.WithContext(context).Model(&models.Plugin{}).Where("Id = ?", id).
         Updates(PluginHashUpdate{LastHash: hash, UpdatedAt: now}).Error; err != nil {
-        return apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to update plugin hash",
+        return appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to update plugin hash",
         )
     }
     return nil
 }
 
-func (s *serviceImpl) calculateDirectoryHash(path string) apperror.Result[string] {
+func (s *serviceImpl) calculateDirectoryHash(path string) appfault.Result[string] {
     hasher := sha256.New()
     
     // Collect all file hashes in sorted order for deterministic output
@@ -561,8 +561,8 @@ func (s *serviceImpl) calculateDirectoryHash(path string) apperror.Result[string
     })
     
     if err != nil {
-        return "", apperror.Wrap(
-            err, apperror.ErrDirRead, "failed to walk directory",
+        return "", appfault.Wrap(
+            err, appfault.ErrDirRead, "failed to walk directory",
         )
     }
     
@@ -576,7 +576,7 @@ func (s *serviceImpl) calculateDirectoryHash(path string) apperror.Result[string
     return hex.EncodeToString(hasher.Sum(nil)), nil
 }
 
-func calculateFileHash(path string) apperror.Result[string] {
+func calculateFileHash(path string) appfault.Result[string] {
     file, err := os.Open(path)
     if err != nil {
         return "", err
@@ -602,7 +602,7 @@ import (
     stdctx "context"
     
     "wp-plugin-publish/internal/models"
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
 )
 
 // PluginWatchingUpdate is a typed GORM update struct
@@ -617,15 +617,15 @@ func (s *serviceImpl) SetWatching(context stdctx.Context, id int64, watching boo
     now := time.Now()
     if err := s.db.WithContext(context).Model(&models.Plugin{}).Where("Id = ?", id).
         Updates(PluginWatchingUpdate{IsWatching: watching, UpdatedAt: now}).Error; err != nil {
-        return apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to update watching status",
+        return appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to update watching status",
         )
     }
     
     return nil
 }
 
-func (s *serviceImpl) GetWatchedPlugins(context stdctx.Context) apperror.Result[[]models.Plugin] {
+func (s *serviceImpl) GetWatchedPlugins(context stdctx.Context) appfault.Result[[]models.Plugin] {
     s.log.Debug("Getting watched plugins")
     
     var plugins []models.Plugin
@@ -633,8 +633,8 @@ func (s *serviceImpl) GetWatchedPlugins(context stdctx.Context) apperror.Result[
         Where("IsWatching = ? AND IsActive = ?", 1, 1).
         Order("Name ASC").
         Find(&plugins).Error; err != nil {
-        return nil, apperror.Wrap(
-            err, apperror.ErrDatabaseQuery, "failed to get watched plugins",
+        return nil, appfault.Wrap(
+            err, appfault.ErrDatabaseQuery, "failed to get watched plugins",
         )
     }
     
@@ -651,8 +651,8 @@ func (s *serviceImpl) UpdateLastPublished(context stdctx.Context, id int64) erro
     now := time.Now()
     if err := s.db.WithContext(context).Model(&models.Plugin{}).Where("Id = ?", id).
         Updates(PluginPublishedUpdate{LastPublishedAt: now, UpdatedAt: now}).Error; err != nil {
-        return apperror.Wrap(
-            err, apperror.ErrDatabaseExec, "failed to update last published",
+        return appfault.Wrap(
+            err, appfault.ErrDatabaseExec, "failed to update last published",
         )
     }
     return nil
@@ -671,64 +671,64 @@ import (
     "regexp"
     "strings"
     
-    "wp-plugin-publish/pkg/apperror"
+    "wp-plugin-publish/pkg/appfault"
 )
 
 var slugRegex = regexp.MustCompile(`^[a-z0-9-]+$`)
 
 func (s *serviceImpl) validateCreateInput(context stdctx.Context, input CreateInput) error {
     if strings.TrimSpace(input.Name) == "" {
-        return apperror.New(
-            apperror.ErrValidationEmpty, "plugin name is required",
+        return appfault.New(
+            appfault.ErrValidationEmpty, "plugin name is required",
         )
     }
     
     if len(input.Name) > 255 {
-        return apperror.New(
-            apperror.ErrValidationLength, "plugin name must be 255 characters or less",
+        return appfault.New(
+            appfault.ErrValidationLength, "plugin name must be 255 characters or less",
         )
     }
     
     if strings.TrimSpace(input.LocalPath) == "" {
-        return apperror.New(
-            apperror.ErrValidationEmpty, "local path is required",
+        return appfault.New(
+            appfault.ErrValidationEmpty, "local path is required",
         )
     }
     
     // Must be absolute path
     if pathutil.IsRelativePath(input.LocalPath) {
-        return apperror.New(
-            apperror.ErrValidationPath, "local path must be absolute",
+        return appfault.New(
+            appfault.ErrValidationPath, "local path must be absolute",
         )
     }
     
     if len(input.LocalPath) > 4096 {
-        return apperror.New(
-            apperror.ErrValidationLength, "local path must be 4096 characters or less",
+        return appfault.New(
+            appfault.ErrValidationLength, "local path must be 4096 characters or less",
         )
     }
     
     if strings.TrimSpace(input.RemoteSlug) == "" {
-        return apperror.New(
-            apperror.ErrValidationEmpty, "remote slug is required",
+        return appfault.New(
+            appfault.ErrValidationEmpty, "remote slug is required",
         )
     }
     
     slug := strings.ToLower(strings.TrimSpace(input.RemoteSlug))
     if !slugRegex.MatchString(slug) {
-        return apperror.New(apperror.ErrValidationFormat, 
+        return appfault.New(appfault.ErrValidationFormat, 
             "remote slug must be lowercase with only letters, numbers, and hyphens")
     }
     
     if len(input.RemoteSlug) > 255 {
-        return apperror.New(
-            apperror.ErrValidationLength, "remote slug must be 255 characters or less",
+        return appfault.New(
+            appfault.ErrValidationLength, "remote slug must be 255 characters or less",
         )
     }
     
     if input.SiteId <= 0 {
-        return apperror.New(
-            apperror.ErrValidationEmpty, "site id is required",
+        return appfault.New(
+            appfault.ErrValidationEmpty, "site id is required",
         )
     }
     

@@ -53,10 +53,10 @@ type CsvVariableSource struct {
 // "Best Cleaning Services","cleaning services","Melbourne CBD","CleanPro",15
 // "Professional Cleaning","house cleaning","South Melbourne","CleanPro",15
 
-func (s *VariableService) ImportCsv(source CsvVariableSource) apperror.Result[ImportResult] {
+func (s *VariableService) ImportCsv(source CsvVariableSource) appfault.Result[ImportResult] {
     file, err := pathutil.OpenFile(source.FilePath)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ImportResult](err, ErrFileReadFailed, "failed to open csv file")
     }
     defer file.Close()
     
@@ -67,7 +67,7 @@ func (s *VariableService) ImportCsv(source CsvVariableSource) apperror.Result[Im
     
     records, err := reader.ReadAll()
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ImportResult](err, ErrCsvParseFailed, "failed to parse csv file")
     }
     
     // Parse headers if present
@@ -105,15 +105,15 @@ func (s *VariableService) ImportCsv(source CsvVariableSource) apperror.Result[Im
     // Save to database
     err = s.db.SaveVariables(source.Id, source.Scope, source.WebsiteId, variables)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ImportResult](err, ErrDatabaseSaveFailed, "failed to save variables")
     }
     
-    return &ImportResult{
+    return appfault.Ok(ImportResult{
         SourceId:   source.Id,
         RowCount:   len(variables),
         Columns:    keys(source.ColumnMap),
         ImportedAt: time.Now(),
-    }, nil
+    })
 }
 ```
 
@@ -143,15 +143,15 @@ type JsonVariableSource struct {
 //   ]
 // }
 
-func (s *VariableService) ImportJson(source JsonVariableSource) apperror.Result[ImportResult] {
+func (s *VariableService) ImportJson(source JsonVariableSource) appfault.Result[ImportResult] {
     data, err := pathutil.ReadFile(source.FilePath)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ImportResult](err, ErrFileReadFailed, "failed to read json file")
     }
     
     var parsed json.RawMessage
     if err := json.Unmarshal(data, &parsed); err != nil {
-        return nil, err
+        return appfault.FailWrap[ImportResult](err, ErrJsonParseFailed, "failed to parse json file")
     }
     
     // Navigate to root path if specified
@@ -164,14 +164,14 @@ func (s *VariableService) ImportJson(source JsonVariableSource) apperror.Result[
     // Save to database
     err = s.db.SaveVariables(source.Id, source.Scope, source.WebsiteId, rows)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ImportResult](err, ErrDatabaseSaveFailed, "failed to save variables")
     }
     
-    return &ImportResult{
+    return appfault.Ok(ImportResult{
         SourceId:   source.Id,
         RowCount:   len(rows),
         ImportedAt: time.Now(),
-    }, nil
+    })
 }
 ```
 
@@ -199,15 +199,15 @@ type YamlVariableSource struct {
 //   tone: professional
 //   experience: 15
 
-func (s *VariableService) ImportYaml(source YamlVariableSource) apperror.Result[ImportResult] {
+func (s *VariableService) ImportYaml(source YamlVariableSource) appfault.Result[ImportResult] {
     data, err := pathutil.ReadFile(source.FilePath)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ImportResult](err, ErrFileReadFailed, "failed to read yaml file")
     }
     
     var parsed json.RawMessage
     if err := yaml.Unmarshal(data, &parsed); err != nil {
-        return nil, err
+        return appfault.FailWrap[ImportResult](err, ErrYamlParseFailed, "failed to parse yaml file")
     }
     
     // Navigate to root path if specified
@@ -412,7 +412,7 @@ type ExportRequest struct {
     Format    variablesourcetype.Variant       // → internal/enums/variablesourcetype/
 }
 
-func (s *VariableService) Export(req ExportRequest) apperror.Result[[]byte] {
+func (s *VariableService) Export(req ExportRequest) appfault.Result[[]byte] {
     variables, err := s.db.GetVariables(req.Scope, req.WebsiteId)
     if err != nil {
         return nil, err
@@ -426,7 +426,7 @@ func (s *VariableService) Export(req ExportRequest) apperror.Result[[]byte] {
     case "yaml":
         return yaml.Marshal(variables)
     default:
-        return nil, apperror.New(
+        return nil, appfault.New(
             ErrFormatUnsupported,
             "unsupported export format",
         ).WithContext("format", req.Format)
@@ -437,7 +437,7 @@ func (s *VariableService) Export(req ExportRequest) apperror.Result[[]byte] {
 ### Import from Exported File
 
 ```go
-func (s *VariableService) ImportFromExport(filePath, scope, websiteId string) apperror.Result[ImportResult] {
+func (s *VariableService) ImportFromExport(filePath, scope, websiteId string) appfault.Result[ImportResult] {
     ext := filepath.Ext(filePath)
     
     switch ext {
@@ -461,10 +461,10 @@ func (s *VariableService) ImportFromExport(filePath, scope, websiteId string) ap
             WebsiteId: websiteId,
         })
     default:
-        return nil, apperror.New(
+        return appfault.Fail[ImportResult](appfault.New(
             ErrFormatUnsupported,
             "unsupported file type for import",
-        ).WithContext("extension", ext)
+        ).WithContext("extension", ext))
     }
 }
 ```

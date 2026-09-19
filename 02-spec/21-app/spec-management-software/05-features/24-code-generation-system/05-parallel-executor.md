@@ -389,7 +389,7 @@ type PromptTemplateContext struct {
     ProjectContext string
 }
 
-func (b *PromptBuilder) BuildPrompt(task *GenerationTask) apperror.Result[string] {
+func (b *PromptBuilder) BuildPrompt(task *GenerationTask) appfault.Result[string] {
     // Get merged guidelines
     guidelines, err := b.guidelineResolver.Resolve(
         task.ProjectId,

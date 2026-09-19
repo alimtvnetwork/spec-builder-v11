@@ -98,7 +98,7 @@ data/
 
 ```go
 // MigrateCodeTasks moves flat code DBs to company-scoped paths
-func MigrateCodeTasks(appName, defaultCompany string) *apperror.AppError {
+func MigrateCodeTasks(appName, defaultCompany string) *appfault.AppError {
     oldPattern := fmt.Sprintf("data/%s/rag/code/*.db", appName)
     files, _ := filepath.Glob(oldPattern)
     
@@ -109,7 +109,7 @@ func MigrateCodeTasks(appName, defaultCompany string) *apperror.AppError {
         
         newPath := filepath.Join(newDir, filename)
         if err := pathutil.Rename(oldPath, newPath); err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrMigrationMoveFailed,
                 "failed to move code task: %s",
@@ -129,7 +129,7 @@ func MigrateCodeTasks(appName, defaultCompany string) *apperror.AppError {
 
 ```go
 // MigrateChatSessions moves from ai/chat/ to rag/chat/{company}/
-func MigrateChatSessions(appName, defaultCompany string) *apperror.AppError {
+func MigrateChatSessions(appName, defaultCompany string) *appfault.AppError {
     oldPattern := fmt.Sprintf("data/%s/ai/chat/*.db", appName)
     files, _ := filepath.Glob(oldPattern)
     
@@ -140,7 +140,7 @@ func MigrateChatSessions(appName, defaultCompany string) *apperror.AppError {
         
         newPath := filepath.Join(newDir, filename)
         if err := pathutil.Rename(oldPath, newPath); err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrMigrationMoveFailed,
                 "failed to move chat session: %s",
@@ -160,7 +160,7 @@ func MigrateChatSessions(appName, defaultCompany string) *apperror.AppError {
 
 ```go
 // MigrateSeoContent splits unified company DB into individual content DBs
-func MigrateSeoContent(appName, company string) *apperror.AppError {
+func MigrateSeoContent(appName, company string) *appfault.AppError {
     companyDb := fmt.Sprintf("data/%s/rag/seo/%s.db", appName, company)
     
     // Extract blog posts

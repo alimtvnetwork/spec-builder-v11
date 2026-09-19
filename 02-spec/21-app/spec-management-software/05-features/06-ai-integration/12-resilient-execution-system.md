@@ -339,7 +339,7 @@ Respond in JSON:
   }
 }`
 
-func (a *RootCauseAnalyzer) Analyze(context stdctx.Context, failure *TaskFailure) apperror.Result[FailureAnalysis] {
+func (a *RootCauseAnalyzer) Analyze(context stdctx.Context, failure *TaskFailure) appfault.Result[FailureAnalysis] {
     // 1. Check pattern database for known failure signatures
     if pattern := a.patternMatcher.Match(failure); pattern != nil {
         return a.applyKnownPattern(pattern, failure)
@@ -358,22 +358,22 @@ func (a *RootCauseAnalyzer) Analyze(context stdctx.Context, failure *TaskFailure
     })
     
     if err != nil {
-        return apperror.Fail[FailureAnalysis](
-            apperror.Wrap(err, apperror.ErrAIAnalysis, "root cause analysis failed"),
+        return appfault.Fail[FailureAnalysis](
+            appfault.Wrap(err, appfault.ErrAIAnalysis, "root cause analysis failed"),
         )
     }
     
     var analysis FailureAnalysis
     if err := json.Unmarshal([]byte(result.Json), &analysis); err != nil {
-        return apperror.Fail[FailureAnalysis](
-            apperror.Wrap(err, apperror.ErrJsonParse, "failed to parse analysis"),
+        return appfault.Fail[FailureAnalysis](
+            appfault.Wrap(err, appfault.ErrJsonParse, "failed to parse analysis"),
         )
     }
     
     // 4. Record pattern for future matching
     a.patternMatcher.RecordPattern(failure, &analysis)
     
-    return apperror.Ok(analysis)
+    return appfault.Ok(analysis)
 }
 ```
 
@@ -393,7 +393,7 @@ type StrategyExecutor struct {
     taskDecomposer   *TaskDecomposer
 }
 
-func (e *StrategyExecutor) Execute(context stdctx.Context, strategy CorrectionStrategy, task *InstructionTask) apperror.Result[CorrectedTask] {
+func (e *StrategyExecutor) Execute(context stdctx.Context, strategy CorrectionStrategy, task *InstructionTask) appfault.Result[CorrectedTask] {
     switch strategy.Strategy {
     case "prompt_rewrite":
         return e.promptRewriter.Rewrite(context, task, strategy.Details)
@@ -408,13 +408,13 @@ func (e *StrategyExecutor) Execute(context stdctx.Context, strategy CorrectionSt
         return e.taskDecomposer.Decompose(ctx, task, strategy.Details)
         
     case "escalate":
-        return apperror.Fail[CorrectedTask](
-            apperror.New(apperror.ErrEscalationRequired, "escalation required"),
+        return appfault.Fail[CorrectedTask](
+            appfault.New(appfault.ErrEscalationRequired, "escalation required"),
         )
         
     default:
-        return apperror.Fail[CorrectedTask](
-            apperror.New(apperror.ErrUnknownStrategy, "unknown strategy"),
+        return appfault.Fail[CorrectedTask](
+            appfault.New(appfault.ErrUnknownStrategy, "unknown strategy"),
         )
     }
 }
@@ -460,7 +460,7 @@ type VerifierPromptContext struct {
     Comparison      *ComparisonResult
 }
 
-func (r *PromptRewriter) Rewrite(context stdctx.Context, task *InstructionTask, guidance string) apperror.Result[CorrectedTask] {
+func (r *PromptRewriter) Rewrite(context stdctx.Context, task *InstructionTask, guidance string) appfault.Result[CorrectedTask] {
     prompt := interpolate(rewritePrompt, RewritePromptContext{
         OriginalPrompt:  task.OriginalPrompt,
         FailureCategory: task.LastFailure.Category,
@@ -474,12 +474,12 @@ func (r *PromptRewriter) Rewrite(context stdctx.Context, task *InstructionTask, 
     })
     
     if err != nil {
-        return apperror.Fail[CorrectedTask](
-            apperror.Wrap(err, apperror.ErrAIGeneration, "prompt rewrite failed"),
+        return appfault.Fail[CorrectedTask](
+            appfault.Wrap(err, appfault.ErrAIGeneration, "prompt rewrite failed"),
         )
     }
     
-    return apperror.Ok(CorrectedTask{
+    return appfault.Ok(CorrectedTask{
         Task:            task,
         CorrectedPrompt: result.Text,
         Strategy:        "prompt_rewrite",
@@ -615,7 +615,7 @@ type ModelOutput struct {
     DurationMs  int
 }
 
-func (e *ConsensusEngine) Execute(context stdctx.Context, task *InstructionTask) apperror.Result[ConsensusResult] {
+func (e *ConsensusEngine) Execute(context stdctx.Context, task *InstructionTask) appfault.Result[ConsensusResult] {
     criticality := GetCriticalityForTask(task)
     config := e.getConfigForCriticality(criticality)
     
@@ -856,7 +856,7 @@ type FileState struct {
     ContentRef   string `json:",omitempty"` // Reference for large files
 }
 
-func (m *CheckpointManager) CreateCheckpoint(context stdctx.Context, task *InstructionTask) apperror.Result[Checkpoint] {
+func (m *CheckpointManager) CreateCheckpoint(context stdctx.Context, task *InstructionTask) appfault.Result[Checkpoint] {
     // 1. Identify files that will be modified
     affectedFiles := m.predictAffectedFiles(task)
     
@@ -932,12 +932,12 @@ type TransactionalExecutor struct {
     taskExecutor   *TaskExecutor
 }
 
-func (e *TransactionalExecutor) ExecuteWithRollback(context stdctx.Context, task *InstructionTask) apperror.Result[TaskResult] {
+func (e *TransactionalExecutor) ExecuteWithRollback(context stdctx.Context, task *InstructionTask) appfault.Result[TaskResult] {
     // 1. Create pre-execution checkpoint
     checkpointResult := e.checkpointMgr.CreateCheckpoint(context, task)
     if checkpointResult.IsError() {
-        return apperror.Fail[TaskResult](
-            apperror.Wrap(checkpointResult.Error, apperror.ErrCheckpoint, "checkpoint creation failed"),
+        return appfault.Fail[TaskResult](
+            appfault.Wrap(checkpointResult.Error, appfault.ErrCheckpoint, "checkpoint creation failed"),
         )
     }
     checkpoint := checkpointResult.Value
@@ -951,28 +951,28 @@ func (e *TransactionalExecutor) ExecuteWithRollback(context stdctx.Context, task
         if rollbackErr != nil {
             // Critical: rollback failed, log for manual intervention
             log.Error("rollback failed", "checkpoint", checkpoint.Id, "error", rollbackErr)
-            return apperror.Fail[TaskResult](
-                apperror.Wrap(err, apperror.ErrExecutionRollbackFailed, "execution failed and rollback failed"),
+            return appfault.Fail[TaskResult](
+                appfault.Wrap(err, appfault.ErrExecutionRollbackFailed, "execution failed and rollback failed"),
             )
         }
 
-        return apperror.Fail[TaskResult](
-            apperror.Wrap(err, apperror.ErrExecutionRolledBack, "execution failed, rolled back"),
+        return appfault.Fail[TaskResult](
+            appfault.Wrap(err, appfault.ErrExecutionRolledBack, "execution failed, rolled back"),
         )
     }
     
     // 4. Validate result
     if valid, validationErr := e.validate(ctx, task, result); !valid {
         e.checkpointMgr.Rollback(ctx, checkpoint.Id)
-        return apperror.Fail[TaskResult](
-            apperror.Wrap(validationErr, apperror.ErrValidationRolledBack, "validation failed, rolled back"),
+        return appfault.Fail[TaskResult](
+            appfault.Wrap(validationErr, appfault.ErrValidationRolledBack, "validation failed, rolled back"),
         )
     }
     
     // 5. Commit (mark checkpoint as superseded)
     e.checkpointMgr.Commit(ctx, checkpoint.Id)
     
-    return apperror.Ok(*result)
+    return appfault.Ok(*result)
 }
 ```
 
@@ -1020,7 +1020,7 @@ var DefaultRetryStrategies = []RetryStrategy{
     {Name: "deterministic", Temperature: 0.0, PromptStyle: "deterministic", ContextLevel: "maximum", TimeoutMultiplier: 4.0},
 }
 
-func (e *AdaptiveRetryEngine) ExecuteWithRetry(context stdctx.Context, task *InstructionTask) apperror.Result[TaskResult] {
+func (e *AdaptiveRetryEngine) ExecuteWithRetry(context stdctx.Context, task *InstructionTask) appfault.Result[TaskResult] {
     var lastError error
     var failureHistory []FailureAnalysis
     
@@ -1041,7 +1041,7 @@ func (e *AdaptiveRetryEngine) ExecuteWithRetry(context stdctx.Context, task *Ins
         e.recordAttemptComplete(attemptRecord, result, err)
         
         if err == nil {
-            return apperror.Ok(*result)
+            return appfault.Ok(*result)
         }
         
         lastError = err
@@ -1060,8 +1060,8 @@ func (e *AdaptiveRetryEngine) ExecuteWithRetry(context stdctx.Context, task *Ins
         }
     }
     
-    return apperror.Fail[TaskResult](
-        apperror.Wrap(lastError, apperror.ErrRetryExhausted, "all attempts failed"),
+    return appfault.Fail[TaskResult](
+        appfault.Wrap(lastError, appfault.ErrRetryExhausted, "all attempts failed"),
     )
 }
 
@@ -1202,7 +1202,7 @@ type EscalationOption struct {
     Action      string
 }
 
-func (m *EscalationManager) Escalate(context stdctx.Context, trigger EscalationTrigger, escalationContext EscalationContext) apperror.Result[EscalationRequest] {
+func (m *EscalationManager) Escalate(context stdctx.Context, trigger EscalationTrigger, escalationContext EscalationContext) appfault.Result[EscalationRequest] {
     // 1. Check for auto-resolver
     if resolver, ok := m.autoResolvers[trigger]; ok {
         if resolution, err := resolver.TryResolve(context, escalationContext); err == nil && resolution != nil {
@@ -1226,15 +1226,15 @@ func (m *EscalationManager) Escalate(context stdctx.Context, trigger EscalationT
     
     // 3. Save to queue
     if err := m.queue.Enqueue(context, request); err != nil {
-        return apperror.Fail[EscalationRequest](
-            apperror.Wrap(err, apperror.ErrQueueWrite, "failed to enqueue escalation"),
+        return appfault.Fail[EscalationRequest](
+            appfault.Wrap(err, appfault.ErrQueueWrite, "failed to enqueue escalation"),
         )
     }
     
     // 4. Notify user
     m.notifier.NotifyEscalation(context, request)
     
-    return apperror.Ok(*request)
+    return appfault.Ok(*request)
 }
 ```
 
@@ -1464,12 +1464,12 @@ type CategoryMetrics struct {
     CommonFailures []string
 }
 
-func (t *SuccessRateTracker) GetCurrentMetrics(context stdctx.Context) apperror.Result[SuccessMetrics] {
+func (t *SuccessRateTracker) GetCurrentMetrics(context stdctx.Context) appfault.Result[SuccessMetrics] {
     since := time.Now().Add(-t.window)
     
     telemetry, err := t.store.QuerySince(context, since)
     if err != nil {
-        return apperror.Fail[SuccessMetrics](err)
+        return appfault.Fail[SuccessMetrics](err)
     }
     
     total := len(telemetry)
@@ -1496,7 +1496,7 @@ func (t *SuccessRateTracker) GetCurrentMetrics(context stdctx.Context) apperror.
         }
     }
     
-    return apperror.Ok(SuccessMetrics{
+    return appfault.Ok(SuccessMetrics{
         Period:          t.window.String(),
         TotalTasks:      total,
         SuccessfulTasks: successful,
@@ -1567,7 +1567,7 @@ type ResilientConfig struct {
     EscalationEnabled bool
 }
 
-func (r *ResilientExecutor) Execute(context stdctx.Context, task *InstructionTask, config ResilientConfig) apperror.Result[TaskResult] {
+func (r *ResilientExecutor) Execute(context stdctx.Context, task *InstructionTask, config ResilientConfig) appfault.Result[TaskResult] {
     startTime := time.Now()
     var recoveryPath []string
     var failurePatterns []FailureAnalysis
@@ -1577,8 +1577,8 @@ func (r *ResilientExecutor) Execute(context stdctx.Context, task *InstructionTas
     if config.CheckpointEnabled {
         checkpointResult := r.checkpointMgr.CreateCheckpoint(context, task)
         if checkpointResult.IsError() {
-            return apperror.Fail[TaskResult](
-                apperror.Wrap(checkpointResult.Error, apperror.ErrCheckpoint, "checkpoint failed"),
+            return appfault.Fail[TaskResult](
+                appfault.Wrap(checkpointResult.Error, appfault.ErrCheckpoint, "checkpoint failed"),
             )
         }
         checkpoint = &checkpointResult.Value

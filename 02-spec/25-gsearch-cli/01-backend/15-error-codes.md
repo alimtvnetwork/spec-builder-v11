@@ -882,7 +882,7 @@ func executeSearch(query string) error {
     return errors.WrapError(
         errors.ErrRateLimited,
         "Google API returned 429",
-        apperror.New(
+        appfault.New(
             ErrHttpRateLimited,
             "http: 429 Too Many Requests",
         ),

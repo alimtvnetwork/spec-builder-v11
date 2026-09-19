@@ -406,7 +406,7 @@ func (g *SuggestionGenerator) GenerateFromTask(
     context stdctx.Context,
     projectId string,
     task TaskInfo,
-) apperror.Result[[]Suggestion] {
+) appfault.Result[[]Suggestion] {
     // Determine target count based on task size
     targetCount := g.config.SuggestionsPerTask
     if len(task.Description) > g.config.TaskSizeThreshold {
@@ -435,7 +435,7 @@ Generate %d improvement suggestions based on this completed work.`,
         OutputSchema: SuggestionArraySchema,
     })
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrAiGenerationFailed,
             "AI generation failed",
@@ -445,7 +445,7 @@ Generate %d improvement suggestions based on this completed work.`,
     // Parse response
     var inputs []SuggestionInput
     if err := json.Unmarshal([]byte(response.Json), &inputs); err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrParseSuggestions,
             "parse suggestions",
@@ -487,7 +487,7 @@ func (g *SuggestionGenerator) createSuggestion(
     task TaskInfo,
     input SuggestionInput,
     index int,
-) apperror.Result[Suggestion] {
+) appfault.Result[Suggestion] {
     // Get daily sequence
     today := time.Now().Format("2006-01-02")
     sequence := g.suggestionRepo.GetNextDailySequence(context, projectId, today)
@@ -521,7 +521,7 @@ func (g *SuggestionGenerator) createSuggestion(
     
     // Save to database
     if err := g.suggestionRepo.Create(context, suggestion); err != nil {
-        return apperror.FailWrap[Suggestion](
+        return appfault.FailWrap[Suggestion](
             err,
             "E7400",
             "failed to create suggestion",
@@ -536,7 +536,7 @@ func (g *SuggestionGenerator) createSuggestion(
     // Write suggestion file
     content := g.formatSuggestionFile(suggestion, input)
     if err := g.fileService.WriteFile(context, relativePath, content); err != nil {
-        return apperror.FailWrap[Suggestion](
+        return appfault.FailWrap[Suggestion](
             err,
             "E7400",
             "failed to write suggestion file",
@@ -550,7 +550,7 @@ func (g *SuggestionGenerator) createSuggestion(
         Priority:     input.Priority,
     })
     
-    return apperror.Ok(*suggestion)
+    return appfault.Ok(*suggestion)
 }
 
 // formatSuggestionFile creates the markdown content
@@ -681,7 +681,7 @@ func (s *ResolutionService) ResolveSuggestion(
     // Get suggestion
     suggestion, err := s.suggestionRepo.GetById(context, req.SuggestionId)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSuggestionNotFound,
             "suggestion not found",
@@ -690,7 +690,7 @@ func (s *ResolutionService) ResolveSuggestion(
     
     // Validate transition
     if suggestion.Status == string(StatusCompleted) {
-        return apperror.New(
+        return appfault.New(
             ErrSuggestionAlreadyCompleted,
             "suggestion already completed",
         )
@@ -874,17 +874,17 @@ type QueryService struct {
 func (q *QueryService) ListSuggestions(
     context stdctx.Context,
     opts QueryOptions,
-) apperror.Result[SuggestionListResult] {
+) appfault.Result[SuggestionListResult] {
     suggestions, count, err := q.suggestionRepo.Query(context, opts)
     if err != nil {
-        return apperror.FailWrap[SuggestionListResult](
+        return appfault.FailWrap[SuggestionListResult](
             err,
             "E7401",
             "suggestion query failed",
         )
     }
 
-    return apperror.Ok(SuggestionListResult{
+    return appfault.Ok(SuggestionListResult{
         Suggestions: suggestions,
         TotalCount:  count,
     })
@@ -894,17 +894,17 @@ func (q *QueryService) ListSuggestions(
 func (q *QueryService) GetStats(
     context stdctx.Context,
     projectId string,
-) apperror.Result[SuggestionStats] {
+) appfault.Result[SuggestionStats] {
     stats, err := q.suggestionRepo.GetStats(context, projectId)
     if err != nil {
-        return apperror.FailWrap[SuggestionStats](
+        return appfault.FailWrap[SuggestionStats](
             err,
             "E7401",
             "suggestion stats query failed",
         )
     }
 
-    return apperror.Ok(*stats)
+    return appfault.Ok(*stats)
 }
 
 // GetBySource returns suggestions for a specific task/chat
@@ -912,20 +912,20 @@ func (q *QueryService) GetBySource(
     context stdctx.Context,
     sourceType string,
     sourceId string,
-) apperror.Result[[]Suggestion] {
+) appfault.Result[[]Suggestion] {
     suggestions, _, err := q.suggestionRepo.Query(context, QueryOptions{
         SourceType: sourceType,
         SourceId:   sourceId,
     })
     if err != nil {
-        return apperror.FailWrap[[]Suggestion](
+        return appfault.FailWrap[[]Suggestion](
             err,
             "E7401",
             "suggestion source query failed",
         )
     }
 
-    return apperror.Ok(suggestions)
+    return appfault.Ok(suggestions)
 }
 ```
 

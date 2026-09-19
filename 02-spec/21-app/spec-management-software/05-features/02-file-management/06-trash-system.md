@@ -114,13 +114,13 @@ func NewTrashManager(db *gorm.DB, projectRoot string) *TrashManager {
 ### Soft Delete
 
 ```go
-func (tm *TrashManager) SoftDelete(context stdctx.Context, path string, userId string, reason string) apperror.Result[*TrashEntry] {
+func (tm *TrashManager) SoftDelete(context stdctx.Context, path string, userId string, reason string) appfault.Result[*TrashEntry] {
     absPath := filepath.Join(tm.projectRoot, path)
     
     // Check if path exists
     info, err := pathutil.Stat(absPath)
     if err != nil {
-        return apperror.FailWrap[*TrashEntry](
+        return appfault.FailWrap[*TrashEntry](
             err,
             "file not found for soft delete",
         )
@@ -151,7 +151,7 @@ func (tm *TrashManager) SoftDelete(context stdctx.Context, path string, userId s
     
     // Create trash directory structure
     if err := pathutil.EnsureDir(filepath.Dir(trashPath), 0755); err != nil {
-        return apperror.FailWrap[*TrashEntry](
+        return appfault.FailWrap[*TrashEntry](
             err,
             "failed to create trash dir",
         )
@@ -159,7 +159,7 @@ func (tm *TrashManager) SoftDelete(context stdctx.Context, path string, userId s
     
     // Move file/directory to trash
     if err := pathutil.Rename(absPath, trashPath); err != nil {
-        return apperror.FailWrap[*TrashEntry](
+        return appfault.FailWrap[*TrashEntry](
             err,
             "failed to move to trash",
         )
@@ -185,7 +185,7 @@ func (tm *TrashManager) SoftDelete(context stdctx.Context, path string, userId s
     if err := tm.db.Create(entry).Error; err != nil {
         // Rollback: move back
         pathutil.Rename(trashPath, absPath)
-        return apperror.FailWrap[*TrashEntry](
+        return appfault.FailWrap[*TrashEntry](
             err,
             "failed to create trash record",
         )
@@ -194,7 +194,7 @@ func (tm *TrashManager) SoftDelete(context stdctx.Context, path string, userId s
     // Write metadata file
     tm.writeMetadata(trashPath, entry)
     
-    return apperror.Ok(entry)
+    return appfault.Ok(entry)
 }
 ```
 
@@ -204,14 +204,14 @@ func (tm *TrashManager) SoftDelete(context stdctx.Context, path string, userId s
 func (tm *TrashManager) Restore(context stdctx.Context, entryId string) error {
     var entry TrashEntry
     if err := tm.db.First(&entry, "id = ?", entryId).Error; err != nil {
-        return apperror.New(
+        return appfault.New(
             ErrFsNotFound,
             "trash entry not found",
         )
     }
     
     if entry.PermanentlyDeleted {
-        return apperror.New(
+        return appfault.New(
             ErrFsNotFound,
             "file was permanently deleted",
         )
@@ -220,7 +220,7 @@ func (tm *TrashManager) Restore(context stdctx.Context, entryId string) error {
     // Check if original path is now occupied
     originalAbs := filepath.Join(tm.projectRoot, entry.OriginalPath)
     if _, err := pathutil.Stat(originalAbs); err == nil {
-        return apperror.New(
+        return appfault.New(
             ErrFsExists,
             "original path already exists",
         )
@@ -228,7 +228,7 @@ func (tm *TrashManager) Restore(context stdctx.Context, entryId string) error {
     
     // Ensure parent directory exists
     if err := pathutil.EnsureDir(filepath.Dir(originalAbs), 0755); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrFsWrite,
             "ensure parent directory",
@@ -237,7 +237,7 @@ func (tm *TrashManager) Restore(context stdctx.Context, entryId string) error {
     
     // Move back from trash
     if err := pathutil.Rename(entry.TrashPath, originalAbs); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrFsWrite,
             "restore from trash",
@@ -248,7 +248,7 @@ func (tm *TrashManager) Restore(context stdctx.Context, entryId string) error {
     if err := tm.db.Delete(&entry).Error; err != nil {
         // Rollback
         pathutil.Rename(originalAbs, entry.TrashPath)
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrDbWrite,
             "remove trash entry",
@@ -268,7 +268,7 @@ func (tm *TrashManager) Restore(context stdctx.Context, entryId string) error {
 func (tm *TrashManager) PermanentDelete(context stdctx.Context, entryId string) error {
     var entry TrashEntry
     if err := tm.db.First(&entry, "id = ?", entryId).Error; err != nil {
-        return apperror.New(
+        return appfault.New(
             ErrFsNotFound,
             "trash entry not found",
         )
@@ -276,7 +276,7 @@ func (tm *TrashManager) PermanentDelete(context stdctx.Context, entryId string) 
     
     // Permanently remove from filesystem
     if err := pathutil.RemoveAll(entry.TrashPath); err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrFsDelete,
             "permanent delete from trash",
@@ -289,7 +289,7 @@ func (tm *TrashManager) PermanentDelete(context stdctx.Context, entryId string) 
     // Mark as permanently deleted in database (keep for audit)
     entry.PermanentlyDeleted = true
     if err := tm.db.Save(&entry).Error; err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrDbWrite,
             "mark permanently deleted",
@@ -303,7 +303,7 @@ func (tm *TrashManager) PermanentDelete(context stdctx.Context, entryId string) 
 ### Empty Trash
 
 ```go
-func (tm *TrashManager) EmptyTrash(context stdctx.Context, beforeDate *time.Time) apperror.Result[int] {
+func (tm *TrashManager) EmptyTrash(context stdctx.Context, beforeDate *time.Time) appfault.Result[int] {
     query := tm.db.Where("permanently_deleted = ?", false)
     
     if beforeDate != nil {
@@ -312,7 +312,7 @@ func (tm *TrashManager) EmptyTrash(context stdctx.Context, beforeDate *time.Time
     
     var entries []TrashEntry
     if err := query.Find(&entries).Error; err != nil {
-        return apperror.FailWrap[int](
+        return appfault.FailWrap[int](
             err,
             "failed to query trash entries",
         )
@@ -325,21 +325,21 @@ func (tm *TrashManager) EmptyTrash(context stdctx.Context, beforeDate *time.Time
         }
     }
     
-    return apperror.Ok(deletedCount)
+    return appfault.Ok(deletedCount)
 }
 ```
 
 ### Auto-Cleanup (Retention Policy)
 
 ```go
-func (tm *TrashManager) RunRetentionCleanup(context stdctx.Context) apperror.Result[int] {
+func (tm *TrashManager) RunRetentionCleanup(context stdctx.Context) appfault.Result[int] {
     now := time.Now()
     
     var expiredEntries []TrashEntry
     err := tm.db.Where("retention_deadline < ? AND permanently_deleted = ?", now, false).
         Find(&expiredEntries).Error
     if err != nil {
-        return apperror.FailWrap[int](
+        return appfault.FailWrap[int](
             err,
             "failed to query expired trash entries",
         )
@@ -352,7 +352,7 @@ func (tm *TrashManager) RunRetentionCleanup(context stdctx.Context) apperror.Res
         }
     }
     
-    return apperror.Ok(cleanedCount)
+    return appfault.Ok(cleanedCount)
 }
 ```
 

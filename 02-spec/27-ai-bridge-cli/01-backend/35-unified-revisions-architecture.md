@@ -209,7 +209,7 @@ type RevisionMeta struct {
     Paragraph *ParagraphMeta `json:",omitempty"`
 }
 
-func CreateRevision(db *gorm.DB, contentType, content string, meta RevisionMeta) apperror.Result[int64] {
+func CreateRevision(db *gorm.DB, contentType, content string, meta RevisionMeta) appfault.Result[int64] {
     var revisionId int64
     // EXEMPTED: gorm.Transaction callback — must return error
     txErr := db.Transaction(func(tx *gorm.DB) error {
@@ -244,14 +244,14 @@ func CreateRevision(db *gorm.DB, contentType, content string, meta RevisionMeta)
         return insertMetadata(tx, contentType, revision.Id, meta)
     })
     if txErr != nil {
-        return apperror.FailWrap[int64](
+        return appfault.FailWrap[int64](
             txErr,
             ErrRevisionCreateFailed,
             "failed to create revision",
         )
     }
 
-    return apperror.Ok(revisionId)
+    return appfault.Ok(revisionId)
 }
 
 func insertMetadata(tx *gorm.DB, contentType string, revisionId int64, meta RevisionMeta) error {
@@ -395,7 +395,7 @@ All content types use the same endpoint pattern:
 When content is regenerated, RAG memory MUST be updated for the session scope:
 
 ```go
-func OnRevisionCreated(revision Revision, feedback *RevisionFeedback) *apperror.AppError {
+func OnRevisionCreated(revision Revision, feedback *RevisionFeedback) *appfault.AppError {
     // Update RAG with new content (session-scoped)
     if err := rag.UpdateSessionChunks(revision.SessionPath, revision.Content); err != nil {
         return err

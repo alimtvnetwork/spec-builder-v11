@@ -206,11 +206,11 @@ func (s *InstructionService) CreateFromVoice(
     context stdctx.Context,
     projectId string,
     audioBlob []byte,
-) apperror.Result[*Instruction] {
+) appfault.Result[*Instruction] {
     // 1. Transcribe audio
     transcription, err := s.voiceService.Transcribe(context, audioBlob)
     if err != nil {
-        return apperror.FailWrap[*Instruction](
+        return appfault.FailWrap[*Instruction](
             err,
             "voice transcription failed",
         )
@@ -231,7 +231,7 @@ func (s *InstructionService) CreateFromVoice(
     
     // 3. Save to database
     if err := s.repo.CreateInstruction(context, instruction); err != nil {
-        return apperror.FailWrap[*Instruction](
+        return appfault.FailWrap[*Instruction](
             err,
             "failed to create instruction record",
         )
@@ -240,7 +240,7 @@ func (s *InstructionService) CreateFromVoice(
     // 4. Start proofreading async
     go s.startProofreading(context, instruction.Id)
     
-    return apperror.Ok(instruction)
+    return appfault.Ok(instruction)
 }
 ```
 
@@ -708,7 +708,7 @@ func (e *TaskExecutor) executeTask(
     done <- task.Id
 }
 
-func (e *TaskExecutor) runTask(context stdctx.Context, task *InstructionTask, model *ModelInfo) apperror.Result[*TaskResult] {
+func (e *TaskExecutor) runTask(context stdctx.Context, task *InstructionTask, model *ModelInfo) appfault.Result[*TaskResult] {
     // Prepare prompt based on task type and target
     prompt := e.buildTaskPrompt(task)
     
@@ -720,13 +720,13 @@ func (e *TaskExecutor) runTask(context stdctx.Context, task *InstructionTask, mo
     })
     
     if err != nil {
-        return apperror.FailWrap[*TaskResult](
+        return appfault.FailWrap[*TaskResult](
             err,
             "task execution failed",
         )
     }
     
-    return apperror.Ok(&TaskResult{
+    return appfault.Ok(&TaskResult{
         Markdown:   response.Text,
         Json:       response.Json,
         TokensUsed: response.TokensUsed,
@@ -1003,26 +1003,26 @@ func (s *InstructionService) getExecutionMode(projectId string) ExecutionMode {
 ```go
 type InstructionService interface {
     // Creation
-    CreateFromText(context stdctx.Context, req CreateInstructionRequest) apperror.Result[*Instruction]
-    CreateFromVoice(context stdctx.Context, projectId string, audio []byte, scope string) apperror.Result[*Instruction]
+    CreateFromText(context stdctx.Context, req CreateInstructionRequest) appfault.Result[*Instruction]
+    CreateFromVoice(context stdctx.Context, projectId string, audio []byte, scope string) appfault.Result[*Instruction]
     
     // Retrieval
-    GetInstruction(context stdctx.Context, id string) apperror.Result[*InstructionDetails]
-    ListInstructions(context stdctx.Context, projectId string, filter InstructionFilter) apperror.Result[[]InstructionSummary]
+    GetInstruction(context stdctx.Context, id string) appfault.Result[*InstructionDetails]
+    ListInstructions(context stdctx.Context, projectId string, filter InstructionFilter) appfault.Result[[]InstructionSummary]
     
     // Lifecycle
-    ApproveInstruction(context stdctx.Context, id string) *apperror.AppError
-    CancelInstruction(context stdctx.Context, id string) *apperror.AppError
-    ReplanInstruction(context stdctx.Context, id string) *apperror.AppError
+    ApproveInstruction(context stdctx.Context, id string) *appfault.AppError
+    CancelInstruction(context stdctx.Context, id string) *appfault.AppError
+    ReplanInstruction(context stdctx.Context, id string) *appfault.AppError
     
     // Task management
-    GetTasks(context stdctx.Context, instructionId string) apperror.Result[[]Task]
-    SkipTask(context stdctx.Context, taskId string) *apperror.AppError
-    RetryTask(context stdctx.Context, taskId string) *apperror.AppError
+    GetTasks(context stdctx.Context, instructionId string) appfault.Result[[]Task]
+    SkipTask(context stdctx.Context, taskId string) *appfault.AppError
+    RetryTask(context stdctx.Context, taskId string) *appfault.AppError
     
     // Execution
-    ExecuteInstruction(context stdctx.Context, id string) *apperror.AppError
-    ExecuteTask(context stdctx.Context, taskId string) apperror.Result[*TaskResult]
+    ExecuteInstruction(context stdctx.Context, id string) *appfault.AppError
+    ExecuteTask(context stdctx.Context, taskId string) appfault.Result[*TaskResult]
 }
 ```
 
@@ -1575,7 +1575,7 @@ func InitRegenerationTables(db *gorm.DB) error {
 ### Regeneration Process
 
 ```go
-func (s *InstructionService) Regenerate(context stdctx.Context, req RegenerateRequest) apperror.Result[*Instruction] {
+func (s *InstructionService) Regenerate(context stdctx.Context, req RegenerateRequest) appfault.Result[*Instruction] {
     // 1. Fetch original instruction and report
     original := s.repo.GetInstruction(context, req.OriginalInstructionId)
     report := s.repo.GetReport(context, req.ReportId)
@@ -1801,24 +1801,24 @@ type PromotionResult struct {
 func (s *ArtifactService) PromoteIdea(
     context stdctx.Context,
     req PromoteIdeaRequest,
-) apperror.Result[*PromotionResult] {
+) appfault.Result[*PromotionResult] {
     // 1. Fetch and validate idea
     idea, err := s.repo.GetArtifact(context, req.IdeaId)
     if err != nil {
-        return apperror.Fail[*PromotionResult](ErrArtifactNotFound)
+        return appfault.Fail[*PromotionResult](ErrArtifactNotFound)
     }
     if idea.ArtifactType != ArtifactTypeIdea {
-        return apperror.Fail[*PromotionResult](ErrInvalidArtifactType)
+        return appfault.Fail[*PromotionResult](ErrInvalidArtifactType)
     }
     if idea.Status == ArtifactStatusPromoted {
-        return apperror.Fail[*PromotionResult](ErrAlreadyPromoted)
+        return appfault.Fail[*PromotionResult](ErrAlreadyPromoted)
     }
     
     // 2. Read idea content from filesystem
     ideaPath := s.pathManager.ResolvePath(idea.RelativePath)
     content, err := s.pathManager.SafeRead(ideaPath)
     if err != nil {
-        return apperror.Fail[*PromotionResult](ErrFileRead)
+        return appfault.Fail[*PromotionResult](ErrFileRead)
     }
     
     // 3. Prepare instruction content
@@ -1856,12 +1856,12 @@ func (s *ArtifactService) PromoteIdea(
     // 5. Write instruction file
     absPath := s.pathManager.ResolvePath(relativePath)
     if err := s.pathManager.SafeWrite(absPath, []byte(finalContent)); err != nil {
-        return apperror.Fail[*PromotionResult](ErrFileWrite)
+        return appfault.Fail[*PromotionResult](ErrFileWrite)
     }
     
     // 6. Create instruction artifact in DB
     if err := s.repo.CreateArtifact(context, instructionArtifact); err != nil {
-        return apperror.Fail[*PromotionResult](err)
+        return appfault.Fail[*PromotionResult](err)
     }
     
     // 7. Update idea status
@@ -1869,7 +1869,7 @@ func (s *ArtifactService) PromoteIdea(
     idea.PromotedToId = &instructionArtifact.Id
     idea.UpdatedAt = time.Now()
     if err := s.repo.UpdateArtifact(context, idea); err != nil {
-        return apperror.Fail[*PromotionResult](err)
+        return appfault.Fail[*PromotionResult](err)
     }
     
     result := &PromotionResult{
@@ -1896,7 +1896,7 @@ func (s *ArtifactService) PromoteIdea(
     // 9. Trigger async re-indexing
     go s.ragService.TriggerReindex(context, instructionArtifact.Id)
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 

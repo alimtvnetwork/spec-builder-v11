@@ -138,7 +138,7 @@ func (c *ContextWindowConfig) TotalFixedReservation() int {
 // Validate checks configuration for logical errors
 func (c *ContextWindowConfig) Validate() error {
     if c.ModelContextSize <= 0 {
-        return apperror.New(
+        return appfault.New(
             ErrInvalidConfig,
             "ModelContextSize must be positive",
         )
@@ -146,14 +146,14 @@ func (c *ContextWindowConfig) Validate() error {
     
     fixed := c.TotalFixedReservation()
     if fixed >= c.ModelContextSize {
-        return apperror.New(
+        return appfault.New(
             ErrInvalidConfig,
             fmt.Sprintf("fixed reservations (%d) exceed model context (%d)", fixed, c.ModelContextSize),
         )
     }
     
     if c.ResponseReserve < 100 {
-        return apperror.New(
+        return appfault.New(
             ErrInvalidConfig,
             "ResponseReserve too small (min 100)",
         )
@@ -162,7 +162,7 @@ func (c *ContextWindowConfig) Validate() error {
     totalWeight := c.SemanticChunkWeight + c.KeywordChunkWeight + 
                    c.RecentArtifactWeight + c.PinnedArtifactWeight
     if totalWeight < 0.99 || totalWeight > 1.01 {
-        return apperror.New(
+        return appfault.New(
             ErrInvalidConfig,
             fmt.Sprintf("priority weights must sum to 1.0 (got %.2f)", totalWeight),
         )
@@ -232,13 +232,13 @@ func GetPresetForModel(modelName string) ContextWindowConfig {
 // TokenCounter provides token counting for various content types
 type TokenCounter interface {
     // Count returns token count for text
-    Count(text string) apperror.Result[int]
+    Count(text string) appfault.Result[int]
     
     // CountBatch counts tokens for multiple texts
-    CountBatch(texts []string) apperror.Result[[]int]
+    CountBatch(texts []string) appfault.Result[[]int]
     
     // CountMessages counts tokens for chat message format
-    CountMessages(messages []ChatMessage) apperror.Result[int]
+    CountMessages(messages []ChatMessage) appfault.Result[int]
     
     // EstimateFromChars provides fast approximation
     EstimateFromChars(charCount int) int
@@ -299,15 +299,15 @@ func NewTokenCounter(tokenizer string) *TokenCounterImpl {
 }
 
 // Count returns exact token count for text
-func (t *TokenCounterImpl) Count(text string) apperror.Result[int] {
+func (t *TokenCounterImpl) Count(text string) appfault.Result[int] {
     if text == "" {
-        return apperror.Ok(0)
+        return appfault.Ok(0)
     }
     
     // Check cache first
     // EXEMPTED: typed accessor internal — cache stores known int values (§7.2)
     if cached, ok := t.cache.Load(text); ok {
-        return apperror.Ok(cached.(int))
+        return appfault.Ok(cached.(int))
     }
     
     // Calculate tokens
@@ -318,7 +318,7 @@ func (t *TokenCounterImpl) Count(text string) apperror.Result[int] {
     // Cache result (with size limit)
     t.cache.Store(text, tokens)
     
-    return apperror.Ok(tokens)
+    return appfault.Ok(tokens)
 }
 
 // countTokensHeuristic provides reasonable approximation without external deps
@@ -350,23 +350,23 @@ func (t *TokenCounterImpl) countTokensHeuristic(text string) int {
 }
 
 // CountBatch counts tokens for multiple texts efficiently
-func (t *TokenCounterImpl) CountBatch(texts []string) apperror.Result[[]int] {
+func (t *TokenCounterImpl) CountBatch(texts []string) appfault.Result[[]int] {
     results := make([]int, len(texts))
     
     for i, text := range texts {
         countResult := t.Count(text)
         if countResult.HasError() {
-            return apperror.Fail[[]int](countResult.Error())
+            return appfault.Fail[[]int](countResult.Error())
         }
 
         results[i] = countResult.Value()
     }
     
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 
 // CountMessages counts tokens for chat message format with overhead
-func (t *TokenCounterImpl) CountMessages(messages []ChatMessage) apperror.Result[int] {
+func (t *TokenCounterImpl) CountMessages(messages []ChatMessage) appfault.Result[int] {
     total := 0
     
     // Each message has format overhead
@@ -375,7 +375,7 @@ func (t *TokenCounterImpl) CountMessages(messages []ChatMessage) apperror.Result
     for _, msg := range messages {
         countResult := t.Count(msg.Content)
         if countResult.HasError() {
-            return apperror.Fail[int](countResult.Error())
+            return appfault.Fail[int](countResult.Error())
         }
 
         total += countResult.Value() + messageOverhead
@@ -392,7 +392,7 @@ func (t *TokenCounterImpl) CountMessages(messages []ChatMessage) apperror.Result
     // Conversation overhead
     total += 3 // <|begin|>...<|end|>
     
-    return apperror.Ok(total)
+    return appfault.Ok(total)
 }
 
 // EstimateFromChars provides fast approximation without full tokenization
@@ -487,7 +487,7 @@ type AssembleRequest struct {
 }
 
 // Assemble builds the final context from request
-func (a *ContextAssembler) Assemble(context stdctx.Context, req AssembleRequest) apperror.Result[AssembledContext] {
+func (a *ContextAssembler) Assemble(context stdctx.Context, req AssembleRequest) appfault.Result[AssembledContext] {
     result := &AssembledContext{
         Messages:       make([]ChatMessage, 0),
         LayerBreakdown: make(map[ContextLayer]int),
@@ -501,7 +501,7 @@ func (a *ContextAssembler) Assemble(context stdctx.Context, req AssembleRequest)
     
     // Layer 1: System Prompt (always included, never truncated)
     if err := a.addSystemPrompt(req.SystemPrompt, budget, result); err != nil {
-        return apperror.FailWrap[AssembledContext](
+        return appfault.FailWrap[AssembledContext](
             err,
             "E5065",
             "system prompt exceeds budget",
@@ -510,7 +510,7 @@ func (a *ContextAssembler) Assemble(context stdctx.Context, req AssembleRequest)
     
     // Layer 2: Critical Context
     if err := a.addCriticalContext(req, budget, result); err != nil {
-        return apperror.FailWrap[AssembledContext](
+        return appfault.FailWrap[AssembledContext](
             err,
             "E5065",
             "critical context assembly failed",
@@ -519,7 +519,7 @@ func (a *ContextAssembler) Assemble(context stdctx.Context, req AssembleRequest)
     
     // Layer 3: User Content
     if err := a.addUserContent(req, budget, result); err != nil {
-        return apperror.FailWrap[AssembledContext](
+        return appfault.FailWrap[AssembledContext](
             err,
             "E5065",
             "user content assembly failed",
@@ -528,7 +528,7 @@ func (a *ContextAssembler) Assemble(context stdctx.Context, req AssembleRequest)
     
     // Layer 4: Retrieved Context (fill remaining budget)
     if err := a.addRetrievedContext(req.RetrievedChunks, budget, result); err != nil {
-        return apperror.FailWrap[AssembledContext](
+        return appfault.FailWrap[AssembledContext](
             err,
             "E5065",
             "retrieved context assembly failed",
@@ -538,7 +538,7 @@ func (a *ContextAssembler) Assemble(context stdctx.Context, req AssembleRequest)
     // Calculate final totals
     result.TotalTokens = budget.total - budget.remaining - a.config.ResponseReserve - a.config.SafetyMargin
     
-    return apperror.Ok(*result)
+    return appfault.Ok(*result)
 }
 
 type tokenBudget struct {
@@ -562,14 +562,14 @@ func (a *ContextAssembler) addSystemPrompt(prompt string, budget *tokenBudget, r
     }
     
     if tokens > a.config.SystemPromptReserve {
-        return apperror.New(
+        return appfault.New(
             ErrSystemPromptExceeded,
             fmt.Sprintf("system prompt (%d tokens) exceeds reserve (%d)", tokens, a.config.SystemPromptReserve),
         )
     }
     
     if !budget.allocate(tokens) {
-        return apperror.New(
+        return appfault.New(
             ErrInsufficientBudget,
             "insufficient budget for system prompt",
         )
@@ -836,7 +836,7 @@ func (b *BudgetAllocator) CalculateBudget(
     criticalContent string,
     userQuery string,
     instruction string,
-) apperror.Result[BudgetAllocation] {
+) appfault.Result[BudgetAllocation] {
     allocation := &BudgetAllocation{
         ResponseBuffer: b.config.ResponseReserve,
         SafetyMargin:   b.config.SafetyMargin,
@@ -850,7 +850,7 @@ func (b *BudgetAllocator) CalculateBudget(
     
     // Validate system prompt fits
     if systemTokens > b.config.SystemPromptReserve {
-        return apperror.FailNew[BudgetAllocation](
+        return appfault.FailNew[BudgetAllocation](
             "E5062",
             "system prompt exceeds reserve",
         )
@@ -889,7 +889,7 @@ func (b *BudgetAllocator) CalculateBudget(
     allocation.TotalAllocated = allocated + allocation.RetrievedContext
     allocation.Remaining = b.config.ModelContextSize - allocation.TotalAllocated
     
-    return apperror.Ok(*allocation)
+    return appfault.Ok(*allocation)
 }
 
 // OptimizeBudget redistributes unused allocations
@@ -963,7 +963,7 @@ func (h *OverflowHandler) HandleOverflow(
     blocks []ContextBlock,
     availableTokens int,
     strategy OverflowStrategy,
-) apperror.Result[OverflowOutcome] {
+) appfault.Result[OverflowOutcome] {
     result := &OverflowResult{
         Strategy:       strategy,
         OriginalTokens: h.totalTokens(blocks),
@@ -984,7 +984,7 @@ func (h *OverflowHandler) HandleOverflow(
     case OverflowSegment:
         return h.handleSegment(blocks, availableTokens, result)
     case OverflowReject:
-        return nil, result, apperror.New(
+        return nil, result, appfault.New(
             ErrContextOverflow,
             fmt.Sprintf("context overflow: %d tokens exceeds limit of %d", result.OriginalTokens, availableTokens),
         )
@@ -1006,7 +1006,7 @@ func (h *OverflowHandler) handleTruncate(
     blocks []ContextBlock,
     availableTokens int,
     result *OverflowResult,
-) apperror.Result[OverflowOutcome] {
+) appfault.Result[OverflowOutcome] {
     output := make([]ContextBlock, 0, len(blocks))
     remaining := availableTokens
     
@@ -1040,7 +1040,7 @@ func (h *OverflowHandler) handlePrioritize(
     blocks []ContextBlock,
     availableTokens int,
     result *OverflowResult,
-) apperror.Result[OverflowOutcome] {
+) appfault.Result[OverflowOutcome] {
     // Sort by priority descending
     sorted := make([]ContextBlock, len(blocks))
     copy(sorted, blocks)
@@ -1070,7 +1070,7 @@ func (h *OverflowHandler) handleSummarize(
     blocks []ContextBlock,
     availableTokens int,
     result *OverflowResult,
-) apperror.Result[OverflowOutcome] {
+) appfault.Result[OverflowOutcome] {
     if h.summarizer == nil {
         // Fall back to prioritize
         result.Warnings = append(result.Warnings, "Summarizer not available, using prioritize")
@@ -1115,7 +1115,7 @@ func (h *OverflowHandler) handleSegment(
     blocks []ContextBlock,
     availableTokens int,
     result *OverflowResult,
-) apperror.Result[OverflowOutcome] {
+) appfault.Result[OverflowOutcome] {
     // Return first segment, mark remaining for later execution
     output := make([]ContextBlock, 0)
     remaining := availableTokens
@@ -1141,7 +1141,7 @@ func (h *OverflowHandler) handleSegment(
 
 // ContentSummarizer interface for LLM-based summarization
 type ContentSummarizer interface {
-    Summarize(context stdctx.Context, blocks []ContextBlock, targetTokens int) apperror.Result[[]ContextBlock]
+    Summarize(context stdctx.Context, blocks []ContextBlock, targetTokens int) appfault.Result[[]ContextBlock]
 }
 ```
 
@@ -1160,18 +1160,18 @@ type ContextWindowManager interface {
     GetPresetForModel(modelName string) ContextWindowConfig
     
     // Token counting
-    CountTokens(text string) apperror.Result[int]
-    CountMessages(messages []ChatMessage) apperror.Result[int]
+    CountTokens(text string) appfault.Result[int]
+    CountMessages(messages []ChatMessage) appfault.Result[int]
     EstimateTokens(charCount int) int
     
     // Budget allocation
-    CalculateBudget(context stdctx.Context, req AssembleRequest) apperror.Result[BudgetAllocation]
+    CalculateBudget(context stdctx.Context, req AssembleRequest) appfault.Result[BudgetAllocation]
     
     // Context assembly
-    Assemble(context stdctx.Context, req AssembleRequest) apperror.Result[AssembledContext]
+    Assemble(context stdctx.Context, req AssembleRequest) appfault.Result[AssembledContext]
     
     // Overflow handling
-    HandleOverflow(context stdctx.Context, blocks []ContextBlock, limit int, strategy OverflowStrategy) apperror.Result[OverflowOutcome]
+    HandleOverflow(context stdctx.Context, blocks []ContextBlock, limit int, strategy OverflowStrategy) appfault.Result[OverflowOutcome]
     
     // Validation
     ValidateContext(assembled *AssembledContext) error
@@ -1188,9 +1188,9 @@ type ContextWindowManagerImpl struct {
 }
 
 // NewContextWindowManager creates the manager
-func NewContextWindowManager(config ContextWindowConfig) apperror.Result[ContextWindowManagerImpl] {
+func NewContextWindowManager(config ContextWindowConfig) appfault.Result[ContextWindowManagerImpl] {
     if err := config.Validate(); err != nil {
-        return apperror.FailWrap[ContextWindowManagerImpl](
+        return appfault.FailWrap[ContextWindowManagerImpl](
             err,
             "E5063",
             "invalid config",
@@ -1199,7 +1199,7 @@ func NewContextWindowManager(config ContextWindowConfig) apperror.Result[Context
     
     tokenCounter := NewTokenCounter("llama")
     
-    return apperror.Ok(ContextWindowManagerImpl{
+    return appfault.Ok(ContextWindowManagerImpl{
         config:          config,
         tokenCounter:    tokenCounter,
         assembler:       NewContextAssembler(config, tokenCounter),
@@ -1230,12 +1230,12 @@ func (m *ContextWindowManagerImpl) GetPresetForModel(modelName string) ContextWi
 }
 
 // CountTokens returns token count for text
-func (m *ContextWindowManagerImpl) CountTokens(text string) apperror.Result[int] {
+func (m *ContextWindowManagerImpl) CountTokens(text string) appfault.Result[int] {
     return m.tokenCounter.Count(text)
 }
 
 // CountMessages returns token count for message array
-func (m *ContextWindowManagerImpl) CountMessages(messages []ChatMessage) apperror.Result[int] {
+func (m *ContextWindowManagerImpl) CountMessages(messages []ChatMessage) appfault.Result[int] {
     return m.tokenCounter.CountMessages(messages)
 }
 
@@ -1245,7 +1245,7 @@ func (m *ContextWindowManagerImpl) EstimateTokens(charCount int) int {
 }
 
 // CalculateBudget determines optimal allocation
-func (m *ContextWindowManagerImpl) CalculateBudget(context stdctx.Context, req AssembleRequest) apperror.Result[BudgetAllocation] {
+func (m *ContextWindowManagerImpl) CalculateBudget(context stdctx.Context, req AssembleRequest) appfault.Result[BudgetAllocation] {
     criticalContent := req.ProjectMetadata + req.MemoryContext
     for _, artifact := range req.PinnedArtifacts {
         criticalContent += artifact.Content
@@ -1261,7 +1261,7 @@ func (m *ContextWindowManagerImpl) CalculateBudget(context stdctx.Context, req A
 }
 
 // Assemble builds complete context
-func (m *ContextWindowManagerImpl) Assemble(context stdctx.Context, req AssembleRequest) apperror.Result[AssembledContext] {
+func (m *ContextWindowManagerImpl) Assemble(context stdctx.Context, req AssembleRequest) appfault.Result[AssembledContext] {
     return m.assembler.Assemble(context, req)
 }
 
@@ -1271,17 +1271,17 @@ func (m *ContextWindowManagerImpl) HandleOverflow(
     blocks []ContextBlock,
     limit int,
     strategy OverflowStrategy,
-) apperror.Result[OverflowOutcome] {
+) appfault.Result[OverflowOutcome] {
     blocks, overflowResult, err := m.overflowHandler.HandleOverflow(context, blocks, limit, strategy)
     if err != nil {
-        return apperror.FailWrap[OverflowOutcome](
+        return appfault.FailWrap[OverflowOutcome](
             err,
             "E5060",
             "context overflow handling failed",
         )
     }
 
-    return apperror.Ok(OverflowOutcome{
+    return appfault.Ok(OverflowOutcome{
         Blocks: blocks,
         Result: overflowResult,
     })
@@ -1292,14 +1292,14 @@ func (m *ContextWindowManagerImpl) ValidateContext(assembled *AssembledContext) 
     maxAllowed := m.config.ModelContextSize - m.config.ResponseReserve
     
     if assembled.TotalTokens > maxAllowed {
-        return apperror.New(
+        return appfault.New(
             "E5060",
             "assembled context exceeds limit",
         )
     }
     
     if len(assembled.Messages) == 0 {
-        return apperror.New(
+        return appfault.New(
             "E5065",
             "assembled context has no messages",
         )

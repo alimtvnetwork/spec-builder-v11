@@ -127,25 +127,25 @@ type ProfileManager struct {
     profiles map[string]*BuildProfile
 }
 
-func (pm *ProfileManager) Get(name string) apperror.Result[BuildProfile] {
+func (pm *ProfileManager) Get(name string) appfault.Result[BuildProfile] {
     profile, isFound := pm.profiles[name]
 
     if !isFound {
-        return apperror.FailNew[BuildProfile](
+        return appfault.FailNew[BuildProfile](
             ErrBrunConfigProfileNotFound,
             "profile not found: %s",
             name,
         )
     }
 
-    return apperror.Ok(*profile)
+    return appfault.Ok(*profile)
 }
 
-func (pm *ProfileManager) Add(profile *BuildProfile) *apperror.AppError {
+func (pm *ProfileManager) Add(profile *BuildProfile) *appfault.AppError {
     _, isExists := pm.profiles[profile.Name]
 
     if isExists {
-        return apperror.New(
+        return appfault.New(
             "profile already exists: %s",
             profile.Name,
         ).WithSkip(1)
@@ -161,12 +161,12 @@ func (pm *ProfileManager) Add(profile *BuildProfile) *apperror.AppError {
     return pm.save()
 }
 
-func (pm *ProfileManager) Remove(name string) *apperror.AppError {
+func (pm *ProfileManager) Remove(name string) *appfault.AppError {
     _, isExists := pm.profiles[name]
     isMissing := !isExists
 
     if isMissing {
-        return apperror.New(
+        return appfault.New(
             "profile not found: %s",
             name,
         ).WithSkip(1)
@@ -186,11 +186,11 @@ func (pm *ProfileManager) List() []*BuildProfile {
     return profiles
 }
 
-func (pm *ProfileManager) validate(profile *BuildProfile) *apperror.AppError {
+func (pm *ProfileManager) validate(profile *BuildProfile) *appfault.AppError {
     hasName := profile.Name != ""
 
     if !hasName {
-        return apperror.New("profile name is required").WithSkip(1)
+        return appfault.New("profile name is required").WithSkip(1)
     }
 
     hasSource := profile.Source != ""
@@ -198,7 +198,7 @@ func (pm *ProfileManager) validate(profile *BuildProfile) *apperror.AppError {
     hasSourceOrCommand := hasSource || hasCommand
 
     if !hasSourceOrCommand {
-        return apperror.New("source or command is required").WithSkip(1)
+        return appfault.New("source or command is required").WithSkip(1)
     }
 
     return nil
@@ -210,11 +210,11 @@ func (pm *ProfileManager) validate(profile *BuildProfile) *apperror.AppError {
 ## Profile Execution
 
 ```go
-func (e *ExecutionEngine) ExecuteProfile(context context.Context, profileName string) apperror.Result[ExecutionResult] {
+func (e *ExecutionEngine) ExecuteProfile(context context.Context, profileName string) appfault.Result[ExecutionResult] {
     profileResult := e.profileManager.Get(profileName)
 
     if profileResult.HasError() {
-        return apperror.Fail[ExecutionResult](profileResult.Error())
+        return appfault.Fail[ExecutionResult](profileResult.Error())
     }
 
     profile := profileResult.Value()
@@ -244,11 +244,11 @@ func (e *ExecutionEngine) buildCommandFromProfile(profile BuildProfile) *Command
     return cmd
 }
 
-func (e *ExecutionEngine) runProfileExecution(context context.Context, profile BuildProfile, cmd *Command) apperror.Result[ExecutionResult] {
+func (e *ExecutionEngine) runProfileExecution(context context.Context, profile BuildProfile, cmd *Command) appfault.Result[ExecutionResult] {
     preErr := e.runPreCommands(context, cmd)
 
     if preErr != nil {
-        return apperror.Fail[ExecutionResult](preErr)
+        return appfault.Fail[ExecutionResult](preErr)
     }
 
     hasPort := profile.Port > 0
@@ -260,12 +260,12 @@ func (e *ExecutionEngine) runProfileExecution(context context.Context, profile B
     return e.executeAndFinalize(context, profile, cmd)
 }
 
-func (e *ExecutionEngine) runPreCommands(context context.Context, cmd *Command) *apperror.AppError {
+func (e *ExecutionEngine) runPreCommands(context context.Context, cmd *Command) *appfault.AppError {
     for _, preCmd := range cmd.PreCommands {
         result := e.executeShellCommand(context, preCmd, cmd.WorkDir)
 
         if result.HasError() {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 result.Error(),
                 "pre-command failed",
             ).WithSkip(1)
@@ -275,11 +275,11 @@ func (e *ExecutionEngine) runPreCommands(context context.Context, cmd *Command) 
     return nil
 }
 
-func (e *ExecutionEngine) executeAndFinalize(context context.Context, profile BuildProfile, cmd *Command) apperror.Result[ExecutionResult] {
+func (e *ExecutionEngine) executeAndFinalize(context context.Context, profile BuildProfile, cmd *Command) appfault.Result[ExecutionResult] {
     executorResult := e.factory.Create(profile.Runtime)
 
     if executorResult.HasError() {
-        return apperror.Fail[ExecutionResult](executorResult.Error())
+        return appfault.Fail[ExecutionResult](executorResult.Error())
     }
 
     result := executorResult.Value().Execute(context, cmd)

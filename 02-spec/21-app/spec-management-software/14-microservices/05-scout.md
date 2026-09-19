@@ -509,7 +509,7 @@ func NewFTSEngine(db *sql.DB, logger *logging.Logger) *FTSEngine {
 }
 
 // Search performs FTS5 search
-func (e *FTSEngine) Search(context stdctx.Context, req model.SearchRequest) apperror.Result[[]model.SearchResult] {
+func (e *FTSEngine) Search(context stdctx.Context, req model.SearchRequest) appfault.Result[[]model.SearchResult] {
     _, file, line, _ := runtime.Caller(0)
     start := time.Now()
     
@@ -648,7 +648,7 @@ func NewVSSEngine(db *sql.DB, embeddingClient *EmbeddingService, logger *logging
 }
 
 // Search performs vector similarity search
-func (e *VSSEngine) Search(context stdctx.Context, req model.SearchRequest) apperror.Result[[]model.SearchResult] {
+func (e *VSSEngine) Search(context stdctx.Context, req model.SearchRequest) appfault.Result[[]model.SearchResult] {
     _, file, line, _ := runtime.Caller(0)
     start := time.Now()
     
@@ -807,7 +807,7 @@ func NewHybridRetriever(
 }
 
 // Search performs hybrid FTS + VSS search with MMR reranking
-func (r *HybridRetriever) Search(context stdctx.Context, req model.SearchRequest) apperror.Result[model.SearchResponse] {
+func (r *HybridRetriever) Search(context stdctx.Context, req model.SearchRequest) appfault.Result[model.SearchResponse] {
     _, file, line, _ := runtime.Caller(0)
     start := time.Now()
     
@@ -1157,7 +1157,7 @@ func NewEmbeddingService(aiBridgeUrl, modelName string, dimensions int, logger *
 }
 
 // GenerateEmbedding generates embedding for a single text
-func (s *EmbeddingService) GenerateEmbedding(context stdctx.Context, text string) apperror.Result[[]float32] {
+func (s *EmbeddingService) GenerateEmbedding(context stdctx.Context, text string) appfault.Result[[]float32] {
     embeddings, err := s.GenerateEmbeddings(context, []string{text})
     if err != nil {
         return nil, err
@@ -1174,7 +1174,7 @@ func (s *EmbeddingService) GenerateEmbedding(context stdctx.Context, text string
 }
 
 // GenerateEmbeddings generates embeddings for multiple texts (batch)
-func (s *EmbeddingService) GenerateEmbeddings(context stdctx.Context, texts []string) apperror.Result[[][]float32] {
+func (s *EmbeddingService) GenerateEmbeddings(context stdctx.Context, texts []string) appfault.Result[[][]float32] {
     _, file, line, _ := runtime.Caller(0)
     start := time.Now()
     
@@ -1310,8 +1310,8 @@ type RagPipeline struct {
 
 // ChunkRepository interface for chunk access
 type ChunkRepository interface {
-    GetRecentChunks(context stdctx.Context, projectId types.ProjectId, limit int) apperror.Result[[]model.Chunk]
-    GetChunkById(context stdctx.Context, chunkId types.ChunkId) apperror.Result[model.Chunk]
+    GetRecentChunks(context stdctx.Context, projectId types.ProjectId, limit int) appfault.Result[[]model.Chunk]
+    GetChunkById(context stdctx.Context, chunkId types.ChunkId) appfault.Result[model.Chunk]
 }
 
 // NewRagPipeline creates a new RAG pipeline
@@ -1338,7 +1338,7 @@ func NewRagPipeline(
 }
 
 // RetrieveContext assembles RAG context for a query
-func (p *RAGPipeline) RetrieveContext(context stdctx.Context, req model.RAGRequest) apperror.Result[model.RAGResponse] {
+func (p *RAGPipeline) RetrieveContext(context stdctx.Context, req model.RAGRequest) appfault.Result[model.RAGResponse] {
     _, file, line, _ := runtime.Caller(0)
     start := time.Now()
     

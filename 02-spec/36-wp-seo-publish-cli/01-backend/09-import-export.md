@@ -91,10 +91,10 @@ type ExportResult struct {
     ExportedAt time.Time
 }
 
-func (s *ImportExportService) Export(req ExportRequest) apperror.Result[ExportResult] {
+func (s *ImportExportService) Export(req ExportRequest) appfault.Result[ExportResult] {
     website, err := s.db.GetWebsite(req.WebsiteId)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ExportResult](err, ErrDatabaseQueryFailed, "failed to get website")
     }
     
     export := &ExportData{
@@ -122,34 +122,34 @@ func (s *ImportExportService) Export(req ExportRequest) apperror.Result[ExportRe
     case "zip":
         return s.exportZip(export, website.Slug)
     default:
-        return nil, ErrInvalidExportFormat(req.Format)
+        return appfault.FailNew[ExportResult](ErrInvalidExportFormat, "invalid export format: "+req.Format)
     }
 }
 
-func (s *ImportExportService) exportJson(export *ExportData, slug string) apperror.Result[ExportResult] {
+func (s *ImportExportService) exportJson(export *ExportData, slug string) appfault.Result[ExportResult] {
     data, err := json.MarshalIndent(export, "", "  ")
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ExportResult](err, ErrJsonMarshalFailed, "failed to marshal export json")
     }
     
     fileName := fmt.Sprintf("export-%s-%s.json", slug, time.Now().Format("20060102"))
     
-    return &ExportResult{
+    return appfault.Ok(ExportResult{
         FileName:   fileName,
         Size:       int64(len(data)),
         Format:     "json",
         Data:       data,
         ExportedAt: time.Now(),
-    }, nil
+    })
 }
 
-func (s *ImportExportService) exportZip(export *ExportData, slug string) apperror.Result[ExportResult] {
+func (s *ImportExportService) exportZip(export *ExportData, slug string) appfault.Result[ExportResult] {
     fileName := fmt.Sprintf("export-%s-%s.zip", slug, time.Now().Format("20060102"))
     filePath := filepath.Join(s.exportDir, fileName)
     
     zipFile, err := pathutil.CreateFile(filePath)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ExportResult](err, ErrFileCreateFailed, "failed to create zip file")
     }
     defer zipFile.Close()
     
@@ -231,7 +231,7 @@ type ImportStats struct {
     Settings     int
 }
 
-func (s *ImportExportService) Import(req ImportRequest) apperror.Result[ImportResult] {
+func (s *ImportExportService) Import(req ImportRequest) appfault.Result[ImportResult] {
     // Detect format
     ext := filepath.Ext(req.FilePath)
     
@@ -244,16 +244,16 @@ func (s *ImportExportService) Import(req ImportRequest) apperror.Result[ImportRe
     case ".zip":
         importData, err = s.parseZipImport(req.FilePath)
     default:
-        return nil, ErrInvalidImportFormat(ext)
+        return appfault.FailNew[ImportResult](ErrInvalidImportFormat, "invalid import format: "+ext)
     }
     
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ImportResult](err, ErrFileReadFailed, "failed to parse import file")
     }
     
     // Validate version compatibility
     if !isCompatibleVersion(importData.Version) {
-        return nil, ErrVersionMismatch(importData.Version, CurrentVersion)
+        return appfault.FailNew[ImportResult](ErrVersionMismatch, fmt.Sprintf("version mismatch: %s vs %s", importData.Version, CurrentVersion))
     }
     
     result := &ImportResult{
@@ -265,7 +265,7 @@ func (s *ImportExportService) Import(req ImportRequest) apperror.Result[ImportRe
         // Create new website from import
         website, err := s.db.CreateWebsite(importData.Website)
         if err != nil {
-            return nil, err
+            return appfault.FailWrap[ImportResult](err, ErrDatabaseSaveFailed, "failed to create website")
         }
         result.WebsiteId = website.Id
     } else {
@@ -297,7 +297,7 @@ func (s *ImportExportService) Import(req ImportRequest) apperror.Result[ImportRe
         }
     }
     
-    return result, nil
+    return appfault.Ok(*result)
 }
 ```
 
@@ -328,16 +328,16 @@ type DeleteStats struct {
     Cache        int
 }
 
-func (s *ImportExportService) Reset(req ResetRequest) apperror.Result[ResetResult] {
+func (s *ImportExportService) Reset(req ResetRequest) appfault.Result[ResetResult] {
     // Step 1: Validate confirmation phrase
     expectedPhrase := fmt.Sprintf("RESET-%s", req.WebsiteId)
     if req.ConfirmPhrase != expectedPhrase {
-        return nil, ErrResetConfirmationMismatch(req.ConfirmPhrase, expectedPhrase)
+        return appfault.FailNew[ResetResult](ErrResetConfirmationMismatch, fmt.Sprintf("confirmation mismatch: %s vs %s", req.ConfirmPhrase, expectedPhrase))
     }
     
     website, err := s.db.GetWebsite(req.WebsiteId)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ResetResult](err, ErrDatabaseQueryFailed, "failed to get website")
     }
     
     result := &ResetResult{
@@ -347,15 +347,16 @@ func (s *ImportExportService) Reset(req ResetRequest) apperror.Result[ResetResul
     }
     
     // Step 2: Perform reset
-    websiteDb, err := s.dbManager.GetWebsiteDb(website.Slug)
-    if err != nil {
-        return nil, err
+    websiteDbRes := s.dbManager.GetWebsiteDb(website.Slug)
+    if websiteDbRes.HasError() {
+        return appfault.Fail[ResetResult](websiteDbRes.AppError())
     }
+    websiteDb := websiteDbRes.Value()
     
     // Delete publications
     pubCount, err := s.deleteAllPublications(websiteDb)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ResetResult](err, ErrDatabaseDeleteFailed, "failed to delete publications")
     }
     result.Deleted.Publications = pubCount
     
@@ -363,7 +364,7 @@ func (s *ImportExportService) Reset(req ResetRequest) apperror.Result[ResetResul
     if !req.KeepVariables {
         varCount, err := s.deleteAllVariables(websiteDb)
         if err != nil {
-            return nil, err
+            return appfault.FailWrap[ResetResult](err, ErrDatabaseDeleteFailed, "failed to delete variables")
         }
         result.Deleted.Variables = varCount
     } else {
@@ -373,7 +374,7 @@ func (s *ImportExportService) Reset(req ResetRequest) apperror.Result[ResetResul
     // Clear cache
     cacheCount, err := s.clearCache(websiteDb)
     if err != nil {
-        return nil, err
+        return appfault.FailWrap[ResetResult](err, ErrDatabaseDeleteFailed, "failed to clear cache")
     }
     result.Deleted.Cache = cacheCount
     
@@ -381,13 +382,13 @@ func (s *ImportExportService) Reset(req ResetRequest) apperror.Result[ResetResul
     if !req.KeepConnection {
         err := s.db.DeleteConnection(req.WebsiteId)
         if err != nil {
-            return nil, err
+            return appfault.FailWrap[ResetResult](err, ErrDatabaseDeleteFailed, "failed to delete connection")
         }
     } else {
         result.Preserved = append(result.Preserved, "connection")
     }
     
-    return result, nil
+    return appfault.Ok(*result)
 }
 ```
 
@@ -398,17 +399,18 @@ func (s *ImportExportService) Reset(req ResetRequest) apperror.Result[ResetResul
 ### Auto-Backup Before Destructive Operations
 
 ```go
-func (s *ImportExportService) CreateAutoBackup(websiteId, operation string) apperror.Result[ExportResult] {
+func (s *ImportExportService) CreateAutoBackup(websiteId, operation string) appfault.Result[ExportResult] {
     backupReq := ExportRequest{
         WebsiteId: websiteId,
         Include:   []string{"publications", "variables", "settings", "cache"},
         Format:    "zip",
     }
     
-    result, err := s.Export(backupReq)
-    if err != nil {
-        return nil, err
+    exportRes := s.Export(backupReq)
+    if exportRes.HasError() {
+        return exportRes
     }
+    result := exportRes.Value()
     
     // Rename with operation context
     newName := fmt.Sprintf("backup-%s-%s-%s.zip", 
@@ -429,7 +431,7 @@ func (s *ImportExportService) CreateAutoBackup(websiteId, operation string) appe
         CreatedAt: time.Now(),
     })
     
-    return result, nil
+    return appfault.Ok(result)
 }
 ```
 

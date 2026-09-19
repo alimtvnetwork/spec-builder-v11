@@ -33,18 +33,18 @@ Define the SettingsService for the Spec Reverse CLI — managing seedable config
 
 ```go
 type SettingsService interface {
-    Get(category ConfigCategory, key string) apperror.Result[any]
-    GetString(category ConfigCategory, key string) apperror.Result[string]
-    GetFloat(category ConfigCategory, key string) apperror.Result[float64]
-    GetInt(category ConfigCategory, key string) apperror.Result[int]
-    GetBool(category ConfigCategory, key string) apperror.Result[bool]
-    GetStringSlice(category ConfigCategory, key string) apperror.Result[[]string]
-    Update(category ConfigCategory, key string, value any) *apperror.AppError
-    ResetToDefault(category ConfigCategory, key string) *apperror.AppError
-    ResetCategoryToDefault(category ConfigCategory) *apperror.AppError
-    SeedFromFile(filepath string) *apperror.AppError
-    GetByCategory(category ConfigCategory) apperror.Result[[]Setting]
-    InvalidateCache() *apperror.AppError
+    Get(category ConfigCategory, key string) appfault.Result[any]
+    GetString(category ConfigCategory, key string) appfault.Result[string]
+    GetFloat(category ConfigCategory, key string) appfault.Result[float64]
+    GetInt(category ConfigCategory, key string) appfault.Result[int]
+    GetBool(category ConfigCategory, key string) appfault.Result[bool]
+    GetStringSlice(category ConfigCategory, key string) appfault.Result[[]string]
+    Update(category ConfigCategory, key string, value any) *appfault.AppError
+    ResetToDefault(category ConfigCategory, key string) *appfault.AppError
+    ResetCategoryToDefault(category ConfigCategory) *appfault.AppError
+    SeedFromFile(filepath string) *appfault.AppError
+    GetByCategory(category ConfigCategory) appfault.Result[[]Setting]
+    InvalidateCache() *appfault.AppError
 }
 ```
 

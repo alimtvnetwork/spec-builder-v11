@@ -255,7 +255,7 @@ type MockResponse struct {
     Stderr   string
     ExitCode int
     Delay    time.Duration
-    Err      *apperror.AppError
+    Err      *appfault.AppError
 }
 
 type MockCall struct {
@@ -275,7 +275,7 @@ func (m *MockRunner) Register(cmdPattern string, response *MockResponse) {
     m.responses[cmdPattern] = response
 }
 
-func (m *MockRunner) Execute(context stdctx.Context, cmd string, args []string, workDir string) apperror.Result[RunOutput] {
+func (m *MockRunner) Execute(context stdctx.Context, cmd string, args []string, workDir string) appfault.Result[RunOutput] {
     m.calls = append(m.calls, MockCall{
         Command: cmd,
         Args:    args,
@@ -285,7 +285,7 @@ func (m *MockRunner) Execute(context stdctx.Context, cmd string, args []string, 
     return m.findMatchingResponse(context, cmd)
 }
 
-func (m *MockRunner) findMatchingResponse(context stdctx.Context, cmd string) apperror.Result[RunOutput] {
+func (m *MockRunner) findMatchingResponse(context stdctx.Context, cmd string) appfault.Result[RunOutput] {
     for pattern, resp := range m.responses {
         isMatch := matchesPattern(cmd, pattern)
 
@@ -294,27 +294,27 @@ func (m *MockRunner) findMatchingResponse(context stdctx.Context, cmd string) ap
         }
     }
 
-    return apperror.Ok(RunOutput{ExitCode: 0})
+    return appfault.Ok(RunOutput{ExitCode: 0})
 }
 
-func (m *MockRunner) executeResponse(context stdctx.Context, resp *MockResponse) apperror.Result[RunOutput] {
+func (m *MockRunner) executeResponse(context stdctx.Context, resp *MockResponse) appfault.Result[RunOutput] {
     hasDelay := resp.Delay > 0
 
     if hasDelay {
         select {
         case <-time.After(resp.Delay):
         case <-context.Done():
-            return apperror.Fail[RunOutput](
-                apperror.Wrap(context.Err(), "context canceled").WithSkip(1),
+            return appfault.Fail[RunOutput](
+                appfault.Wrap(context.Err(), "context canceled").WithSkip(1),
             )
         }
     }
 
     if resp.Err != nil {
-        return apperror.Fail[RunOutput](resp.Err)
+        return appfault.Fail[RunOutput](resp.Err)
     }
 
-    return apperror.Ok(RunOutput{
+    return appfault.Ok(RunOutput{
         Stdout:   resp.Stdout,
         Stderr:   resp.Stderr,
         ExitCode: resp.ExitCode,
@@ -345,7 +345,7 @@ import (
 // MockExecutor is a test double for any runtime executor
 type MockExecutor struct {
     RuntimeName    string
-    ValidateErr    *apperror.AppError
+    ValidateErr    *appfault.AppError
     Version        string
     ExecuteResults map[string]*Result
     ExecuteCalls   []ExecuteCall
@@ -368,27 +368,27 @@ func (m *MockExecutor) RuntimeType() string {
     return m.RuntimeName
 }
 
-func (m *MockExecutor) Validate() *apperror.AppError {
+func (m *MockExecutor) Validate() *appfault.AppError {
     return m.ValidateErr
 }
 
-func (m *MockExecutor) GetVersion() apperror.Result[string] {
+func (m *MockExecutor) GetVersion() appfault.Result[string] {
     if m.ValidateErr != nil {
-        return apperror.Fail[string](m.ValidateErr)
+        return appfault.Fail[string](m.ValidateErr)
     }
 
-    return apperror.Ok(m.Version)
+    return appfault.Ok(m.Version)
 }
 
-func (m *MockExecutor) Execute(context stdctx.Context, cmd *Command) apperror.Result[Result] {
+func (m *MockExecutor) Execute(context stdctx.Context, cmd *Command) appfault.Result[Result] {
     m.ExecuteCalls = append(m.ExecuteCalls, ExecuteCall{Command: cmd})
 
     if result, isFound := m.ExecuteResults[cmd.Script]; isFound {
-        return apperror.Ok(*result)
+        return appfault.Ok(*result)
     }
 
     // Default success response
-    return apperror.Ok(Result{
+    return appfault.Ok(Result{
         ExitCode: 0,
         Stdout:   "mock success",
         Stderr:   "",

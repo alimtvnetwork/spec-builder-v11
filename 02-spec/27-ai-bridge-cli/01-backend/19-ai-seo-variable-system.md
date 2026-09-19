@@ -258,10 +258,10 @@ func NewVariableProcessor() *VariableProcessor {
     return vp
 }
 
-func (vp *VariableProcessor) LoadCsv(path string) *apperror.AppError {
+func (vp *VariableProcessor) LoadCsv(path string) *appfault.AppError {
     file, err := pathutil.OpenFile(path)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeoVariableLoadFailed,
             "failed to open CSV: %s",
@@ -273,7 +273,7 @@ func (vp *VariableProcessor) LoadCsv(path string) *apperror.AppError {
     reader := csv.NewReader(file)
     records, err := reader.ReadAll()
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeoVariableLoadFailed,
             "failed to parse CSV: %s",
@@ -282,7 +282,7 @@ func (vp *VariableProcessor) LoadCsv(path string) *apperror.AppError {
     }
     
     if len(records) < 2 {
-        return apperror.New(
+        return appfault.New(
             ErrSeoVariableLoadFailed,
             "CSV must have header and at least one data row: %s",
             path,
@@ -309,10 +309,10 @@ func (vp *VariableProcessor) LoadCsv(path string) *apperror.AppError {
     return nil
 }
 
-func (vp *VariableProcessor) LoadJson(path string) *apperror.AppError {
+func (vp *VariableProcessor) LoadJson(path string) *appfault.AppError {
     data, err := pathutil.ReadFile(path)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeoVariableLoadFailed,
             "failed to read JSON: %s",
@@ -322,7 +322,7 @@ func (vp *VariableProcessor) LoadJson(path string) *apperror.AppError {
     
     scope, parseErr := parseJsonToScope(data)
     if parseErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             parseErr,
             ErrSeoVariableLoadFailed,
             "failed to parse JSON: %s",
@@ -336,10 +336,10 @@ func (vp *VariableProcessor) LoadJson(path string) *apperror.AppError {
     return nil
 }
 
-func (vp *VariableProcessor) LoadYaml(path string) *apperror.AppError {
+func (vp *VariableProcessor) LoadYaml(path string) *appfault.AppError {
     data, err := pathutil.ReadFile(path)
     if err != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             err,
             ErrSeoVariableLoadFailed,
             "failed to read YAML: %s",
@@ -349,7 +349,7 @@ func (vp *VariableProcessor) LoadYaml(path string) *apperror.AppError {
     
     scope, parseErr := parseYamlToScope(data)
     if parseErr != nil {
-        return apperror.Wrap(
+        return appfault.Wrap(
             parseErr,
             ErrSeoVariableLoadFailed,
             "failed to parse YAML: %s",
@@ -369,22 +369,22 @@ func (vp *VariableProcessor) LoadYaml(path string) *apperror.AppError {
 ### Variable Resolution
 
 ```go
-func (vp *VariableProcessor) Resolve(key string) apperror.Result[string] {
+func (vp *VariableProcessor) Resolve(key string) appfault.Result[string] {
     // Check scopes in order (instance -> content -> app -> global)
     if val, ok := vp.resolveInScope(key, vp.InstanceVars); ok {
-        return apperror.Ok(val)
+        return appfault.Ok(val)
     }
     if val, ok := vp.resolveInScope(key, vp.ContentVars); ok {
-        return apperror.Ok(val)
+        return appfault.Ok(val)
     }
     if val, ok := vp.resolveInScope(key, vp.AppVars); ok {
-        return apperror.Ok(val)
+        return appfault.Ok(val)
     }
     if val, ok := vp.resolveInScope(key, vp.GlobalVars); ok {
-        return apperror.Ok(val)
+        return appfault.Ok(val)
     }
     
-    return apperror.FailNew[string](
+    return appfault.FailNew[string](
         ErrVariableNotFound,
         "variable not found: %s", key,
     )
@@ -446,7 +446,7 @@ func (vp *VariableProcessor) resolveInScope(key string, scope VariableScope) (st
 ### Template Processing
 
 ```go
-func (vp *VariableProcessor) ProcessTemplate(template string) apperror.Result[string] {
+func (vp *VariableProcessor) ProcessTemplate(template string) appfault.Result[string] {
     // Regex to match {{variable|formatter:arg}}
     re := regexp.MustCompile(`\{\{([^}]+)\}\}`)
     
@@ -483,7 +483,7 @@ func (vp *VariableProcessor) ProcessTemplate(template string) apperror.Result[st
         return fmt.Sprintf("%v", value)
     })
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 ```
 

@@ -84,7 +84,7 @@ import (
     "time"
     
     "github.com/rs/zerolog/log"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // SelectorRegistry manages versioned CSS selectors for search engines
@@ -136,7 +136,7 @@ func DefaultSelectorConfig() SelectorConfig {
 }
 
 // NewSelectorRegistry creates a new selector registry
-func NewSelectorRegistry(config SelectorConfig) apperror.Result[*SelectorRegistry] {
+func NewSelectorRegistry(config SelectorConfig) appfault.Result[*SelectorRegistry] {
     registry := &SelectorRegistry{
         filePath: config.Path,
         embedded: embeddedSelectors(),
@@ -150,8 +150,8 @@ func NewSelectorRegistry(config SelectorConfig) apperror.Result[*SelectorRegistr
                 Msg("Failed to load selectors file, using embedded fallback")
             registry.copyFromEmbedded()
         } else {
-            return apperror.Fail[*SelectorRegistry](
-                apperror.Wrap(
+            return appfault.Fail[*SelectorRegistry](
+                appfault.Wrap(
                     err,
                     "selector file missing: "+config.Path,
                 ),
@@ -164,11 +164,11 @@ func NewSelectorRegistry(config SelectorConfig) apperror.Result[*SelectorRegistr
         go registry.watchFile(config.ReloadInterval)
     }
     
-    return apperror.OK(registry)
+    return appfault.Ok(registry)
 }
 
 // loadFromFile loads selectors from the JSON file
-func (r *SelectorRegistry) loadFromFile() *apperror.AppError {
+func (r *SelectorRegistry) loadFromFile() *appfault.AppError {
     data, err := pathutil.ReadFile(r.filePath)
     if err != nil {
         return err
@@ -230,18 +230,18 @@ func (r *SelectorRegistry) watchFile(interval time.Duration) {
 }
 
 // GetSelectors returns selectors for an engine
-func (r *SelectorRegistry) GetSelectors(engine string) apperror.Result[EngineSelectors] {
+func (r *SelectorRegistry) GetSelectors(engine string) appfault.Result[EngineSelectors] {
     r.mu.RLock()
     defer r.mu.RUnlock()
     
     selectors, ok := r.Engines[engine]
     if !ok {
-        return apperror.Fail[EngineSelectors](
-            apperror.New("no selectors for engine: " + engine),
+        return appfault.Fail[EngineSelectors](
+            appfault.New("no selectors for engine: " + engine),
         )
     }
     
-    return apperror.OK(selectors)
+    return appfault.Ok(selectors)
 }
 
 // GetVersion returns the current selector version
@@ -398,7 +398,7 @@ import (
     "time"
     
     "github.com/PuerkitoBio/goquery"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
 )
 
 // ValidationResult contains selector validation results
@@ -412,9 +412,9 @@ type ValidationResult struct {
 }
 
 // ValidateSelector validates CSS selector syntax
-func ValidateSelector(selector string) *apperror.AppError {
+func ValidateSelector(selector string) *appfault.AppError {
     if selector == "" {
-        return apperror.New("empty selector")
+        return appfault.New("empty selector")
     }
     
     // Parse comma-separated alternatives
@@ -428,7 +428,7 @@ func ValidateSelector(selector string) *apperror.AppError {
         // Create a minimal document to test the selector
         doc, err := goquery.NewDocumentFromReader(strings.NewReader("<html><body></body></html>"))
         if err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 "failed to create test document",
             )
@@ -436,7 +436,7 @@ func ValidateSelector(selector string) *apperror.AppError {
         
         // Validate selector by attempting to use it
         if validateErr := validateSelectorSyntax(alt); validateErr != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 validateErr,
                 "invalid selector '"+alt+"'",
             )
@@ -449,18 +449,18 @@ func ValidateSelector(selector string) *apperror.AppError {
 }
 
 // validateSelectorSyntax performs basic selector syntax validation
-func validateSelectorSyntax(selector string) *apperror.AppError {
+func validateSelectorSyntax(selector string) *appfault.AppError {
     // Check for common syntax errors
     if strings.Contains(selector, "[[") || strings.Contains(selector, "]]") {
-        return apperror.New("malformed attribute selector")
+        return appfault.New("malformed attribute selector")
     }
     if strings.HasPrefix(selector, ">") || strings.HasPrefix(selector, "+") || strings.HasPrefix(selector, "~") {
-        return apperror.New("selector cannot start with combinator")
+        return appfault.New("selector cannot start with combinator")
     }
     if strings.HasSuffix(strings.TrimSpace(selector), ">") || 
        strings.HasSuffix(strings.TrimSpace(selector), "+") ||
        strings.HasSuffix(strings.TrimSpace(selector), "~") {
-        return apperror.New("selector cannot end with combinator")
+        return appfault.New("selector cannot end with combinator")
     }
     return nil
 }
@@ -600,7 +600,7 @@ func runSelectorsValidate(cmd *cobra.Command, args []string) error {
         if allValid {
             fmt.Println("\nAll selectors valid!")
         } else {
-        return apperror.New("validation failed")
+        return appfault.New("validation failed")
         }
     }
     
@@ -670,7 +670,7 @@ import (
     "time"
     
     "github.com/PuerkitoBio/goquery"
-    "gsearch/pkg/apperror"
+    "gsearch/pkg/appfault"
     "gsearch/pkg/selectors"
 )
 
@@ -688,7 +688,7 @@ func NewHtmlParser(cfg *config.SearchConfig, registry *selectors.SelectorRegistr
             Timeout: cfg.Timeout.Duration(),
             CheckRedirect: func(req *http.Request, via []*http.Request) error {
                 if len(via) >= 3 {
-                    return apperror.New("too many redirects")
+                    return appfault.New("too many redirects")
                 }
                 return nil
             },
@@ -708,18 +708,18 @@ func (p *HtmlParser) RequiresApi() bool { return false }
 ### Google Search Parser
 
 ```go
-func (p *HtmlParser) SearchGoogle(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]Result] {
+func (p *HtmlParser) SearchGoogle(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
     searchUrl := p.buildGoogleUrl(query, opts.MaxResults)
     
     docResult := p.fetchAndParse(context, searchUrl)
     if !docResult.IsSuccess {
-        return apperror.Fail[[]Result](docResult.Error)
+        return appfault.Fail[[]Result](docResult.Error)
     }
     
     doc := docResult.Value
     selResult := p.selectors.GetSelectors("google")
     if !selResult.IsSuccess {
-        return apperror.Fail[[]Result](selResult.Error)
+        return appfault.Fail[[]Result](selResult.Error)
     }
     
     sel := selResult.Value
@@ -736,7 +736,7 @@ func (p *HtmlParser) SearchGoogle(context stdctx.Context, query string, opts Sea
         }
     }
     
-    return apperror.OK(results)
+    return appfault.Ok(results)
 }
 
 func (p *HtmlParser) buildGoogleUrl(query string, maxResults int) string {
@@ -819,18 +819,18 @@ func (p *HTMLParser) parseWithSelectors(doc *goquery.Document, sel selectors.Eng
 ### DuckDuckGo Parser
 
 ```go
-func (p *HtmlParser) SearchDuckDuckGo(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]Result] {
+func (p *HtmlParser) SearchDuckDuckGo(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
     searchUrl := p.buildDdgUrl(query)
     
     docResult := p.fetchAndParse(context, searchUrl)
     if !docResult.IsSuccess {
-        return apperror.Fail[[]Result](docResult.Error)
+        return appfault.Fail[[]Result](docResult.Error)
     }
     
     doc := docResult.Value
     selResult := p.selectors.GetSelectors("duckduckgo")
     if !selResult.IsSuccess {
-        return apperror.Fail[[]Result](selResult.Error)
+        return appfault.Fail[[]Result](selResult.Error)
     }
     
     sel := selResult.Value
@@ -847,7 +847,7 @@ func (p *HtmlParser) SearchDuckDuckGo(context stdctx.Context, query string, opts
         }
     }
     
-    return apperror.OK(results)
+    return appfault.Ok(results)
 }
 
 func (p *HtmlParser) buildDdgUrl(query string) string {
@@ -885,18 +885,18 @@ func (p *HtmlParser) extractDdgUrl(ddgUrl string) string {
 ### Bing Parser
 
 ```go
-func (p *HtmlParser) SearchBing(context stdctx.Context, query string, opts SearchOptions) apperror.Result[[]Result] {
+func (p *HtmlParser) SearchBing(context stdctx.Context, query string, opts SearchOptions) appfault.Result[[]Result] {
     searchUrl := p.buildBingUrl(query, opts.MaxResults)
     
     docResult := p.fetchAndParse(context, searchUrl)
     if !docResult.IsSuccess {
-        return apperror.Fail[[]Result](docResult.Error)
+        return appfault.Fail[[]Result](docResult.Error)
     }
     
     doc := docResult.Value
     selResult := p.selectors.GetSelectors("bing")
     if !selResult.IsSuccess {
-        return apperror.Fail[[]Result](selResult.Error)
+        return appfault.Fail[[]Result](selResult.Error)
     }
     
     sel := selResult.Value
@@ -913,7 +913,7 @@ func (p *HtmlParser) SearchBing(context stdctx.Context, query string, opts Searc
         }
     }
     
-    return apperror.OK(results)
+    return appfault.Ok(results)
 }
 
 func (p *HtmlParser) buildBingUrl(query string, maxResults int) string {
@@ -928,11 +928,11 @@ func (p *HtmlParser) buildBingUrl(query string, maxResults int) string {
 ### HTTP Fetching
 
 ```go
-func (p *HTMLParser) fetchAndParse(context stdctx.Context, targetUrl string) apperror.Result[*goquery.Document] {
+func (p *HTMLParser) fetchAndParse(context stdctx.Context, targetUrl string) appfault.Result[*goquery.Document] {
     req, err := http.NewRequestWithContext(context, httpmethod.Get.String(), targetUrl, nil)
     if err != nil {
-        return apperror.Fail[*goquery.Document](
-            apperror.Wrap(err, "create request"),
+        return appfault.Fail[*goquery.Document](
+            appfault.Wrap(err, "create request"),
         )
     }
     
@@ -945,8 +945,8 @@ func (p *HTMLParser) fetchAndParse(context stdctx.Context, targetUrl string) app
     
     resp, err := p.client.Do(req)
     if err != nil {
-        return apperror.Fail[*goquery.Document](
-            apperror.Wrap(err, "network error: "+targetUrl),
+        return appfault.Fail[*goquery.Document](
+            appfault.Wrap(err, "network error: "+targetUrl),
         )
     }
     defer resp.Body.Close()
@@ -954,37 +954,37 @@ func (p *HTMLParser) fetchAndParse(context stdctx.Context, targetUrl string) app
     // Check status
     if resp.StatusCode != http.StatusOK {
         if resp.StatusCode == 429 {
-            return apperror.Fail[*goquery.Document](
-                apperror.New("rate limited by " + targetUrl),
+            return appfault.Fail[*goquery.Document](
+                appfault.New("rate limited by " + targetUrl),
             )
         }
         if resp.StatusCode == 403 {
-            return apperror.Fail[*goquery.Document](
-                apperror.New("blocked by " + targetUrl),
+            return appfault.Fail[*goquery.Document](
+                appfault.New("blocked by " + targetUrl),
             )
         }
-        return apperror.Fail[*goquery.Document](
-            apperror.New("unexpected status from " + targetUrl),
+        return appfault.Fail[*goquery.Document](
+            appfault.New("unexpected status from " + targetUrl),
         )
     }
     
     // Parse HTML
     doc, err := goquery.NewDocumentFromReader(resp.Body)
     if err != nil {
-        return apperror.Fail[*goquery.Document](
-            apperror.Wrap(err, "parse response"),
+        return appfault.Fail[*goquery.Document](
+            appfault.Wrap(err, "parse response"),
         )
     }
     
     // Check for blocking patterns in content
     html, _ := doc.Html()
     if p.isBlocked(html) {
-        return apperror.Fail[*goquery.Document](
-            apperror.New("blocking pattern detected in response"),
+        return appfault.Fail[*goquery.Document](
+            appfault.New("blocking pattern detected in response"),
         )
     }
     
-    return apperror.OK(doc)
+    return appfault.Ok(doc)
 }
 
 func (p *HTMLParser) getNextUserAgent() string {

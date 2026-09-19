@@ -54,7 +54,7 @@ type PortResolution struct {
 
 ```go
 // CheckPort verifies if a port is available
-func (pm *PortManager) CheckPort(port int) apperror.Result[*PortCheckResult] {
+func (pm *PortManager) CheckPort(port int) appfault.Result[*PortCheckResult] {
     // Try to listen on the port
     listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
     if err != nil {
@@ -77,7 +77,7 @@ func (pm *PortManager) CheckPort(port int) apperror.Result[*PortCheckResult] {
 }
 
 // ResolvePort finds an available port with fallback
-func (pm *PortManager) ResolvePort(primary int, fallback []int) apperror.Result[*PortResolution] {
+func (pm *PortManager) ResolvePort(primary int, fallback []int) appfault.Result[*PortResolution] {
     resolution := &PortResolution{
         RequestedPort: primary,
         CheckedPorts:  make([]PortCheckResult, 0),
@@ -109,7 +109,7 @@ func (pm *PortManager) ResolvePort(primary int, fallback []int) apperror.Result[
         }
     }
     
-    return resolution, apperror.New(
+    return resolution, appfault.New(
         ErrPortUnavailable,
         "no available port found",
     )
@@ -207,8 +207,8 @@ type FirewallRule struct {
 
 func (fm *FirewallManager) EnablePort(port int, name string, protocol string) error
 func (fm *FirewallManager) DisablePort(port int) error
-func (fm *FirewallManager) ListRules() apperror.Result[[]FirewallRule]
-func (fm *FirewallManager) RuleExists(port int) apperror.Result[bool]
+func (fm *FirewallManager) ListRules() appfault.Result[[]FirewallRule]
+func (fm *FirewallManager) RuleExists(port int) appfault.Result[bool]
 ```
 
 ### Windows Implementation (netsh)
@@ -228,7 +228,7 @@ func (fm *FirewallManager) enablePortWindows(port int, name string, protocol str
     
     output, err := cmd.CombinedOutput()
     if err != nil {
-        return apperror.New(
+        return appfault.New(
             ErrFirewallRuleFailed,
             "failed to add firewall rule",
         ).WithContext("output", string(output))
@@ -247,7 +247,7 @@ func (fm *FirewallManager) disablePortWindows(port int) error {
     return cmd.Run()
 }
 
-func (fm *FirewallManager) listRulesWindows() apperror.Result[[]FirewallRule] {
+func (fm *FirewallManager) listRulesWindows() appfault.Result[[]FirewallRule] {
     cmd := exec.Command("netsh", "advfirewall", "firewall", "show", "rule", 
         fmt.Sprintf("name=%s*", fm.ruleName))
     output, err := cmd.Output()
@@ -351,12 +351,12 @@ Available port: 8081
 ## Integration with Execution
 
 ```go
-func (e *ExecutionEngine) executeWithPort(context context.Context, cmd *Command, requestedPort int) apperror.Result[ExecutionResult] {
+func (e *ExecutionEngine) executeWithPort(context context.Context, cmd *Command, requestedPort int) appfault.Result[ExecutionResult] {
     // Resolve available port
     resolution := e.portManager.ResolvePort(requestedPort, e.config.Ports.Fallback)
     if resolution.IsErr() {
-        return apperror.Fail[ExecutionResult](
-            apperror.Wrap(resolution.Err(), 7301, "no available port"),
+        return appfault.Fail[ExecutionResult](
+            appfault.Wrap(resolution.Err(), 7301, "no available port"),
         )
     }
     port := resolution.Value()
@@ -381,7 +381,7 @@ func (e *ExecutionEngine) executeWithPort(context context.Context, cmd *Command,
     if result.IsOk() {
         value := result.Value()
         value.Port = port.AvailablePort
-        return apperror.Ok(value)
+        return appfault.Ok(value)
     }
     return result
 }

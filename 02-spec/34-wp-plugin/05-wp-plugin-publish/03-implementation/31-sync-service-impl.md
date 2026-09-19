@@ -106,15 +106,15 @@ import (
 // Service interface for sync operations
 type Service interface {
 	// Sync checking
-	CheckSync(context stdctx.Context, pluginId, siteId int64) apperror.Result[*SyncResult]
-	CheckAllSites(context stdctx.Context, pluginId int64) apperror.Result[*BatchSyncResult]
-	CheckAllPlugins(context stdctx.Context) apperror.Result[[]SyncResult]
+	CheckSync(context stdctx.Context, pluginId, siteId int64) appfault.Result[*SyncResult]
+	CheckAllSites(context stdctx.Context, pluginId int64) appfault.Result[*BatchSyncResult]
+	CheckAllPlugins(context stdctx.Context) appfault.Result[[]SyncResult]
 
 	// File change management
-	GetFileChanges(context stdctx.Context, pluginId, siteId int64) apperror.Result[[]models.FileChange]
-	RecordFileChange(context stdctx.Context, change *models.FileChange) *apperror.AppError
-	MarkSynced(context stdctx.Context, pluginId, siteId int64, files []string) *apperror.AppError
-	ClearChanges(context stdctx.Context, pluginId int64) *apperror.AppError
+	GetFileChanges(context stdctx.Context, pluginId, siteId int64) appfault.Result[[]models.FileChange]
+	RecordFileChange(context stdctx.Context, change *models.FileChange) *appfault.AppError
+	MarkSynced(context stdctx.Context, pluginId, siteId int64, files []string) *appfault.AppError
+	ClearChanges(context stdctx.Context, pluginId int64) *appfault.AppError
 }
 
 // Config holds sync service configuration
@@ -159,10 +159,10 @@ import (
 
 	"wp-plugin-publish/internal/models"
 	"wp-plugin-publish/internal/ws"
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 )
 
-func (s *serviceImpl) CheckSync(context stdctx.Context, pluginId, siteId int64) apperror.Result[SyncResult] {
+func (s *serviceImpl) CheckSync(context stdctx.Context, pluginId, siteId int64) appfault.Result[SyncResult] {
 	s.log.Info("Checking sync status", "pluginId", pluginId, "siteId", siteId)
 
 	// Broadcast sync started event
@@ -192,8 +192,8 @@ func (s *serviceImpl) CheckSync(context stdctx.Context, pluginId, siteId int64) 
 	if err := s.db.GormDb().WithContext(context).First(&site, "Id = ?", siteId).Error; err != nil {
 		result.Status = "error"
 		result.Error = "site not found"
-		return result, apperror.New(
-			apperror.ErrNotFound, "site not found",
+		return result, appfault.New(
+			appfault.ErrNotFound, "site not found",
 		)
 	}
 	result.SiteName = site.Name
@@ -205,8 +205,8 @@ func (s *serviceImpl) CheckSync(context stdctx.Context, pluginId, siteId int64) 
 		First(&mapping).Error; err != nil {
 		result.Status = "error"
 		result.Error = "plugin not mapped to site"
-		return result, apperror.New(
-			apperror.ErrNotFound, "mapping not found",
+		return result, appfault.New(
+			appfault.ErrNotFound, "mapping not found",
 		)
 	}
 	remoteSlug := mapping.RemoteSlug
@@ -280,13 +280,13 @@ func (s *serviceImpl) CheckSync(context stdctx.Context, pluginId, siteId int64) 
 	return result, nil
 }
 
-func (s *serviceImpl) CheckAllSites(context stdctx.Context, pluginId int64) apperror.Result[BatchSyncResult] {
+func (s *serviceImpl) CheckAllSites(context stdctx.Context, pluginId int64) appfault.Result[BatchSyncResult] {
 	s.log.Info("Checking sync for all sites", "pluginId", pluginId)
 
 	// Get all mappings for this plugin
 	mappings, err := s.pluginService.GetMappings(context, pluginId)
 	if err != nil {
-		return apperror.Fail[BatchSyncResult](err)
+		return appfault.Fail[BatchSyncResult](err)
 	}
 
 	batch := &BatchSyncResult{
@@ -316,7 +316,7 @@ func (s *serviceImpl) CheckAllSites(context stdctx.Context, pluginId int64) appe
 	return batch, nil
 }
 
-func (s *serviceImpl) CheckAllPlugins(context stdctx.Context) apperror.Result[[]SyncResult] {
+func (s *serviceImpl) CheckAllPlugins(context stdctx.Context) appfault.Result[[]SyncResult] {
 	s.log.Info("Checking sync for all plugins")
 
 	// Get all mappings
@@ -422,19 +422,19 @@ import (
 	"time"
 
 	"wp-plugin-publish/internal/models"
-	"wp-plugin-publish/pkg/apperror"
+	"wp-plugin-publish/pkg/appfault"
 
 	"gorm.io/gorm"
 )
 
-func (s *serviceImpl) GetFileChanges(context stdctx.Context, pluginId, siteId int64) apperror.Result[[]models.FileChange] {
+func (s *serviceImpl) GetFileChanges(context stdctx.Context, pluginId, siteId int64) appfault.Result[[]models.FileChange] {
 	var changes []models.FileChange
 	if err := s.db.GormDb().WithContext(context).
 		Where("PluginId = ? AND SyncedAt IS NULL", pluginId).
 		Order("DetectedAt DESC").
 		Find(&changes).Error; err != nil {
-		return nil, apperror.Wrap(
-			err, apperror.ErrDatabaseQuery, "failed to get file changes",
+		return nil, appfault.Wrap(
+			err, appfault.ErrDatabaseQuery, "failed to get file changes",
 		)
 	}
 
@@ -473,8 +473,8 @@ func (s *serviceImpl) MarkSynced(context stdctx.Context, pluginId, siteId int64,
 			Model(&models.FileChange{}).
 			Where("PluginId = ? AND FilePath = ? AND SyncedAt IS NULL", pluginId, path).
 			Update("SyncedAt", now).Error; err != nil {
-			return apperror.Wrap(
-				err, apperror.ErrDatabaseExec, "failed to mark file synced",
+			return appfault.Wrap(
+				err, appfault.ErrDatabaseExec, "failed to mark file synced",
 			)
 		}
 	}

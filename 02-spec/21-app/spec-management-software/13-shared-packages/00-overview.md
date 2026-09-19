@@ -121,7 +121,7 @@ db, err := database.New(
 All operations accept `context.Context` as the first parameter:
 
 ```go
-func (db *DB) Query(context stdctx.Context, query string, args ...any) apperror.Result[*Rows]
+func (db *DB) Query(context stdctx.Context, query string, args ...any) appfault.Result[*Rows]
 ```
 
 ---

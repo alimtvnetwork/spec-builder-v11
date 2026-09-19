@@ -128,12 +128,12 @@ func NewBoolValue(v bool) SettingValue {
 // All methods are strongly typed — no interface{} or any usage.
 type SettingsService interface {
     // Type-safe accessors (preferred)
-    GetString(category ConfigCategory, key string) apperror.Result[string]
-    GetFloat(category ConfigCategory, key string) apperror.Result[float64]
-    GetInt(category ConfigCategory, key string) apperror.Result[int]
-    GetBool(category ConfigCategory, key string) apperror.Result[bool]
-    GetStringSlice(category ConfigCategory, key string) apperror.Result[[]string]
-    GetMap(category ConfigCategory, key string) apperror.Result[map[string]string]
+    GetString(category ConfigCategory, key string) appfault.Result[string]
+    GetFloat(category ConfigCategory, key string) appfault.Result[float64]
+    GetInt(category ConfigCategory, key string) appfault.Result[int]
+    GetBool(category ConfigCategory, key string) appfault.Result[bool]
+    GetStringSlice(category ConfigCategory, key string) appfault.Result[[]string]
+    GetMap(category ConfigCategory, key string) appfault.Result[map[string]string]
     
     // Mutation methods (strongly typed value container)
     Update(category ConfigCategory, key string, value SettingValue) error
@@ -144,8 +144,8 @@ type SettingsService interface {
     SeedFromFile(filepath string) error
     
     // Query methods
-    GetByCategory(category ConfigCategory) apperror.Result[[]Setting]
-    GetCategoryVersion(category ConfigCategory) apperror.Result[string]
+    GetByCategory(category ConfigCategory) appfault.Result[[]Setting]
+    GetCategoryVersion(category ConfigCategory) appfault.Result[string]
     
     // Cache management
     InvalidateCache() error
@@ -157,7 +157,7 @@ type SettingsService interface {
 ```go
 // GetTyped retrieves a setting and returns it as the specified concrete type.
 // Eliminates the need for interface{} by using Go generics.
-func GetTyped[T SettingConstraint](svc SettingsService, category ConfigCategory, key string) apperror.Result[T] {
+func GetTyped[T SettingConstraint](svc SettingsService, category ConfigCategory, key string) appfault.Result[T] {
     var zero T
     switch v := any(zero).(type) {
     case string:
@@ -185,7 +185,7 @@ func GetTyped[T SettingConstraint](svc SettingsService, category ConfigCategory,
         result, err := svc.GetMap(category, key)
         return any(result).(T), err
     default:
-        return zero, apperror.New(
+        return zero, appfault.New(
             ErrUnsupportedSettingType,
             "unsupported setting type",
         )
@@ -445,7 +445,7 @@ The Settings service integrates with the Port Management system defined in the O
 
 ```go
 // GetAvailablePort returns next available port from configured range
-func (s *SettingsServiceImpl) GetAvailablePort() apperror.Result[int] {
+func (s *SettingsServiceImpl) GetAvailablePort() appfault.Result[int] {
     // Use typed accessors — no interface{} assertions
     start, err := GetTyped[int](s, CategoryPortRanges, "DefaultRangeStart")
     if err != nil {

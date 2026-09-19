@@ -178,7 +178,7 @@ type MockAIBridge struct {
     mock.Mock
 }
 
-func (m *MockAIBridge) Embed(text string) apperror.Result[[]float32] {
+func (m *MockAIBridge) Embed(text string) appfault.Result[[]float32] {
     args := m.Called(text)
     return args.Get(0).([]float32), args.Error(1)
 }
@@ -336,7 +336,7 @@ import (
     "github.com/stretchr/testify/require"
 )
 
-func runCLI(t *testing.T, args ...string) apperror.Result[CliOutput] {
+func runCLI(t *testing.T, args ...string) appfault.Result[CliOutput] {
     cmd := exec.Command("wpb", args...)
     
     var stdout, stderr bytes.Buffer
@@ -462,18 +462,18 @@ func TestGeneratedCode_WordPressStandards(t *testing.T) {
 
 ```go
 type MockAIBridgeClient struct {
-    GenerateFunc func(req AIRequest) apperror.Result[string]
-    EmbedFunc    func(text string) apperror.Result[[]float32]
+    GenerateFunc func(req AIRequest) appfault.Result[string]
+    EmbedFunc    func(text string) appfault.Result[[]float32]
 }
 
-func (m *MockAIBridgeClient) Generate(req AIRequest) apperror.Result[string] {
+func (m *MockAIBridgeClient) Generate(req AIRequest) appfault.Result[string] {
     if m.GenerateFunc != nil {
         return m.GenerateFunc(req)
     }
-    return apperror.Ok("```php:test.php\n<?php\n// Mock response\n```")
+    return appfault.Ok("```php:test.php\n<?php\n// Mock response\n```")
 }
 
-func (m *MockAIBridgeClient) Embed(text string) apperror.Result[[]float32] {
+func (m *MockAIBridgeClient) Embed(text string) appfault.Result[[]float32] {
     if m.EmbedFunc != nil {
         return m.EmbedFunc(text)
     }

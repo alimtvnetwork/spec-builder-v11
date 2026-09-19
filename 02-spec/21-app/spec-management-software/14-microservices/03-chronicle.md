@@ -162,7 +162,7 @@ type CommitId struct {
 }
 
 func NewCommitId() CommitId { return CommitId{value: uuid.New()} }
-func ParseCommitId(s string) apperror.Result[CommitId] { /* similar to other IDs */ }
+func ParseCommitId(s string) appfault.Result[CommitId] { /* similar to other IDs */ }
 func (id CommitId) String() string { return id.value.String() }
 
 // CreateCommitRequest for creating a commit
@@ -396,10 +396,10 @@ func NewHistoryService(
 }
 
 // CreateCommit records a new commit with changes
-func (s *HistoryService) CreateCommit(context stdctx.Context, req model.CreateCommitRequest, author model.CommitAuthor) apperror.Result[*model.Commit] {
+func (s *HistoryService) CreateCommit(context stdctx.Context, req model.CreateCommitRequest, author model.CommitAuthor) appfault.Result[*model.Commit] {
     projectDb, err := s.dbManager.GetProjectDb(context, req.ProjectId)
     if err != nil {
-        return apperror.Fail[*model.Commit](apperror.Wrap(err, "get project db"))
+        return appfault.Fail[*model.Commit](appfault.Wrap(err, "get project db"))
     }
     defer projectDb.Close()
     
@@ -446,7 +446,7 @@ func (s *HistoryService) CreateCommit(context stdctx.Context, req model.CreateCo
             "project_id", req.ProjectId,
             "message", req.Message,
         )
-        return apperror.Fail[*model.Commit](apperror.Wrap(txErr, "create commit"))
+        return appfault.Fail[*model.Commit](appfault.Wrap(txErr, "create commit"))
     }
     
     s.logger.InfoContext(context, "commit created",
@@ -456,11 +456,11 @@ func (s *HistoryService) CreateCommit(context stdctx.Context, req model.CreateCo
         "message", req.Message,
     )
     
-    return apperror.OK(commit)
+    return appfault.Ok(commit)
 }
 
 // processChange creates a change record and version snapshot
-func (s *HistoryService) processChange(context stdctx.Context, tx *database.Tx, commitId model.CommitId, input model.ChangeInput) apperror.Result[*model.Change] {
+func (s *HistoryService) processChange(context stdctx.Context, tx *database.Tx, commitId model.CommitId, input model.ChangeInput) appfault.Result[*model.Change] {
     // Get current spec version
     currentVersion, _ := s.versionRepo.GetLatestForSpec(context, tx, input.SpecId)
     
@@ -507,7 +507,7 @@ func (s *HistoryService) processChange(context stdctx.Context, tx *database.Tx, 
         }
         
         if err := s.versionRepo.CreateWithTx(context, tx, version); err != nil {
-            return apperror.Fail[*model.Change](apperror.Wrap(err, "create version"))
+            return appfault.Fail[*model.Change](appfault.Wrap(err, "create version"))
         }
         
         change.NewContent = newContent
@@ -516,51 +516,51 @@ func (s *HistoryService) processChange(context stdctx.Context, tx *database.Tx, 
     
     // Save change record
     if err := s.changeRepo.CreateWithTx(context, tx, change); err != nil {
-        return apperror.Fail[*model.Change](apperror.Wrap(err, "create change"))
+        return appfault.Fail[*model.Change](appfault.Wrap(err, "create change"))
     }
     
-    return apperror.OK(change)
+    return appfault.Ok(change)
 }
 
 // GetCommitHistory returns commit history for a project
-func (s *HistoryService) GetCommitHistory(context stdctx.Context, projectId types.ProjectId, req types.PageRequest) apperror.Result[*types.PageResponse[model.Commit]] {
+func (s *HistoryService) GetCommitHistory(context stdctx.Context, projectId types.ProjectId, req types.PageRequest) appfault.Result[*types.PageResponse[model.Commit]] {
     projectDb, err := s.dbManager.GetProjectDb(context, projectId)
     if err != nil {
-        return apperror.Fail[*types.PageResponse[model.Commit]](apperror.Wrap(err, "get project db"))
+        return appfault.Fail[*types.PageResponse[model.Commit]](appfault.Wrap(err, "get project db"))
     }
     defer projectDb.Close()
     
     commits, total, err := s.commitRepo.List(context, projectDb, projectId, req)
     if err != nil {
-        return apperror.Fail[*types.PageResponse[model.Commit]](apperror.Wrap(err, "list commits"))
+        return appfault.Fail[*types.PageResponse[model.Commit]](appfault.Wrap(err, "list commits"))
     }
     
     response := types.NewPageResponse(commits, req, total)
-    return apperror.OK(&response)
+    return appfault.Ok(&response)
 }
 
 // GetSpecHistory returns version history for a specific spec
-func (s *HistoryService) GetSpecHistory(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, req types.PageRequest) apperror.Result[*types.PageResponse[model.SpecVersion]] {
+func (s *HistoryService) GetSpecHistory(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, req types.PageRequest) appfault.Result[*types.PageResponse[model.SpecVersion]] {
     projectDb, err := s.dbManager.GetProjectDb(context, projectId)
     if err != nil {
-        return apperror.Fail[*types.PageResponse[model.SpecVersion]](apperror.Wrap(err, "get project db"))
+        return appfault.Fail[*types.PageResponse[model.SpecVersion]](appfault.Wrap(err, "get project db"))
     }
     defer projectDb.Close()
     
     versions, total, err := s.versionRepo.ListForSpec(context, projectDb, specId, req)
     if err != nil {
-        return apperror.Fail[*types.PageResponse[model.SpecVersion]](apperror.Wrap(err, "list versions"))
+        return appfault.Fail[*types.PageResponse[model.SpecVersion]](appfault.Wrap(err, "list versions"))
     }
     
     response := types.NewPageResponse(versions, req, total)
-    return apperror.OK(&response)
+    return appfault.Ok(&response)
 }
 
 // GetVersionAtTime returns the spec version at a specific point in time
-func (s *HistoryService) GetVersionAtTime(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, timestamp types.Timestamp) apperror.Result[*model.SpecVersion] {
+func (s *HistoryService) GetVersionAtTime(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, timestamp types.Timestamp) appfault.Result[*model.SpecVersion] {
     projectDb, err := s.dbManager.GetProjectDb(context, projectId)
     if err != nil {
-        return apperror.Fail[*model.SpecVersion](apperror.Wrap(err, "get project db"))
+        return appfault.Fail[*model.SpecVersion](appfault.Wrap(err, "get project db"))
     }
     defer projectDb.Close()
     
@@ -570,12 +570,12 @@ func (s *HistoryService) GetVersionAtTime(context stdctx.Context, projectId type
             "spec_id", specId,
             "timestamp", timestamp,
         )
-        return apperror.Fail[*model.SpecVersion](
-            apperror.Wrap(errors.NewDatabaseNotFound("SpecVersion", specId.String()), "version at time"),
+        return appfault.Fail[*model.SpecVersion](
+            appfault.Wrap(errors.NewDatabaseNotFound("SpecVersion", specId.String()), "version at time"),
         )
     }
     
-    return apperror.OK(version)
+    return appfault.Ok(version)
 }
 
 func calculateDiffStats(oldContent, newContent string) (additions, deletions int) {
@@ -634,10 +634,10 @@ func NewDiffService(
 }
 
 // CompareVersions generates a diff between two versions
-func (s *DiffService) CompareVersions(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, oldVersion, newVersion int) apperror.Result[*model.DiffResult] {
+func (s *DiffService) CompareVersions(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, oldVersion, newVersion int) appfault.Result[*model.DiffResult] {
     projectDb, err := s.dbManager.GetProjectDb(context, projectId)
     if err != nil {
-        return apperror.Fail[*model.DiffResult](apperror.Wrap(err, "get project db"))
+        return appfault.Fail[*model.DiffResult](appfault.Wrap(err, "get project db"))
     }
     defer projectDb.Close()
     
@@ -648,8 +648,8 @@ func (s *DiffService) CompareVersions(context stdctx.Context, projectId types.Pr
             "spec_id", specId,
             "version", oldVersion,
         )
-        return apperror.Fail[*model.DiffResult](
-            apperror.Wrap(errors.NewDatabaseNotFound("SpecVersion", fmt.Sprintf("%s@v%d", specId, oldVersion)), "old version"),
+        return appfault.Fail[*model.DiffResult](
+            appfault.Wrap(errors.NewDatabaseNotFound("SpecVersion", fmt.Sprintf("%s@v%d", specId, oldVersion)), "old version"),
         )
     }
     
@@ -659,8 +659,8 @@ func (s *DiffService) CompareVersions(context stdctx.Context, projectId types.Pr
             "spec_id", specId,
             "version", newVersion,
         )
-        return apperror.Fail[*model.DiffResult](
-            apperror.Wrap(errors.NewDatabaseNotFound("SpecVersion", fmt.Sprintf("%s@v%d", specId, newVersion)), "new version"),
+        return appfault.Fail[*model.DiffResult](
+            appfault.Wrap(errors.NewDatabaseNotFound("SpecVersion", fmt.Sprintf("%s@v%d", specId, newVersion)), "new version"),
         )
     }
     
@@ -694,21 +694,21 @@ func (s *DiffService) CompareVersions(context stdctx.Context, projectId types.Pr
         "deletions", stats.Deletions,
     )
     
-    return apperror.OK(result)
+    return appfault.Ok(result)
 }
 
 // CompareWithCurrent generates a diff between a version and current
-func (s *DiffService) CompareWithCurrent(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, version int) apperror.Result[*model.DiffResult] {
+func (s *DiffService) CompareWithCurrent(context stdctx.Context, projectId types.ProjectId, specId types.SpecId, version int) appfault.Result[*model.DiffResult] {
     projectDb, err := s.dbManager.GetProjectDb(context, projectId)
     if err != nil {
-        return apperror.Fail[*model.DiffResult](apperror.Wrap(err, "get project db"))
+        return appfault.Fail[*model.DiffResult](appfault.Wrap(err, "get project db"))
     }
     defer projectDb.Close()
     
     // Get latest version
     latestVer, err := s.versionRepo.GetLatestForSpec(context, projectDb, specId)
     if err != nil {
-        return apperror.Fail[*model.DiffResult](apperror.Wrap(err, "get latest version"))
+        return appfault.Fail[*model.DiffResult](appfault.Wrap(err, "get latest version"))
     }
     
     return s.CompareVersions(context, projectId, specId, version, latestVer.Version)
@@ -768,10 +768,10 @@ type RollbackRequest struct {
 }
 
 // Rollback restores a spec to a previous version
-func (s *RollbackService) Rollback(context stdctx.Context, req RollbackRequest, author model.CommitAuthor) apperror.Result[*model.Commit] {
+func (s *RollbackService) Rollback(context stdctx.Context, req RollbackRequest, author model.CommitAuthor) appfault.Result[*model.Commit] {
     projectDb, err := s.dbManager.GetProjectDb(context, req.ProjectId)
     if err != nil {
-        return apperror.Fail[*model.Commit](apperror.Wrap(err, "get project db"))
+        return appfault.Fail[*model.Commit](appfault.Wrap(err, "get project db"))
     }
     defer projectDb.Close()
     
@@ -782,15 +782,15 @@ func (s *RollbackService) Rollback(context stdctx.Context, req RollbackRequest, 
             "spec_id", req.SpecId,
             "version", req.Version,
         )
-        return apperror.Fail[*model.Commit](
-            apperror.Wrap(errors.NewDatabaseNotFound("SpecVersion", fmt.Sprintf("%s@v%d", req.SpecId, req.Version)), "target version"),
+        return appfault.Fail[*model.Commit](
+            appfault.Wrap(errors.NewDatabaseNotFound("SpecVersion", fmt.Sprintf("%s@v%d", req.SpecId, req.Version)), "target version"),
         )
     }
     
     // Get current version for comparison
     currentVersion, err := s.versionRepo.GetLatestForSpec(context, projectDb, req.SpecId)
     if err != nil {
-        return apperror.Fail[*model.Commit](apperror.Wrap(err, "get current version"))
+        return appfault.Fail[*model.Commit](appfault.Wrap(err, "get current version"))
     }
     
     // Prevent rollback to current version
@@ -799,8 +799,8 @@ func (s *RollbackService) Rollback(context stdctx.Context, req RollbackRequest, 
         type RollbackErrorContext struct {
             Version int
         }
-        return apperror.Fail[*model.Commit](
-            apperror.New("cannot rollback to current version"),
+        return appfault.Fail[*model.Commit](
+            appfault.New("cannot rollback to current version"),
         )
     }
     
@@ -825,7 +825,7 @@ func (s *RollbackService) Rollback(context stdctx.Context, req RollbackRequest, 
     
     commitResult := s.historyService.CreateCommit(context, commitReq, author)
     if commitResult.HasError() {
-        return apperror.Fail[*model.Commit](commitResult.Error())
+        return appfault.Fail[*model.Commit](commitResult.Error())
     }
     
     commit := commitResult.Value()
@@ -846,7 +846,7 @@ func (s *RollbackService) Rollback(context stdctx.Context, req RollbackRequest, 
         "to_version", req.Version,
     )
     
-    return apperror.OK(commit)
+    return appfault.Ok(commit)
 }
 ```
 
@@ -884,17 +884,17 @@ type GenerateChangelogRequest struct {
 }
 
 // GenerateChangelog creates a changelog between two commits
-func (s *ChangelogService) GenerateChangelog(context stdctx.Context, req GenerateChangelogRequest) apperror.Result[*model.Changelog] {
+func (s *ChangelogService) GenerateChangelog(context stdctx.Context, req GenerateChangelogRequest) appfault.Result[*model.Changelog] {
     projectDb, err := s.dbManager.GetProjectDb(context, req.ProjectId)
     if err != nil {
-        return apperror.Fail[*model.Changelog](apperror.Wrap(err, "get project db"))
+        return appfault.Fail[*model.Changelog](appfault.Wrap(err, "get project db"))
     }
     defer projectDb.Close()
     
     // Get all commits between from and to
     commits, err := s.commitRepo.GetRange(context, projectDb, req.FromCommit, req.ToCommit)
     if err != nil {
-        return apperror.Fail[*model.Changelog](apperror.Wrap(err, "get commit range"))
+        return appfault.Fail[*model.Changelog](appfault.Wrap(err, "get commit range"))
     }
     
     // Group changes by type
@@ -948,7 +948,7 @@ func (s *ChangelogService) GenerateChangelog(context stdctx.Context, req Generat
         "sections", len(changelogSections),
     )
     
-    return apperror.OK(changelog)
+    return appfault.Ok(changelog)
 }
 
 func (s *ChangelogService) generateMarkdown(title string, sections []model.ChangelogSection) string {

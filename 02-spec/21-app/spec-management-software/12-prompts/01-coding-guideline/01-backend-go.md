@@ -129,7 +129,7 @@ const DefaultTimeout = 30 * time.Second
 // Good
 result, err := doSomething()
 if err != nil {
-    return apperror.Wrap(
+    return appfault.Wrap(
         err,
         ErrOperationFailed,
         "do something",
@@ -144,7 +144,7 @@ result, _ := doSomething()
 ```go
 // Wrap with context
 if err != nil {
-    return apperror.Wrap(
+    return appfault.Wrap(
         err,
         ErrUserCreateFailed,
         "creating user",
@@ -210,11 +210,11 @@ func (User) TableName() string {
 import stdctx "context"
 
 type UserRepository interface {
-    Create(context stdctx.Context, user *User) *apperror.AppError
-    FindById(context stdctx.Context, id string) apperror.Result[User]
-    FindByEmail(context stdctx.Context, email string) apperror.Result[User]
-    Update(context stdctx.Context, user *User) *apperror.AppError
-    Delete(context stdctx.Context, id string) *apperror.AppError
+    Create(context stdctx.Context, user *User) *appfault.AppError
+    FindById(context stdctx.Context, id string) appfault.Result[User]
+    FindByEmail(context stdctx.Context, email string) appfault.Result[User]
+    Update(context stdctx.Context, user *User) *appfault.AppError
+    Delete(context stdctx.Context, id string) *appfault.AppError
 }
 
 type userRepository struct {
@@ -225,13 +225,13 @@ func NewUserRepository(db *gorm.DB) UserRepository {
     return &userRepository{db: db}
 }
 
-func (r *userRepository) FindById(context stdctx.Context, id string) apperror.Result[User] {
+func (r *userRepository) FindById(context stdctx.Context, id string) appfault.Result[User] {
     var user User
     if err := r.db.WithContext(context).First(&user, "id = ?", id).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             return nil, ErrNotFound
         }
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrDatabaseQuery,
             "finding user by id",
@@ -246,7 +246,7 @@ func (r *userRepository) FindById(context stdctx.Context, id string) apperror.Re
 func (s *UserService) CreateWithProfile(context stdctx.Context, user *User, profile *Profile) error {
     return s.db.WithContext(context).Transaction(func(tx *gorm.DB) error {
         if err := tx.Create(user).Error; err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrUserCreateFailed,
                 "creating user",
@@ -255,7 +255,7 @@ func (s *UserService) CreateWithProfile(context stdctx.Context, user *User, prof
         
         profile.UserId = user.Id
         if err := tx.Create(profile).Error; err != nil {
-            return apperror.Wrap(
+            return appfault.Wrap(
                 err,
                 ErrProfileCreateFailed,
                 "creating profile",
@@ -399,7 +399,7 @@ type mockUserRepository struct {
     users map[string]*User
 }
 
-func (m *mockUserRepository) FindById(context stdctx.Context, id string) apperror.Result[User] {
+func (m *mockUserRepository) FindById(context stdctx.Context, id string) appfault.Result[User] {
     if user, ok := m.users[id]; ok {
         return user, nil
     }
@@ -426,14 +426,14 @@ var metadata map[string]interface{}
 
 // ✅ CORRECT — concrete types
 func Process(data ProcessInput) error { ... }
-func GetSetting(key string) apperror.Result[SettingValue] { ... }
+func GetSetting(key string) appfault.Result[SettingValue] { ... }
 type Event struct {
     Payload EventPayload
 }
 var metadata map[string]string
 
 // ✅ CORRECT — generics when polymorphism is needed
-func GetTyped[T SettingConstraint](key string) apperror.Result[T] { ... }
+func GetTyped[T SettingConstraint](key string) appfault.Result[T] { ... }
 type Result[T any] struct {
     Data  T
     Error string

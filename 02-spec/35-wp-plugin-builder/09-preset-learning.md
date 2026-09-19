@@ -128,7 +128,7 @@ type PresetMetadata struct {
 ## Import Flow
 
 ```go
-func (pm *PresetManager) Import(path string, opts ImportPresetOptions) apperror.Result[*Preset] {
+func (pm *PresetManager) Import(path string, opts ImportPresetOptions) appfault.Result[*Preset] {
     // 1. Read file
     content, err := pathutil.ReadFile(path)
     if err != nil {

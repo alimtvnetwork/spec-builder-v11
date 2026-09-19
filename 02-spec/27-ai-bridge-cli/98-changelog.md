@@ -24,12 +24,12 @@ Project-wide major version increment (+1.0.0) applied to all specification files
 
 ### fmt.Errorf Elimination
 
-Final scan converting all remaining `fmt.Errorf` calls to `apperror.Wrap`/`apperror.New` with proper multi-line formatting.
+Final scan converting all remaining `fmt.Errorf` calls to `appfault.Wrap`/`appfault.New` with proper multi-line formatting.
 
 #### Changed
-- **40-gsearch-context-integration.md**: `EnrichPromptContext` signature `(*EnrichedContext, error)` → `apperror.Result[*EnrichedContext]`; `handleFetchError` signature `(*RecoveryResult, error)` → `apperror.Result[*RecoveryResult]`. All `fmt.Errorf` calls replaced with `apperror.Wrap`/`apperror.New`.
-- **29-gsearch-url-extraction.md**: `FetchAuthorityMetrics` internal error accumulation converted from `[]error` with `fmt.Errorf` to `[]*apperror.AppError` with `apperror.Wrap`. `FetchWithFallback` fallback chain converted from `fmt.Errorf` wrapping to `apperror.Wrap` per source. Tuple-style returns (`return nil, ...` / `return cached, nil`) converted to `apperror.Fail[T]`/`apperror.Ok(T)`.
-- **45-plan-synchronization.md**: `PlanWatcher.Start()` signature `error` → `*apperror.AppError`; `fmt.Errorf("AB9904: %w", err)` → `apperror.Wrap` with `ErrPlanWatcherFailed`.
+- **40-gsearch-context-integration.md**: `EnrichPromptContext` signature `(*EnrichedContext, error)` → `appfault.Result[*EnrichedContext]`; `handleFetchError` signature `(*RecoveryResult, error)` → `appfault.Result[*RecoveryResult]`. All `fmt.Errorf` calls replaced with `appfault.Wrap`/`appfault.New`.
+- **29-gsearch-url-extraction.md**: `FetchAuthorityMetrics` internal error accumulation converted from `[]error` with `fmt.Errorf` to `[]*appfault.AppError` with `appfault.Wrap`. `FetchWithFallback` fallback chain converted from `fmt.Errorf` wrapping to `appfault.Wrap` per source. Tuple-style returns (`return nil, ...` / `return cached, nil`) converted to `appfault.Fail[T]`/`appfault.Ok(T)`.
+- **45-plan-synchronization.md**: `PlanWatcher.Start()` signature `error` → `*appfault.AppError`; `fmt.Errorf("AB9904: %w", err)` → `appfault.Wrap` with `ErrPlanWatcherFailed`.
 
 #### Not Changed (Exemptions)
 - `36-session-scoped-rag-memory.md` L174: `fmt.Errorf` inside `UnmarshalJSON` (EXEMPTED: stdlib interface).
@@ -52,7 +52,7 @@ Comprehensive audit and remediation bringing the AI Bridge CLI specification sui
 - Frontend spec `02-implementation-checklist` synchronized.
 
 #### Return Signature Migration
-- **100+ functions** converted from `(T, error)` tuples to `apperror.Result[T]` or `*apperror.AppError`.
+- **100+ functions** converted from `(T, error)` tuples to `appfault.Result[T]` or `*appfault.AppError`.
 - Multi-return tuples replaced with dedicated outcome structs:
   - `SequenceAllocation` — sequence ID + allocated range
   - `RetryDecision` — should-retry + backoff duration
@@ -62,7 +62,7 @@ Comprehensive audit and remediation bringing the AI Bridge CLI specification sui
 - Stdlib interface implementations (`MarshalJSON`, `UnmarshalJSON`, `DialContext`) annotated `// EXEMPTED`.
 
 #### Raw Error Conversion
-- ~20 raw `error` returns across 11 files converted to `*apperror.AppError`:
+- ~20 raw `error` returns across 11 files converted to `*appfault.AppError`:
   - `MigrateCodeTasks`, `MigrateChatSessions`, `MigrateSeoContent` (33-database-migration-guide)
   - `LoadCsv`, `LoadJson`, `LoadYaml` (19-ai-seo-variable-system)
   - `TrackRows`, `handleAhrefsResponse`, `Cleanup`, `CleanupStale` (29-gsearch-url-extraction)
@@ -74,7 +74,7 @@ Comprehensive audit and remediation bringing the AI Bridge CLI specification sui
   - `OnRevisionCreated` (35-unified-revisions-architecture)
   - `Validate` (06-configuration)
 - Stdlib boundary functions (`cobra.RunE`, `gorm.Transaction`, `rate.Limiter.Wait`) annotated `// EXEMPTED`.
-- `SaveHtml` in 29-gsearch-url-extraction corrected from `(string, error)` tuple to `apperror.Result[string]`.
+- `SaveHtml` in 29-gsearch-url-extraction corrected from `(string, error)` tuple to `appfault.Result[string]`.
 
 #### Error Code Remediation
 - Resolved overlap between 9900s and 9620s error code ranges.

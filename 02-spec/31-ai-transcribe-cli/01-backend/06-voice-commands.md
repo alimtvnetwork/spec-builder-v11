@@ -158,7 +158,7 @@ type CommandMatch struct {
     EndTime    float64
 }
 
-func (d *CommandDetector) Detect(transcript string) apperror.Result[CommandMatch] {
+func (d *CommandDetector) Detect(transcript string) appfault.Result[CommandMatch] {
     // 1. Exact match check
     if cmd := d.exactMatch(transcript); cmd != nil {
         return &CommandMatch{Command: *cmd, Confidence: 1.0}, nil
@@ -216,8 +216,8 @@ func (d *CommandDetector) fuzzyMatchCommand(transcript string) *CommandMatch {
 import stdctx "context"
 
 type CommandExecutor interface {
-    Execute(context stdctx.Context, cmd CommandMatch) apperror.Result[ExecutionResult]
-    Validate(cmd CommandDefinition) *apperror.AppError
+    Execute(context stdctx.Context, cmd CommandMatch) appfault.Result[ExecutionResult]
+    Validate(cmd CommandDefinition) *appfault.AppError
     CanExecute(cmd CommandDefinition) bool
 }
 
@@ -247,7 +247,7 @@ type SystemExecutor struct {
     config  *Config
 }
 
-func (e *SystemExecutor) Execute(context stdctx.Context, cmd CommandMatch) apperror.Result[ExecutionResult] {
+func (e *SystemExecutor) Execute(context stdctx.Context, cmd CommandMatch) appfault.Result[ExecutionResult] {
     switch cmd.Command.Action {
     case "pause_listening":
         e.session.PauseStt()
@@ -280,7 +280,7 @@ type WebhookExecutor struct {
     timeout time.Duration
 }
 
-func (e *WebhookExecutor) Execute(context stdctx.Context, cmd CommandMatch) apperror.Result[ExecutionResult] {
+func (e *WebhookExecutor) Execute(context stdctx.Context, cmd CommandMatch) appfault.Result[ExecutionResult] {
     url := cmd.Command.Parameters.Url
     
     payload := WebhookPayload{
@@ -291,7 +291,7 @@ func (e *WebhookExecutor) Execute(context stdctx.Context, cmd CommandMatch) appe
     
     resp, err := e.client.Post(url, "application/json", toJson(payload))
     if err != nil {
-        return nil, apperror.Wrap(
+        return nil, appfault.Wrap(
             err,
             ErrVoiceCommandWebhookFailed,
             "execute webhook",

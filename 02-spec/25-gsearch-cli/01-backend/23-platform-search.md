@@ -181,31 +181,31 @@ type YouTubeSearchService struct {
     cache   *CacheService
 }
 
-func NewYouTubeSearchService(config *YouTubeConfig) apperror.Result[YouTubeSearchService] {
+func NewYouTubeSearchService(config *YouTubeConfig) appfault.Result[YouTubeSearchService] {
     backgroundContext := stdctx.Background()
     client, clientErr := youtube.NewService(backgroundContext, option.WithApiKey(config.ApiKey))
     if clientErr != nil {
-        return apperror.Fail[YouTubeSearchService](
-            apperror.Wrap(
+        return appfault.Fail[YouTubeSearchService](
+            appfault.Wrap(
                 clientErr,
                 "failed to create YouTube client",
             ),
         )
     }
     
-    return apperror.Ok(YouTubeSearchService{
+    return appfault.Ok(YouTubeSearchService{
         config: config,
         client: client,
         cache:  NewCacheService("youtube"),
     })
 }
 
-func (s *YouTubeSearchService) Search(query string) apperror.Result[[]YouTubeResult] {
+func (s *YouTubeSearchService) Search(query string) appfault.Result[[]YouTubeResult] {
     // Check cache first
     cacheKey := s.buildCacheKey(query)
     // EXEMPTED: typed accessor internal — cache stores known []YouTubeResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return apperror.Ok(cached.([]YouTubeResult))
+        return appfault.Ok(cached.([]YouTubeResult))
     }
     
     // Build search request
@@ -234,8 +234,8 @@ func (s *YouTubeSearchService) Search(query string) apperror.Result[[]YouTubeRes
     
     response, err := call.Do()
     if err != nil {
-        return apperror.Fail[[]YouTubeResult](
-            apperror.Wrap(
+        return appfault.Fail[[]YouTubeResult](
+            appfault.Wrap(
                 err,
                 "YouTube search failed",
             ),
@@ -280,7 +280,7 @@ func (s *YouTubeSearchService) Search(query string) apperror.Result[[]YouTubeRes
     // Cache results
     s.cache.Set(cacheKey, results, 24*time.Hour)
     
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 
 func (s *YouTubeSearchService) generateEmbed(videoId, title string) string {
@@ -312,17 +312,17 @@ func NewRedditSearchService(config *RedditConfig) *RedditSearchService {
     }
 }
 
-func (s *RedditSearchService) Search(query string) apperror.Result[[]RedditResult] {
+func (s *RedditSearchService) Search(query string) appfault.Result[[]RedditResult] {
     // Ensure valid auth token
     if authErr := s.ensureAuth(); authErr != nil {
-        return apperror.Fail[[]RedditResult](authErr)
+        return appfault.Fail[[]RedditResult](authErr)
     }
     
     // Check cache
     cacheKey := s.buildCacheKey(query)
     // EXEMPTED: typed accessor internal — cache stores known []RedditResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return apperror.Ok(cached.([]RedditResult))
+        return appfault.Ok(cached.([]RedditResult))
     }
     
     // Build search URL
@@ -343,8 +343,8 @@ func (s *RedditSearchService) Search(query string) apperror.Result[[]RedditResul
     
     req, reqErr := http.NewRequest(httpmethod.Get.String(), searchUrl+"?"+params.Encode(), nil)
     if reqErr != nil {
-        return apperror.Fail[[]RedditResult](
-            apperror.Wrap(
+        return appfault.Fail[[]RedditResult](
+            appfault.Wrap(
                 reqErr,
                 "create reddit search request",
             ),
@@ -356,8 +356,8 @@ func (s *RedditSearchService) Search(query string) apperror.Result[[]RedditResul
     
     resp, httpErr := s.httpClient.Do(req)
     if httpErr != nil {
-        return apperror.Fail[[]RedditResult](
-            apperror.Wrap(
+        return appfault.Fail[[]RedditResult](
+            appfault.Wrap(
                 httpErr,
                 "execute reddit search request",
             ),
@@ -368,8 +368,8 @@ func (s *RedditSearchService) Search(query string) apperror.Result[[]RedditResul
     
     var listing redditListing
     if decodeErr := json.NewDecoder(resp.Body).Decode(&listing); decodeErr != nil {
-        return apperror.Fail[[]RedditResult](
-            apperror.Wrap(
+        return appfault.Fail[[]RedditResult](
+            appfault.Wrap(
                 decodeErr,
                 "decode reddit response",
             ),
@@ -413,7 +413,7 @@ func (s *RedditSearchService) Search(query string) apperror.Result[[]RedditResul
     // Cache results
     s.cache.Set(cacheKey, results, 1*time.Hour)
     
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 ```
 
@@ -438,7 +438,7 @@ type SeoMediaConfig struct {
     RegionCode            string  // e.g., "AU"
 }
 
-func (d *SeoMediaDiscovery) FindMediaForContent(content *SeoContent) apperror.Result[MediaSuggestions] {
+func (d *SeoMediaDiscovery) FindMediaForContent(content *SeoContent) appfault.Result[MediaSuggestions] {
     suggestions := MediaSuggestions{}
     
     // Build search query from content
@@ -486,7 +486,7 @@ func (d *SeoMediaDiscovery) FindMediaForContent(content *SeoContent) apperror.Re
         }
     }
     
-    return apperror.Ok(suggestions)
+    return appfault.Ok(suggestions)
 }
 
 func (d *SeoMediaDiscovery) buildSearchQuery(content *SeoContent) string {
@@ -643,19 +643,19 @@ type MediumSearchService struct {
     cache      *CacheService
 }
 
-func (s *MediumSearchService) Search(query string) apperror.Result[[]MediumResult] {
+func (s *MediumSearchService) Search(query string) appfault.Result[[]MediumResult] {
     cacheKey := s.buildCacheKey(query)
     // EXEMPTED: typed accessor internal — cache stores known []MediumResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return apperror.Ok(cached.([]MediumResult))
+        return appfault.Ok(cached.([]MediumResult))
     }
     
     // Use Google site:medium.com search via GSearch core
     siteQuery := fmt.Sprintf("site:medium.com %s", query)
     rawResults, err := s.siteSearch(siteQuery)
     if err != nil {
-        return apperror.Fail[[]MediumResult](
-            apperror.Wrap(
+        return appfault.Fail[[]MediumResult](
+            appfault.Wrap(
                 err,
                 "Medium search failed",
             ),
@@ -675,7 +675,7 @@ func (s *MediumSearchService) Search(query string) apperror.Result[[]MediumResul
     
     s.cache.Set(cacheKey, results, 24*time.Hour)
 
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 ```
 
@@ -744,19 +744,19 @@ type LinkedInSearchService struct {
     cache      *CacheService
 }
 
-func (s *LinkedInSearchService) SearchPosts(query string) apperror.Result[[]LinkedInPostResult] {
+func (s *LinkedInSearchService) SearchPosts(query string) appfault.Result[[]LinkedInPostResult] {
     cacheKey := s.buildCacheKey("posts", query)
     // EXEMPTED: typed accessor internal — cache stores known []LinkedInPostResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return apperror.Ok(cached.([]LinkedInPostResult))
+        return appfault.Ok(cached.([]LinkedInPostResult))
     }
     
     // Use Google site:linkedin.com/posts search via GSearch core
     siteQuery := fmt.Sprintf("site:linkedin.com/posts %s", query)
     rawResults, err := s.siteSearch(siteQuery)
     if err != nil {
-        return apperror.Fail[[]LinkedInPostResult](
-            apperror.Wrap(
+        return appfault.Fail[[]LinkedInPostResult](
+            appfault.Wrap(
                 err,
                 "LinkedIn post search failed",
             ),
@@ -772,21 +772,21 @@ func (s *LinkedInSearchService) SearchPosts(query string) apperror.Result[[]Link
     
     s.cache.Set(cacheKey, results, 6*time.Hour)
 
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 
-func (s *LinkedInSearchService) SearchCompanies(query string) apperror.Result[[]LinkedInCompanyResult] {
+func (s *LinkedInSearchService) SearchCompanies(query string) appfault.Result[[]LinkedInCompanyResult] {
     cacheKey := s.buildCacheKey("companies", query)
     // EXEMPTED: typed accessor internal — cache stores known []LinkedInCompanyResult values (§7.2)
     if cached, ok := s.cache.Get(cacheKey); ok {
-        return apperror.Ok(cached.([]LinkedInCompanyResult))
+        return appfault.Ok(cached.([]LinkedInCompanyResult))
     }
     
     siteQuery := fmt.Sprintf("site:linkedin.com/company %s", query)
     rawResults, err := s.siteSearch(siteQuery)
     if err != nil {
-        return apperror.Fail[[]LinkedInCompanyResult](
-            apperror.Wrap(
+        return appfault.Fail[[]LinkedInCompanyResult](
+            appfault.Wrap(
                 err,
                 "LinkedIn company search failed",
             ),
@@ -802,7 +802,7 @@ func (s *LinkedInSearchService) SearchCompanies(query string) apperror.Result[[]
     
     s.cache.Set(cacheKey, results, 24*time.Hour)
 
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 ```
 
@@ -840,11 +840,11 @@ type YouTubeDeepExtractor struct {
 }
 
 // ExtractVideo performs full deep extraction for a single video
-func (e *YouTubeDeepExtractor) ExtractVideo(videoUrl string) apperror.Result[YouTubeResult] {
+func (e *YouTubeDeepExtractor) ExtractVideo(videoUrl string) appfault.Result[YouTubeResult] {
     videoId := e.parseVideoId(videoUrl)
     if videoId == "" {
-        return apperror.Fail[YouTubeResult](
-            apperror.New(
+        return appfault.Fail[YouTubeResult](
+            appfault.New(
                 "invalid YouTube URL: " + videoUrl,
             ),
         )
@@ -853,7 +853,7 @@ func (e *YouTubeDeepExtractor) ExtractVideo(videoUrl string) apperror.Result[You
     // Get base video metadata
     metadataResult := e.getVideoMetadata(videoId)
     if metadataResult.HasError() {
-        return apperror.Fail[YouTubeResult](metadataResult.Error())
+        return appfault.Fail[YouTubeResult](metadataResult.Error())
     }
 
     result := metadataResult.Value()
@@ -873,11 +873,11 @@ func (e *YouTubeDeepExtractor) ExtractVideo(videoUrl string) apperror.Result[You
         }
     }
     
-    return apperror.Ok(result)
+    return appfault.Ok(result)
 }
 
 // ExtractBatch processes multiple videos in parallel
-func (e *YouTubeDeepExtractor) ExtractBatch(videoUrls []string) apperror.Result[[]YouTubeResult] {
+func (e *YouTubeDeepExtractor) ExtractBatch(videoUrls []string) appfault.Result[[]YouTubeResult] {
     results := make([]YouTubeResult, 0, len(videoUrls))
     var mu sync.Mutex
     
@@ -902,18 +902,18 @@ func (e *YouTubeDeepExtractor) ExtractBatch(videoUrls []string) apperror.Result[
     
     wg.Wait()
     
-    return apperror.Ok(results)
+    return appfault.Ok(results)
 }
 
 // getTranscript fetches auto-generated or manual captions
-func (e *YouTubeDeepExtractor) getTranscript(videoId string) apperror.Result[TranscriptResult] {
+func (e *YouTubeDeepExtractor) getTranscript(videoId string) appfault.Result[TranscriptResult] {
     // Fetch video page to get caption track URLs
     pageUrl := fmt.Sprintf("https://www.youtube.com/watch?v=%s", videoId)
     
     req, reqErr := http.NewRequest(httpmethod.Get.String(), pageUrl, nil)
     if reqErr != nil {
-        return apperror.Fail[TranscriptResult](
-            apperror.Wrap(
+        return appfault.Fail[TranscriptResult](
+            appfault.Wrap(
                 reqErr,
                 "create transcript request",
             ),
@@ -926,8 +926,8 @@ func (e *YouTubeDeepExtractor) getTranscript(videoId string) apperror.Result[Tra
     
     resp, httpErr := e.httpClient.Do(req)
     if httpErr != nil {
-        return apperror.Fail[TranscriptResult](
-            apperror.Wrap(
+        return appfault.Fail[TranscriptResult](
+            appfault.Wrap(
                 httpErr,
                 "fetch video page for transcript",
             ),
@@ -941,8 +941,8 @@ func (e *YouTubeDeepExtractor) getTranscript(videoId string) apperror.Result[Tra
     // Parse caption tracks from ytInitialPlayerResponse
     tracks := e.parseCaptionTracks(string(body))
     if len(tracks) == 0 {
-        return apperror.Fail[TranscriptResult](
-            apperror.New(
+        return appfault.Fail[TranscriptResult](
+            appfault.New(
                 "no captions available for video " + videoId,
             ),
         )
@@ -957,10 +957,10 @@ func (e *YouTubeDeepExtractor) getTranscript(videoId string) apperror.Result[Tra
     // Fetch first available transcript
     captionResult := e.fetchCaptionTrack(tracks[0].BaseUrl)
     if captionResult.HasError() {
-        return apperror.Fail[TranscriptResult](captionResult.Error())
+        return appfault.Fail[TranscriptResult](captionResult.Error())
     }
     
-    return apperror.Ok(TranscriptResult{
+    return appfault.Ok(TranscriptResult{
         Text:      captionResult.Value(),
         Languages: languages,
     })

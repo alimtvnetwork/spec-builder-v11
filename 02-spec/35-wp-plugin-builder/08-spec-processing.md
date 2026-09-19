@@ -77,7 +77,7 @@ type Feature struct {
 ## Import Flow
 
 ```go
-func (sp *SpecParser) Import(path string) apperror.Result[*ParsedSpec] {
+func (sp *SpecParser) Import(path string) appfault.Result[*ParsedSpec] {
     // 1. Detect format
     format := detectFormat(path)
     
@@ -139,7 +139,7 @@ func (sp *SpecParser) Import(path string) apperror.Result[*ParsedSpec] {
 ### Structure Recognition
 
 ```go
-func (sp *SpecParser) parseMarkdown(content string) apperror.Result[*ParsedSpec] {
+func (sp *SpecParser) parseMarkdown(content string) appfault.Result[*ParsedSpec] {
     spec := &ParsedSpec{}
     
     // 1. Extract frontmatter
@@ -307,7 +307,7 @@ func (sp *SpecParser) parseComponents(content string) []Component {
 ## PRD Processing
 
 ```go
-func (sp *SpecParser) parsePRD(content string) apperror.Result[*ParsedSpec] {
+func (sp *SpecParser) parsePRD(content string) appfault.Result[*ParsedSpec] {
     spec := &ParsedSpec{}
     
     // PRD-specific sections
@@ -366,7 +366,7 @@ func (sp *SpecParser) extractPRDSection(content, sectionName string) string {
 ## Zip Processing
 
 ```go
-func (sp *SpecParser) extractAndReadZip(path string) apperror.Result[[]SpecFile] {
+func (sp *SpecParser) extractAndReadZip(path string) appfault.Result[[]SpecFile] {
     // Create temp directory
     tempDir, err := pathutil.MkdirTemp("", "wpb-spec-*")
     if err != nil {
@@ -383,7 +383,7 @@ func (sp *SpecParser) extractAndReadZip(path string) apperror.Result[[]SpecFile]
     return sp.readFolder(tempDir)
 }
 
-func (sp *SpecParser) readFolder(path string) apperror.Result[[]SpecFile] {
+func (sp *SpecParser) readFolder(path string) appfault.Result[[]SpecFile] {
     var files []SpecFile
     
     err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {

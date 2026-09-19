@@ -14,19 +14,19 @@ Patterns for loading and using preset data in Go backend tests and React fronten
 ## Go: Loading Presets
 
 ```go
-func LoadPreset[T any](presetPath string) apperror.Result[T] {
+func LoadPreset[T any](presetPath string) appfault.Result[T] {
     fullPath := filepath.Join("data/presets", presetPath)
     data, err := pathutil.ReadFile(fullPath)
     if err != nil {
-        return apperror.Fail[T](err)
+        return appfault.Fail[T](err)
     }
     
     var preset T
     if unmarshalErr := json.Unmarshal(data, &preset); unmarshalErr != nil {
-        return apperror.Fail[T](apperror.Wrap(unmarshalErr, apperror.ErrJsonParse, "unmarshal preset"))
+        return appfault.Fail[T](appfault.Wrap(unmarshalErr, appfault.ErrJsonParse, "unmarshal preset"))
     }
     
-    return apperror.Ok(preset)
+    return appfault.Ok(preset)
 }
 ```
 
