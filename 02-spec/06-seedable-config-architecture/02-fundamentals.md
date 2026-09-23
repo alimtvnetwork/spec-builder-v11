@@ -271,7 +271,7 @@ CREATE INDEX IdxHistoryChanged ON SettingsHistory(ChangedAt);
 
 ```go
 // SettingValue is the strongly-typed union container for all config values.
-// See 02-spec/27-ai-bridge-cli/01-backend/57-settings-service.md for the canonical definition.
+// See 02-spec/22-ai-bridge-cli/01-backend/57-settings-service.md for the canonical definition.
 type SettingValue struct {
     StringVal  *string            `json:"StringVal,omitempty"`
     IntVal     *int               `json:"IntVal,omitempty"`

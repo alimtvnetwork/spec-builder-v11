@@ -250,7 +250,7 @@ Standard template for all file/path errors:
 - [Code Severity Taxonomy](../../../02-coding-guidelines/03-golang/07-code-severity-taxonomy.md) — Code Red classification
 - [Error Documentation Guideline](../02-error-documentation-guideline.md) — Mandatory documentation process
 - [Data Model: CapturedError](../../02-error-architecture/04-error-modal/03-error-modal-reference/02-data-model.md) — `file`, `context` fields
-- [Error Code Registry](../../03-error-manage/03-error-code-registry/03-integration-guide.md) — Error code integration
+- [Error Code Registry](../../03-error-code-registry/03-integration-guide.md) — Error code integration
 
 ---
 

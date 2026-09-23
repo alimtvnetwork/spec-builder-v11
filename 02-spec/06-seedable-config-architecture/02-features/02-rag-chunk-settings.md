@@ -350,6 +350,6 @@ POST /api/v1/rag/reindex
 | Reference | Location |
 |-----------|----------|
 | Seedable Config Overview | `../01-index.md` |
-| AI Bridge Database | `../27-ai-bridge-cli/01-backend/12-database-architecture.md` |
-| RAG Reindexing | `../27-ai-bridge-cli/01-backend/11-rag-reindexing.md` |
+| AI Bridge Database | `../22-ai-bridge-cli/01-backend/12-database-architecture.md` |
+| RAG Reindexing | `../22-ai-bridge-cli/01-backend/11-rag-reindexing.md` |
 | Error Codes | `../03-error-manage/03-error-code-registry/01-index.md` |

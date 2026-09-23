@@ -614,7 +614,7 @@ The ecosystem uses **two complementary error code systems**:
 1. **No overlap risk** — `E{x}xxx` codes are string-typed and never collide with the numeric project registry codes
 2. **Different granularity** — Variation covers low-level Go domain errors; the registry covers project-scoped allocations
 3. **Complementary usage** — a Go handler returns `E2010` via `apperror.NewType(apperrtype.SiteNotFound)`; the project registry tracks broader allocation
-4. **Both must be registered** — new variants go in this file AND in the [Error Code Registry](../../../03-error-manage/03-error-code-registry/02-registry.md)
+4. **Both must be registered** — new variants go in this file AND in the [Error Code Registry](../../../03-error-code-registry/02-registry.md)
 
 ---
 
@@ -622,7 +622,7 @@ The ecosystem uses **two complementary error code systems**:
 
 1. Add the constant to the appropriate domain block in `variation.go` (before `MaxError`)
 2. Add the `VariantStructure` entry to `variantRegistry` in `variant_registry.go`
-3. Register the code in the [Error Code Registry](../../../03-error-manage/03-error-code-registry/02-registry.md)
+3. Register the code in the [Error Code Registry](../../../03-error-code-registry/02-registry.md)
 4. Update this spec's domain block if adding a new domain range
 
 ---
@@ -680,7 +680,7 @@ To ensure AI agents properly construct the `errtype` structure without hallucina
 | Reference | Location |
 |-----------|----------|
 | Error Code Convention | [04-codes-and-policy.md](./05-codes-and-policy.md) |
-| Error Code Registry | [03-error-code-registry/01-registry.md](../../../03-error-manage/03-error-code-registry/02-registry.md) |
+| Error Code Registry | [03-error-code-registry/01-registry.md](../../../03-error-code-registry/02-registry.md) |
 | Enum Specification | [03-golang/01-enum-specification](../../../../02-coding-guidelines/03-golang/01-enum-specification/01-index.md) |
 | Lint Rule CODE-RED-008 | `linter-scripts/validate-guidelines.go` |
 | Source Inspiration | [evatix-go/errorwrapper/errtype](https://gitlab.com/auk-go/errorwrapper/-/tree/develop/errtype) |

@@ -59,4 +59,4 @@ Error resolution patterns, debugging guides, retrospectives, and verification pr
 
 - [Parent Overview](../01-index.md) — Error Management root
 - [Error Architecture](../02-error-architecture/01-index.md) — Cross-stack error handling
-- [Error Code Registry](../03-error-manage/03-error-code-registry/01-index.md) — Error code ranges
+- [Error Code Registry](../03-error-code-registry/01-index.md) — Error code ranges

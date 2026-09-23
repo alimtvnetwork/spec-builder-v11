@@ -890,5 +890,5 @@ func BenchmarkValidateChunkSize(b *testing.B) {
 |-----------|----------|
 | RAG Validation Helpers | `./02-rag-validation-helpers.md` |
 | RAG Chunk Settings | `./02-rag-chunk-settings.md` |
-| Error Code Registry | `../03-error-manage/03-error-code-registry/02-registry.md` |
-| AI Bridge Error Codes | `../27-ai-bridge-cli/01-backend/05-error-codes.md` |
+| Error Code Registry | `../03-error-code-registry/01-registry.md` |
+| AI Bridge Error Codes | `../22-ai-bridge-cli/01-backend/05-error-codes.md` |

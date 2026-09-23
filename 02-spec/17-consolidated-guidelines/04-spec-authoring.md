@@ -374,7 +374,7 @@ When specs change, update **all three** targets:
 
 | # | Target | Purpose |
 |---|--------|---------|
-| 1 | `02-02-spec/spec-index.md` | Master index of all spec modules |
+| 1 | `02-spec/spec-index.md` | Master index of all spec modules |
 | 2 | `src/data/specTree.json` | UI tree (requires `content` field with full markdown) |
 | 3 | `02-spec/17-consolidated-guidelines/` | Consolidated AI-readable summary |
 
@@ -393,7 +393,7 @@ When specs change, update **all three** targets:
 
 ## §X Version & Sync Workflow — The Mandatory Sequence
 
-This section is the **single canonical reference** for how versions are bumped and how derived artifacts (`version.json`, `src/data/specTree.json`, `02-02-spec/dashboard-data.json`) stay synchronized. Skipping any step or running them out of order produces `Drift detected in version.json` and blocks CI.
+This section is the **single canonical reference** for how versions are bumped and how derived artifacts (`version.json`, `src/data/specTree.json`, `02-spec/dashboard-data.json`) stay synchronized. Skipping any step or running them out of order produces `Drift detected in version.json` and blocks CI.
 
 ### X.1 The Three Sync Scripts
 
@@ -401,7 +401,7 @@ This section is the **single canonical reference** for how versions are bumped a
 |---|--------|-------|--------|-------------|
 | 1 | `scripts/sync-version.mjs` | `package.json`, git HEAD | `version.json` (top-level + per-folder stats) | After **any** version bump or spec change |
 | 2 | `scripts/sync-spec-tree.mjs` | `02-spec/**/*.md` | `src/data/specTree.json` | After **any** spec file add/rename/delete |
-| 3 | `linter-scripts/generate-dashboard-data.cjs` | `version.json`, `02-spec/**/*.md` | `02-02-spec/dashboard-data.json` | After #1 and #2 (CI runs this automatically) |
+| 3 | `linter-scripts/generate-dashboard-data.cjs` | `version.json`, `02-spec/**/*.md` | `02-spec/dashboard-data.json` | After #1 and #2 (CI runs this automatically) |
 
 ### X.2 Mandatory Execution Order
 
@@ -467,7 +467,7 @@ Use this when the path is a redirect stub or a documentation pointer with no rea
 
 ```
 [doc-only]
-02-02-spec/folder-structure-root.md
+02-spec/folder-structure-root.md
 ```
 
 **Commit message convention**: When adding to either section, the commit message must include `allowlist: <reason>` so reviewers can audit.

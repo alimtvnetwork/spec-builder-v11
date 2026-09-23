@@ -351,7 +351,7 @@ This document provides visual architecture diagrams showing the complete databas
 | Split DB Overview | `../01-index.md` |
 | CLI Examples | `./01-cli-examples.md` |
 | Reset API Standard | `./02-reset-api-standard.md` |
-| AI Bridge DB | `../27-ai-bridge-cli/01-backend/12-database-architecture.md` |
-| GSearch DB | `../25-gsearch-cli/01-backend/22-database-architecture.md` |
-| BRun DB | `../26-brun-cli/01-backend/16-database-architecture.md` |
+| AI Bridge DB | `../22-ai-bridge-cli/01-backend/12-database-architecture.md` |
+| GSearch DB | `../20-gsearch-cli/01-backend/22-database-architecture.md` |
+| BRun DB | `../21-brun-cli/01-backend/16-database-architecture.md` |
 | Nexus Flow DB | `../24-nexus-flow-cli/01-backend/05-database-architecture.md` |

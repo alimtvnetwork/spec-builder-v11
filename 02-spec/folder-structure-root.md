@@ -8,7 +8,7 @@
 
 The complete folder structure specification — including repository organization, `.ai-memory/` AI metadata layers, numbering policy, required folders, rules, and validation checklists — is maintained in:
 
-> **📄 [Canonical Folder Structure Specification](./01-spec-authoring-guide/02-folder-structure.md)**
+> **📄 [Canonical Folder Structure Specification](../.ai-memory/folder-structure.md)**
 > **📄 [`02-spec/01-spec-authoring-guide/02-folder-structure.md`](./01-spec-authoring-guide/02-folder-structure.md)** (Spec Hierarchy Guide)
 
 This file previously contained a full copy of the folder structure rules. To eliminate duplication and maintain a single source of truth, all content has been consolidated into the spec authoring guide.

@@ -35,8 +35,8 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-02-spec/folder-structure-root.md` | Folder Structure Root — Redirect to canonical source | 2.0.0 |
-| `02-02-spec/health-dashboard.md` | Project-Wide Spec Health Dashboard |  |
+| `02-spec/folder-structure-root.md` | Folder Structure Root — Redirect to canonical source | 2.0.0 |
+| `02-spec/health-dashboard.md` | Project-Wide Spec Health Dashboard |  |
 
 ## 📘 Spec Authoring Guide
 

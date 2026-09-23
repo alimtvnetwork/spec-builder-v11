@@ -52,7 +52,7 @@ Every CLI tool in the project follows a **standardized 3-folder structure**. Thi
 
 ### Step 1: Choose the Module Number
 
-Look at the current `02-02-02-spec/01-index.md` master index. Use the **next available number** after the highest existing module. Do NOT reuse or insert numbers in the middle of the sequence.
+Look at the current `02-02-spec/01-index.md` master index. Use the **next available number** after the highest existing module. Do NOT reuse or insert numbers in the middle of the sequence.
 
 ### Step 2: Create the Folder
 
@@ -164,7 +164,7 @@ Create `99-consistency-report.md` at each level:
 
 ### Step 8: Update Master Index
 
-Add the new module to `02-02-02-spec/01-index.md` in the appropriate layer table.
+Add the new module to `02-02-spec/01-index.md` in the appropriate layer table.
 
 ---
 
@@ -219,6 +219,6 @@ Add the new module to `02-02-02-spec/01-index.md` in the appropriate layer table
 - [ ] `03-deploy/` folder with `01-index.md`
 - [ ] `97-acceptance-criteria.md` with numbered, testable criteria
 - [ ] `99-consistency-report.md` at root and each subfolder
-- [ ] `02-02-02-spec/01-index.md` master index updated
+- [ ] `02-02-spec/01-index.md` master index updated
 - [ ] Cross-references added to related modules
 - [ ] Error codes registered in `02-spec/03-error-manage/03-error-code-registry/`

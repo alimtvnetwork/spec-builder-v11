@@ -330,7 +330,7 @@ Common errors:
 |-----------|----------|
 | Split DB Overview | `../01-index.md` |
 | CLI Examples | `./01-cli-examples.md` |
-| AI Bridge Reset | `02-spec/27-ai-bridge-cli/01-backend/14-reset-and-export-api.md` |
-| GSearch Database | `02-spec/25-gsearch-cli/01-backend/22-database-architecture.md` |
-| BRun Database | `02-spec/26-brun-cli/01-backend/16-database-architecture.md` |
-| Nexus Flow Database | `02-spec/29-nexus-flow-cli/01-backend/05-database-architecture.md` |
+| AI Bridge Reset | `02-spec/22-ai-bridge-cli/01-backend/14-reset-and-export-api.md` |
+| GSearch Database | `02-spec/20-gsearch-cli/01-backend/22-database-architecture.md` |
+| BRun Database | `02-spec/21-brun-cli/01-backend/16-database-architecture.md` |
+| Nexus Flow Database | `02-spec/24-nexus-flow-cli/01-backend/05-database-architecture.md` |

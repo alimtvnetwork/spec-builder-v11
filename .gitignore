@@ -31,9 +31,23 @@ test-results/
 
 # Artifacts & Temporary Files
 tmp/
+.tmp/
 *.zip
 *.tar.gz
 *.tgz
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Ephemeral runtime & local runner directories
+.ai-memory/temp/
+.ai-memory/temp-scripts/
+.ai-memory/temp-agents/
+.ai-memory/cicd/
 
 # Compiled binaries
 bin/
@@ -41,7 +55,3 @@ bin/
 *.exe~
 *.dll
 *.so
-# Python
-__pycache__/
-*.py[cod]
-*$py.class

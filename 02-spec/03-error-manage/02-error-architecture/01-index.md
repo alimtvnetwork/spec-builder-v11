@@ -70,4 +70,4 @@ Tier 3: Frontend (React) → Error store, Global Error Modal, toast notification
 
 - [Parent Overview](../01-index.md) — Error Management root
 - [Error Resolution](../01-error-resolution/01-index.md) — Debugging and diagnostics
-- [Error Code Registry](../03-error-manage/03-error-code-registry/01-index.md) — Error code ranges
+- [Error Code Registry](../03-error-code-registry/01-index.md) — Error code ranges

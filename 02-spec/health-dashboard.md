@@ -118,6 +118,6 @@
 ## How to Regenerate
 
 ```bash
-node linter-scripts/generate-dashboard-data.cjs   # writes 02-02-spec/dashboard-data.json
+node linter-scripts/generate-dashboard-data.cjs   # writes 02-spec/dashboard-data.json
 python3 linter-scripts/check-spec-folder-refs.py  # CI guard for stale folder refs
 ```

@@ -709,9 +709,9 @@ POST /api/v1/reset/confirm
 | Split DB Overview | `../01-index.md` |
 | Reset API Standard | `./02-reset-api-standard.md` |
 | Database Flow Diagrams | `./03-database-flow-diagrams.md` |
-| AI Bridge DB Architecture | `../27-ai-bridge-cli/01-backend/12-database-architecture.md` |
-| GSearch DB Schema | `../25-gsearch-cli/01-backend/03-database-schema.md` |
-| BRun Data Models | `../26-brun-cli/01-backend/10-data-models.md` |
+| AI Bridge DB Architecture | `../22-ai-bridge-cli/01-backend/12-database-architecture.md` |
+| GSearch DB Schema | `../20-gsearch-cli/01-backend/03-database-schema.md` |
+| BRun Data Models | `../21-brun-cli/01-backend/10-data-models.md` |
 | Naming Conventions | `../02-coding-guidelines/01-cross-language/07-database-naming.md` |
 
 ---

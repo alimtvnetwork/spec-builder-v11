@@ -207,7 +207,7 @@ Tracks bugs, investigations, and resolutions. Each issue follows the same `{NN}-
 - [ ] `03-issues/01-index.md` created (even if empty initially)
 - [ ] `97-acceptance-criteria.md` with numbered, testable criteria
 - [ ] `99-consistency-report.md` at root and each major subfolder
-- [ ] `02-02-02-spec/01-index.md` master index updated
+- [ ] `02-02-spec/01-index.md` master index updated
 - [ ] Cross-references added to related modules
 - [ ] Error codes registered in error code registry (if applicable)
 

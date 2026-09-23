@@ -183,5 +183,5 @@ This module aggregates acceptance criteria from `34-time-log-cli` and `35-time-l
 - [ ] Decided on flat vs. multi-category structure
 - [ ] If multi-category: each subfolder has `01-index.md`
 - [ ] `99-consistency-report.md` at root
-- [ ] `02-02-02-spec/01-index.md` master index updated
+- [ ] `02-02-spec/01-index.md` master index updated
 - [ ] Cross-references added to related modules

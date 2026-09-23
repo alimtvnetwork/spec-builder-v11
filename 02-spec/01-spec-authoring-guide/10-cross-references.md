@@ -154,7 +154,7 @@ When a module's numeric prefix changes (e.g., `09-gsearch-cli` → `09-gsearch-c
 1. **Other spec files** — Any `../09-gsearch-cli/...` → `../09-gsearch-cli/...`
 2. **Memory files** — Any reference to the old path
 3. **Dashboard code** — `SpecFileViewer.tsx` module definitions
-4. **Master index** — `02-02-02-spec/01-index.md` module table
+4. **Master index** — `02-02-spec/01-index.md` module table
 5. **Consistency reports** — If they mention module paths
 
 **This is why module renaming should be done carefully and in batches.**
