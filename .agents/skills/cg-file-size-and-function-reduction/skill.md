@@ -35,16 +35,19 @@ All logic, services, controllers, handlers, utilities, hooks, CLI commands, and 
 - Files must be reduced by modular decomposition into separate files, NOT by code compression.
 
 ### 4. Wrapper Objects & Parameter Reduction Pattern
+
 - **Return Wrapper Struct:** If an extracted helper returns 2 or more related values (beyond standard error/Result), encapsulate them into a dedicated named struct or type.
 - **Parameter Structs:** If an extracted function requires more than 2 parameters, combine them into an options or params struct (`*Params` / `*Options`).
 
 ### 5. Boolean Principles During Extraction
+
 - **Implicit Positive Checks Only:** NEVER write `if isReady == true`. ALWAYS write `if isReady`.
 - **No Negative Polarity:** NEVER combine a positive and negative condition (`if isA && !isB`). Split into separate guard clauses!
 - **Positive Naming Only:** All booleans MUST use affirmative prefixes: `is*` or `has*` only (e.g., `isFail`, `isInvalid`, `isPaused`).
 - **Zero Nested If Statements:** Every extracted function MUST maintain a nesting depth <= 1 using early guard returns.
 
 ### 6. Execution & Build Policy
+
 - **NO INTERMEDIATE TEST RUNNING:** NEVER run unit test suites (`go test ./...`, `npm test`, `pytest`) during routine refactoring turns.
 - **NO INTERMEDIATE BUILD CHECKING:** DO NOT execute build commands (`go build`, `npm run build`) after individual file edits.
 - **FINAL STEP BUILD VERIFICATION ONLY:** Verify compilation strictly at the final step after all file extractions and import adjustments are completed.

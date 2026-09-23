@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-functions`, `cg-signatures`, `cg-return-types`, `cg-execute functions`, `audit function naming`, `fix return types`, `enforce apperror`, `enforce result envelope`, `single return type audit`, `multi-line arguments`, `function call formatting`
 
-> **Prompt Version:** 2.1.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.1.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -74,25 +78,31 @@ def save_record(label: str, path: str, is_success: bool, error: Optional[str] = 
 #### ✅ REQUIRED (One parameter per line with trailing comma):
 
 ```go
+// In types.go:
+// type BoolResult = result.Result[bool]
+
 // Go
 func SaveRecord(
     label string,
     path string,
     isSuccess bool,
     errMsg string,
-) Result[bool] {
+) BoolResult {
     // ...
 }
 ```
 
 ```typescript
+// In types.ts:
+// export type VoidResult = Result<void>;
+
 // TypeScript
 function saveRecord(
     label: string,
     path: string,
     isSuccess: boolean,
     error?: string,
-): Result<void> {
+): VoidResult {
     // ...
 }
 ```
@@ -222,17 +232,34 @@ logMessageWithStack("Payment failed");
 
 In domain services, handlers, and internal business logic, functions MUST return a single encapsulated result envelope rather than raw multi-value tuples `(T, error)` or unhandled exceptions.
 
-#### 4a. Production-Ready Go `Result[T]` Architecture
+#### 4a. Production-Ready Go `Result[T]` Architecture & Concrete `types.go` Mapping
 
 ```go
 package result
 
-import "gitmap/apperror"
+import (
+    "coding-guidelines/common/pkg/appfault"
+    "coding-guidelines/common/pkg/errtype"
+)
 
-// Result encapsulates a computation outcome with typed value or *apperror.AppError.
+// -----------------------------------------------------------------------------
+// Step 1: Declare Concrete Types in `types.go` (Mandatory Rule)
+// -----------------------------------------------------------------------------
+// In types.go:
+// type (
+//     // UserResult is the canonical single reusable concrete result envelope for User.
+//     // RULE: Define concrete type alias in types.go rather than repeating raw generic instantiations!
+//     UserResult = result.Result[User]
+//
+//     // UserSliceResult is the single reusable concrete result envelope for User slices.
+//     UserSliceResult = result.ResultSlice[User]
+// )
+// -----------------------------------------------------------------------------
+
+// Result encapsulates a computation outcome with typed value or *appfault.AppError.
 type Result[T any] struct {
     Value    T
-    Err      *apperror.AppError
+    Err      *appfault.AppError
     Data     T
     AppError error
 }
@@ -277,17 +304,17 @@ func (r Result[T]) HasValidError() bool {
 }
 
 // Unwrap returns the value and error tuple.
-func (r Result[T]) Unwrap() (T, *apperror.AppError) {
+func (r Result[T]) Unwrap() (T, *appfault.AppError) {
     if r.Err != nil {
         return r.Value, r.Err
     }
 
     if r.AppError != nil {
-        if appErr, isAppErr := r.AppError.(*apperror.AppError); isAppErr {
+        if appErr, isAppErr := r.AppError.(*appfault.AppError); isAppErr {
             return r.Value, appErr
         }
 
-        return r.Value, apperror.WrapSimple(r.AppError, "result.Unwrap")
+        return r.Value, appfault.Wrap(errtype.Internal, r.AppError, "result.Unwrap")
     }
 
     return r.Value, nil
@@ -323,8 +350,8 @@ func SuccessResult[T any](val T) Result[T] {
     }
 }
 
-// FailureResult constructs a failed Result envelope with *apperror.AppError.
-func FailureResult[T any](err *apperror.AppError) Result[T] {
+// FailureResult constructs a failed Result envelope with *appfault.AppError.
+func FailureResult[T any](err *appfault.AppError) Result[T] {
     return Result[T]{
         Err:      err,
         AppError: err,
@@ -338,7 +365,7 @@ func NewSuccess[T any](data T) Result[T] {
 
 // NewFailure constructs a failed Result envelope from any error.
 func NewFailure[T any](err error) Result[T] {
-    if appErr, isAppErr := err.(*apperror.AppError); isAppErr {
+    if appErr, isAppErr := err.(*appfault.AppError); isAppErr {
         return FailureResult[T](appErr)
     }
 
@@ -346,18 +373,18 @@ func NewFailure[T any](err error) Result[T] {
         return Result[T]{}
     }
 
-    appErr := apperror.WrapSimple(err, "result.NewFailure")
+    appErr := appfault.Wrap(errtype.Internal, err, "result.NewFailure")
 
     return FailureResult[T](appErr)
 }
 
 // NewFailureWithType constructs a typed failed Result with code, message, and caller.
 func NewFailureWithType[T any](
-    errCode apperror.ErrorCodeType,
+    errType errtype.Variation,
     msg string,
     caller string,
 ) Result[T] {
-    appErr := apperror.New(errCode, msg, caller)
+    appErr := appfault.New(errType, msg).WithOp(caller)
     return FailureResult[T](appErr)
 }
 ```
@@ -367,7 +394,7 @@ func NewFailureWithType[T any](
 #### 4b. `AppError` Methods & Error Code Comparison
 
 ```go
-package apperror
+package appfault
 
 // HasError reports whether an error exists.
 func (e *AppError) HasError() bool {
@@ -384,14 +411,14 @@ func (e *AppError) HasValidError() bool {
     return e != nil && e.Code != ""
 }
 
-// IsErrorCode reports whether the AppError matches the specified ErrorCodeType.
-func (e *AppError) IsErrorCode(code ErrorCodeType) bool {
-    return e != nil && e.Code == code
+// IsErrorCode reports whether the AppError matches the specified Variation.
+func (e *AppError) IsErrorCode(errType errtype.Variation) bool {
+    return e != nil && e.Type() == errType
 }
 
 // IsCode alias for IsErrorCode.
-func (e *AppError) IsCode(code ErrorCodeType) bool {
-    return e.IsErrorCode(code)
+func (e *AppError) IsCode(errType errtype.Variation) bool {
+    return e.IsErrorCode(errType)
 }
 ```
 
@@ -400,7 +427,7 @@ func (e *AppError) IsCode(code ErrorCodeType) bool {
 #### 4c. TypeScript `Result<T>` Envelope Architecture
 
 ```typescript
-import { AppError, ErrorCodeType } from "./apperror";
+import { AppError, ErrorCodeType } from "./appfault";
 
 export type Result<T> = {
     readonly isSuccess: boolean;

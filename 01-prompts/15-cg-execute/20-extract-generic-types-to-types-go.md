@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-types-go`, `cg-extract-types`, `cg-execute types-go`, `extract-generic-types`, `types-go-single-type`, `types-go-result-reuse`, `centralize-types-go`, `audit types go`, `fix raw generics`, `single reusable type`, `type-alias-repeated-generics`
 
-> **Prompt Version:** 1.0.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 1.0.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -58,7 +62,7 @@ In codebases undergoing refactoring, a frequent transitional anti-pattern occurs
 ```diff
 - func parseImportSQLite(filePath string) ([]scheduleExportBundle, error) {
 + func parseImportSQLite(filePath string) result.ResultSlice[scheduleExportBundle] {
-+ 	return result.FailSlice[scheduleExportBundle](apperror.WrapSimple(err, "parse imported sqlite"))
++ 	return result.FailSlice[scheduleExportBundle](appfault.Wrap(errtype.IO, err, "parse imported sqlite"))
 ```
 
 ### 2. Why This Diff Violates Repository Guidelines: Two Latent Violations
@@ -127,6 +131,7 @@ func parseImportSQLite(filePath string) ScheduleExportBundleResult {
 	}
 
 	bundles, err := readSQLiteBundles(filePath)
+
 	if err != nil {
 		return result.FailSlice[ScheduleExportBundle](
 			appfault.Wrap(appfault.ErrDatabaseQuery, err, "parse imported sqlite").

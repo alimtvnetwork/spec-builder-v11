@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `create-ci-cd`, `cicd-create`, `create cicd`, `setup cicd pipeline`, `build ci-cd pipeline`, `cicd create python`, `05-cicd-pipeline-create`
 
-> **Prompt Version:** 2.1.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.5.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Whatever directives, constraints, checklists, or instructions are given before this section or prompt (including in the prompt preamble, header blocks, or incoming user request) are HIGHEST PRIORITY and MUST BE FOLLOWED as strictly NON-NEGOTIABLE. They supersede and strictly override any conflicting general advice, default conventions, or lower-level guidelines below.
 
 ```text
 N = 300
@@ -13,23 +17,25 @@ N = total self-loop steps budget for end-to-end CI/CD creation and cross-platfor
 
 ### Master Task Checklist (Atomic Numbered Steps)
 
-1. [ ] /goal Phase 1 (Step A): Deeply scan the target codebase to inventory all architectural violations and anti-patterns.
-2. [ ] /goal Phase 1 (Step B): Write the master audit specification in `.ai-memory/plans/pending/` with an exhaustive Violation Ledger.
-3. [ ] /goal Phase 1 (Step C): Decompose the master plan into granular, atomic subtasks in `.ai-memory/plans/subtasks/`.
-4. [ ] /goal Phase 1 (Step D): Verify or create the automated quality linter and register in `03-ai-scripts/01-index.md`.
-5. [ ] /goal Phase 2 (Step A): Open each target file and perform surgical refactoring following authoritative guidelines.
-6. [ ] /goal Phase 2 (Step B): Enforce <= 8–15 line function decomposition, single return types, and clean formatting.
-7. [ ] /goal Phase 2 (Step C): Execute local linters to verify 0 remaining violations across all modified files.
-8. [ ] /goal Phase 2 (Step D): Execute local CI quality gates via `python 03-ai-scripts/06-cicd-local-runner.py` with exit code 0 (`exit 0`).
-9. [ ] /learn Ingest `02-spec/12-cicd-pipeline-workflows/` for domain-specific architectural specifications.
-10. [ ] /learn Ingest `02-spec/02-coding-guidelines/06-cicd-integration/` for domain-specific architectural specifications.
-11. [ ] /learn Ingest `02-spec/11-powershell-integration/` for domain-specific architectural specifications.
-12. [ ] /learn Ingest `02-spec/14-update/` for domain-specific architectural specifications.
-13. [ ] /learn Ingest `02-spec/15-distribution-and-runner/` for domain-specific architectural specifications.
-14. [ ] /learn Ingest `02-spec/16-generic-release/` for domain-specific architectural specifications.
-15. [ ] /learn Ingest `02-spec/17-consolidated-guidelines/18-cicd-pipeline-workflows.md` for domain-specific architectural specifications.
-16. [ ] /learn Ingest `.ai-memory/coding-guidelines.md` for master consolidated coding guidelines.
-17. [ ] /goal Create or update agent rules in the repository if missing from agent memory.
+1. [ ] /goal Preamble Precedence Verification: Whatever is given before this section or prompt (user preamble, header constraints, prior instructions) has been verified as highest priority and non-negotiable, and is strictly incorporated into the task scope ahead of all other guidelines.
+2. [ ] /goal Phase 1A (Step 0 - Requirement Ingestion & Chat Output Gate): Capture incoming pipeline requirements verbatim, decode any base64 screenshot images to assets/screenshots/<slug>-<NN>.png, output confirmed deliverable breakdown in chat, and chain the first discovery tool call in the exact same turn (TOTAL BAN on closing conversation or waiting for approval).
+3. [ ] /goal Phase 1B (Step A): Deeply scan the target codebase to inventory all architectural violations and anti-patterns.
+4. [ ] /goal Phase 1B (Step B): Write the master audit specification in `.ai-memory/plans/pending/` with an exhaustive Violation Ledger.
+5. [ ] /goal Phase 1B (Step C): Decompose the master plan into granular, atomic subtasks in `.ai-memory/plans/subtasks/`.
+6. [ ] /goal Phase 1B (Step D): Verify or create the automated quality linter and register in `03-ai-scripts/01-index.md`.
+7. [ ] /goal Phase 2 (Step A): Open each target file and perform surgical refactoring following authoritative guidelines.
+8. [ ] /goal Phase 2 (Step B): Enforce <= 8–15 line function decomposition, single return types, and clean formatting.
+9. [ ] /goal Phase 2 (Step C): Execute local linters to verify 0 remaining violations across all modified files.
+10. [ ] /goal Phase 2 (Step D): Execute local CI quality gates via `python 03-ai-scripts/06-cicd-local-runner.py` with exit code 0 (`exit 0`).
+11. [ ] /learn Ingest `02-spec/12-cicd-pipeline-workflows/` for domain-specific architectural specifications.
+12. [ ] /learn Ingest `02-spec/02-coding-guidelines/06-cicd-integration/` for domain-specific architectural specifications.
+13. [ ] /learn Ingest `02-spec/11-powershell-integration/` for domain-specific architectural specifications.
+14. [ ] /learn Ingest `02-spec/14-update/` for domain-specific architectural specifications.
+15. [ ] /learn Ingest `02-spec/15-distribution-and-runner/` for domain-specific architectural specifications.
+16. [ ] /learn Ingest `02-spec/16-generic-release/` for domain-specific architectural specifications.
+17. [ ] /learn Ingest `02-spec/17-consolidated-guidelines/18-cicd-pipeline-workflows.md` for domain-specific architectural specifications.
+18. [ ] /learn Ingest `.ai-memory/coding-guidelines.md` for master consolidated coding guidelines.
+19. [ ] /goal Create or update agent rules in the repository if missing from agent memory.
 
 ```text
 PHASE_1_STEPS = N / 2   (Steps 1 .. 150: Spec Ingestion, Python Automation Design, Local Runner Setup)
@@ -371,6 +377,8 @@ To survive massive checklists and complex codebases, you MUST operate using thes
 
 ## Pre-Reply / Loop Checklist (Must Verify Every Turn)
 
+- [ ] **Top-Instruction Priority Mandate:** Whatever directives, constraints, checklists, or instructions are given before this section or prompt are verified as highest priority and non-negotiable.
+- [ ] **Issue & RCA Destination Routing:** Whenever resolving an issue or performing a fix with RCA, verified that CI/CD failures are documented in .ai-memory/cicd-issues/NN-<slug>.md (indexed in .ai-memory/cicd-index.md), while non-CI/CD issues (application bugs, logic/runtime defects) are documented in 02-spec/22-app-issues/NN-<slug>.md (indexed in 02-spec/22-app-issues/01-index.md).
 - [ ] **Specs Ingested:** Read `index.md` or `00-overview.md` and all subfiles across `02-spec/12-cicd-pipeline-workflows/` and `02-spec/02-coding-guidelines/06-cicd-integration/`.
 - [ ] **Cross-Platform Python-First:** All automation, build, test, and linter scripts written in Python 3.
 - [ ] **Local Runner Configured:** `03-ai-scripts/06-cicd-local-runner.py` created and tested with batching.
@@ -378,4 +386,4 @@ To survive massive checklists and complex codebases, you MUST operate using thes
 - [ ] **Zero Linting/CI/CD Bypass:** Confirmed NO linters, static analysis tools, or test scripts were disabled, commented out, or bypassed with `|| true`.
 - [ ] **Local Runner 100% Green:** `python 03-ai-scripts/06-cicd-local-runner.py` exited with code 0.
 - [ ] **Strict Lowercase Filenames:** All generated files use strictly lowercase naming.
-- [ ] **Stage, Commit & Push:** Grouped fixes into clean commit and pushed to remote branch.
+- [ ] **Stage, Commit & Push:** Grouped fixes into clean commit and pushed to remote branch (total ban on per-file commits).

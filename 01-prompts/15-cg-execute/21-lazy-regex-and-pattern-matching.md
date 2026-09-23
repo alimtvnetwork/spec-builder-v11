@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-lazyregex`, `cg-regex`, `cg-execute regex`, `audit regex`, `fix raw regex`, `enforce lazy regex`, `regex-match-result`, `lazyregex-match`, `ban-regexp-mustcompile`
 
-> **Prompt Version:** 2.1.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.1.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -11,7 +15,7 @@ N = 200
 
 N = total self-loop steps budget that the agents will perform.
 
-/goal Autonomously scan, plan, refactor, and verify all regular expression usage across the codebase, eliminating raw `regexp.MustCompile` and `regexp.Compile` outside package `lazyregex`, replacing inline compilation and blind `re.MatchString` test assertions with thread-safe `lazyregex.New(...)` and wrapped `lazyregex.MatchResult(...)` returning `*MatchResult` (`ResultGroup`) and structured `*apperror.AppError` diagnostics, enforcing affirmative evaluation (`rs.IsMatch()`, `rs.IsSuccess()`, `rs.IsFailed()`), and providing rich failure diagnostics showing pattern, compared text, character count, and failure cause until 100% green without stopping.
+/goal Autonomously scan, plan, refactor, and verify all regular expression usage across the codebase, eliminating raw `regexp.MustCompile` and `regexp.Compile` outside package `lazyregex`, replacing inline compilation and blind `re.MatchString` test assertions with thread-safe `lazyregex.New(...)` and wrapped `lazyregex.MatchResult(...)` returning `*MatchResult` (`ResultGroup`) and structured `*appfault.AppError` diagnostics, enforcing affirmative evaluation (`rs.IsMatch()`, `rs.IsSuccess()`, `rs.IsFailed()`), and providing rich failure diagnostics showing pattern, compared text, character count, and failure cause until 100% green without stopping.
 
 ### Master Task Checklist (Atomic Numbered Steps)
 

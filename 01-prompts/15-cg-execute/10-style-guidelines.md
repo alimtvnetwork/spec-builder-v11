@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-style`, `cg-execute style`, `audit style`, `fix formatting`, `enforce newline styling`, `flatten nested if`, `newline before if`, `return newline style`, `style guidelines audit`, `line gaps audit`, `fix line endings`, `enforce utf8 lf`, `fix function newlines`, `newline refactor`
 
-> **Prompt Version:** 2.2.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.2.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -280,7 +284,7 @@ cleanup();
 
 ```go
 // ❌ FORBIDDEN (Unacceptable): Squeezed loops against map literals, inline conditional assignments, and missing blank lines between if blocks
-func ValidateDoubleExtensionFormats(targetPath string) *apperror.AppError {
+func ValidateDoubleExtensionFormats(targetPath string) *appfault.AppError {
     cases := map[string]Format{
         "archive.tar.gz":  FormatTarGz,
         "archive.tgz":     FormatTarGz,
@@ -293,27 +297,27 @@ func ValidateDoubleExtensionFormats(targetPath string) *apperror.AppError {
     }
     for path, expectedFormat := range cases {
         if got := FormatFromPath(path); got != expectedFormat {
-            return apperror.New(apperror.ErrCodeValidationFailed, "mismatch", "ValidateDoubleExtensionFormats")
+            return appfault.New(errtype.Validation, "mismatch")
         }
     }
     return nil
 }
 
-func ValidateExtensionRoundTrip(formats []Format) *apperror.AppError {
+func ValidateExtensionRoundTrip(formats []Format) *appfault.AppError {
     for _, f := range formats {
         ext := f.Extension()
         if len(ext) == 0 {
-            return apperror.New(apperror.ErrCodeValidationFailed, "empty extension", "ValidateExtensionRoundTrip")
+            return appfault.New(errtype.Validation, "empty extension")
         }
         if got := FormatFromPath("sample" + ext); got != f {
-            return apperror.New(apperror.ErrCodeValidationFailed, "unmatched format", "ValidateExtensionRoundTrip")
+            return appfault.New(errtype.Validation, "unmatched format")
         }
     }
     return nil
 }
 
 // ✅ REQUIRED (Right Practice): Blank line after map literal closing brace, blank line before loops, blank line before if, blank line after closing brace, and extracted affirmative booleans
-func ValidateDoubleExtensionFormats(targetPath string) *apperror.AppError {
+func ValidateDoubleExtensionFormats(targetPath string) *appfault.AppError {
     cases := map[string]Format{
         "archive.tar.gz":  FormatTarGz,
         "archive.tgz":     FormatTarGz,
@@ -330,39 +334,36 @@ func ValidateDoubleExtensionFormats(targetPath string) *apperror.AppError {
         isFormatMismatch := resolvedFormat != expectedFormat
 
         if isFormatMismatch {
-            return apperror.New(
-                apperror.ErrCodeValidationFailed,
+            return appfault.New(
+                errtype.Validation,
                 "format mismatch detected",
-                "ValidateDoubleExtensionFormats",
-            )
+            ).WithOp("ValidateDoubleExtensionFormats")
         }
     }
 
     return nil
 }
 
-func ValidateExtensionRoundTrip(formats []Format) *apperror.AppError {
+func ValidateExtensionRoundTrip(formats []Format) *appfault.AppError {
     for _, f := range formats {
         ext := f.Extension()
         isEmptyExtension := len(ext) == 0
 
         if isEmptyExtension {
-            return apperror.New(
-                apperror.ErrCodeValidationFailed,
+            return appfault.New(
+                errtype.Validation,
                 "extension returned empty string",
-                "ValidateExtensionRoundTrip",
-            )
+            ).WithOp("ValidateExtensionRoundTrip")
         }
 
         got := FormatFromPath("sample" + ext)
         isSampleUnmatchFile := got != f
 
         if isSampleUnmatchFile {
-            return apperror.New(
-                apperror.ErrCodeValidationFailed,
+            return appfault.New(
+                errtype.Validation,
                 "unmatched sample file format",
-                "ValidateExtensionRoundTrip",
-            )
+            ).WithOp("ValidateExtensionRoundTrip")
         }
     }
 

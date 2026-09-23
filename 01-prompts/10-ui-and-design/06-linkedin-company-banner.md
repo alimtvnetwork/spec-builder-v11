@@ -195,6 +195,7 @@ Ultra-wide panoramic 6:1 banner background for LinkedIn company page, dimensions
 
 ```markdown
 # Canvas: 2256 x 382 px (2x Retina, Ubuntu Font Family)
+
 - Company Logo Collision Zone: x: 0 to 520 px (Keep empty)
 - Primary Headline: "{value_proposition}" (Font: Ubuntu Bold, Color: #FFFFFF, Size: 52pt, x: 580px, y: 150px)
 - Supporting Tagline: "{core_offerings}" (Font: Ubuntu Regular, Color: #94A3B8, Size: 26pt, x: 580px, y: 220px)

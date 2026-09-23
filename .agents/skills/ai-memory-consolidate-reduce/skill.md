@@ -20,6 +20,7 @@ git push origin "$BACKUP_BRANCH"
 ```
 
 ## Core Compaction Rules
+
 1. **Cluster Tasks:** Combine 2, 3, or more related tasks into single milestone files.
 2. **Prune Guideline Noise:** Remove pure formatting or routine guideline-fix micro-plans that contain zero business logic.
 3. **Checklist Compaction:** Consolidate repeated checklists into a single pointer to `.ai-memory/coding-guidelines.md`.

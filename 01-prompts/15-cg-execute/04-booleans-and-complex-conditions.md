@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-boolean`, `cg-execute boolean`, `audit boolean`, `fix boolean negatives`, `fix complex conditions`, `affirmative booleans`, `boolean-parameter-naming`, `affirmative-boolean-parameters`, `is-stopped`, `fix-v-bool`
 
-> **Prompt Version:** 2.3.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.3.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -242,42 +246,40 @@ func ValidateAccess(user *User) bool {
 }
 
 // ❌ FORBIDDEN: Squeezed loop, inline assignment condition, and direct comparison
-func ValidateFormat(formats []Format) *apperror.AppError {
+func ValidateFormat(formats []Format) *appfault.AppError {
     for _, f := range formats {
         ext := f.Extension()
         if len(ext) == 0 {
-            return apperror.New(apperror.ErrCodeValidationFailed, "empty extension", "ValidateFormat")
+            return appfault.New(errtype.Validation, "empty extension")
         }
         if got := FormatFromPath("sample" + ext); got != f {
-            return apperror.New(apperror.ErrCodeValidationFailed, "unmatched format", "ValidateFormat")
+            return appfault.New(errtype.Validation, "unmatched format")
         }
     }
     return nil
 }
 
 // ✅ REQUIRED: Blank line before for loop, extracted affirmative booleans, blank line before if
-func ValidateFormat(formats []Format) *apperror.AppError {
+func ValidateFormat(formats []Format) *appfault.AppError {
     for _, f := range formats {
         ext := f.Extension()
         isEmptyExtension := len(ext) == 0
 
         if isEmptyExtension {
-            return apperror.New(
-                apperror.ErrCodeValidationFailed,
+            return appfault.New(
+                errtype.Validation,
                 "extension returned empty string",
-                "ValidateFormat",
-            )
+            ).WithOp("ValidateFormat")
         }
 
         got := FormatFromPath("sample" + ext)
         isSampleUnmatchFile := got != f
 
         if isSampleUnmatchFile {
-            return apperror.New(
-                apperror.ErrCodeValidationFailed,
+            return appfault.New(
+                errtype.Validation,
                 "unmatched sample file format",
-                "ValidateFormat",
-            )
+            ).WithOp("ValidateFormat")
         }
     }
 

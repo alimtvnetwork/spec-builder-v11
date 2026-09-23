@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-isolate-os-tests`, `cg-mock-destructive`, `cg-execute os-tests`, `isolate destructive tests`, `mock os shutdown`, `hermetic test isolation`
 
-> **Prompt Version:** 2.2.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.2.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -51,6 +55,7 @@ PHASE_2_STEPS = N / 2   (Steps N/2+1 .. N: Parallel Subtasks, Injectable Executo
 Unit tests must be fast, hermetic, and safe. Executing destructive OS commands or heavy operations directly inside unit tests causes machine instability, shuts down developer workstations, and breaks CI/CD runners.
 
 ### Core Mandates:
+
 1. **Total Ban on Real OS Shutdown / Reboot**:
    - `exec.Command("shutdown", ...)`
    - `exec.Command("reboot", ...)`

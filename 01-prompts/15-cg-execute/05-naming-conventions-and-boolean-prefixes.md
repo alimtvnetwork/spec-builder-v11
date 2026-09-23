@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-naming`, `cg-execute naming`, `audit naming`, `fix boolean naming`, `fix naming conventions`, `fix ok boolean`, `affirmative naming`, `positive boolean naming`, `naming conventions audit`
 
-> **Prompt Version:** 2.2.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.2.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -68,7 +72,7 @@ You MUST replace bare `ok` with a domain-specific boolean starting with `is` or 
 
 | Context | ❌ FORBIDDEN (Bare `ok`) | ✅ REQUIRED (Affirmative Semantic Boolean) |
 |---|---|---|
-| **Type Assertion** | `appErr, ok := err.(*apperror.AppError)` | `appErr, isAppErr := err.(*apperror.AppError)` |
+| **Type Assertion** | `appErr, ok := err.(*appfault.AppError)` | `appErr, isAppErr := err.(*appfault.AppError)` |
 | **Map Lookup** | `val, ok := userMap[id]` | `val, isFound := userMap[id]` or `val, isUserExist := userMap[id]` |
 | **Map Key Check** | `_, ok := headers["Authorization"]` | `_, hasAuthHeader := headers["Authorization"]` |
 | **Channel Receive** | `msg, ok := <-msgChan` | `msg, hasMessage := <-msgChan` or `msg, isChannelOpen := <-msgChan` |
@@ -158,7 +162,7 @@ When you need to handle the absence, empty state, or failure condition of a reso
 
 ```go
 // ❌ FORBIDDEN: Nested if with bare ok and else branch
-if appErr, ok := err.(*apperror.AppError); ok {
+if appErr, ok := err.(*appfault.AppError); ok {
     if appErr.Code != "E_INTERNAL_ERROR" {
         t.Errorf("expected E_INTERNAL_ERROR, got %s", appErr.Code)
     }
@@ -167,7 +171,7 @@ if appErr, ok := err.(*apperror.AppError); ok {
 }
 
 // ✅ REQUIRED: Semantic isAppErr boolean + inverted guard clause
-appErr, isAppErr := err.(*apperror.AppError)
+appErr, isAppErr := err.(*appfault.AppError)
 if !isAppErr {
     t.Fatalf("expected AppError, got %T", err)
 }

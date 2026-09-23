@@ -6,6 +6,13 @@ description: >-
 
 # Instruction (must follow): CI/CD Pipeline & Cross-Platform Python Automation Creation
 
+> [!IMPORTANT]
+> Prompt Version: 2.5.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Whatever directives, constraints, checklists, or instructions are given before this section or prompt (including in the prompt preamble, header blocks, or incoming user request) are HIGHEST PRIORITY and MUST BE FOLLOWED as strictly NON-NEGOTIABLE. They supersede and strictly override any conflicting general advice, default conventions, or lower-level guidelines below.
+
 Trigger Keywords & Aliases: `create-ci-cd`, `cicd-create`, `create cicd`, `setup cicd pipeline`, `build ci-cd pipeline`, `cicd create python`, `05-cicd-pipeline-create`
 
 /goal Autonomously design, create, and verify complete cross-platform Python CI/CD pipelines, local runners, and GitHub Actions workflows by following specifications in `02-spec/12-cicd-pipeline-workflows/` and `02-spec/02-coding-guidelines/06-cicd-integration/`, maintaining a continuous N-step self-loop until all jobs exit code 0.
@@ -60,9 +67,11 @@ PHASE_2_STEPS = N / 2  (Steps 151 .. 300: Workflow Generation, Python Linter Ver
 
 ## End of Tunnel Checklist
 
+- [ ] **Top-Instruction Priority Mandate:** Whatever directives, constraints, checklists, or instructions are given before this section or prompt are verified as highest priority and non-negotiable.
+- [ ] **Issue & RCA Destination Routing:** Whenever resolving an issue or performing a fix with RCA, verified that CI/CD failures are documented in .ai-memory/cicd-issues/NN-<slug>.md (indexed in .ai-memory/cicd-index.md), while non-CI/CD issues (application bugs, logic/runtime defects) are documented in 02-spec/22-app-issues/NN-<slug>.md (indexed in 02-spec/22-app-issues/01-index.md).
 - [ ] All CI/CD specs (`02-spec/12-cicd-pipeline-workflows/`, `02-spec/02-coding-guidelines/06-cicd-integration/`) read and followed.
 - [ ] Python cross-platform runner `03-ai-scripts/06-cicd-local-runner.py` created and verified.
 - [ ] All linters in `linter-scripts/` verified and passing without bypass.
 - [ ] GitHub Actions workflows created in `.github/workflows/` (strictly adhering to Zero-Storage mandate — no `actions/upload-artifact` in CI).
 - [ ] Local runner exited with code 0 on all jobs.
-- [ ] All changes committed and pushed to remote repository.
+- [ ] All changes committed and pushed to remote repository (total ban on per-file commits).

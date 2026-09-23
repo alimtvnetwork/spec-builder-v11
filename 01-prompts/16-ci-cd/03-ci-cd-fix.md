@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `fix with RCA`, `fix`, `fix, fix`, `CI/CD fix`, `cicd fix`
 
-> **Prompt Version:** 2.1.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.5.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Whatever directives, constraints, checklists, or instructions are given before this section or prompt (including in the prompt preamble, header blocks, or incoming user request) are HIGHEST PRIORITY and MUST BE FOLLOWED as strictly NON-NEGOTIABLE. They supersede and strictly override any conflicting general advice, default conventions, or lower-level guidelines below.
 
 ```text
 N = 200
@@ -24,24 +28,26 @@ To rapidly locate failing pipeline definitions, broken source files, test fixtur
 - **Record Modified Files Under Lock:** `python 03-ai-scripts/33-test-inventory-generator.py --record <files...>`
 
 > [!NOTE]
-> **CI/CD Fix Verification Allowance:** Unlike routine refactoring turns, CI/CD Fix workflows ARE explicitly authorized and expected to run local builds, tests, and runner scripts (`python 03-ai-scripts/06-cicd-local-runner.py`) to diagnose failures, reproduce errors, and verify that all quality gates pass (exit code 0).
+> **Smart Targeted CI/CD Fix Verification:** Unlike routine refactoring turns, CI/CD Fix workflows ARE authorized to run targeted builds and tests. However, the AI MUST execute tests in the smartest way possible: run builds/tests ONLY for packages cited in the failing stack trace or changed from the last git hash (`git diff --name-only HEAD~1`), recording modified files to `.ai-memory/temp/recent-file-changes.json`. Do NOT run full test suites, spellcheckers, or unrelated checks that delay resolution.
 
 ---
 
 ## Master Task Checklist (Atomic Numbered Steps)
 
-1. [ ] /goal First `N/2` steps (Phase 1): Review the central CI/CD pipeline definitions (`.github/workflows`, `.gitlab-ci.yml`, etc.) and cross-reference them with the local Python runner (`03-ai-scripts/06-cicd-local-runner.py`).
+1. [ ] /goal Preamble Precedence Verification: Whatever is given before this section or prompt (user preamble, header constraints, prior instructions) has been verified as highest priority and non-negotiable, and is strictly incorporated into the task scope ahead of all other guidelines.
+2. [ ] /goal Phase 1A (Step 0 - Verbatim Prompt Recording & Failure Extraction Gate): Immediately capture the user prompt and error logs verbatim into `.ai-memory/cicd-issues/xx-<slug>.md`. If screenshot URLs or base64 data URIs are provided, decode/save them to `assets/screenshots/<slug>-<NN>.png` and refer back via relative paths. Output the confirmed failure breakdown directly in chat and chain the first diagnostic tool call in the exact same turn (TOTAL BAN on closing conversation or waiting for approval).
+3. [ ] /goal First `N/2` steps (Phase 1B): Review the central CI/CD pipeline definitions (`.github/workflows`, `.gitlab-ci.yml`, etc.) and cross-reference them with the local Python runner (`03-ai-scripts/06-cicd-local-runner.py`).
    - **Condition:** If `03-ai-scripts/06-cicd-local-runner.py` does not exist, you must create it immediately.
    - **Condition:** You must ensure that **every single CI/CD case** that needs to run in the pipeline can also be run locally from this Python script (with Docker stripped for native host execution). Improve the Python script to cover all cases if any are missing.
-2. [ ] /goal Second `N/2` steps (Phase 2): Run the local runner script (`python 03-ai-scripts/06-cicd-local-runner.py --all`) to catch all errors. Singly execute the script in an autonomous self-loop, zeroing in on one failing error per turn (4-part RCA -> surgical fix -> guideline autofixer -> re-verify).
-3. [ ] /goal Finalize CI/CD: Your ultimate goal is to fix and finalize the CI/CD. You must loop until the Python local runner script executes flawlessly with **no errors** (exit code 0) for all registered cases. Do not stop until this goal is met.
-4. [ ] /learn Ingest `.ai-memory/cicd-issues/` for domain-specific architectural specifications.
-5. [ ] /learn Ingest `.ai-memory/strictly-avoid.md` for banned anti-patterns and strict constraints.
-6. [ ] /learn Ingest `02-spec/02-coding-guidelines/02-canonical-size-tier.md` for canonical file and function size tiers.
-7. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for hallucination prevention and micro-tasking.
-8. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for strict relative path citation requirements.
-9. [ ] /learn Ingest `02-spec/03-error-manage/` for error handling architectures and AppError.
-10. [ ] /goal Create or update agent rules in the repository if missing from agent memory.
+4. [ ] /goal Second `N/2` steps (Phase 2): Run the local runner script (`python 03-ai-scripts/06-cicd-local-runner.py --changed-only` or `--pkg <target>`) to catch all errors. Singly execute the script in an autonomous self-loop, zeroing in on one failing error per turn (4-part RCA -> surgical fix -> guideline autofixer -> re-verify).
+5. [ ] /goal Finalize CI/CD: Your ultimate goal is to fix and finalize the CI/CD. You must loop until the Python local runner script executes flawlessly with **no errors** (exit code 0) for all registered cases. Do not stop until this goal is met.
+6. [ ] /learn Ingest `.ai-memory/cicd-issues/` for domain-specific architectural specifications.
+7. [ ] /learn Ingest `.ai-memory/strictly-avoid.md` for banned anti-patterns and strict constraints.
+8. [ ] /learn Ingest `02-spec/02-coding-guidelines/02-canonical-size-tier.md` for canonical file and function size tiers.
+9. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for hallucination prevention and micro-tasking.
+10. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for strict relative path citation requirements.
+11. [ ] /learn Ingest `02-spec/03-error-manage/` for error handling architectures and AppError.
+12. [ ] /goal Create or update agent rules in the repository if missing from agent memory.
 
 ```text
 PHASE_1_STEPS = N / 2   (Steps 1 .. N/2: Screenshot Pipeline Discovery, Update 06-cicd-local-runner.py, Register New JOBS)
@@ -436,6 +442,7 @@ The plan task file MUST contain:
 # CI/CD Task: <short failure description>
 
 ## Source
+
 - Runner job: <job-name>
 - Error type: FAIL | TIMEOUT
 - Detected at: <timestamp>
@@ -447,10 +454,12 @@ The plan task file MUST contain:
 <one-sentence description of the fix needed>
 
 ## Acceptance Criteria
+
 - [ ] `06-cicd-local-runner.py` reports ✅ PASS for job `<job-name>`
 - [ ] No regression in any other job
 
 ## Status
+
 - [ ] pending
 ```
 
@@ -491,9 +500,13 @@ Update `.ai-memory/cicd-index.md` in the same operation. Never delete existing e
 
 ---
 
-## Phase 3: 4-Part RCA Requirement (Mandatory Memory File)
+## Phase 3: 4-Part RCA Requirement & Issue Destination Routing
 
-For each distinct failure type encountered in Phase 2 (or extracted via `gitmap pipeline-ai status --json`), write a memory file at `.ai-memory/memory/issues/xx-<slug>.md` with exactly four sections:
+For each distinct failure type encountered in Phase 2 (or extracted via `gitmap pipeline-ai status --json`), author the structured RCA document following the mandatory issue destination routing:
+- **CI/CD Issues & Pipeline Failures:** Record the RCA in `.ai-memory/cicd-issues/xx-<slug>.md` and index it in `.ai-memory/cicd-index.md`.
+- **Non-CI/CD Issues (Application Bugs, Feature Defects, Logic/Runtime Errors):** If during diagnosis the failure is determined to be an application bug or domain defect rather than a pipeline runner/workflow issue, document it in `02-spec/22-app-issues/xx-<slug>.md` (indexed in `02-spec/22-app-issues/01-index.md`, cross-referencing in `.ai-memory/memory/issues/`).
+
+The RCA document MUST contain exactly four sections:
 
 1. **Why it happened:** High-level architectural reason for the failure.
 2. **How it happened:** Exact execution flow that triggered the error (using GitMap targeted failure output `##[error]`, `FAIL:`, compile errors when remote).
@@ -529,8 +542,8 @@ Before entering Phase 1 or Phase 2:
 ## Strictly Avoid: No Automatic Releases & Run All Tests (Strict Policy)
 
 > [!CAUTION]
-> **NO AUTOMATIC RELEASES (TOTAL BAN IN STANDARD CI-CD-FIX):** This is a development fix workflow. You MUST NOT bump versions, update changelogs, or cut a release. Releases are exclusively handled by `04-ci-cd-fix-with-release.md` or `release-orchestrator`.
-> **NO ROUTINE UNIT TEST RUNNING (EXCLUSIVE TO CI-CD WITH RELEASE):** Routine heavy unit test execution is STRICTLY RESERVED for `04-ci-cd-fix-with-release.md` and release workflows! In standard `ci-cd-fix`, do NOT run full unit test suites or test runner pools (`go test ./...`, `06-cicd-local-runner.py --run-tests`). Instead, diagnose and verify fixes using targeted file-level linters, AST validators, and syntax checks on the specific modified files. ONLY `04-ci-cd-fix-with-release.md` will execute the full test suite (`--run-tests` / `--all`) before cutting the release!
+> **NO AUTOMATIC RELEASES (TOTAL BAN IN STANDARD CI-CD-FIX):** This is a development fix workflow. You MUST NOT bump versions, update changelogs, or cut a release. Releases are exclusively handled by `06-ci-cd-fix-with-release.md` or `release-orchestrator`.
+> **SMART TARGETED TESTING (NO FULL SUITE RUNS):** Do NOT run full repository test suites (`go test ./...`, `06-cicd-local-runner.py --all`). Instead, isolate and run builds/tests ONLY for the packages failed in the stack trace or changed since the last git hash (`python 03-ai-scripts/06-cicd-local-runner.py --pkg <target>` or `--changed-only`), recording modified files to `.ai-memory/temp/recent-file-changes.json`.
 > **NO PER-FILE COMMITTING (TOTAL BAN):** Never commit each file individually. All modified files across the turn must be accumulated in the working tree and committed together in a single atomic commit at the final step.
 
 ---
@@ -559,7 +572,7 @@ When `06-cicd-local-runner.py` exits with code 0:
 
 - [ ] **Zero Linting/CI/CD Bypass:** Confirmed that NO CLI linters, static analysis tools, or test scripts were disabled, commented out, skipped, or bypassed with `|| true`.
 - [ ] **Local CI Runner 100% Green:** All jobs in `06-cicd-local-runner.py` (including all unit tests, linters, and quality gates) passed legitimately (exit code = 0).
-- [ ] **RCA Documented:** All encountered failures have memory files in `.ai-memory/memory/issues/`.
+- [ ] **RCA Documented:** All encountered failures have RCA records in `.ai-memory/cicd-issues/` (or `02-spec/22-app-issues/` for non-CI/CD issues).
 - [ ] **Modified Files Recorded:** Confirmed all modified files were tracked via `python 03-ai-scripts/33-test-inventory-generator.py --record <files...>`.
 - [ ] **Antigravity Skill Updated:** Verified `.agents/skills/ci-cd-fix/skill.md` is present and synchronized with the latest rules.
 - [ ] **Stage & Commit:** Group all related fixes into a single descriptive commit: `fix(ci): resolve <summary>`.
@@ -577,10 +590,13 @@ When `06-cicd-local-runner.py` exits with code 0:
 
 ## Banned Operations Checklist (TOTAL BAN — Auto-Reject on Violation)
 
-- [ ] **NO ROUTINE UNIT TEST RUNNING (TOTAL BAN IN STANDARD CI-CD-FIX):** NEVER run heavy unit test suites (`go test ./...`, `06-cicd-local-runner.py --run-tests`, runner scripts) during standard CI/CD fix turns. All full test suite runs are strictly reserved for `04-ci-cd-fix-with-release.md` and release workflows.
+- [ ] **TOP-INSTRUCTION PRIORITY MANDATE:** Whatever directives, constraints, checklists, or instructions are given before this section or prompt (user preamble, header constraints, prior instructions) are verified as highest priority and non-negotiable, overriding all lower-level guidelines below.
+- [ ] **ISSUE & RCA DESTINATION ROUTING:** Whenever resolving an issue or performing a fix with RCA, verified that CI/CD failures are documented in .ai-memory/cicd-issues/NN-<slug>.md (indexed in .ai-memory/cicd-index.md), while non-CI/CD issues (application bugs, logic/runtime defects) are documented in 02-spec/22-app-issues/NN-<slug>.md (indexed in 02-spec/22-app-issues/01-index.md).
+- [ ] **NO STOPPING AFTER RCA (TOTAL BAN):** Never halt execution or ask user permission after writing the RCA. Proceed unconditionally to Phase 2 code execution.
+- [ ] **SMART TARGETED TESTING MANDATE:** NEVER run full repository test suites (`go test ./...`, `06-cicd-local-runner.py --all`, full test pools) during standard fix turns. Testing is strictly scoped to packages failed in the stack trace and files changed from the last git hash, persisted under `.ai-memory/temp/recent-file-changes.json`.
 - [ ] **NO ROUTINE BUILD CHECKING (TOTAL BAN):** NEVER run broad build commands (`go build ./...`, `npm run build`) to verify compilation during intermediate micro-refactoring steps.
 - [ ] **NO RUNNER SCRIPTS (TOTAL BAN):** NEVER launch background test runners, worker pools, or test inventory loops during routine execution.
-- [ ] **NO AUTOMATIC RELEASES (TOTAL BAN IN STANDARD CI-CD-FIX):** NEVER bump versions, update changelogs, or trigger releases in standard `ci-cd-fix`. Releases are exclusively handled by `04-ci-cd-fix-with-release.md` or `release-orchestrator`.
+- [ ] **NO AUTOMATIC RELEASES (TOTAL BAN IN STANDARD CI-CD-FIX):** NEVER bump versions, update changelogs, or trigger releases in standard `ci-cd-fix`. Releases are exclusively handled by `06-ci-cd-fix-with-release.md` or `release-orchestrator`.
 - [ ] **NO PER-FILE COMMITTING (TOTAL BAN):** NEVER commit each file individually as you work. Committing file-by-file pollutes git history, creates subagent lock collisions, and breaks atomic changes. All modified files across the turn must be accumulated and committed together in a single atomic commit at the final step.
 
 ---

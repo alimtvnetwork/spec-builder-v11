@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-result-wrapper`, `cg-apperror-returns`, `cg-execute result-wrapper`, `audit result wrapper`, `fix map return error`, `fix slice return error`, `single return object audit`, `enforce apperror returns`, `enforce result map`, `fix multi-value returns`, `is-count-other-than`, `has-record`, `is-defined`, `result-wrapper-null-safety`, `pointer-null-safety`, `types-go-single-type`, `types-go-result-reuse`, `centralize-types-go`
 
-> **Prompt Version:** 2.4.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.4.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -132,32 +136,55 @@ Under Prompt Architect coding guidelines, all multi-value returns are refactored
 ### Modern Refactored Store Implementation
 
 ```go
-// ✅ MODERN PATTERN: Single ResultMap return envelope with structured AppError
-func (s *SQLiteStore) queryAllMacroSteps(db *sql.DB) appfault.ResultMap[string, []MacroStep] {
+// -----------------------------------------------------------------------------
+// Step 1: Declare Concrete Types in `types.go` (Mandatory Rule)
+// -----------------------------------------------------------------------------
+// In types.go:
+// type (
+//     // MacroStep defines an individual recorded UI action.
+//     MacroStep struct {
+//         Name    string `json:"name"`
+//         Action  string `json:"action"`
+//         Payload string `json:"payload"`
+//     }
+//
+//     // MacroStepsMapResult is the canonical single reusable result envelope for macro step maps.
+//     // RULE: Define concrete type alias in types.go rather than repeating raw generic instantiations.
+//     MacroStepsMapResult = appfault.ResultMap[string, []MacroStep]
+// )
+// -----------------------------------------------------------------------------
+
+// ✅ MODERN PATTERN: Concrete MacroStepsMapResult return envelope with structured AppError and blank line gaps
+func (s *SQLiteStore) queryAllMacroSteps(db *sql.DB) MacroStepsMapResult {
     rows, err := db.Query("SELECT macro_id, step_name, action, payload FROM macro_steps ORDER BY macro_id, step_order")
+
     if err != nil {
-        return appfault.FailMap[string, []MacroStep](
-            appfault.New(appfault.ErrDatabaseQuery).
-                WithCause(err).
-                WithMessage("failed to query macro steps from database"),
-        )
+        fault := appfault.New(appfault.ErrDatabaseQuery).
+            WithCause(err).
+            WithMessage("failed to query macro steps from database")
+
+        return appfault.FailMap[string, []MacroStep](fault)
     }
+
     defer rows.Close()
 
     return scanMacroStepsMap(rows)
 }
 
-// ✅ MODERN PATTERN: Scanner returning strongly-typed ResultMap
-func scanMacroStepsMap(rows *sql.Rows) appfault.ResultMap[string, []MacroStep] {
+// ✅ MODERN PATTERN: Scanner returning strongly-typed concrete MacroStepsMapResult
+func scanMacroStepsMap(rows *sql.Rows) MacroStepsMapResult {
     stepsMap := make(map[string][]MacroStep)
+
     for rows.Next() {
         var macroId, name, action, payload string
-        if err := rows.Scan(&macroId, &name, &action, &payload); err != nil {
-            return appfault.FailMap[string, []MacroStep](
-                appfault.New(appfault.ErrDatabaseScan).
-                    WithCause(err).
-                    WithMessage("failed to scan macro step row"),
-            )
+        err := rows.Scan(&macroId, &name, &action, &payload)
+
+        if err != nil {
+            fault := appfault.New(appfault.ErrDatabaseScan).
+                WithCause(err).
+                WithMessage("failed to scan macro step row")
+
+            return appfault.FailMap[string, []MacroStep](fault)
         }
 
         stepsMap[macroId] = append(stepsMap[macroId], MacroStep{
@@ -167,12 +194,14 @@ func scanMacroStepsMap(rows *sql.Rows) appfault.ResultMap[string, []MacroStep] {
         })
     }
 
-    if err := rows.Err(); err != nil {
-        return appfault.FailMap[string, []MacroStep](
-            appfault.New(appfault.ErrDatabaseIteration).
-                WithCause(err).
-                WithMessage("row iteration failed for macro steps"),
-        )
+    err := rows.Err()
+
+    if err != nil {
+        fault := appfault.New(appfault.ErrDatabaseIteration).
+            WithCause(err).
+            WithMessage("row iteration failed for macro steps")
+
+        return appfault.FailMap[string, []MacroStep](fault)
     }
 
     return appfault.OkMap(stepsMap)
@@ -188,7 +217,7 @@ A frequent transitional anti-pattern observed during Result wrapper refactoring 
 ```diff
 - func parseImportSQLite(filePath string) ([]scheduleExportBundle, error) {
 + func parseImportSQLite(filePath string) result.ResultSlice[scheduleExportBundle] {
-+ 	return result.FailSlice[scheduleExportBundle](apperror.WrapSimple(err, "parse imported sqlite"))
++ 	return result.FailSlice[scheduleExportBundle](appfault.Wrap(errtype.IO, err, "parse imported sqlite"))
 ```
 
 ### Why the Transitional Diff is Flawed: Two Latent Violations
@@ -251,6 +280,7 @@ func parseImportSQLite(filePath string) ScheduleExportBundleResult {
 	}
 
 	bundles, err := readSQLiteBundles(filePath)
+
 	if err != nil {
 		return result.FailSlice[ScheduleExportBundle](
 			appfault.Wrap(appfault.ErrDatabaseQuery, err, "parse imported sqlite").

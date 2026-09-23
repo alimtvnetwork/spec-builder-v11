@@ -207,6 +207,7 @@ Wide panoramic 4:1 banner background for LinkedIn profile, dimensions 3168x792. 
 
 ```markdown
 # Canvas: 3168 x 792 px (2x Retina, Ubuntu Font Family)
+
 - Avatar Dead Zone: x: 0 to 760 px (Keep empty)
 - Primary Headline: "{headline_text}" (Font: Ubuntu Bold, Color: #FFFFFF, Size: 64pt, x: 820px, y: 260px)
 - Pillars: "{core_pillars}" (Font: Ubuntu Medium, Color: #06B6D4, Size: 32pt, x: 820px, y: 380px)

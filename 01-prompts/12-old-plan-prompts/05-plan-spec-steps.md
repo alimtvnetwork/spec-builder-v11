@@ -28,16 +28,21 @@ You must use your high-powered brain to write tasks that explicitly detail:
 
 The tasks must be so detailed and explicit that the next executing AI (who requires less brain) can simply follow the instructions without guessing.
 
-## 3. Self-Loop to Create Brain and Tasks
+## 3. Self-Loop to Create Canonical Spec and Subtasks
 
-You must self-loop `N` times to create the brain, tasks, and detailed specs.
-Generate the folder structure and the `.ai-memory/plans/pending/` files immediately during your self-loop.
+You must self-loop `N` times to create the canonical specification and actionable subtasks.
+DO NOT execute code or run test suites during this planning turn.
 Your self-loop must strictly follow this structure:
 
-1. Roll-up Index: Update `.ai-memory/plans/01-index.md`.
-2. Parent Plan: Create `.ai-memory/plans/pending/xx-<slug>.md`.
-3. Detailed Steps (Strict 01, 02 Sequence): Every step must be detailed inside the parent plan or placed in a dedicated file under `.ai-memory/plans/subtasks/xx-<slug>/` if it requires more depth.
-   - Any subtasks MUST follow a strict zero-padded numeric sequence: `01`, `02`, `03`, etc.
+1. Canonical App Specification (`02-spec/21-app/`):
+   - Create the canonical specification inside `02-spec/21-app/xx-<slug>.md` (or `02-spec/21-app/xx-<slug>/` if complex).
+   - Lossless Verbatim Ingestion: Every spec MUST include a dedicated `## User Request (Verbatim)` section preserving 100% of the user's prompt text and requirements without truncation.
+   - Register the new spec in `02-spec/21-app/01-index.md` under `## Contents`.
+2. Roll-up Index: Update `.ai-memory/plans/01-index.md`.
+3. Parent Plan: Create `.ai-memory/plans/pending/xx-<slug>.md`.
+4. Actionable Subtasks (Strict 01, 02 Sequence): Create granular subtasks under `.ai-memory/plans/subtasks/xx-<slug>/001-<task>.md`, `002-...`.
+   - Every subtask MUST include a mandatory back-reference link to the canonical spec file in `02-spec/21-app/`.
+5. End-of-Run Summary: Output a structured summary of specs created in `02-spec/21-app/`, subtasks created in `.ai-memory/plans/`, a traceability matrix, and next step execution commands.
 
 ## 4. High-Stakes Code Standards, Error Management & Guidelines
 

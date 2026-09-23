@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-python-enhancement`, `cg-python-boolean`, `python-code-enhancement`, `python-lookup-table`, `audit python conditionals`
 
-> **Prompt Version:** 2.2.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.2.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -27,6 +31,7 @@ def _threshold_preview(gray: bytearray, white_threshold: int) -> bytearray:
 ```
 
 ### Why This Is An Anti-Pattern
+
 1. **Magic Numbers:** Hardcoded `0`, `255`, and `round()` boundaries scatter domain constants across the codebase.
 2. **CPU Branch Misprediction:** Evaluating `255 if value >= threshold else value` for every byte creates millions of conditional branch checks on large buffers.
 3. **Incomplete Type Flexibility:** Restricting to `bytearray` blocks immutable `bytes` inputs.

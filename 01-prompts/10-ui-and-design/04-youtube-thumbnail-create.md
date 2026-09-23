@@ -1187,11 +1187,13 @@ Cinematic 16:9 YouTube thumbnail scene. Seated professional subject captured in 
 # Canvas: 1280 x 720 px (16:9, Ubuntu Font Family)
 
 ## Zone A: Quote (x: 90, y: 55)
+
 - Line 1: "“Better Ideas" (Font: Caveat Brush / Ubuntu Bold Script, Color: #F7F7F4, Size: 50pt)
 - Line 2: "Bigger Impact”" (Font: Caveat Brush / Ubuntu Bold Script, Color: #F7F7F4, Size: 50pt)
 - Underline: Hand-painted curve (Color: #E6A51D, Width: 220px, Height: 8px, y: 165px)
 
 ## Zone C: Main Name (x: 660, y: 85)
+
 - First Line: "MD ALIM UL" (Font: Ubuntu Bold, Color: #F7F7F4, Size: 86pt, Shadow: #02060D 65% 5px down-right)
 - Second Line: "KARIM" (Font: Ubuntu Bold, Color: #F5A817, Size: 86pt, Shadow: #02060D 70% 5px down-right)
 - Credentials (y: 305): "Author | Marketer | Trainer | Consultant | Podcaster" (Font: Ubuntu Medium, Color: #ECEBE6, Size: 28pt)
@@ -1199,11 +1201,13 @@ Cinematic 16:9 YouTube thumbnail scene. Seated professional subject captured in 
 - Values Underline: Hand-painted gold stroke (Color: #E6A51D, Width: 200px, Height: 5px, y: 435px)
 
 ## Zone D: Achievement (x: 945, y: 165)
+
 - Achievement: "Top" (#F7F7F4) + " 1%" (#F5A817) (Font: Ubuntu Bold, Size: 84pt)
 - Hook (y: 305): "Real Stories, Real People,\nReal Growth." (Font: Ubuntu Medium, Color: #B8BBC2, Size: 24pt)
 - YouTube Line (y: 385): YouTube Play Icon (32px, #FF0000) + "{youtube_handle}" (Font: Ubuntu Bold, Color: #ECEBE6, Size: 20pt)
 
 ## Zone E: Lower Role Strip (x: 675, y: 550 to 720)
+
 - Background: #211612 at 88% opacity, top line #7F5A45 at 35%
 - Group 1: Book Icon + "Bestselling Author" (Font: Ubuntu Medium, Color: #F5F4F0, Size: 19pt)
 - Group 2: Cap Icon + "Hard-skill Trainer" (Font: Ubuntu Medium, Color: #F5F4F0, Size: 19pt)

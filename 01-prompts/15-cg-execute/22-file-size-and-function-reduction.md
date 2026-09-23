@@ -2,8 +2,12 @@
 
 Trigger Keywords & Aliases: `cg-size-reduction`, `cg-file-reduction`, `cg-function-reduction`, `cg-execute size`, `reduce file size`, `split large files`, `decompose functions`, `audit file sizes`
 
-> **Prompt Version:** 2.2.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.2.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -76,6 +80,7 @@ Do not rely on standard search tools with 50-item truncation when discovering re
 ## 1. Canonical Size Limits & Allowed Exceptions
 
 ### A. Strict File Size Caps
+
 - **Target File Size:** Under 100 lines of code (recommended <= 80 lines).
 - **Target Function Size:** <= 8 lines preferred (hard cap of <= 15 lines). In extreme cases (e.g. exhaustive codegen switch), maximum <= 25 lines with waiver, but always strive for <= 8 lines.
 
@@ -97,6 +102,7 @@ All other source files (logic, services, controllers, handlers, utilities, hooks
 > Never attempt to meet the 100-line file cap or 8-line function cap by deleting blank lines, merging multiple statements onto a single line, or writing one-line `if/else` blocks. Doing so violates repository style guidelines and is an immediate auto-reject failure.
 
 ### Strict Formatting Preservation Invariants:
+
 1. **Return New Line Concept (Mandatory):**
    - Always leave exactly **ONE blank line BEFORE** every `return`, `throw`, or `break` statement (unless it is the only statement in a block).
    - Always leave exactly **ONE blank line AFTER** every closing curly brace `}` of an `if`, `for`, `switch`, or helper block.
@@ -188,6 +194,7 @@ Refactoring a large file must be performed in two sequential phases:
 ```
 
 ### Part 1: Function Decomposition (Target: <= 8 lines, Max: 15 lines)
+
 - Identify long functions and extract sub-operations into dedicated, private helper functions.
 - Replace complex multi-stage loops or deep logic with readable pipeline calls:
   ```go
@@ -206,6 +213,7 @@ Refactoring a large file must be performed in two sequential phases:
   ```
 
 ### Part 2: File Modularization (Target: < 100 lines)
+
 - When a file has multiple decomposed functions that keep the total lines above 100, extract cohesive clusters into new sibling files:
   - Validation logic -> `<name>_validator.go` (or `.ts`)
   - Transformation/mapping -> `<name>_converter.go` (or `.ts`)
@@ -219,6 +227,7 @@ Refactoring a large file must be performed in two sequential phases:
 When extracting functions, passing or returning multiple distinct values leads to argument bloat and fragile signatures.
 
 ### The Wrapper Object Mandate:
+
 1. **Return Wrapper Struct:** If an extracted helper returns 2 or more related values (beyond standard error/Result), encapsulate them into a dedicated named struct or type:
    ```go
    // ❌ BAD: returning multiple raw values
@@ -300,5 +309,6 @@ When all subtasks for the parent task (`.ai-memory/plans/pending/xx-size-reducti
 5. Update `.ai-memory/plans/01-index.md` to point to the newly consolidated completed file.
 
 ### Final Step Git Commit & Push Mandate (Strict Checklist)
+
 - [ ] **MANDATORY FINAL COMMIT & PUSH TO GIT (ANYHOW):** At the FINAL step of the turn, after all targeted files have been refactored, verified with targeted linters, and plans/subtasks consolidated, you MUST stage everything (`git add -A`), create a clean, descriptive conventional commit (`git commit -m "<type>(<scope>): <summary>"`), and push directly to the remote repository (`git push origin <branch>`). Leaving uncommitted changes or unpushed commits on the active branch at the end of a turn is an immediate failure.
 - [ ] **TOTAL BAN ON PER-FILE COMMITS (DO NOT COMMIT EACH FILE INDIVIDUALLY):** You MUST NOT create separate git commits for each individual file as you edit them (e.g. running `git commit` after editing File 1, then committing again after File 2 is STRICTLY FORBIDDEN). Committing file-by-file pollutes git log history, creates subagent lock collisions, and breaks atomic rollback/bisectability. All modified files, test change caches, and plan records across the turn MUST be accumulated in the working tree and committed together in a SINGLE grouped atomic commit at the final step before pushing!

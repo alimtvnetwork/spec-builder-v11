@@ -1,7 +1,11 @@
 # Coding Guideline Execution Suite (`cg-execute`) — Index & Catalog (must follow)
 
-> **Prompt Version:** 2.1.0
-> **Synchronization:** Main Meta-Repo & Connected Workspaces
+> [!IMPORTANT]
+> Prompt Version: 2.1.0
+> Synchronization: Main Meta-Repo & Connected Workspaces
+> 
+> **Top-Instruction Priority Mandate (Preamble Precedence):**
+> Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 ```text
 N = 200
@@ -61,7 +65,7 @@ Prompts are sequenced according to priority. Error management, control-flow flat
 | **15** | [`15-typescript-guidelines-and-types.md`](./15-typescript-guidelines-and-types.md) | TypeScript Strict Typing, Discriminated Unions & Architecture | `cg-typescript`, `cg-ts`, `cg-execute ts`, `audit typescript` | Total ban on `any`, Discriminated Unions for state, strongly-typed `Result<T>` envelopes, `as const` object enums, exhaustive `assertNever` matching | `tsc --noEmit`, `check-enum-and-boolean.mjs` |
 | **16** | [`16-multi-language-enums-and-traits.md`](./16-multi-language-enums-and-traits.md) | Multi-Language Enums, Traits & Pattern Matching | `cg-enums-traits`, `cg-enums`, `cg-execute enums`, `audit enums` | PHP 8.1+ Backed Enums + `HasEnumHelpers` trait, Rust ADT Enums + exhaustive `match`, Go custom enums + stringers, `*Type` suffixes | `check-enum-guidelines.py`, `05-guideline-autofixer.py` |
 | **17** | [`17-terminal-ui-and-cli-styling.md`](./17-terminal-ui-and-cli-styling.md) | Terminal UI, CLI Styling, Lipgloss & Animation Architecture | `cg-terminal-ui`, `cg-cli-style`, `cg-lipgloss`, `audit terminal ui` | Bright bold 9X ANSI palette, Catppuccin pastel cycling, 2-column width caps (max width 26), intent banners, clone spinners, version footers | `09-cli-help-auditor.py` |
-| **18** | [`18-function-argument-reduction-and-params.md`](./18-function-argument-reduction-and-params.md) | Argument Reduction, Parameter Structs & Return Architecture | `cg-argument-reduction`, `cg-params`, `cg-struct-params`, `cg-execute params` | Parameter structs (`*Params`) for >2–3 args, value-based passing, affirmative boolean fields (`is`/`has`), mandatory `*apperror.AppError` returns (zero void in Go), framework error conversion | `check-function-lengths.py`, `check-error-management.py` |
+| **18** | [`18-function-argument-reduction-and-params.md`](./18-function-argument-reduction-and-params.md) | Argument Reduction, Parameter Structs & Return Architecture | `cg-argument-reduction`, `cg-params`, `cg-struct-params`, `cg-execute params` | Parameter structs (`*Params`) for >2–3 args, value-based passing, affirmative boolean fields (`is`/`has`), mandatory `*appfault.AppError` returns (zero void in Go), framework error conversion | `check-function-lengths.py`, `check-error-management.py` |
 | **19** | [`19-result-wrapper-and-apperror-returns.md`](./19-result-wrapper-and-apperror-returns.md) | Result Wrapper Types, Collections & AppError Returns | `cg-result-wrapper`, `cg-apperror-returns`, `cg-execute result-wrapper` | Eliminate multi-value `(T, error)` tuples and `(map[K]V, error)`, return single `Result[T]`/`ResultMap[K, V]`/`ResultSlice[T]`, outer inspection methods (`IsSuccess`, `IsFailure`, `HasError`, `Data`, `AppError`), zero dual handling | `check-error-management.py`, `check-function-lengths.py` |
 | **20** | [`20-extract-generic-types-to-types-go.md`](./20-extract-generic-types-to-types-go.md) | Extracting Generic Types, Envelopes & Models to `types.go` | `cg-types-go`, `cg-extract-types`, `cg-execute types-go`, `extract-generic-types` | Centralize domain structs, repeated generic Result wrappers (`ResultSlice[T]`, `ResultMap[K, V]`, `Result[T]`), and enums into package-level `types.go` as single reusable named types everywhere | `check-error-management.py`, `check-function-lengths.py` |
 | **21** | [`21-lazy-regex-and-pattern-matching.md`](./21-lazy-regex-and-pattern-matching.md) | Lazy Regex, Centralized Pattern Caching & Match Result Diagnostics | `cg-lazyregex`, `cg-regex`, `cg-execute regex` | Total ban on raw `regexp.MustCompile`, thread-safe `lazyregex.New(...)`, wrapped `MatchResult` (`ResultGroup`) with rich `AppError` test diagnostics showing pattern, comparing text, and character length | `golangci-lint`, `check-boolean-guidelines.py` |
