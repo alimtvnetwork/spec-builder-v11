@@ -1,6 +1,6 @@
 # Completed Plan: Coding Guidelines Synchronization & Index-to-Readme Migration
 
-Canonical Spec: [02-spec/21-app/07-guidelines-sync-and-index-to-readme-migration.md](../../../02-spec/21-app/07-guidelines-sync-and-index-to-readme-migration.md)  
+Canonical Spec: [02-spec/21-app/30-guidelines-sync-and-index-migration.md](../../../02-spec/21-app/30-guidelines-sync-and-index-migration.md)  
 Status: Completed  
 Completed Date: 2026-09-25  
 Version Released: v3.18.0  
@@ -17,6 +17,7 @@ There are ten presenting code base, spec folder, everything, permit structure ac
 ### Subtask 01: Pre-Migration Backup Branch & Baseline Release
 - Created backup branch `backup/pre-sync-migration` and pushed to origin.
 - Created annotated release tag `v3.17.0` establishing pre-sync baseline snapshot and pushed to origin.
+- Published GitHub Release `v3.17.0` on GitHub.
 
 ### Subtask 02: Synchronize Coding Guidelines Specifications (Folders 01 to 20)
 - Compared each specification file against `d:\work\coding-guidelines\02-spec\`.
@@ -30,6 +31,7 @@ There are ten presenting code base, spec folder, everything, permit structure ac
 
 ### Subtask 04: Repository-Wide Index to Readme Migration
 - Identified and migrated all `01-index.md`, `index.md`, and `00-index.md` files across all directories (01 through 60, `.ai-memory`, `linter-scripts`, `.agents/scripts`) to canonical lowercase `readme.md`.
+- Normalized `.ai-memory/memories/` uppercase files to lowercase `readme.md`.
 - Executed repository-wide reference rewrites, updating markdown links and references to `readme.md`.
 - Verified zero index markdown files remain in the repository.
 
@@ -37,11 +39,12 @@ There are ten presenting code base, spec folder, everything, permit structure ac
 - Updated `scripts/generate-dashboard-data.cjs` to scan `.ai-memory` and recognize `readme.md` files as module overviews.
 - Updated `src/utils/spec-index.ts` to prioritize `readme.md` and display as `00 — Overview (Readme)`.
 - Verified Vitest test suite (`bun run test`) passes with all 7 test files and 26 tests passing.
-- Verified Vite production build (`bun run build`) compiles cleanly in 8.75s across 2,000+ spec assets.
+- Verified Vite production build (`bun run build`) compiles cleanly in 5.66s across 2,000+ spec assets.
 
-### Subtask 06: Version Bump, Release, and Push
-- Updated root `readme.md` detailing the index-to-readme modernization and upstream guidelines sync.
+### Subtask 06: Version Bump, Release Packaging & GitHub Release Publication
+- Updated root `readme.md` detailing the index-to-readme modernization, upstream guidelines sync, and installer examples.
 - Updated `package.json` and `AGENTS.md` version to `3.18.0`.
-- Documented changes in `changelog.md`.
-- Created release tag `v3.18.0`.
-- Staged all changes and pushed atomic commit to `origin/main`.
+- Authored `changelog.md`.
+- Stamped installer templates and scripts (`release.ps1`, `release.sh`, `install.ps1`, `install.sh`, `templates/release-version.*.tmpl`) for `alimtvnetwork/spec-builder-v11`.
+- Built full release pack and published GitHub Release `v3.18.0` with assets attached (`coding-guidelines-v3.18.0.zip`, `dashboard-v3.18.0.zip`, `release-version.ps1`, `release-version.sh`, `checksums.txt`).
+- Pushed atomic commits and updated release tag `v3.18.0` to `origin/main`.
