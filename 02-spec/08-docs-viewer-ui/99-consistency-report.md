@@ -9,9 +9,9 @@
 
 | # | File | Status |
 |---|------|--------|
-| 00 | `01-index.md` | ✅ Present |
+| 00 | `readme.md` | ✅ Present |
 | 01 | `02-fundamentals.md` | ✅ Present |
-| 02 | `02-features/01-index.md` | ✅ Present |
+| 02 | `02-features/readme.md` | ✅ Present |
 | 02.01 | `02-features/01-typography.md` | ✅ Present |
 | 02.02 | `02-features/02-syntax-highlighting.md` | ✅ Present |
 | 02.03 | `02-features/03-fullscreen-mode.md` | ✅ Present |

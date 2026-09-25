@@ -10,7 +10,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `01-data-model.md` | ✅ Present |
 | 3 | `02-capture-pipeline.md` | ✅ Present |
 | 4 | `03-envelope-parsing.md` | ✅ Present |
@@ -35,7 +35,7 @@
 |-------|--------|
 | Lowercase kebab-case | ✅ All files compliant |
 | Numeric prefixes | ✅ All files prefixed |
-| `01-index.md` present | ✅ Yes |
+| `readme.md` present | ✅ Yes |
 
 ---
 
@@ -43,10 +43,10 @@
 
 | Source | Target | Status |
 |--------|--------|--------|
-| `01-index.md` → `../01-index.md` | ✅ Valid |
-| `01-index.md` → `../02-react-components/01-index.md` | ✅ Valid |
-| `01-index.md` → `../01-copy-formats/01-index.md` | ✅ Valid |
-| `01-index.md` → `../../05-response-envelope/envelope.schema.json` | ✅ Valid |
+| `readme.md` → `../readme.md` | ✅ Valid |
+| `readme.md` → `../02-react-components/readme.md` | ✅ Valid |
+| `readme.md` → `../01-copy-formats/readme.md` | ✅ Valid |
+| `readme.md` → `../../05-response-envelope/envelope.schema.json` | ✅ Valid |
 | `07-request-chain.md` → `../02-react-components/06-component-source.md` | ✅ Valid |
 | `08-traversal-details.md` → `../02-react-components/06-component-source.md` | ✅ Valid |
 | `09-session-diagnostics.md` → `../01-copy-formats/08-session-diagnostics.md` | ✅ Valid |

@@ -79,4 +79,4 @@ See: [Database Standards Memory](../../../.ai-memory/memories/standards/00-datab
 | Overview | `../00-overview.md` |
 | Time Log UI | `../../41-time-log-ui/00-overview.md` |
 | Coding Guidelines | `../../02-coding-guidelines/00-overview.md` |
-| Error Code Registry | `../../03-error-manage/03-error-code-registry/01-index.md` |
+| Error Code Registry | `../../03-error-manage/03-error-code-registry/readme.md` |

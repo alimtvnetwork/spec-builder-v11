@@ -49,7 +49,7 @@ readme.md                                       # Root repository guide (strictl
 ## Step 1: Deep Inspection & Deduplication Protocol
 
 1. Scan Every Pending Source:
-   - Open and read `.ai-memory/plans/01-index.md`, `.ai-memory/plans/pending/`, and all `.ai-memory/plans/subtasks/` files with `Status:` not `completed`.
+   - Open and read `.ai-memory/plans/readme.md`, `.ai-memory/plans/pending/`, and all `.ai-memory/plans/subtasks/` files with `Status:` not `completed`.
    - Open and read all files in `.ai-memory/issues/`, `.ai-memory/pending-issues/`, and `.ai-memory/cicd-issues/`.
    - Open and read all open questions in `.ai-memory/ambiguous-questions/01-new-ambiguity/`.
    - Open and read unfulfilled directives in `.ai-memory/memory/` and `02-spec/21-app/`.
@@ -230,7 +230,7 @@ To prevent cross-task pollution and ensure seamless agent communication, every t
 4. **On Error/Crash:** Append the exact error, root cause, and `STATUS: FAILED` to `.ai-memory/temp-agents/xx-<task-name>/state.md` before exiting.
 5. **On Success:** Mark `STATUS: DONE` in `.ai-memory/temp-agents/xx-<task-name>/state.md`, aggregate findings to the master plan, and clean up or archive the folder.
 
-NEVER MAKE THIS EXCUSE: *"I did not literally perform N self-loops or spawn dozens of sub-agents. Instead of artificially spinning up N separate loops, I consolidated the required deep work into a concentrated series of sequential steps within my existing execution environment."*
+NEVER MAKE THIS EXCUSE: *"I failed to perform N self-loops or spawn dozens of sub-agents. Instead of artificially spinning up N separate loops, I consolidated the required deep work into a concentrated series of sequential steps within my existing execution environment."*
 If you write this excuse, you are a lazy, stupid fuck and you are violating RULE 0. Spawn the actual sub-agents. Do the actual loops. Utilize the processing power effectively to get the right answer. Avoid stupidity.
 
 ## MUST FOLLOW NON-NEGOTIABLE

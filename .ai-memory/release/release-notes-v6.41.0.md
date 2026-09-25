@@ -22,5 +22,5 @@ curl -sL https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v24/v
 - **5-Day Cache Freshness Engine:** Enhanced `03-ai-scripts/33-test-inventory-generator.py` with `--check-age` and `--max-age-days` to audit test inventory freshness and skip redundant test execution on fresh timing profiles.
 - **Verbatim Task Capture Mandate:** Updated parent execution prompts and skills (`02-execute-parent-task-with-n-steps.md`, `06-execute-parent-task-with-n-steps-v2.md`, `07-execute-batched-loop-v2.md`) to require Phase 1 Step 0 verbatim prompt capture under `## User Request (Verbatim)` and actionable deliverables extraction under `## Extracted Actionable Task List`.
 - **Per-Task Isolated Workspaces:** Enforced `.ai-memory/temp-agents/xx-<task-name>/` with progress tracking via `state.md`.
-- **Catalog & Index Synchronization:** Registered Prompt 25 in `01-prompts/15-cg-execute/01-index.md` and regenerated `.ai-memory/prompts.md` with 96 indexed prompts.
+- **Catalog & Index Synchronization:** Registered Prompt 25 in `01-prompts/15-cg-execute/readme.md` and regenerated `.ai-memory/prompts.md` with 96 indexed prompts.
 - **Clean CI Quality Gates:** All 36 local CI/CD quality gates verified 100% green.

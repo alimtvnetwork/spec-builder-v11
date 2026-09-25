@@ -1,6 +1,6 @@
 # Go AppError — Mandatory Return Type, DisplayError & Linter Enforcement
 
-> **Parent:** [AppError Package Reference](./01-index.md)
+> **Parent:** [AppError Package Reference](./readme.md)
 > **Version:** 1.0.0
 > **Updated:** 2026-08-28
 > **Rule IDs:** CODE-RED-026, CODE-RED-027
@@ -303,10 +303,10 @@ The linter checks:
 | Reference | Location |
 |-----------|----------|
 | AppError Struct | [02-apperror-struct.md](./02-apperror-reference.md) |
-| StackTrace | [01-overview-and-stack.md](./01-index.md) |
-| Result types | [03-result-types.md](./01-index.md) |
+| StackTrace | [01-overview-and-stack.md](./readme.md) |
+| Result types | [03-result-types.md](./readme.md) |
 | AppErrType Enums | [05-apperrtype-enums.md](./02-apperror-reference.md) |
 | Linter Script | [linter-scripts/validate-guidelines.go](../../../../linter-scripts/validate-guidelines.go) |
 | golangci-lint Config | [linters/golangci-lint/.golangci.yml](../../../../linters/golangci-lint/.golangci.yml) |
 | codestack package | `gitlab.com/auk-go/core/codestack` |
-| Error Management Overview | [02-spec/03-error-manage/01-index.md](../../../01-index.md) |
+| Error Management Overview | [02-spec/03-error-manage/readme.md](../../../readme.md) |

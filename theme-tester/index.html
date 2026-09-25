@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald-green">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sweet Digs Design System & Theme Tester</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       1. CSS Custom Properties & HSL Theme Architecture
+       ========================================================================== */
+    :root {
+      /* Theme 1: Emerald Green (Default) */
+      --primary: 142 71% 45%;
+      --primary-foreground: 0 0% 100%;
+      --secondary: 142 60% 93%;
+      --secondary-foreground: 142 71% 30%;
+      --background: 140 20% 97%;
+      --foreground: 160 20% 10%;
+      --card: 0 0% 100%;
+      --card-foreground: 160 20% 10%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 160 20% 10%;
+      --muted: 150 14% 96%;
+      --muted-foreground: 160 9% 46%;
+      --accent: 142 60% 93%;
+      --accent-foreground: 142 71% 30%;
+      --destructive: 0 84% 60%;
+      --destructive-foreground: 0 0% 100%;
+      --border: 150 13% 91%;
+      --input: 150 13% 91%;
+      --ring: 142 71% 45%;
+      --radius: 0.75rem;
+      --gradient-start: 142 40% 92%;
+      --gradient-end: 160 30% 90%;
+    }
+
+    /* Theme 2: Pink / Red */
+    [data-theme="pink-red"] {
+      --primary: 342 90% 55%;
+      --primary-foreground: 0 0% 100%;
+      --secondary: 342 80% 94%;
+      --secondary-foreground: 342 80% 35%;
+      --background: 340 20% 98%;
+      --foreground: 340 20% 12%;
+      --card: 0 0% 100%;
+      --card-foreground: 340 20% 12%;
+      --muted: 340 15% 96%;
+      --muted-foreground: 340 10% 48%;
+      --accent: 342 80% 94%;
+      --accent-foreground: 342 80% 35%;
+      --border: 340 15% 90%;
+      --input: 340 15% 90%;
+      --ring: 342 90% 55%;
+      --gradient-start: 342 60% 95%;
+      --gradient-end: 20 40% 92%;
+    }
+
+    /* Theme 3: Obsidian Navy */
+    [data-theme="obsidian-navy"] {
+      --primary: 222 80% 55%;
+      --primary-foreground: 0 0% 100%;
+      --secondary: 222 50% 93%;
+      --secondary-foreground: 222 80% 30%;
+      --background: 220 20% 97%;
+      --foreground: 222 25% 12%;
+      --card: 0 0% 100%;
+      --card-foreground: 222 25% 12%;
+      --muted: 220 15% 95%;
+      --muted-foreground: 220 10% 48%;
+      --accent: 222 50% 93%;
+      --accent-foreground: 222 80% 30%;
+      --border: 220 15% 90%;
+      --input: 220 15% 90%;
+      --ring: 222 80% 55%;
+      --gradient-start: 222 45% 93%;
+      --gradient-end: 240 30% 91%;
+    }
+
+    /* Theme 4: Sunset Amber */
+    [data-theme="sunset-amber"] {
+      --primary: 38 92% 50%;
+      --primary-foreground: 0 0% 100%;
+      --secondary: 38 75% 92%;
+      --secondary-foreground: 38 92% 28%;
+      --background: 40 25% 97%;
+      --foreground: 35 25% 12%;
+      --card: 0 0% 100%;
+      --card-foreground: 35 25% 12%;
+      --muted: 40 15% 95%;
+      --muted-foreground: 35 12% 48%;
+      --accent: 38 75% 92%;
+      --accent-foreground: 38 92% 28%;
+      --border: 40 18% 90%;
+      --input: 40 18% 90%;
+      --ring: 38 92% 50%;
+      --gradient-start: 38 60% 93%;
+      --gradient-end: 48 40% 91%;
+    }
+
+    /* Theme 5: Cyber Indigo */
+    [data-theme="cyber-indigo"] {
+      --primary: 243 75% 59%;
+      --primary-foreground: 0 0% 100%;
+      --secondary: 243 65% 94%;
+      --secondary-foreground: 243 75% 35%;
+      --background: 240 20% 98%;
+      --foreground: 240 25% 12%;
+      --card: 0 0% 100%;
+      --card-foreground: 240 25% 12%;
+      --muted: 240 15% 95%;
+      --muted-foreground: 240 10% 48%;
+      --accent: 243 65% 94%;
+      --accent-foreground: 243 75% 35%;
+      --border: 240 15% 90%;
+      --input: 240 15% 90%;
+      --ring: 243 75% 59%;
+      --gradient-start: 243 50% 94%;
+      --gradient-end: 270 35% 92%;
+    }
+
+    /* Dark Mode Overrides */
+    html.dark {
+      --background: 160 20% 6%;
+      --foreground: 0 0% 95%;
+      --card: 160 20% 10%;
+      --card-foreground: 0 0% 95%;
+      --popover: 160 20% 10%;
+      --popover-foreground: 0 0% 95%;
+      --secondary: 142 30% 15%;
+      --secondary-foreground: 142 71% 75%;
+      --muted: 160 15% 15%;
+      --muted-foreground: 160 10% 60%;
+      --accent: 142 30% 15%;
+      --accent-foreground: 142 71% 75%;
+      --border: 160 15% 20%;
+      --input: 160 15% 20%;
+      --gradient-start: 160 25% 12%;
+      --gradient-end: 160 20% 8%;
+    }
+
+    html.dark[data-theme="pink-red"] {
+      --background: 340 25% 7%;
+      --card: 340 20% 11%;
+      --secondary: 342 35% 16%;
+      --secondary-foreground: 342 85% 75%;
+      --border: 340 15% 20%;
+      --input: 340 15% 20%;
+      --gradient-start: 340 30% 12%;
+      --gradient-end: 340 20% 8%;
+    }
+
+    html.dark[data-theme="obsidian-navy"] {
+      --background: 222 35% 7%;
+      --card: 222 30% 11%;
+      --secondary: 222 35% 16%;
+      --secondary-foreground: 222 80% 75%;
+      --border: 222 15% 20%;
+      --input: 222 15% 20%;
+      --gradient-start: 222 30% 12%;
+      --gradient-end: 222 20% 8%;
+    }
+
+    html.dark[data-theme="sunset-amber"] {
+      --background: 35 25% 7%;
+      --card: 35 20% 11%;
+      --secondary: 38 35% 16%;
+      --secondary-foreground: 38 90% 75%;
+      --border: 35 15% 20%;
+      --input: 35 15% 20%;
+      --gradient-start: 35 30% 12%;
+      --gradient-end: 35 20% 8%;
+    }
+
+    html.dark[data-theme="cyber-indigo"] {
+      --background: 240 25% 7%;
+      --card: 240 20% 11%;
+      --secondary: 243 35% 16%;
+      --secondary-foreground: 243 80% 75%;
+      --border: 240 15% 20%;
+      --input: 240 15% 20%;
+      --gradient-start: 240 30% 12%;
+      --gradient-end: 240 20% 8%;
+    }
+
+    /* ==========================================================================
+       2. Global Reset & Base Typography
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 300ms ease, color 300ms ease;
+    }
+
+    /* ==========================================================================
+       3. Theme Control Banner
+       ========================================================================== */
+    .theme-toolbar {
+      background-color: hsl(var(--card));
+      border-bottom: 1px solid hsl(var(--border));
+      padding: 0.625rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: background-color 300ms ease, border-color 300ms ease;
+    }
+
+    .theme-toolbar-inner {
+      max-width: 1200px;
+      margin-inline: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .toolbar-title {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: hsl(var(--muted-foreground));
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theme-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      border: 1px solid hsl(var(--border));
+      background-color: hsl(var(--card));
+      color: hsl(var(--foreground));
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      transition: all 200ms ease;
+    }
+
+    .theme-btn:hover {
+      border-color: hsl(var(--primary));
+      background-color: hsl(var(--secondary));
+    }
+
+    .theme-btn.is-active {
+      border-color: hsl(var(--primary));
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+    }
+
+    .theme-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      display: inline-block;
+    }
+
+    .dark-toggle-btn {
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      border: 1px solid hsl(var(--border));
+      background-color: hsl(var(--card));
+      color: hsl(var(--foreground));
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      transition: all 200ms ease;
+    }
+
+    .dark-toggle-btn:hover {
+      border-color: hsl(var(--primary));
+      color: hsl(var(--primary));
+    }
+
+    /* ==========================================================================
+       4. Sticky Header & Menu with 75% Expanding Underline
+       ========================================================================== */
+    .site-header {
+      position: sticky;
+      top: 45px;
+      z-index: 50;
+      width: 100%;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      background-color: hsl(var(--background) / 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid hsl(var(--border) / 0.6);
+      transition: background-color 300ms ease, border-color 300ms ease;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      width: 100%;
+      margin-inline: auto;
+      padding-inline: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      text-decoration: none;
+      color: hsl(var(--foreground));
+      font-weight: 800;
+      font-size: 1.125rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 0.5rem;
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px hsl(var(--primary) / 0.35);
+      transition: background-color 300ms ease, box-shadow 300ms ease;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* 75% Expanding Underline Navigation Link */
+    .nav-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.5rem 0.875rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: hsl(var(--foreground) / 0.85);
+      border-radius: var(--radius);
+      text-decoration: none;
+      cursor: pointer;
+      background-color: transparent;
+      border: none;
+      transition: color 300ms ease, background-color 300ms ease;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background-color: hsl(var(--primary));
+      border-radius: 9999px;
+      transition: width 300ms ease;
+      pointer-events: none;
+    }
+
+    .nav-link:hover {
+      color: hsl(var(--primary));
+      background-color: hsl(var(--secondary));
+    }
+
+    .nav-link:hover::after {
+      width: 75%;
+    }
+
+    .nav-link.is-active {
+      color: hsl(var(--primary));
+      font-weight: 600;
+    }
+
+    .nav-link.is-active::after {
+      width: 75%;
+    }
+
+    .chevron-icon {
+      opacity: 0.6;
+      transition: transform 300ms ease, opacity 300ms ease;
+    }
+
+    .nav-link:hover .chevron-icon {
+      opacity: 1;
+    }
+
+    .nav-link.has-dropdown-open .chevron-icon {
+      transform: rotate(180deg);
+    }
+
+    /* ==========================================================================
+       5. Button Suite (NO ZOOM-IN!)
+       ========================================================================== */
+    /* Button 1: Standard Primary with CSS3 Fluid Water / Color-Switching */
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      overflow: hidden;
+      user-select: none;
+      transition: box-shadow 300ms ease, background-position 400ms ease;
+    }
+
+    .btn-primary {
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      box-shadow: 0 4px 14px 0 hsl(var(--primary) / 0.30);
+    }
+
+    /* Fluid Water Gradient Animation */
+    .btn-water {
+      background-image: linear-gradient(
+        135deg,
+        hsl(var(--primary)) 0%,
+        hsl(var(--primary) / 0.85) 30%,
+        hsl(var(--secondary-foreground) / 0.85) 50%,
+        hsl(var(--primary)) 70%,
+        hsl(var(--primary) / 0.9) 100%
+      );
+      background-size: 250% 250%;
+      background-position: 0% 50%;
+    }
+
+    .btn-water:hover {
+      /* Fluid gradient position sweep without scale zoom-in */
+      background-position: 100% 50%;
+      box-shadow: 0 8px 22px -2px hsl(var(--primary) / 0.45);
+    }
+
+    .btn-water:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px 0 hsl(var(--primary) / 0.30);
+    }
+
+    /* Button 2: "Join Us" CSS3 Sliding Text Reveal */
+    .btn-slide {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      padding-inline: 1.5rem;
+      border-radius: 9999px;
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow: 0 4px 14px 0 hsl(var(--primary) / 0.30);
+      transition: box-shadow 300ms ease;
+    }
+
+    .btn-slide__track {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .btn-slide__label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      white-space: nowrap;
+    }
+
+    .btn-slide:hover {
+      box-shadow: 0 8px 22px -2px hsl(var(--primary) / 0.45);
+    }
+
+    .btn-slide:hover .btn-slide__track {
+      transform: translateY(-100%);
+    }
+
+    .btn-slide:active {
+      transform: scale(0.98);
+    }
+
+    /* Button 3: "Climate AI" Glowing Floating Action Button (FAB) */
+    .fab-climate-ai {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 9999px;
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: 1px solid hsl(var(--primary-foreground) / 0.2);
+      cursor: pointer;
+      animation: fab-pulse-glow 2.5s ease-in-out infinite, fab-fade-in 500ms ease-out both;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+
+    .fab-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background-color: #ffffff;
+      box-shadow: 0 0 8px #ffffff;
+    }
+
+    @keyframes fab-pulse-glow {
+      0%, 100% {
+        box-shadow: 0 4px 14px 0 hsl(var(--primary) / 0.40),
+                    0 0 0 0 hsl(var(--primary) / 0.40);
+      }
+      50% {
+        box-shadow: 0 8px 24px 0 hsl(var(--primary) / 0.50),
+                    0 0 24px 6px hsl(var(--primary) / 0.25);
+      }
+    }
+
+    @keyframes fab-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fab-climate-ai:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px 0 hsl(var(--primary) / 0.55),
+                  0 0 28px 8px hsl(var(--primary) / 0.30);
+    }
+
+    .fab-climate-ai:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* ==========================================================================
+       6. Hero Section & Decorative Ambient Orbs
+       ========================================================================== */
+    .hero-section {
+      position: relative;
+      overflow: hidden;
+      padding-top: 4.5rem;
+      padding-bottom: 3.5rem;
+      text-align: center;
+    }
+
+    .hero-gradient {
+      position: absolute;
+      inset: 0;
+      z-index: -10;
+      background: linear-gradient(
+        180deg,
+        hsl(var(--gradient-start)) 0%,
+        hsl(var(--gradient-end)) 60%,
+        hsl(var(--background)) 100%
+      );
+      transition: background 300ms ease;
+    }
+
+    .orb-left {
+      position: absolute;
+      top: 40px;
+      left: 10%;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: hsl(var(--primary) / 0.08);
+      filter: blur(48px);
+      animation: float-orb 3.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .orb-right {
+      position: absolute;
+      top: 70px;
+      right: 12%;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: hsl(var(--primary) / 0.08);
+      filter: blur(48px);
+      animation: float-orb 3.5s ease-in-out infinite 0.5s;
+      pointer-events: none;
+    }
+
+    @keyframes float-orb {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .hero-container {
+      max-width: 900px;
+      margin-inline: auto;
+      padding-inline: 1.5rem;
+    }
+
+    .hero-badge-row {
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 1rem;
+      border-radius: 9999px;
+      background-color: hsl(var(--secondary));
+      color: hsl(var(--secondary-foreground));
+      font-size: 0.8125rem;
+      font-weight: 600;
+      border: 1px solid hsl(var(--primary) / 0.2);
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      color: hsl(var(--foreground));
+      margin-bottom: 1.25rem;
+      animation: fade-in-up 700ms ease-out both;
+    }
+
+    @media (min-width: 768px) {
+      .hero-title {
+        font-size: 3.75rem;
+      }
+    }
+
+    .text-primary {
+      color: hsl(var(--primary));
+      transition: color 300ms ease;
+    }
+
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: hsl(var(--muted-foreground));
+      max-width: 640px;
+      margin-inline: auto;
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+      animation: fade-in-up 700ms ease-out both 150ms;
+    }
+
+    /* Headline Switcher Controls */
+    .headline-toggle-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.75rem;
+      padding: 0.25rem 0.5rem;
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: 9999px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .headline-toggle-btn {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: hsl(var(--muted-foreground));
+      cursor: pointer;
+      transition: all 200ms ease;
+    }
+
+    .headline-toggle-btn.is-active {
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+    }
+
+    /* ==========================================================================
+       7. Live Search Card & Filter Chips
+       ========================================================================== */
+    .search-card-container {
+      max-width: 760px;
+      margin-inline: auto;
+      background-color: hsl(var(--card));
+      border-radius: 1.25rem;    /* 20px curvature */
+      border: 1px solid hsl(var(--border));
+      box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+      padding: 1.5rem;
+      animation: scale-in 600ms ease-out both 250ms;
+      transition: background-color 300ms ease, border-color 300ms ease;
+    }
+
+    .search-input-group {
+      display: flex;
+      gap: 0.625rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .search-field-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: hsl(var(--muted-foreground));
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 48px;
+      padding-left: 2.75rem;
+      padding-right: 1rem;
+      border-radius: 0.75rem;    /* 12px */
+      background-color: hsl(var(--muted) / 0.6);
+      border: 1px solid hsl(var(--border));
+      color: hsl(var(--foreground));
+      font-size: 0.9375rem;
+      outline: none;
+      transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+    }
+
+    .search-input::placeholder {
+      color: hsl(var(--muted-foreground) / 0.7);
+    }
+
+    .search-input:focus {
+      border-color: hsl(var(--primary));
+      box-shadow: 0 0 0 3px hsl(var(--primary) / 0.25);
+      background-color: hsl(var(--card));
+    }
+
+    .search-pill-btn {
+      height: 48px;
+      padding-inline: 1.5rem;
+      border-radius: 9999px;
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      font-size: 0.9375rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 14px 0 hsl(var(--primary) / 0.35);
+      transition: box-shadow 300ms ease, background-position 400ms ease;
+      white-space: nowrap;
+    }
+
+    /* Filter Chips Row */
+    .filter-chips-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: hsl(var(--muted-foreground));
+      margin-right: 0.25rem;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.4375rem 0.875rem;
+      border-radius: 9999px;
+      border: 1px solid hsl(var(--border));
+      background-color: hsl(var(--card));
+      color: hsl(var(--foreground));
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 200ms ease, background-color 200ms ease;
+    }
+
+    .filter-chip:hover {
+      border-color: hsl(var(--primary));
+      background-color: hsl(var(--secondary));
+    }
+
+    .filter-chip.is-active {
+      border-color: hsl(var(--primary));
+      background-color: hsl(var(--secondary));
+      color: hsl(var(--secondary-foreground));
+      font-weight: 600;
+    }
+
+    .filter-chip:active {
+      transform: scale(0.97);
+    }
+
+    .chip-dropdown-caret {
+      font-size: 0.625rem;
+      color: hsl(var(--muted-foreground));
+    }
+
+    /* ==========================================================================
+       8. Showcase Section: Button & Animation Gallery
+       ========================================================================== */
+    .showcase-section {
+      max-width: 1152px;
+      margin-inline: auto;
+      padding: 4rem 1.5rem;
+    }
+
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .showcase-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .showcase-card {
+      background-color: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: 1.25rem;
+      padding: 2rem;
+      box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: border-color 300ms ease, box-shadow 300ms ease;
+    }
+
+    .showcase-card:hover {
+      border-color: hsl(var(--primary) / 0.4);
+      box-shadow: 0 12px 28px -4px hsl(var(--primary) / 0.12);
+    }
+
+    .showcase-card-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: hsl(var(--foreground));
+      margin-bottom: 0.5rem;
+    }
+
+    .showcase-card-desc {
+      font-size: 0.8125rem;
+      color: hsl(var(--muted-foreground));
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .showcase-card-action {
+      margin-top: auto;
+    }
+
+    .badge-no-zoom {
+      display: inline-block;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      background-color: hsl(var(--secondary));
+      color: hsl(var(--secondary-foreground));
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 1rem;
+    }
+
+    /* ==========================================================================
+       9. Team Greenhouse Section & Atmospheric Gas Cards
+       ========================================================================== */
+    .section-greenhouse {
+      max-width: 1152px;
+      margin-inline: auto;
+      padding: 3rem 1.5rem 6rem;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 680px;
+      margin-inline: auto;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-badge {
+      display: inline-block;
+      padding: 0.25rem 0.875rem;
+      border-radius: 9999px;
+      background-color: hsl(var(--secondary));
+      color: hsl(var(--secondary-foreground));
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: hsl(var(--foreground));
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .section-description {
+      font-size: 1.0625rem;
+      color: hsl(var(--muted-foreground));
+      line-height: 1.6;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .card-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .gas-card {
+      position: relative;
+      background-color: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: 1.25rem;
+      padding: 2rem;
+      box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+      transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+      overflow: hidden;
+    }
+
+    .gas-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        hsl(var(--primary) / 0.05) 0%,
+        hsl(var(--secondary) / 0.3) 100%
+      );
+      opacity: 0;
+      transition: opacity 300ms ease;
+      pointer-events: none;
+    }
+
+    .gas-card:hover {
+      transform: translateY(-6px);
+      border-color: hsl(var(--primary) / 0.4);
+      box-shadow: 0 16px 32px -6px hsl(var(--primary) / 0.14),
+                  0 6px 12px -4px rgba(0, 0, 0, 0.04);
+    }
+
+    .gas-card:hover::before {
+      opacity: 1;
+    }
+
+    .gas-card__header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .gas-card__icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 0.75rem;
+      background-color: hsl(var(--primary) / 0.12);
+      color: hsl(var(--primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 300ms ease;
+    }
+
+    .gas-card:hover .gas-card__icon-box {
+      transform: scale(1.08) rotate(4deg);
+    }
+
+    .gas-card__badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background-color: hsl(var(--primary) / 0.12);
+      color: hsl(var(--primary));
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+
+    .gas-card__title {
+      position: relative;
+      z-index: 1;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: hsl(var(--card-foreground));
+      margin-bottom: 0.625rem;
+    }
+
+    .gas-card__desc {
+      position: relative;
+      z-index: 1;
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+      line-height: 1.55;
+      margin-bottom: 1.5rem;
+    }
+
+    .gas-card__meta {
+      position: relative;
+      z-index: 1;
+      padding-top: 1rem;
+      border-top: 1px solid hsl(var(--border) / 0.8);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8125rem;
+    }
+
+    .meta-label {
+      color: hsl(var(--muted-foreground));
+    }
+
+    .meta-value {
+      font-weight: 600;
+      color: hsl(var(--foreground));
+    }
+
+    /* ==========================================================================
+       10. Keyframes & Animation Utilities
+       ========================================================================== */
+    @keyframes fade-in-up {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scale-in {
+      from {
+        opacity: 0;
+        transform: scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Toast Notification for Interactive Events */
+    .toast-popup {
+      position: fixed;
+      top: 5rem;
+      right: 1.5rem;
+      background-color: hsl(var(--card));
+      border: 1px solid hsl(var(--primary));
+      color: hsl(var(--foreground));
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 25px -5px hsl(var(--primary) / 0.25);
+      z-index: 70;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transform: translateY(-20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 250ms ease, opacity 250ms ease;
+    }
+
+    .toast-popup.is-visible {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media (max-width: 768px) {
+      .main-nav {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification -->
+  <div id="toast-message" class="toast-popup" role="status" aria-live="polite">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <span id="toast-text">Action executed</span>
+  </div>
+
+  <!-- 1. Live Theme Switcher Toolbar -->
+  <aside class="theme-toolbar" aria-label="Theme Switcher Toolbar">
+    <div class="theme-toolbar-inner">
+      <div class="toolbar-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10"></path>
+        </svg>
+        <span>Live Theme Switcher:</span>
+      </div>
+
+      <div class="theme-buttons">
+        <button class="theme-btn is-active" data-theme-target="emerald-green">
+          <span class="theme-dot" style="background-color: #22c55e;"></span>
+          Emerald Green
+        </button>
+        <button class="theme-btn" data-theme-target="pink-red">
+          <span class="theme-dot" style="background-color: #ff2d6f;"></span>
+          Pink / Red
+        </button>
+        <button class="theme-btn" data-theme-target="obsidian-navy">
+          <span class="theme-dot" style="background-color: #3b82f6;"></span>
+          Obsidian Navy
+        </button>
+        <button class="theme-btn" data-theme-target="sunset-amber">
+          <span class="theme-dot" style="background-color: #f59e0b;"></span>
+          Sunset Amber
+        </button>
+        <button class="theme-btn" data-theme-target="cyber-indigo">
+          <span class="theme-dot" style="background-color: #6366f1;"></span>
+          Cyber Indigo
+        </button>
+      </div>
+
+      <button id="dark-mode-toggle" class="dark-toggle-btn" aria-label="Toggle dark mode">
+        <span id="dark-mode-icon">🌙</span>
+        <span id="dark-mode-label">Dark Mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 2. Sticky Header with 75% Expanding Underline Navigation -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="#" class="brand-logo">
+        <span class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </span>
+        <span>Sweet Digs</span>
+      </a>
+
+      <!-- Menu with 75% expanding underline on hover -->
+      <nav class="main-nav" aria-label="Main Navigation">
+        <a href="#hero" class="nav-link is-active">Overview</a>
+        <a href="#science" class="nav-link">
+          <span>Science</span>
+          <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </a>
+        <a href="#solutions" class="nav-link">
+          <span>Solutions</span>
+          <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </a>
+        <a href="#data" class="nav-link">Climate Data</a>
+        <a href="#education" class="nav-link">Education</a>
+      </nav>
+
+      <!-- Header CTA using Join Us sliding reveal -->
+      <button class="btn-slide" id="header-join-btn" aria-label="Join Community">
+        <span class="btn-slide__track">
+          <span class="btn-slide__label">Join Us</span>
+          <span class="btn-slide__label" aria-hidden="true">Let's Go!</span>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 3. Hero Section with Split Headline & Ambient Floating Orbs -->
+    <section id="hero" class="hero-section">
+      <div class="hero-gradient"></div>
+      <div class="orb-left"></div>
+      <div class="orb-right"></div>
+
+      <div class="hero-container">
+        <div class="hero-badge-row">
+          <span class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            Interactive Design System Demo
+          </span>
+        </div>
+
+        <!-- Headline Toggle Controls -->
+        <div class="headline-toggle-row">
+          <button class="headline-toggle-btn is-active" data-headline="climate">Greenhouse Science</button>
+          <button class="headline-toggle-btn" data-headline="realestate">Dream Home Search</button>
+        </div>
+
+        <!-- Split Headline -->
+        <h1 class="hero-title" id="dynamic-headline">
+          Understanding the Greenhouse <span class="text-primary">Effect</span>
+        </h1>
+
+        <p class="hero-subtitle" id="dynamic-subtext">
+          Key atmospheric gases trap solar thermal radiation, creating a habitable planetary climate while requiring balanced emission governance and intelligent real-time data.
+        </p>
+
+        <!-- 4. Live Search Card with Focus Ring & Pill Search Button -->
+        <div class="search-card-container">
+          <div class="search-input-group">
+            <div class="search-field-wrapper">
+              <svg class="search-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input 
+                type="text" 
+                class="search-input" 
+                id="search-input" 
+                placeholder="Search greenhouse gases, emissions, or climate policies..." 
+                aria-label="Search"
+              />
+            </div>
+            <button class="search-pill-btn btn-water" id="search-action-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span>Search</span>
+            </button>
+          </div>
+
+          <!-- 5. Filter Chips with Hover Background & Border Shifts -->
+          <div class="filter-chips-row" role="group" aria-label="Filter chips">
+            <span class="filter-label">Quick Filters:</span>
+            <button class="filter-chip is-active" data-chip="climate">
+              <span>🌍 Climate</span>
+            </button>
+            <button class="filter-chip" data-chip="science">
+              <span>🔬 Science</span>
+              <span class="chip-dropdown-caret">▾</span>
+            </button>
+            <button class="filter-chip" data-chip="solutions">
+              <span>⚡ Solutions</span>
+              <span class="chip-dropdown-caret">▾</span>
+            </button>
+            <button class="filter-chip" data-chip="data">
+              <span>📊 Data</span>
+              <span class="chip-dropdown-caret">▾</span>
+            </button>
+            <button class="filter-chip" data-chip="education">
+              <span>🎓 Education</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Buttons Showcase Section (NO ZOOM-IN MANDATE) -->
+    <section class="showcase-section">
+      <div class="section-header">
+        <span class="section-badge">Button Kinetics</span>
+        <h2 class="section-title">
+          Interactive Button <span class="text-primary">Playground</span>
+        </h2>
+        <p class="section-description">
+          Demonstrating zero zoom-in scale distortion. Hover triggers fluid CSS3 color shifts, soft shadow blooms, and vertical text reveals.
+        </p>
+      </div>
+
+      <div class="showcase-grid">
+        <!-- Variant 1: Fluid Water / Color-Switching (No Zoom-in) -->
+        <div class="showcase-card">
+          <h3 class="showcase-card-title">Fluid Color-Switching</h3>
+          <p class="showcase-card-desc">
+            Standard primary button with soft ambient shadow and CSS3 multi-stop gradient position sweep.
+          </p>
+          <div class="showcase-card-action">
+            <button class="btn btn-primary btn-water" id="demo-water-btn">
+              <span>Explore Data →</span>
+            </button>
+          </div>
+          <span class="badge-no-zoom">✓ Strictly Zero Zoom-in</span>
+        </div>
+
+        <!-- Variant 2: "Join Us" CSS3 Sliding Text Reveal -->
+        <div class="showcase-card">
+          <h3 class="showcase-card-title">"Join Us" Slide Reveal</h3>
+          <p class="showcase-card-desc">
+            Vertical text displacement where alternate label slides up on hover via hardware-accelerated transforms.
+          </p>
+          <div class="showcase-card-action">
+            <button class="btn-slide" id="demo-slide-btn">
+              <span class="btn-slide__track">
+                <span class="btn-slide__label">Join Us</span>
+                <span class="btn-slide__label" aria-hidden="true">Let's Go!</span>
+              </span>
+            </button>
+          </div>
+          <span class="badge-no-zoom">✓ 350ms Material Slide</span>
+        </div>
+
+        <!-- Variant 3: "Climate AI" Glowing FAB Preview -->
+        <div class="showcase-card">
+          <h3 class="showcase-card-title">Climate AI Floating Action</h3>
+          <p class="showcase-card-desc">
+            Pinned to the bottom-right corner with a continuous 2.5s pulse-glow breathing halo.
+          </p>
+          <div class="showcase-card-action">
+            <button class="btn btn-primary btn-water" id="trigger-fab-demo">
+              <span>Ping Climate AI</span>
+            </button>
+          </div>
+          <span class="badge-no-zoom">✓ Layered Glow Keyframes</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. "Team Greenhouse" Section & Gas Cards -->
+    <section id="science" class="section-greenhouse">
+      <div class="section-header">
+        <span class="section-badge">Atmospheric Inventory</span>
+        <h2 class="section-title">
+          Key Greenhouse <span class="text-primary">Gases</span>
+        </h2>
+        <p class="section-description">
+          The "Team Greenhouse" section styling is the standard layout DNA for thematic cards, featuring 16–20px curvature, icon rotation, and ambient elevation.
+        </p>
+      </div>
+
+      <div class="card-grid">
+        <!-- Gas Card 1: CO2 -->
+        <article class="gas-card">
+          <div class="gas-card__header">
+            <div class="gas-card__icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <span class="gas-card__badge">76% Share</span>
+          </div>
+          <h3 class="gas-card__title">Carbon Dioxide (CO₂)</h3>
+          <p class="gas-card__desc">Primary long-lived greenhouse gas produced by fossil fuel combustion, deforestation, and industrial activity.</p>
+          <div class="gas-card__meta">
+            <span class="meta-label">Atmospheric Lifetime</span>
+            <span class="meta-value">100+ Years</span>
+          </div>
+        </article>
+
+        <!-- Gas Card 2: CH4 -->
+        <article class="gas-card">
+          <div class="gas-card__header">
+            <div class="gas-card__icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+            </div>
+            <span class="gas-card__badge">16% Share</span>
+          </div>
+          <h3 class="gas-card__title">Methane (CH₄)</h3>
+          <p class="gas-card__desc">Potent short-lived climate pollutant emitted during natural gas distribution, livestock farming, and decomposition.</p>
+          <div class="gas-card__meta">
+            <span class="meta-label">Global Warming Potential</span>
+            <span class="meta-value">28x CO₂</span>
+          </div>
+        </article>
+
+        <!-- Gas Card 3: N2O -->
+        <article class="gas-card">
+          <div class="gas-card__header">
+            <div class="gas-card__icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="m4.93 4.93 4.24 4.24"></path>
+                <path d="m14.83 9.17 4.24-4.24"></path>
+                <path d="m14.83 14.83 4.24 4.24"></path>
+                <path d="m9.17 14.83-4.24 4.24"></path>
+              </svg>
+            </div>
+            <span class="gas-card__badge">6% Share</span>
+          </div>
+          <h3 class="gas-card__title">Nitrous Oxide (N₂O)</h3>
+          <p class="gas-card__desc">Emitted predominantly through agricultural synthetic fertilizers and nitrogen management operations.</p>
+          <div class="gas-card__meta">
+            <span class="meta-label">Atmospheric Lifetime</span>
+            <span class="meta-value">114 Years</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- 8. Climate AI Glowing Floating Action Button (FAB) -->
+  <button class="fab-climate-ai" id="fab-climate-ai" aria-label="Open Climate AI Assistant">
+    <span class="fab-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </span>
+    <span class="fab-text">Climate AI</span>
+    <span class="fab-status-dot"></span>
+  </button>
+
+  <!-- ==========================================================================
+       11. Interactive JavaScript Engine (Positive Booleans Standard)
+       ========================================================================== */ -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Positive booleans tracking state
+      let isDarkModeActive = false;
+      let activeThemeName = 'emerald-green';
+
+      const htmlElement = document.documentElement;
+      const toastElement = document.getElementById('toast-message');
+      const toastTextElement = document.getElementById('toast-text');
+
+      function showToast(message) {
+        toastTextElement.textContent = message;
+        toastElement.classList.add('is-visible');
+        setTimeout(() => {
+          toastElement.classList.remove('is-visible');
+        }, 2200);
+      }
+
+      // Theme Switcher Buttons
+      const themeButtons = document.querySelectorAll('[data-theme-target]');
+      themeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetTheme = button.getAttribute('data-theme-target');
+          htmlElement.setAttribute('data-theme', targetTheme);
+          activeThemeName = targetTheme;
+
+          themeButtons.forEach(btn => btn.classList.remove('is-active'));
+          button.classList.add('is-active');
+
+          showToast(`Theme switched to ${button.textContent.trim()}`);
+        });
+      });
+
+      // Dark Mode Toggle
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      const darkModeIcon = document.getElementById('dark-mode-icon');
+      const darkModeLabel = document.getElementById('dark-mode-label');
+
+      darkModeToggle.addEventListener('click', () => {
+        isDarkModeActive = !isDarkModeActive;
+        if (isDarkModeActive) {
+          htmlElement.classList.add('dark');
+          darkModeIcon.textContent = '☀️';
+          darkModeLabel.textContent = 'Light Mode';
+          showToast('Dark mode enabled');
+        } else {
+          htmlElement.classList.remove('dark');
+          darkModeIcon.textContent = '🌙';
+          darkModeLabel.textContent = 'Dark Mode';
+          showToast('Light mode enabled');
+        }
+      });
+
+      // Headline Toggle
+      const headlineToggleButtons = document.querySelectorAll('[data-headline]');
+      const dynamicHeadline = document.getElementById('dynamic-headline');
+      const dynamicSubtext = document.getElementById('dynamic-subtext');
+
+      headlineToggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          headlineToggleButtons.forEach(btn => btn.classList.remove('is-active'));
+          button.classList.add('is-active');
+
+          const variant = button.getAttribute('data-headline');
+          if (variant === 'climate') {
+            dynamicHeadline.innerHTML = 'Understanding the Greenhouse <span class="text-primary">Effect</span>';
+            dynamicSubtext.textContent = 'Key atmospheric gases trap solar thermal radiation, creating a habitable planetary climate while requiring balanced emission governance and intelligent real-time data.';
+          } else {
+            dynamicHeadline.innerHTML = 'Find Your Dream <span class="text-primary">Home</span>';
+            dynamicSubtext.textContent = 'Explore certified energy-efficient smart homes and sustainable living spaces designed for climate resilience and low ecological impact.';
+          }
+          showToast('Headline variant updated');
+        });
+      });
+
+      // Filter Chips
+      const filterChips = document.querySelectorAll('.filter-chip');
+      filterChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          chip.classList.toggle('is-active');
+          const chipLabel = chip.querySelector('span').textContent.trim();
+          showToast(`Filter selected: ${chipLabel}`);
+        });
+      });
+
+      // Search Action
+      const searchInput = document.getElementById('search-input');
+      const searchButton = document.getElementById('search-action-btn');
+
+      function executeSearch() {
+        const query = searchInput.value.trim();
+        if (query.length > 0) {
+          showToast(`Searching inventory for: "${query}"`);
+        } else {
+          showToast('Please type a search query');
+        }
+      }
+
+      searchButton.addEventListener('click', executeSearch);
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          executeSearch();
+        }
+      });
+
+      // Button Demos
+      document.getElementById('demo-water-btn').addEventListener('click', () => {
+        showToast('Fluid color button clicked (strictly zero zoom-in!)');
+      });
+
+      document.getElementById('demo-slide-btn').addEventListener('click', () => {
+        showToast('"Join Us" sliding button triggered!');
+      });
+
+      document.getElementById('header-join-btn').addEventListener('click', () => {
+        showToast('Header CTA "Join Us" activated!');
+      });
+
+      // Climate AI FAB
+      const fabBtn = document.getElementById('fab-climate-ai');
+      fabBtn.addEventListener('click', () => {
+        showToast('Climate AI Assistant ready to assist you!');
+      });
+
+      document.getElementById('trigger-fab-demo').addEventListener('click', () => {
+        fabBtn.focus();
+        showToast('Climate AI assistant pinged!');
+      });
+    });
+  </script>
+</body>
+</html>

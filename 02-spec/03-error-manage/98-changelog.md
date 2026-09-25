@@ -164,7 +164,7 @@
 
 - Created `04-error-manage/` as the single canonical location for all error management specs
 - Organized into 3 categories: Error Resolution, Error Architecture, Error Code Registry
-- New `01-index.md` with core principles, common pitfalls, and cross-references
+- New `readme.md` with core principles, common pitfalls, and cross-references
 
 #### Consolidated From
 

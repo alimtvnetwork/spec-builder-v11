@@ -10,7 +10,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `01-design-tokens.md` | ✅ Present |
 | 3 | `02-backend-tab-colors.md` | ✅ Present |
 | 4 | `03-frontend-and-ui-colors.md` | ✅ Present |
@@ -25,7 +25,7 @@
 |-------|--------|
 | Lowercase kebab-case | ✅ All files compliant |
 | Numeric prefixes | ✅ All files prefixed |
-| `01-index.md` present | ✅ Yes |
+| `readme.md` present | ✅ Yes |
 
 ---
 
@@ -42,9 +42,9 @@
 
 | Source | Target | Status |
 |--------|--------|--------|
-| `01-index.md` → `../01-index.md` | ✅ Valid |
-| `01-index.md` → `../03-error-modal-reference/01-index.md` | ✅ Valid |
-| `01-index.md` → `../../03-notification-colors.md` | ✅ Valid |
+| `readme.md` → `../readme.md` | ✅ Valid |
+| `readme.md` → `../03-error-modal-reference/readme.md` | ✅ Valid |
+| `readme.md` → `../../03-notification-colors.md` | ✅ Valid |
 
 ---
 

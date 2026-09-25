@@ -97,7 +97,7 @@ python 03-ai-scripts/29-release-orchestrator.py --tier <minor|patch|major> --sco
 3. **If Script Is Missing:**
    - The AI agent MUST immediately construct `03-ai-scripts/29-release-orchestrator.py` inside `03-ai-scripts/` using Python standard libraries (`argparse`, `json`, `os`, `re`, `subprocess`, `sys`, `pathlib`, `datetime`).
    - Support `--skip-tests` to skip pre-release verification entirely.
-   - Register it in `03-ai-scripts/01-index.md` under slot 29.
+   - Register it in `03-ai-scripts/readme.md` under slot 29.
    - Execute the script with `--skip-tests` to fulfill the release.
 
 ---

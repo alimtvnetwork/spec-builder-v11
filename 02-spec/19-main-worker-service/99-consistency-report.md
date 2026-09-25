@@ -17,7 +17,7 @@ Cross-link integrity, naming-convention compliance, and rule-inheritance audit f
 | File | Purpose | Version | Status |
 |------|---------|---------|--------|
 | `29-plan.md` | Phased roadmap + decisions | 1.0.0 | ✅ |
-| `01-index.md` | Entry point, document map | 1.1.0 | ✅ |
+| `readme.md` | Entry point, document map | 1.1.0 | ✅ |
 | `02-architecture.md` | Topology + comms contract | 1.1.0 | ✅ |
 | `03-glossary.md` | Canonical terms (5 entries added: Quarantined, Draining, Seedable-Config, apperror, Power Admin↔PowerAdmin) | 1.1.0 | ✅ |
 | `04-main-db-schema.md` | Main SQLite schema (+EnumPage, RolePageAccess, AccessDenialEvent, MainSetting, User TOTP cols, **+EndpointAuthAuditEvent §2.6.4 / EndpointAuthChangeKind §2.6.5 — FU-17**) | 1.3.0 | ✅ |

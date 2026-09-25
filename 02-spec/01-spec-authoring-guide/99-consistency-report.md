@@ -9,7 +9,7 @@
 
 | Criterion | Status |
 |-----------|--------|
-| `01-index.md` present | ✅ |
+| `readme.md` present | ✅ |
 | `99-consistency-report.md` present | ✅ |
 | Lowercase kebab-case naming | ✅ |
 | Unique numeric sequence prefixes | ✅ |
@@ -22,7 +22,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 00 | `01-index.md` | ✅ Present |
+| 00 | `readme.md` | ✅ Present |
 | 01 | `02-folder-structure.md` | ✅ Present (canonical folder structure — single source of truth) |
 | 02 | `03-naming-conventions.md` | ✅ Present |
 | 03 | `04-required-files.md` | ✅ Present |

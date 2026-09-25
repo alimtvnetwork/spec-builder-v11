@@ -18,7 +18,7 @@ Solves bugs and pipeline failures through structured 4-part Root Cause Analysis.
 
 Whenever resolving an issue or performing a fix with RCA:
 - **CI/CD Issues & Pipeline Failures:** Record the RCA in `.ai-memory/cicd-issues/NN-<slug>.md` and register it in `.ai-memory/cicd-index.md`.
-- **Non-CI/CD Issues (Application Bugs, Feature Defects, Logic/Runtime Errors):** Document in `02-spec/22-app-issues/NN-<slug>.md` (indexed in `02-spec/22-app-issues/01-index.md`, cross-referencing in `.ai-memory/memory/issues/` for institutional memory).
+- **Non-CI/CD Issues (Application Bugs, Feature Defects, Logic/Runtime Errors):** Document in `02-spec/22-app-issues/NN-<slug>.md` (indexed in `02-spec/22-app-issues/readme.md`, cross-referencing in `.ai-memory/memory/issues/` for institutional memory).
 
 ## GitMap Pipeline-AI & Dynamic Waiting Protocol
 
@@ -46,7 +46,7 @@ When diagnosing bugs or failures that involve CI/CD pipelines or remote workflow
 ## Verification & Commit Checklist
 
 - [ ] **Top-Instruction Priority Mandate:** Verified that directives before this section or prompt take highest priority and are non-negotiable.
-- [ ] **Issue Destination Routing:** Verified that CI/CD failures are recorded in `.ai-memory/cicd-issues/NN-<slug>.md` (and `.ai-memory/cicd-index.md`), while application bugs are recorded in `02-spec/22-app-issues/NN-<slug>.md` (and `02-spec/22-app-issues/01-index.md`).
+- [ ] **Issue Destination Routing:** Verified that CI/CD failures are recorded in `.ai-memory/cicd-issues/NN-<slug>.md` (and `.ai-memory/cicd-index.md`), while application bugs are recorded in `02-spec/22-app-issues/NN-<slug>.md` (and `02-spec/22-app-issues/readme.md`).
 - [ ] **Atomic Change Tracking:** Recorded all modified files under lock via `python 03-ai-scripts/33-test-inventory-generator.py --record <files...>`.
 - [ ] **Targeted Verification:** Executed targeted tests/linters on modified packages (avoiding broad test runner loops).
 - [ ] **Atomic Commit & Push:** All modifications committed in a single atomic commit and pushed to origin (ban on per-file commits).

@@ -26,7 +26,7 @@ eadme.md is strictly lowercase, find the root cause in one sentence, write the m
 
 Before you write any code to fix the problem, you MUST document the issue following the mandatory issue destination routing:
 - **CI/CD Issues & Pipeline Failures:** Record the RCA in `.ai-memory/cicd-issues/xx-<slug>.md` and index it in `.ai-memory/cicd-index.md`.
-- **Non-CI/CD Issues (Application Bugs, Feature Defects, Logic/Runtime Errors):** Document in `02-spec/22-app-issues/xx-<slug>.md` (indexed in `02-spec/22-app-issues/01-index.md`, cross-referencing in `.ai-memory/memory/issues/` for institutional memory).
+- **Non-CI/CD Issues (Application Bugs, Feature Defects, Logic/Runtime Errors):** Document in `02-spec/22-app-issues/xx-<slug>.md` (indexed in `02-spec/22-app-issues/readme.md`, cross-referencing in `.ai-memory/memory/issues/` for institutional memory).
 
 The RCA file MUST contain these exact four sections:
 
@@ -74,7 +74,7 @@ To survive massive checklists and complex codebases, you MUST operate using thes
 ## Execution Checklist & Strict Guidelines
 
 - [ ] **Top-Instruction Priority Mandate:** Whatever directives, constraints, checklists, or instructions are given before this section or prompt (user preamble, header constraints, prior instructions) are verified as highest priority and non-negotiable, overriding all lower-level guidelines below.
-- [ ] **Issue & RCA Destination Routing:** Whenever resolving an issue or performing a fix with RCA, verified that CI/CD failures are documented in .ai-memory/cicd-issues/NN-<slug>.md (indexed in .ai-memory/cicd-index.md), while non-CI/CD issues (application bugs, logic/runtime defects) are documented in 02-spec/22-app-issues/NN-<slug>.md (indexed in 02-spec/22-app-issues/01-index.md).
+- [ ] **Issue & RCA Destination Routing:** Whenever resolving an issue or performing a fix with RCA, verified that CI/CD failures are documented in .ai-memory/cicd-issues/NN-<slug>.md (indexed in .ai-memory/cicd-index.md), while non-CI/CD issues (application bugs, logic/runtime defects) are documented in 02-spec/22-app-issues/NN-<slug>.md (indexed in 02-spec/22-app-issues/readme.md).
 - [ ] **RCA Document Generation:** I have created the 4-part RCA document in the designated location (.ai-memory/cicd-issues/ for CI/CD, or 02-spec/22-app-issues/ for non-CI/CD) with the strict 4-part schema (Why, How, Root Cause, Code Fix).
 - [ ] **GitMap Pipeline-AI Inspection:** If this bug is triggered by or related to a CI/CD pipeline, I used `gitmap pipeline-ai status --json` with dynamic waiting (`-t <seconds>`) and extracted targeted failure lines (`##[error]`, `FAIL:`, compile errors) for the 4-part RCA without tight-loop polling.
 - [ ] **Atomic Change Tracking:** I recorded all modified files under lock via `python 03-ai-scripts/33-test-inventory-generator.py --record <files...>` before final verification and commit.

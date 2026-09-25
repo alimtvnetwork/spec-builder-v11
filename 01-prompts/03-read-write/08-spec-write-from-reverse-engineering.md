@@ -88,19 +88,19 @@ Subtasks must focus purely on unique task deliverables without repeating common 
 8. [ ] /goal Phase 1 (Zero-Stop Transition): Immediately upon completing file inventory and assignment planning, self-loop and transition directly into Phase 2 execution mode without pausing or requesting user input.
 9. [ ] /goal Phase 2 (Parallel File Reverse Engineering, Steps N/2+1..N): Dispatch 2–3 execution sub-agents in parallel on disjoint file sets to analyze code semantics, exported types, data flow, functions, and external dependencies.
 10. [ ] /goal Phase 2 (Component Specification Generation): Write dedicated, modular specification files under `02-spec/21-app/` (e.g., `02-spec/21-app/XX-core-engine.md`, `02-spec/21-app/XX-data-models.md`, `02-spec/21-app/XX-api-contracts.md`) documenting all reverse-engineered logic. If UI screenshots or base64 print screen URLs are provided, convert and save them immediately to `assets/screenshots/<spec-slug>-<NN>.png` and reference them via relative markdown links.
-11. [ ] /goal Phase 3 (Master Index Synthesis): Author `02-spec/21-app/01-index.md` summarizing the overall application architecture, behavior, technology stack, architectural health score, and component topology.
+11. [ ] /goal Phase 3 (Master Index Synthesis): Author `02-spec/21-app/readme.md` summarizing the overall application architecture, behavior, technology stack, architectural health score, and component topology.
 12. [ ] /goal Phase 3 (Security Audit & Risk Assessment): Identify hardcoded credentials, unauthenticated endpoints, input sanitization flaws, and dependency vulnerabilities, publishing an exhaustive risk evaluation in `02-spec/21-app/xx-security-and-risks.md`.
 13. [ ] /goal Phase 3 (Final Structure Communication): Output a clean, viewable markdown/ASCII folder tree in the final chat response illustrating the complete generated specification layout.
-14. [ ] /learn Ingest `.ai-memory/memory/01-index.md` for project memory index and past learnings.
+14. [ ] /learn Ingest `.ai-memory/memory/readme.md` for project memory index and past learnings.
 15. [ ] /learn Ingest `.ai-memory/strictly-avoid.md` for banned anti-patterns and strict constraints.
 16. [ ] /learn Ingest `02-spec/02-coding-guidelines/08-file-folder-naming/` for lowercase naming and continuous file sequencing.
-17. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for strict relative path citation requirements.
-18. [ ] /learn Ingest `02-spec/21-app/01-index.md` for baseline application documentation standards.
+17. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/readme.md` for strict relative path citation requirements.
+18. [ ] /learn Ingest `02-spec/21-app/readme.md` for baseline application documentation standards.
 19. [ ] /goal Verify zero absolute paths or `file:///` URIs exist in generated specification markdown.
 
 ```text
 PHASE_1_STEPS = N / 2   (Steps 1 .. N/2: Environment Bootstrap, Inventory Script, File Discovery, Language Topology, Concurrency Ledger)
-PHASE_2_STEPS = N / 2   (Steps N/2+1 .. N: 2–3 Agent Parallel File Analysis, Module Specs, 01-index.md Synthesis, Security Audit, Tree Output)
+PHASE_2_STEPS = N / 2   (Steps N/2+1 .. N: 2–3 Agent Parallel File Analysis, Module Specs, readme.md Synthesis, Security Audit, Tree Output)
 ```
 
 N, PHASE_1_STEPS, and PHASE_2_STEPS are read-only after initialization. Never modify them mid-execution.
@@ -121,9 +121,9 @@ N, PHASE_1_STEPS, and PHASE_2_STEPS are read-only after initialization. Never mo
    - Create or populate the application-specific spec folder: `<spec-root>/21-app/` (e.g. `02-spec/21-app/`).
    - If sibling folders for issues exist or are needed, reference `<spec-root>/22-app-issues/` or create `02-spec/21-app/xx-security-and-risks.md`.
 3. Strict Lowercase File Naming:
-   - All files created MUST use strictly lowercase characters, hyphens, and numeric prefixes (e.g., `01-index.md`, `xx-security-and-risks.md`, `XX-core-architecture.md`). Uppercase letters are strictly banned.
+   - All files created MUST use strictly lowercase characters, hyphens, and numeric prefixes (e.g., `readme.md`, `xx-security-and-risks.md`, `XX-core-architecture.md`). Uppercase letters are strictly banned.
 4. Strict Relative Git Paths:
-   - All markdown links and citations MUST be relative paths from repository root (e.g., `02-spec/21-app/01-index.md`). NEVER write absolute paths (`C:\...`, `/home/...`) or `file:///` URIs.
+   - All markdown links and citations MUST be relative paths from repository root (e.g., `02-spec/21-app/readme.md`). NEVER write absolute paths (`C:\...`, `/home/...`) or `file:///` URIs.
 
 ---
 
@@ -230,7 +230,7 @@ Spawn 2 to 3 sub-agents concurrently (max 2 threads each) to process the assigne
 
 Upon completion of all modular specifications, the master orchestrator synthesizes the top-level documentation:
 
-### 1. Master Specification Index (`02-spec/21-app/01-index.md`)
+### 1. Master Specification Index (`02-spec/21-app/readme.md`)
 
 The index file must provide an executive synthesis:
 - Application Overview: Purpose of the software, high-level architecture, user flows, and core features.
@@ -254,7 +254,7 @@ In the final turn after all files are generated, the orchestrator MUST output a 
 
 ```text
 📁 02-spec/21-app/
-├── 📄 01-index.md                     # Application overview, tech stack, health score & architecture
+├── 📄 readme.md                     # Application overview, tech stack, health score & architecture
 ├── 📄 02-security-and-risks.md        # Security audit, flaw analysis, secrets scan & risk rating
 ├── 📄 03-domain-models.md             # Data structures, enums, interfaces, and entities
 ├── 📄 04-business-logic.md            # Service layer operations, workflows, and state machines

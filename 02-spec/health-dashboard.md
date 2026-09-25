@@ -5,7 +5,7 @@
 **Total Folders:** 75
 **Overall Health:** 80/100 (B)
 
-> All in-repo broken links fixed. Missing 01-index.md (×2) and 99-consistency-report.md (×4) created — structural deductions cleared. Remaining broken links are intentional gitmap-v3 sibling references covered by the folder-ref allowlist.
+> All in-repo broken links fixed. Missing readme.md (×2) and 99-consistency-report.md (×4) created — structural deductions cleared. Remaining broken links are intentional gitmap-v3 sibling references covered by the folder-ref allowlist.
 
 ---
 
@@ -86,7 +86,7 @@
 
 ## Missing Required Files
 
-### Missing `01-index.md`
+### Missing `readme.md`
 
 | Folder | File Count |
 |--------|------------|
@@ -111,7 +111,7 @@
 | `02-spec/NN-name/` folder references | 0 stale ✅ |
 | Allowlisted external folders | 25 (gitmap-v3 sibling repos) |
 | File-level broken links | 32 (all in allowlisted external paths) |
-| Renumber-related fixes | `12-cicd-pipeline-workflows/01-index.md` (6 links), `02-go-binary-deploy/*` (3 links), `17-consolidated-guidelines/01-index.md` (2 links) — all resolved |
+| Renumber-related fixes | `12-cicd-pipeline-workflows/readme.md` (6 links), `02-go-binary-deploy/*` (3 links), `17-consolidated-guidelines/readme.md` (2 links) — all resolved |
 
 ---
 

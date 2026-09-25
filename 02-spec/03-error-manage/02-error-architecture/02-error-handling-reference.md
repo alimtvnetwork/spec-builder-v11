@@ -642,8 +642,8 @@ The Errors page implements a 3-tier fallback:
 - [Copy Format Samples](./04-error-modal/02-copy-formats.md)
 - [Response Envelope Schema](./05-response-envelope/envelope.schema.json)
 - [Envelope Configurability](./05-response-envelope/02-adr.md)
-- [PHP Standards](../../02-coding-guidelines/04-php/07-php-standards-reference/01-index.md)
-- [Golang Standards](../../02-coding-guidelines/03-golang/04-golang-standards-reference/01-index.md)
+- [PHP Standards](../../02-coding-guidelines/04-php/07-php-standards-reference/readme.md)
+- [Golang Standards](../../02-coding-guidelines/03-golang/04-golang-standards-reference/readme.md)
 
 ---
 

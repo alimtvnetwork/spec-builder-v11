@@ -11,7 +11,7 @@
 
 | # | File | Version | Status |
 |---|------|---------|--------|
-| 1 | `01-index.md` | 5.0.0 | ✅ Present |
+| 1 | `readme.md` | 5.0.0 | ✅ Present |
 | 2 | `03-shared-conventions.md` | — | ✅ Present |
 | 3 | `04-github-release-standard.md` | — | ✅ Present |
 | 4 | `06-vulnerability-scanning.md` | — | ✅ Present |
@@ -30,7 +30,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 15 | `01-browser-extension-deploy/01-index.md` | ✅ Present |
+| 15 | `01-browser-extension-deploy/readme.md` | ✅ Present |
 | 16 | `01-browser-extension-deploy/02-ci-pipeline.md` | ✅ Present |
 | 17 | `01-browser-extension-deploy/05-release-pipeline.md` | ✅ Present |
 | 18 | `01-browser-extension-deploy/99-consistency-report.md` | ✅ Present |
@@ -39,7 +39,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 19 | `02-go-binary-deploy/01-index.md` | ✅ Present |
+| 19 | `02-go-binary-deploy/readme.md` | ✅ Present |
 | 20 | `02-go-binary-deploy/02-ci-pipeline.md` | ✅ Present |
 | 21 | `02-go-binary-deploy/05-release-pipeline.md` | ✅ Present |
 | 22 | `02-go-binary-deploy/03-complete-workflow-reference.md` | ✅ Present |

@@ -10,7 +10,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `2026-04-02-url-error-casing-fix.md` | ✅ Present |
 | 3 | `error-management-file-path-and-missing-file-code-red-rule.md` | ✅ Present |
 | 4 | `99-consistency-report.md` | ✅ Present |
@@ -21,7 +21,7 @@
 
 | Check | Status |
 |-------|--------|
-| `01-index.md` present | ✅ |
+| `readme.md` present | ✅ |
 | `99-consistency-report.md` present | ✅ |
 | All files listed in overview | ✅ |
 | Cross-references valid | ✅ |

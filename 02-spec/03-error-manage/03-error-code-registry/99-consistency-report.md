@@ -10,7 +10,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `01-registry.md` | ✅ Present |
 | 3 | `02-integration-guide.md` | ✅ Present |
 | 4 | `03-collision-resolution-summary.md` | ✅ Present |
@@ -20,7 +20,7 @@
 
 **Subfolders:**
 
-| # | Folder | `01-index.md` | `99-consistency-report.md` | Status |
+| # | Folder | `readme.md` | `99-consistency-report.md` | Status |
 |---|--------|-------------------|----------------------------|--------|
 | 1 | `07-schemas/` | ✅ | ✅ | ✅ Compliant |
 | 2 | `08-linter-scripts/` | ✅ | ✅ | ✅ Compliant |

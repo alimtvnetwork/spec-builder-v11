@@ -10,7 +10,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `error-code.schema.json` | ✅ Present |
 | 3 | `error-codes-index.schema.json` | ✅ Present |
 

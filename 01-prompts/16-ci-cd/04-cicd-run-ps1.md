@@ -29,9 +29,9 @@ Listen, past runs of these turns have been sloppy and stupid as fuck: wrong step
 >    - Coding Guidelines Mirror: `.ai-memory/coding-guidelines.md`.
 > 3. **Worker Pool & Log Aggregation Architecture:** All local runners and test orchestrators must use a concurrent worker pool (2–3 workers via `ThreadPoolExecutor`), announce enqueued tasks upfront, show real-time progress, handle failures gracefully without canceling sibling workers, and print a consolidated final summary with full stdout/stderr error logs for failed jobs.
 > 4. **`force` Keyword Support:** If the user wrote `force`, `force rebuild`, or `force create` on top of the prompt or trigger: **ALWAYS recreate/regenerate the Python runner script from scratch**, regardless of whether the file already exists on disk.
-> 5. **Strict Relative Git Paths (TOTAL BAN on Absolute Paths / `file:///` URIs):** All file paths, markdown links, citations, and subtask paths inside plans, RCA logs (`.ai-memory/memory/issues/`), scripts, and code comments MUST be strictly relative paths from the git root (e.g., `02-spec/03-error-manage/01-index.md`, `.ai-memory/plans/01-index.md`, `cmd/main.go`). NEVER write absolute OS paths (`/absolute/path/to/...`, `/absolute/path/to/...`, `/home/...`) or absolute file URIs (`file:///...`).
+> 5. **Strict Relative Git Paths (TOTAL BAN on Absolute Paths / `file:///` URIs):** All file paths, markdown links, citations, and subtask paths inside plans, RCA logs (`.ai-memory/memory/issues/`), scripts, and code comments MUST be strictly relative paths from the git root (e.g., `02-spec/03-error-manage/readme.md`, `.ai-memory/plans/readme.md`, `cmd/main.go`). NEVER write absolute OS paths (`/absolute/path/to/...`, `/absolute/path/to/...`, `/home/...`) or absolute file URIs (`file:///...`).
 >    - ❌ **BAD:** `[SSH Commands](file:///absolute/path/to/...)`
->    - ✅ **GOOD:** `[SSH Commands]`02-spec/13-generic-cli/01-index.md)`
+>    - ✅ **GOOD:** `[SSH Commands]`02-spec/13-generic-cli/readme.md)`
 > 6. **No External or Random File Creation:** NEVER write scripts, temporary test scripts, or scratch files to root, `/tmp`, global system paths, or outside the repository boundary.
 > 7. **Temp & Failure Folder Isolation:** All temporary directories, runner caches, and test artifacts MUST be strictly placed in `.ai-memory/temp/`. Creating `.tmp/` at the repository root or outside `.ai-memory/` is strictly forbidden.
 >    - Dedicated Failure Directory: `.ai-memory/temp/failures/` is the dedicated folder where failed tests and failed quality gates write error logs (`<test-or-job-name>.log`).
@@ -54,13 +54,13 @@ Before making any changes to `.github/workflows` or automation scripts, you must
 
 #### PowerShell & Orchestration (`02-spec/11-powershell-integration`)
 
-- [ ] `02-spec/11-powershell-integration/01-index.md`
+- [ ] `02-spec/11-powershell-integration/readme.md`
 - [ ] `02-spec/11-powershell-integration/04-script-reference.md`
 - [ ] `02-spec/11-powershell-integration/05-integration-guide.md`
 
 #### CI/CD Pipeline Workflows (`02-spec/12-cicd-pipeline-workflows`)
 
-- [ ] `02-spec/12-cicd-pipeline-workflows/01-index.md`
+- [ ] `02-spec/12-cicd-pipeline-workflows/readme.md`
 - [ ] `02-spec/12-cicd-pipeline-workflows/02-ci-pipeline.md`
 - [ ] `02-spec/12-cicd-pipeline-workflows/05-release-pipeline.md`
 - [ ] `02-spec/12-cicd-pipeline-workflows/07-install-script-generation.md`
@@ -68,7 +68,7 @@ Before making any changes to `.github/workflows` or automation scripts, you must
 
 #### CLI & Build (`02-spec/13-generic-cli`)
 
-- [ ] `02-spec/13-generic-cli/01-index.md`
+- [ ] `02-spec/13-generic-cli/readme.md`
 - [ ] `02-spec/13-generic-cli/11-build-deploy.md`
 - [ ] `02-spec/13-generic-cli/18-batch-execution.md`
 
@@ -80,7 +80,7 @@ Before making any changes to `.github/workflows` or automation scripts, you must
 
 #### Release Engineering (`02-spec/16-generic-release`)
 
-- [ ] `02-spec/16-generic-release/01-index.md`
+- [ ] `02-spec/16-generic-release/readme.md`
 - [ ] `02-spec/16-generic-release/04-install-scripts.md`
 
 #### Context / Issue Logging

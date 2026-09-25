@@ -1,3 +1,9 @@
+## v6.46.0 — 2026-09-24 (add ai-adaptable design system specification and gitmap skill update)
+
+**Scope:** Version bump. add ai-adaptable design system specification and gitmap skill update.
+
+---
+
 ## v6.45.0 — 2026-09-22 (enhance release orchestrator with automated release notes and GitHub release creation)
 
 **Scope:** Version bump. enhance release orchestrator with automated release notes and GitHub release creation.
@@ -919,7 +925,7 @@ Linter verification (4/4 green): `check-mws-error-codes` (R1-R4 — 52 codes ver
 - `08-role-based-dashboards.md` → **v1.1.0**: §5 stack-agnostic 3-step access-guard contract above the Laravel example + Express equivalent (F-A-34).
 - `09-error-contract.md` → **v1.1.0**: §2 envelope +`EnvelopeVersion`/`OperationId`/`SubCode`/`FieldErrors` (F-A-12/15/16/28); §3.4 `X-Auth-Action: Reauthenticate` header (F-A-26); §5 `lastResponse` initialized via `makeNullResponse(call)` (F-A-35); §8 ErrorCode→HTTP-status mapping (F-A-31); §9 Worker→Main envelope + 3 new ErrorCodes `WorkerRegisterRejected/WorkerHeartbeatRejected/WorkerPushAckUnknownJid` (F-A-32); §10 audit-closure log.
 - `10-self-update-pointer.md` → **v1.2.0**: bounded sunset (3-way expiry: spec/19 v2.0.0 OR prod-green-14d OR 2026-12-31); §9 deletion checklist (F-A-09); inline tunables replaced with §15 citations.
-- `01-index.md`, `02-architecture.md` → **v1.1.0**: bumped for image-import + tunable citations.
+- `readme.md`, `02-architecture.md` → **v1.1.0**: bumped for image-import + tunable citations.
 
 ### Cross-spec contributions
 
@@ -962,7 +968,7 @@ Initial authoring. Phases 1–4 of the spec roadmap complete.
 ### Added
 
 - `29-plan.md` — phased roadmap, locked decisions (Q1–Q5), open questions (OQ-1, OQ-2)
-- `01-index.md` — purpose, scope, stack flexibility, document map
+- `readme.md` — purpose, scope, stack flexibility, document map
 - `02-architecture.md` — topology, request lifecycle, comms contract, caching
 - `03-glossary.md` — canonical terms + forbidden-term replacements (`CW configuration` → `Seedable-Config`, `git map` → `gitmap`)
 - `04-main-db-schema.md` — 9 tables (WorkerNode, WorkerNodeStatus/Kind, Company, User, UserRole, Role, WorkerVersion, WorkerSelectionEvent/Strategy)

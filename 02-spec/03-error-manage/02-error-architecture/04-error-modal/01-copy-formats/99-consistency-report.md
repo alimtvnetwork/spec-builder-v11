@@ -10,7 +10,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `01-compact-report.md` | ✅ Present |
 | 3 | `02-full-report.md` | ✅ Present |
 | 4 | `03-full-report-with-backend-logs.md` | ✅ Present |
@@ -31,7 +31,7 @@
 |-------|--------|
 | Lowercase kebab-case | ✅ All files compliant |
 | Numeric prefixes | ✅ All files prefixed |
-| `01-index.md` present | ✅ Yes |
+| `readme.md` present | ✅ Yes |
 
 ---
 
@@ -39,11 +39,11 @@
 
 | Source | Target | Status |
 |--------|--------|--------|
-| `01-index.md` → `../01-index.md` | ✅ Valid |
-| `01-index.md` → `../03-error-modal-reference.md` | ✅ Valid |
-| `01-index.md` → `../02-react-components.md` | ✅ Valid |
-| `01-index.md` → `../../05-response-envelope/envelope.schema.json` | ✅ Valid |
-| `01-index.md` → `../../01-error-handling-reference.md` | ✅ Valid |
+| `readme.md` → `../readme.md` | ✅ Valid |
+| `readme.md` → `../03-error-modal-reference.md` | ✅ Valid |
+| `readme.md` → `../02-react-components.md` | ✅ Valid |
+| `readme.md` → `../../05-response-envelope/envelope.schema.json` | ✅ Valid |
+| `readme.md` → `../../01-error-handling-reference.md` | ✅ Valid |
 
 ---
 

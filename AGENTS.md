@@ -2,7 +2,7 @@
 
 > **Repository:** `alimtvnetwork/spec-builder-v11`  
 > **Status:** SPECIFICATION-ONLY REPOSITORY  
-> **Version:** 3.17.0  
+> **Version:** 3.18.0  
 > **Authority:** `02-spec/` is the single source of truth
 
 ---

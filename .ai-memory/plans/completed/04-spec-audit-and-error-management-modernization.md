@@ -43,7 +43,7 @@ Okay, now that you made the components, okay, now I want you to update the spec 
   - [x] Executed `python linter-scripts/check-error-management.py` (zero bare panics/exits/swallowed errors).
   - [x] Executed `python linter-scripts/check-spec-cross-links.py` (100% internal links resolve).
   - [x] Executed `python linter-scripts/check-spec-folder-refs.py` (0 stale folder references).
-  - [x] Consolidated subtasks and updated `.ai-memory/plans/01-index.md`.
+  - [x] Consolidated subtasks and updated `.ai-memory/plans/readme.md`.
 
 ---
 

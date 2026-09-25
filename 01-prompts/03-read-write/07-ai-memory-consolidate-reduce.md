@@ -22,18 +22,18 @@ N = total self-loop steps budget that the agents will perform.
 5. [ ] /goal Phase 1 (Step B): Build an aggressive compaction and clustering plan in `.ai-memory/plans/pending/` merging 2, 3, or more related tasks into single milestone files.
 6. [ ] /goal Phase 1 (Step C): Filter out and prune pure coding-guideline-fix micro-tasks (zero business logic) and consolidate common checklists to reference `.ai-memory/coding-guidelines.md`.
 7. [ ] /goal Phase 1 (Step D): Compact multi-file subtask sets into single unified specification files.
-8. [ ] /goal Phase 1 (Step E): Verify or update the automated sequence linter and register in `03-ai-scripts/01-index.md`.
+8. [ ] /goal Phase 1 (Step E): Verify or update the automated sequence linter and register in `03-ai-scripts/readme.md`.
 9. [ ] /goal Phase 2 (Step A): Author high-density consolidated milestone summaries preserving all core concepts, code modifications, and verification proofs.
 10. [ ] /goal Phase 2 (Step B): Cleanly remove superseded micro-plan files and collapsed subtask folders via `git rm`.
 11. [ ] /goal Phase 2 (Step C): Purge resolved spec audit files in `02-spec/25-app-spec-audit/` using `python 03-ai-scripts/32-git-history-file-tracer.py --preset-audit --delete`.
 12. [ ] /goal Phase 2 (Step D): Execute monotonic continuous re-sequencing (`01-`, `02-`, `03-`, ...) with strictly lowercase filenames and zero sequence gaps.
-13. [ ] /goal Phase 2 (Step E): Synchronize `.ai-memory/plans/01-index.md`, `.ai-memory/what-to-read.md`, and project memory indexes.
+13. [ ] /goal Phase 2 (Step E): Synchronize `.ai-memory/plans/readme.md`, `.ai-memory/what-to-read.md`, and project memory indexes.
 14. [ ] /goal Phase 2 (Step F): Execute local CI quality gates via `python 03-ai-scripts/06-cicd-local-runner.py` with exit code 0 (`exit 0`).
-15. [ ] /learn Ingest `.ai-memory/memory/01-index.md` for project memory index and past learnings.
+15. [ ] /learn Ingest `.ai-memory/memory/readme.md` for project memory index and past learnings.
 16. [ ] /learn Ingest `.ai-memory/strictly-avoid.md` for banned anti-patterns and strict constraints.
 17. [ ] /learn Ingest `02-spec/02-coding-guidelines/02-canonical-size-tier.md` for canonical file and function size tiers.
-18. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for hallucination prevention and micro-tasking.
-19. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for strict relative path citation requirements.
+18. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/readme.md` for hallucination prevention and micro-tasking.
+19. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/readme.md` for strict relative path citation requirements.
 20. [ ] /learn Ingest `02-spec/02-coding-guidelines/08-file-folder-naming/` for lowercase naming and continuous file sequencing.
 21. [ ] /learn Ingest `.ai-memory/coding-guidelines.md` for master consolidated coding guidelines.
 22. [ ] /goal Create or update agent rules in the repository if missing from agent memory.
@@ -240,7 +240,7 @@ Every consolidated file generated inside `.ai-memory/plans/completed/` MUST adhe
    python 03-ai-scripts/03-file-manipulator.py fix-seq-files .ai-memory/plans/completed/
    ```
    Ensure all files are strictly lowercase with monotonic `01-`, `02-`, `03-` prefixes.
-6. **Synchronize Indexes:** Update `.ai-memory/plans/01-index.md` and `.ai-memory/what-to-read.md` with the new compact list of milestones.
+6. **Synchronize Indexes:** Update `.ai-memory/plans/readme.md` and `.ai-memory/what-to-read.md` with the new compact list of milestones.
 7. **Verify Formatting & Linters:**
    ```bash
    python 03-ai-scripts/21-sequence-integrity-linter.py
@@ -281,7 +281,7 @@ You MUST verify and check off every item during Phase 2:
 - [ ] **Spec Audit Reports Purged:** Removed resolved audit reports in `02-spec/25-app-spec-audit/` using `python 03-ai-scripts/32-git-history-file-tracer.py --preset-audit --delete`.
 - [ ] **Continuous Monotonic Re-Sequencing:** Executed `python 03-ai-scripts/03-file-manipulator.py fix-seq-files .ai-memory/plans/completed/` to ensure contiguous `01-`, `02-`, `03-` numbering without gaps.
 - [ ] **Strict Lowercase Naming:** Verified all filenames in `.ai-memory/plans/completed/` use lowercase alphanumeric characters and hyphens.
-- [ ] **Index Documentation Synchronized:** Updated `.ai-memory/plans/01-index.md` and `.ai-memory/what-to-read.md` to reflect the compact file catalog.
+- [ ] **Index Documentation Synchronized:** Updated `.ai-memory/plans/readme.md` and `.ai-memory/what-to-read.md` to reflect the compact file catalog.
 - [ ] **Single Checklist Enforced:** Confirmed that quality gates reference the master `.ai-memory/coding-guidelines.md` checklist with zero redundant rule text across files.
 - [ ] **Universal File Hygiene:** Verified Unix LF line endings (`\n`), UTF-8 (no BOM), and single terminating newline at EOF across all created/modified files.
 - [ ] **Markdown Spacing Compliance:** Verified exactly one blank line before and after headings (MD022/MD032) and zero double blank lines (`\n\n\n`).
@@ -310,14 +310,14 @@ You MUST verify and check off every item during Phase 2:
 
 ## AI Fix Scripts Memory (Reusable Tooling)
 
-- [ ] `/goal` **Reuse First:** I have rigorously scanned and `/learn`ed `03-ai-scripts/01-index.md` to check if a helper script already exists before writing any new temporary code.
+- [ ] `/goal` **Reuse First:** I have rigorously scanned and `/learn`ed `03-ai-scripts/readme.md` to check if a helper script already exists before writing any new temporary code.
 - [ ] **Strict In-Repository Execution:** All Python scripts (`03-ai-scripts/*.py`) MUST be executed strictly within the codebase repository root, NEVER outside the codebase.
 - [ ] **Strict 03-ai-scripts/ Tooling Storage:** All AI scripts, local runners, autofixers, and helper utilities MUST be created inside `03-ai-scripts/`. NEVER create scripts in root or external paths.
 - [ ] **Automated File Sequencing & Normalization:** Use `python 03-ai-scripts/03-file-manipulator.py fix-seq-files <dir>` to re-sequence completed plan files monotonically.
 - [ ] **Relative Path Normalization:** Use `python 03-ai-scripts/07-relative-path-fixer.py .` to ensure all links in consolidated documents are strictly relative Git paths.
 - [ ] **Git History Tracer & Audit Purge:** Use `python 03-ai-scripts/32-git-history-file-tracer.py --preset-audit --delete` to purge resolved audit directories with automatic OS temp backup and Recycle Bin safety.
 - [ ] **Commit & Track:** All new helper scripts were written strictly to `03-ai-scripts/` and committed to Git for future reuse.
-- [ ] **Index Documentation:** I have updated `03-ai-scripts/01-index.md` using sequential script naming. For every script, I have included a `<details>` collapsible tag explaining exactly why the script is there and what it does.
+- [ ] **Index Documentation:** I have updated `03-ai-scripts/readme.md` using sequential script naming. For every script, I have included a `<details>` collapsible tag explaining exactly why the script is there and what it does.
 
 ---
 
@@ -334,7 +334,7 @@ You MUST verify and check off every item during Phase 2:
 - [ ] **Strict Relative Git Paths:** All file paths, markdown links, citations, and subtask references in consolidated files are strictly relative to the git repository root. Zero absolute paths (`/absolute/path/to/...`) or `file:///` URIs.
 - [ ] **Strict Lowercase Naming:** Every file in `.ai-memory/plans/completed/` uses strictly lowercase letters (e.g. `01-auth-system.md`).
 - [ ] **Monotonic Sequencing:** File prefixes in `.ai-memory/plans/completed/` are continuous and monotonic (`01-`, `02-`, `03-`, ...) without gaps or duplicates.
-- [ ] **Index Synchronization:** Both `.ai-memory/plans/01-index.md` and `.ai-memory/what-to-read.md` reflect the consolidated files and remove deleted entries.
+- [ ] **Index Synchronization:** Both `.ai-memory/plans/readme.md` and `.ai-memory/what-to-read.md` reflect the consolidated files and remove deleted entries.
 - [ ] **LF Line Endings (`\n`):** All files use Unix LF line endings. Zero CRLF (`\r\n`).
 - [ ] **UTF-8 Encoding (No BOM):** All files encoded in UTF-8 without BOM.
 - [ ] **Single Trailing Newline:** Every file ends with exactly one terminating newline (`\n`).

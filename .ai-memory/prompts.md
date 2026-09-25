@@ -66,7 +66,7 @@ It is referenced from `.ai-memory/coding-guidelines.md` as a required read befor
 | `14-execute` | [`14-execute/05-execute-batched-loop-wor.md`](../01-prompts/14-execute/05-execute-batched-loop-wor.md) | Batched Loop Execution Without Release (WOR) — Workflow (must follow) |
 | `14-execute` | [`14-execute/06-execute-parent-task-with-n-steps-v2.md`](../01-prompts/14-execute/06-execute-parent-task-with-n-steps-v2.md) | [V2] Parent Task N-Step Continuous Loop & Multi-Agent Orchestration — Workflow (must follow) |
 | `14-execute` | [`14-execute/07-execute-batched-loop-v2.md`](../01-prompts/14-execute/07-execute-batched-loop-v2.md) | [V2] Batched Loop & Execution Wave Orchestration — Workflow (must follow) |
-| `15-cg-execute` | [`15-cg-execute/01-index.md`](../01-prompts/15-cg-execute/01-index.md) | Coding Guideline Execution Suite (`cg-execute`) — Index & Catalog (must follow) |
+| `15-cg-execute` | [`15-cg-execute/readme.md`](../01-prompts/15-cg-execute/readme.md) | Coding Guideline Execution Suite (`cg-execute`) — Index & Catalog (must follow) |
 | `15-cg-execute` | [`15-cg-execute/02-error-management.md`](../01-prompts/15-cg-execute/02-error-management.md) | Error Management & Architecture — Coding Guideline (must follow) |
 | `15-cg-execute` | [`15-cg-execute/03-nested-if-and-guard-clauses.md`](../01-prompts/15-cg-execute/03-nested-if-and-guard-clauses.md) | Nested If Elimination & Guard Clauses — Coding Guideline (must follow) |
 | `15-cg-execute` | [`15-cg-execute/04-booleans-and-complex-conditions.md`](../01-prompts/15-cg-execute/04-booleans-and-complex-conditions.md) | Boolean Principles, Negatives & Complex Conditions — Coding Guideline (must follow) |

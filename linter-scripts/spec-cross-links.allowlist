@@ -6,7 +6,7 @@
 # Spec cross-link allowlist (waivers)
 02-spec/01-spec-authoring-guide/13-root-readme-conventions.md:255:../../scripts/sync-readme-stats.mjs
 02-spec/01-spec-authoring-guide/14-version-schema.md:252:../../.ai-memory/resolved-issues/07-version-drift-after-package-bump.md
-02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/01-index.md:61:../../../../linters-cicd/codegen/readme.md
+02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/readme.md:61:../../../../linters-cicd/codegen/readme.md
 02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/05-exemptions-and-api.md:101:items
 02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/05-exemptions-and-api.md:102:err
 02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/05-exemptions-and-api.md:121:items
@@ -26,11 +26,11 @@
 02-spec/02-coding-guidelines/06-cicd-integration/00-overview.md:87:../17-consolidated-guidelines/00-overview.md
 02-spec/02-coding-guidelines/06-cicd-integration/07-performance.md:131:./00-overview.md#layer-1--portable-check-scripts-linters-cicdchecks
 02-spec/02-coding-guidelines/06-cicd-integration/07-rules-mapping.md:45:../../../linters-cicd/checks/function-length-prefer8/readme.md
-02-spec/02-coding-guidelines/06-cicd-integration/08-fix-repo-and-installers/01-index.md:82:../../../../tests/installer/
-02-spec/03-error-manage/01-error-resolution/01-index.md:62:../03-error-manage/03-error-code-registry/01-index.md
-02-spec/03-error-manage/01-error-resolution/05-debugging-guides/03-debugging-go.md:681:../../03-error-manage/03-error-code-registry/01-index.md
+02-spec/02-coding-guidelines/06-cicd-integration/08-fix-repo-and-installers/readme.md:82:../../../../tests/installer/
+02-spec/03-error-manage/01-error-resolution/readme.md:62:../03-error-manage/03-error-code-registry/readme.md
+02-spec/03-error-manage/01-error-resolution/05-debugging-guides/03-debugging-go.md:681:../../03-error-manage/03-error-code-registry/readme.md
 02-spec/03-error-manage/01-error-resolution/app-issues/02-error-management-file-path-and-missing-file-code-red-rule.md:253:../../03-error-manage/03-error-code-registry/03-integration-guide.md
-02-spec/03-error-manage/02-error-architecture/01-index.md:73:../03-error-manage/03-error-code-registry/01-index.md
+02-spec/03-error-manage/02-error-architecture/readme.md:73:../03-error-manage/03-error-code-registry/readme.md
 02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/05-usage-and-adapters.md:70:err
 02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/06-apperrtype-enums.md:617:../../../03-error-manage/03-error-code-registry/02-registry.md
 02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/06-apperrtype-enums.md:625:../../../03-error-manage/03-error-code-registry/02-registry.md

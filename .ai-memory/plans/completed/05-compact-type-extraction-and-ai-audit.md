@@ -34,7 +34,7 @@ I do think that these type of codes what you have corrected from the old code th
   - [x] Executed `npm run validate:errors` (0 collisions across 818 ecosystem codes).
   - [x] Executed `python linter-scripts/check-error-management.py` (0 violations across 70 files).
   - [x] Executed `python linter-scripts/check-spec-cross-links.py` and `python linter-scripts/check-spec-folder-refs.py` (100% passing).
-  - [x] Consolidated subtasks and updated `.ai-memory/plans/01-index.md`.
+  - [x] Consolidated subtasks and updated `.ai-memory/plans/readme.md`.
 
 ---
 

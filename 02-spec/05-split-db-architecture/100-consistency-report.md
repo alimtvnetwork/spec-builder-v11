@@ -10,15 +10,15 @@
 
 | # | File | Status |
 |---|------|--------|
-| 00 | `01-index.md` | ✅ Present |
+| 00 | `readme.md` | ✅ Present |
 | 01 | `02-fundamentals.md` | ✅ Present |
-| 02 | `02-features/01-index.md` | ✅ Present |
+| 02 | `02-features/readme.md` | ✅ Present |
 | 02.01 | `02-features/01-cli-examples.md` | ✅ Present |
 | 02.02 | `02-features/02-reset-api-standard.md` | ✅ Present |
 | 02.03 | `02-features/03-database-flow-diagrams.md` | ✅ Present |
 | 02.04 | `02-features/04-rbac-casbin.md` | ✅ Present |
 | 02.05 | `02-features/05-user-scoped-isolation.md` | ✅ Present |
-| 03 | `03-issues/01-index.md` | ✅ Present |
+| 03 | `03-issues/readme.md` | ✅ Present |
 | 97 | `97-acceptance-criteria.md` | ✅ Present |
 | 97b | `97-changelog.md` | ✅ Present |
 | 98 | `98-acceptance-criteria.md` | ✅ Present |

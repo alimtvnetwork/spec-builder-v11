@@ -31,7 +31,7 @@ Could you please read the coding guideline one more time, uh, very thoroughly? B
   - [x] Returned to working branch `main`.
 - [x] **2. Memory Modernization (`.lovable/` -> `.ai-memory/`):**
   - [x] Migrated `.lovable/` folder contents to `.ai-memory/`.
-  - [x] Restructured `.ai-memory/` into modern standard (`memory/`, `plans/`, `prompts.md`, `what-to-read.md`, `coding-guidelines.md`, `strictly-avoid.md`, `01-index.md`).
+  - [x] Restructured `.ai-memory/` into modern standard (`memory/`, `plans/`, `prompts.md`, `what-to-read.md`, `coding-guidelines.md`, `strictly-avoid.md`, `readme.md`).
   - [x] Removed legacy `.lovable/` directory completely.
 - [x] **3. Toolchain & System Synchronization:**
   - [x] Synced `01-prompts/` (100 prompts across 21 categories) from `coding-guidelines`.

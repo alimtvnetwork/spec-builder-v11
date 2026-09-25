@@ -47,10 +47,21 @@ const formatLabel = (slug: string): string =>
 
 const formatFileName = (filename: string, includeNumberPrefix: boolean): string => {
   const base = filename.replace(/\.md$/, "");
+  if (base.toLowerCase() === "readme" || base === "01-index" || base === "00-overview") {
+    return "00 — Overview (Readme)";
+  }
   if (includeNumberPrefix) {
     return base.replace(/^(\d+)-/, "$1 — ").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }
   return base.replace(/^\d+-/, "").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+const sortSpecFiles = (a: SpecFileLike, b: SpecFileLike): number => {
+  const aIsReadme = a.path.endsWith("/readme.md") || a.path === "readme.md";
+  const bIsReadme = b.path.endsWith("/readme.md") || b.path === "readme.md";
+  if (aIsReadme && !bIsReadme) return -1;
+  if (!aIsReadme && bIsReadme) return 1;
+  return a.path.localeCompare(b.path);
 };
 
 const inferCategory = (folderName: string): SpecFolderLike["category"] => {
@@ -124,7 +135,7 @@ export function augmentSpecFolders<T extends SpecFolderLike>(
       });
       known.add(filePath);
     }
-    folder.files.sort((a, b) => a.path.localeCompare(b.path));
+    folder.files.sort(sortSpecFiles);
   }
 
   // 2) Add brand-new folders (not in curated list at all)
@@ -158,7 +169,7 @@ export function augmentSpecFolders<T extends SpecFolderLike>(
             path: filePath,
           };
         })
-        .sort((a, b) => a.path.localeCompare(b.path)),
+        .sort(sortSpecFiles),
     } as T;
 
     result.push(newFolder);
@@ -193,7 +204,7 @@ export function augmentSpecFolders<T extends SpecFolderLike>(
       });
       known.add(filePath);
     }
-    ancestor.files.sort((a, b) => a.path.localeCompare(b.path));
+    ancestor.files.sort(sortSpecFiles);
   }
 
   return result;

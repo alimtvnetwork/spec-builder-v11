@@ -44,8 +44,8 @@ To rapidly locate failing pipeline definitions, broken source files, test fixtur
 6. [ ] /learn Ingest `.ai-memory/cicd-issues/` for domain-specific architectural specifications.
 7. [ ] /learn Ingest `.ai-memory/strictly-avoid.md` for banned anti-patterns and strict constraints.
 8. [ ] /learn Ingest `02-spec/02-coding-guidelines/02-canonical-size-tier.md` for canonical file and function size tiers.
-9. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for hallucination prevention and micro-tasking.
-10. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for strict relative path citation requirements.
+9. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/readme.md` for hallucination prevention and micro-tasking.
+10. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/readme.md` for strict relative path citation requirements.
 11. [ ] /learn Ingest `02-spec/03-error-manage/` for error handling architectures and AppError.
 12. [ ] /goal Create or update agent rules in the repository if missing from agent memory.
 
@@ -86,9 +86,9 @@ Before any execution, check if this prompt is installed as a native Antigravity 
 >    - RCA & Issue Logs: `.ai-memory/memory/issues/` and `.ai-memory/cicd-issues/`.
 >    - Execution Plans & Subtasks: `.ai-memory/plans/pending/`, `.ai-memory/plans/subtasks/`.
 >    - Coding Guidelines Mirror: `.ai-memory/coding-guidelines.md`.
-> 3. **Strict Relative Git Paths (TOTAL BAN on Absolute Paths / `file:///` URIs):** All file paths, markdown links, citations, and subtask paths inside plans, RCA logs (`.ai-memory/memory/issues/`), scripts, and code comments MUST be strictly relative paths from the git root (e.g., `02-spec/03-error-manage/01-index.md`, `.ai-memory/plans/01-index.md`, `cmd/main.go`). NEVER write absolute OS paths (`/absolute/path/to/...`, `/absolute/path/to/...`, `/home/...`) or absolute file URIs (`file:///...`).
+> 3. **Strict Relative Git Paths (TOTAL BAN on Absolute Paths / `file:///` URIs):** All file paths, markdown links, citations, and subtask paths inside plans, RCA logs (`.ai-memory/memory/issues/`), scripts, and code comments MUST be strictly relative paths from the git root (e.g., `02-spec/03-error-manage/readme.md`, `.ai-memory/plans/readme.md`, `cmd/main.go`). NEVER write absolute OS paths (`/absolute/path/to/...`, `/absolute/path/to/...`, `/home/...`) or absolute file URIs (`file:///...`).
 >    - ❌ **BAD:** `[SSH Commands](file:///absolute/path/to/...)`
->    - ✅ **GOOD:** `[SSH Commands]`02-spec/13-generic-cli/01-index.md)`
+>    - ✅ **GOOD:** `[SSH Commands]`02-spec/13-generic-cli/readme.md)`
 > 4. **No External or Random File Creation:** NEVER write scripts, temporary test scripts, or scratch files to root, `/tmp`, global system paths, or outside the repository boundary.
 > 5. **Cross-Platform Python CI Mandate (TOTAL BAN on new `.sh` scripts in CI):** All newly created or refactored CI/CD verification tools, determinism checks, fixtures, and linter jobs MUST be implemented in pure, cross-platform Python (`.py`). Legacy `.sh` scripts must be converted to `.py` scripts so all pipelines run natively across Linux, macOS, and Windows without relying on bash emulation.
 > 6. **Temp & Failure Folder Isolation:** All temporary directories, runner caches, and test artifacts MUST be strictly placed in `.ai-memory/temp/`. Creating `.tmp/` at the repository root or outside `.ai-memory/` is strictly forbidden.
@@ -142,7 +142,7 @@ Every step must be **singly done** using bounded self-looping turns. Do NOT try 
   1. For the zeroed-in failure, write a mandatory 4-part RCA file:
      - Path: `.ai-memory/memory/issues/xx-<slug>.md` (next sequential number)
      - Sections: **Why it happened / How it happened / Root Cause / Code Fix**
-  2. Update `.ai-memory/01-index.md` and `.ai-memory/cicd-index.md`.
+  2. Update `.ai-memory/readme.md` and `.ai-memory/cicd-index.md`.
   3. Append any newly identified anti-pattern to `.ai-memory/strictly-avoid.md`.
 
 - **Self-Loop Step 5 (Surgical Code Fix):**
@@ -463,7 +463,7 @@ The plan task file MUST contain:
 - [ ] pending
 ```
 
-Update `.ai-memory/plans/01-index.md` to register the new task entry immediately.
+Update `.ai-memory/plans/readme.md` to register the new task entry immediately.
 
 ### B. Record in CI/CD Issues
 
@@ -504,7 +504,7 @@ Update `.ai-memory/cicd-index.md` in the same operation. Never delete existing e
 
 For each distinct failure type encountered in Phase 2 (or extracted via `gitmap pipeline-ai status --json`), author the structured RCA document following the mandatory issue destination routing:
 - **CI/CD Issues & Pipeline Failures:** Record the RCA in `.ai-memory/cicd-issues/xx-<slug>.md` and index it in `.ai-memory/cicd-index.md`.
-- **Non-CI/CD Issues (Application Bugs, Feature Defects, Logic/Runtime Errors):** If during diagnosis the failure is determined to be an application bug or domain defect rather than a pipeline runner/workflow issue, document it in `02-spec/22-app-issues/xx-<slug>.md` (indexed in `02-spec/22-app-issues/01-index.md`, cross-referencing in `.ai-memory/memory/issues/`).
+- **Non-CI/CD Issues (Application Bugs, Feature Defects, Logic/Runtime Errors):** If during diagnosis the failure is determined to be an application bug or domain defect rather than a pipeline runner/workflow issue, document it in `02-spec/22-app-issues/xx-<slug>.md` (indexed in `02-spec/22-app-issues/readme.md`, cross-referencing in `.ai-memory/memory/issues/`).
 
 The RCA document MUST contain exactly four sections:
 
@@ -591,7 +591,7 @@ When `06-cicd-local-runner.py` exits with code 0:
 ## Banned Operations Checklist (TOTAL BAN — Auto-Reject on Violation)
 
 - [ ] **TOP-INSTRUCTION PRIORITY MANDATE:** Whatever directives, constraints, checklists, or instructions are given before this section or prompt (user preamble, header constraints, prior instructions) are verified as highest priority and non-negotiable, overriding all lower-level guidelines below.
-- [ ] **ISSUE & RCA DESTINATION ROUTING:** Whenever resolving an issue or performing a fix with RCA, verified that CI/CD failures are documented in .ai-memory/cicd-issues/NN-<slug>.md (indexed in .ai-memory/cicd-index.md), while non-CI/CD issues (application bugs, logic/runtime defects) are documented in 02-spec/22-app-issues/NN-<slug>.md (indexed in 02-spec/22-app-issues/01-index.md).
+- [ ] **ISSUE & RCA DESTINATION ROUTING:** Whenever resolving an issue or performing a fix with RCA, verified that CI/CD failures are documented in .ai-memory/cicd-issues/NN-<slug>.md (indexed in .ai-memory/cicd-index.md), while non-CI/CD issues (application bugs, logic/runtime defects) are documented in 02-spec/22-app-issues/NN-<slug>.md (indexed in 02-spec/22-app-issues/readme.md).
 - [ ] **NO STOPPING AFTER RCA (TOTAL BAN):** Never halt execution or ask user permission after writing the RCA. Proceed unconditionally to Phase 2 code execution.
 - [ ] **SMART TARGETED TESTING MANDATE:** NEVER run full repository test suites (`go test ./...`, `06-cicd-local-runner.py --all`, full test pools) during standard fix turns. Testing is strictly scoped to packages failed in the stack trace and files changed from the last git hash, persisted under `.ai-memory/temp/recent-file-changes.json`.
 - [ ] **NO ROUTINE BUILD CHECKING (TOTAL BAN):** NEVER run broad build commands (`go build ./...`, `npm run build`) to verify compilation during intermediate micro-refactoring steps.

@@ -9,7 +9,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `02-cross-compilation.md` | ✅ Present |
 | 3 | `05-release-pipeline.md` | ✅ Present |
 | 4 | `04-install-scripts.md` | ✅ Present |

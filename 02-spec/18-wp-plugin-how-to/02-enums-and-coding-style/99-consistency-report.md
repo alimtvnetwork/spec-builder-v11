@@ -9,7 +9,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `02-enum-architecture.md` | ✅ Present |
 | 3 | `03-enum-metadata-pattern.md` | ✅ Present |
 | 4 | `04-self-update-status-enum.md` | ✅ Present |

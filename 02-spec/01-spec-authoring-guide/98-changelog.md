@@ -7,13 +7,13 @@
 
 ## [2026-03-30] v2.0.0 Compliance Rollout
 
-**Scope:** Project-wide sub-folder `01-index.md` upgrade
+**Scope:** Project-wide sub-folder `readme.md` upgrade
 **Total files upgraded:** 139 sub-folder overviews + 2 new files created
 **Health impact:** 100% compliance with Spec Authoring Guide v2.0.0
 
 ### Summary
 
-Upgraded all `01-index.md` files across the entire spec tree to include the four mandatory sections introduced by the Spec Authoring Guide v2.0.0:
+Upgraded all `readme.md` files across the entire spec tree to include the four mandatory sections introduced by the Spec Authoring Guide v2.0.0:
 
 1. **AI Confidence** — metadata field (High for all modules)
 2. **Ambiguity** — metadata field (None for all modules)
@@ -45,13 +45,13 @@ Upgraded all `01-index.md` files across the entire spec tree to include the four
 
 ### Verification
 
-- Final scan confirmed 0 non-compliant `01-index.md` files (excluding root dashboard)
+- Final scan confirmed 0 non-compliant `readme.md` files (excluding root dashboard)
 - Parent consistency reports updated where applicable
 
 ---
 
 ## Cross-References
 
-- [Spec Authoring Guide Overview](./01-index.md)
+- [Spec Authoring Guide Overview](./readme.md)
 - [Acceptance Criteria](./97-acceptance-criteria.md)
 - [Consistency Report](./99-consistency-report.md)

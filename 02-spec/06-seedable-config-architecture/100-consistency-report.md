@@ -10,15 +10,15 @@
 
 | # | File | Status |
 |---|------|--------|
-| 00 | `01-index.md` | ✅ Present |
+| 00 | `readme.md` | ✅ Present |
 | 01 | `02-fundamentals.md` | ✅ Present |
-| 02 | `02-features/01-index.md` | ✅ Present |
+| 02 | `02-features/readme.md` | ✅ Present |
 | 02.01 | `02-features/01-rag-chunk-settings.md` | ✅ Present |
 | 02.02 | `02-features/02-rag-validation-helpers.md` | ✅ Present |
 | 02.03 | `02-features/03-rag-validation-tests.md` | ✅ Present |
 | 02.04 | `02-features/04-rag-test-coverage-matrix.md` | ✅ Present |
 | 02.05 | `02-features/05-validation-data-seeding.md` | ✅ Present |
-| 03 | `03-issues/01-index.md` | ✅ Present |
+| 03 | `03-issues/readme.md` | ✅ Present |
 | 97 | `97-acceptance-criteria.md` | ✅ Present |
 | 97b | `97-changelog.md` | ✅ Present |
 | 98 | `98-acceptance-criteria.md` | ✅ Present |

@@ -22,11 +22,11 @@
 
 | Resource | Path | Purpose |
 |----------|------|---------|
-| **Memory Index** | `.ai-memory/memory/00-index.md` | Core memory index |
+| **Memory Index** | `.ai-memory/memory/readme.md` | Core memory index |
 | **What to Read** | `.ai-memory/memory/what-to-read.md` | Reading guidance for AI agents |
 | **Strictly Avoid** | `.ai-memory/memory/strictly-avoid.md` | Prohibited operations and patterns |
 | **Coding Guidelines** | `.ai-memory/coding-guidelines.md` | Grounded coding guidelines |
-| **Master Plans Index** | `.ai-memory/plans/01-index.md` | Plan tracking and roadmap |
+| **Master Plans Index** | `.ai-memory/plans/readme.md` | Plan tracking and roadmap |
 | **Error Registry** | `02-spec/03-error-manage/03-error-code-registry/01-registry.md` | All error code ranges |
 
 ---

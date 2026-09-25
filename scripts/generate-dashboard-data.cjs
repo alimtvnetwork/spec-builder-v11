@@ -9,7 +9,9 @@ const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
 const SPEC_DIR = path.join(ROOT, "02-spec");
-const MEMORIES_DIR = path.join(ROOT, ".lovable", "memories");
+const MEMORIES_DIR = fs.existsSync(path.join(ROOT, ".ai-memory"))
+  ? path.join(ROOT, ".ai-memory")
+  : path.join(ROOT, ".lovable", "memories");
 const OUTPUT_DIR = path.join(ROOT, "src", "generated");
 const OUTPUT_FILE = path.join(OUTPUT_DIR, "dashboard-data.json");
 
@@ -113,6 +115,12 @@ function getComplianceTools(specDir) {
     const reportPath = path.join(modPath, "99-consistency-report.md");
     if (fs.existsSync(reportPath)) {
       auditDate = extractDate(fs.readFileSync(reportPath, "utf8"));
+    }
+    if (!auditDate) {
+      const readmePath = path.join(modPath, "readme.md");
+      if (fs.existsSync(readmePath)) {
+        auditDate = extractDate(fs.readFileSync(readmePath, "utf8"));
+      }
     }
     if (!auditDate) {
       const overviewPath = path.join(modPath, "00-overview.md");

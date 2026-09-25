@@ -5,7 +5,7 @@ Trigger Keywords & Aliases: `cg-error`, `cg-execute error`, `audit error`, `fix 
 > [!IMPORTANT]
 > Prompt Version: 2.5.0
 > Synchronization: Main Meta-Repo & Connected Workspaces
-> 
+>
 > **Top-Instruction Priority Mandate (Preamble Precedence):**
 > Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
@@ -43,11 +43,11 @@ Before executing the tasks below, check if this prompt is already installed as a
 10. [ ] /goal Phase 2 (Step D - Change Recording & Quality Linting): Record all modified files into `.ai-memory/temp/recent-file-changes.json` under lock (`python 03-ai-scripts/33-test-inventory-generator.py --record <files...>`) and run targeted file-level linters on specifically modified files (`exit 0`). DO NOT run the full CI/CD pipeline runner (`06-cicd-local-runner.py`), unit tests, or build checks during routine turns.
 11. [ ] /goal Phase 3 (Step A - Consolidation & Atomic Push): Consolidate completed subtasks into `.ai-memory/plans/completed/xx-<slug>.md`, delete granular subtasks and pending plan, stage all changes, and push in a single grouped commit.
 12. [ ] /goal Phase 3 (Step B - Completion & Confidence Reporting): Emit the final Task Completion Summary with green check mark emojis, modified files summary, and implementation confidence score.
-13. [ ] /learn Ingest `.ai-memory/memory/01-index.md` for project memory index and past learnings.
+13. [ ] /learn Ingest `.ai-memory/memory/readme.md` for project memory index and past learnings.
 14. [ ] /learn Ingest `.ai-memory/strictly-avoid.md` for banned anti-patterns and strict constraints.
 15. [ ] /learn Ingest `02-spec/02-coding-guidelines/02-canonical-size-tier.md` for canonical file and function size tiers.
-16. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for hallucination prevention and micro-tasking.
-17. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/01-index.md` for strict relative path citation requirements.
+16. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/readme.md` for hallucination prevention and micro-tasking.
+17. [ ] /learn Ingest `02-spec/02-coding-guidelines/01-cross-language/readme.md` for strict relative path citation requirements.
 18. [ ] /learn Ingest `02-spec/02-coding-guidelines/` for domain-specific architectural specifications.
 19. [ ] /learn Ingest `02-spec/03-error-manage/` for error handling architectures and AppError.
 20. [ ] /learn Ingest `.ai-memory/coding-guidelines.md` for master consolidated coding guidelines.
@@ -355,7 +355,7 @@ You MUST read, follow, and mechanically verify every single specification file b
 - [ ] **`02-spec/02-coding-guidelines/02-canonical-size-tier.md`**
   - **Why:** Universal size limits across all languages.
   - **How:** Functions <= 8 lines preferred (hard cap 15 lines). Files <= 100 lines coding max (recommended <= 80 lines). Zero line-compression cheating.
-- [ ] **`02-spec/02-coding-guidelines/06-ai-optimization/01-index.md`**
+- [ ] **`02-spec/02-coding-guidelines/06-ai-optimization/readme.md`**
   - **Why:** Comprehensive catalog of forbidden vs required generation patterns.
   - **How:** Strictly follow AH-N1 to AH-T2 rules. Zero ghost diffs, zero truncation stubs (`// ...`), zero unverified claims.
 - [ ] **`02-spec/02-coding-guidelines/06-ai-optimization/06-citation-requirement.md`**
@@ -364,7 +364,7 @@ You MUST read, follow, and mechanically verify every single specification file b
 - [ ] **`02-spec/02-coding-guidelines/01-cross-language/04-code-style/02-braces-and-nesting.md`**
   - **Why:** Absolute zero tolerance for nested conditionals.
   - **How:** Flatten all nested `if` statements with guard clauses and early returns.
-- [ ] **`02-spec/03-error-manage/01-index.md`**
+- [ ] **`02-spec/03-error-manage/readme.md`**
   - **Why:** Authoritative error management foundation across all services.
   - **How:** Never swallow errors; every `catch` logs with operation name and key inputs, then rethrows or returns a typed error.
 - [ ] **`02-spec/03-error-manage/02-error-architecture/02-error-handling-reference.md`**
@@ -373,13 +373,13 @@ You MUST read, follow, and mechanically verify every single specification file b
 - [ ] **`02-spec/03-error-manage/02-error-architecture/03-go-delegation-fix.md`**
   - **Why:** Prevents nil pointer panics and raw error leaks in Go routines.
   - **How:** Never delegate errors to uninitialized handlers; use explicit, typed error delegation channels with mutex guards.
-- [ ] **`02-spec/03-error-manage/02-error-architecture/01-index.md`**
+- [ ] **`02-spec/03-error-manage/02-error-architecture/readme.md`**
   - **Why:** Standardized error severity and UI feedback mapping.
   - **How:** Map log levels strictly: `debug` (trace), `info` (lifecycle), `warn` (recoverable/amber), `error` (user-visible failure/red), `fatal` (process exit).
-- [ ] **`02-spec/03-error-manage/02-error-architecture/05-response-envelope/01-index.md`**
+- [ ] **`02-spec/03-error-manage/02-error-architecture/05-response-envelope/readme.md`**
   - **Why:** Universal API response contract across all endpoints.
   - **How:** Every HTTP/RPC response MUST return the standard envelope: `{ "data": T, "errors": [AppError], "meta": Meta }`. Never return raw un-enveloped error text.
-- [ ] **`02-spec/03-error-manage/03-error-code-registry/01-index.md`**
+- [ ] **`02-spec/03-error-manage/03-error-code-registry/readme.md`**
   - **Why:** Stable error code registry and catalog.
   - **How:** All error codes must be registered constants (`errtype.Variation`). No ad-hoc string literals invented at the throw site.
 
@@ -441,7 +441,7 @@ WHILE (STEP < PHASE_2_STEPS):
 
     7. When all subtasks are finished and local checks are 100% green:
           - Move .ai-memory/plans/pending/xx-error-management-audit.md to .ai-memory/plans/completed/
-          - Update .ai-memory/plans/01-index.md
+          - Update .ai-memory/plans/readme.md
           - Run plan consolidator:
             python 03-ai-scripts/20-plan-consolidator.py
           - Stage modified files with git add and create semantic commit:
@@ -455,7 +455,7 @@ WHILE (STEP < PHASE_2_STEPS):
 
 - [ ] **Top-Instruction Priority Respected:** Highest precedence given to preamble directives and header mandates.
 - [ ] **Git Working Tree Clean:** Working tree verified before new code changes.
-- [ ] **Sub-agents Assigned Disjoint Files:** Verified against `.ai-memory/01-index.md`.
+- [ ] **Sub-agents Assigned Disjoint Files:** Verified against `.ai-memory/readme.md`.
 - [ ] **Zero Swallowed Errors:** Verified no empty catches, no blank identifiers (`_ = err`), and no silent fallback returns.
 - [ ] **Fault Wrapper Enforcement:** Every Go error encountered is strictly embedded in `*appfault.AppError` / `result.Wrap[T]`.
 - [ ] **Error Return Sovereignty:** Leaf functions return `error` (`return err`); NO leaf functions call exit handlers or panics and return `nil`.

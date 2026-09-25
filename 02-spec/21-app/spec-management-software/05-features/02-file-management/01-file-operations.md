@@ -1302,4 +1302,4 @@ func (s *metadataService) handleExternalChange(projectId string) {
 - [Git Integration: Auto-Commit](../07-history-system/01-git-integration.md)
 - [PathManager: Path Validation](./02-path-manager.md)
 - [RAG System: Artifact Indexing](../09-knowledge-memory/01-rag-system.md)
-- [General Spec: Error Management](../../../../03-error-manage/01-index.md)
+- [General Spec: Error Management](../../../../03-error-manage/readme.md)

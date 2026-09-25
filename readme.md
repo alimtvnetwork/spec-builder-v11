@@ -1,19 +1,19 @@
 # Coding Guidelines
 
-> **Version:** See `package.json`
-> **Status:** Specification-only repository (with companion Health Dashboard UI)
-> **Last updated:** 2026-04-20
+> **Version:** 3.18.0 (See `package.json`)  
+> **Status:** Specification-only repository (with companion Health Dashboard UI)  
+> **Last updated:** 2026-09-25  
 
-A canonical, version-controlled set of **coding guidelines, error-code registries, and architectural specifications** that drive multiple downstream projects (CLIs, WordPress plugins, Go services, React frontends). Everything in `spec/` is the source of truth — implementation lives in separate repositories.
+A canonical, version-controlled set of **coding guidelines, error-code registries, and architectural specifications** that drive multiple downstream projects (CLIs, WordPress plugins, Go services, React frontends). Everything in `02-spec/` is the single source of truth — implementation lives in separate repositories.
 
-This repo also ships a small **Health Dashboard** (React + Vite + TypeScript) that browses the spec tree, surfaces consistency reports, and visualizes health-score metrics.
+This repo also ships a companion **Health Dashboard** (React + Vite + TypeScript) that browses the spec tree, surfaces consistency reports, and visualizes health-score metrics.
 
 ---
 
 ## Table of Contents
 
 - [What's Inside](#-whats-inside)
-- [Architecture](#️-architecture)
+- [Architecture & Modernization](#️-architecture--modernization)
 - [Critical Constraint](#-critical-constraint)
 - [Getting Started](#-getting-started)
 - [Install Scripts](#-install-scripts)
@@ -29,10 +29,11 @@ This repo also ships a small **Health Dashboard** (React + Vite + TypeScript) th
 
 ## ✨ What's Inside
 
-- **`spec/`** — The full specification tree. Numeric-prefixed, lowercase-kebab-case folders covering coding standards, error codes, AI-bridge architecture, license manager, time-log system, dashboards, and more.
-- **`.lovable/memories/`** — Institutional memory: conventions, constraints, training packages, and per-feature decision logs that AI agents and contributors load before making changes.
+- **`02-spec/`** — The canonical specification tree. Numeric-prefixed, lowercase-kebab-case folders covering coding standards, error codes, AI-bridge architecture, license manager, time-log system, dashboards, and more. All modules use lowercase `readme.md` as their primary overview document.
+- **`.ai-memory/`** — Institutional memory: conventions, constraints, training packages, active plans, and per-feature decision logs that AI agents and contributors load before making changes.
 - **`src/`** — Health Dashboard UI (React 18 + Vite 5 + Tailwind v3 + shadcn) for browsing specs and metrics.
 - **`scripts/`** — Data-pipeline scripts that generate the dashboard manifest from the spec tree.
+- **`theme-tester/`** — Interactive visual testing environment for design systems, themes, and CSS variables.
 
 ---
 
@@ -87,6 +88,17 @@ graph TD
     C5 --> AP2
     F5 --> C3
 ```
+
+---
+
+## 🔄 Index-to-Readme Modernization & Guidelines Sync (v3.18.0)
+
+In version 3.18.0, the repository structure and guidelines were modernized in full alignment with the upstream `coding-guidelines` meta-standards:
+
+1. **Repository-Wide Readme Standard:** All legacy `01-index.md` and `index.md` files have been permanently eliminated across every module and folder (01–60) in favor of standard, lowercase `readme.md` files.
+2. **Upstream Chronological Synchronization:** Specs in folders `01-` through `20-` (`01-spec-authoring-guide`, `02-coding-guidelines`, `03-error-manage`, `04-database-conventions`, `05-split-db-architecture`, `06-seedable-config-architecture`, `07-design-system`, `12-cicd-pipeline-workflows`, `17-consolidated-guidelines`, etc.) were updated to the latest upstream revisions based on git commit timestamps.
+3. **Sweet Digs Design System & Interactive Theme Tester:** Ingested the complete `02-spec/07-design-system` suite including modern themes, dark mode materiality, sliding interaction mechanics, CSS3 animations, and the standalone `theme-tester/` web application.
+4. **Autonomous AI Orchestration & Tooling:** Synchronized `01-prompts/`, `.agents/skills/`, and `03-ai-scripts/` (including `39-migrate-indexes-to-readme.py` and multi-agent execution parameters `A=2, H=2`).
 
 ---
 

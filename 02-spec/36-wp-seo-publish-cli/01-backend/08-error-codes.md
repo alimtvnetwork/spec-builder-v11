@@ -170,5 +170,5 @@ func ErrVariableNotFound(key string) WPSEOError {
 | Reference | Location |
 |-----------|----------|
 | Architecture | `01-architecture.md` |
-| Error Code Registry | `../../03-error-manage/03-error-code-registry/01-index.md` |
+| Error Code Registry | `../../03-error-manage/03-error-code-registry/readme.md` |
 | AI Bridge Error Codes | `../../27-ai-bridge-cli/01-backend/05-error-codes.md` |

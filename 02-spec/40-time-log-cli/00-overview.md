@@ -87,7 +87,7 @@ Cross-platform system activity tracker that monitors user interactions at the OS
 
 All Rust code must follow:
 
-- [Cross-Language Guidelines](../02-coding-guidelines/01-cross-language/01-index.md)
+- [Cross-Language Guidelines](../02-coding-guidelines/01-cross-language/readme.md)
 - PascalCase for all database columns, JSON fields, and API payloads
 
 ---
@@ -98,4 +98,4 @@ All Rust code must follow:
 |-----------|----------|
 | Time Log UI | `../41-time-log-ui/00-overview.md` |
 | Coding Guidelines | `../02-coding-guidelines/00-overview.md` |
-| Error Code Registry | `../03-error-manage/03-error-code-registry/01-index.md` |
+| Error Code Registry | `../03-error-manage/03-error-code-registry/readme.md` |

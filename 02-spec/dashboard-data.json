@@ -255,7 +255,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "99-consistency-report.md",
           "folder-structure-root.md",
           "health-dashboard.md",
@@ -271,7 +271,7 @@
         "HasChangelog": true,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-folder-structure.md",
           "03-naming-conventions.md",
           "04-required-files.md",
@@ -297,7 +297,7 @@
         "HasChangelog": false,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "97-acceptance-criteria.md",
           "99-consistency-report.md",
           "04-consolidated-review-guide-condensed.md",
@@ -313,7 +313,7 @@
         "HasChangelog": true,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-issues-and-fixes-log.md",
           "02-boolean-principles.md",
           "03-casting-elimination-patterns.md",
@@ -355,7 +355,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-naming-prefixes.md",
           "02-guards-and-extraction.md",
           "03-parameters-and-conditions.md",
@@ -373,7 +373,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-braces-and-nesting.md",
           "02-conditions-and-extraction.md",
           "03-blank-lines-and-spacing.md",
@@ -393,7 +393,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-naming-and-database.md",
           "02-boolean-and-enum.md",
           "03-code-style-and-errors.md",
@@ -413,7 +413,7 @@
         "HasChangelog": true,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-go-golangci-lint.md",
           "03-php-phpcs-phpstan.md",
           "04-csharp-stylecop.md",
@@ -437,7 +437,7 @@
         "HasChangelog": true,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-connection-status-enum.md",
           "02-entity-status-enum.md",
           "03-execution-status-enum.md",
@@ -464,7 +464,7 @@
         "HasChangelog": true,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-boolean-standards.md",
           "03-httpmethod-enum.md",
           "04-golang-standards-reference.md",
@@ -486,7 +486,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-enum-pattern.md",
           "02-required-methods.md",
           "03-folder-03-structure.md",
@@ -504,7 +504,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-file-and-function-rules.md",
           "02-type-safety-and-errors.md",
           "03-database-and-structs.md",
@@ -523,7 +523,7 @@
         "HasChangelog": true,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-enums.md",
           "02-forbidden-patterns.md",
           "03-naming-conventions.md",
@@ -546,7 +546,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-naming-and-errors.md",
           "02-constants-and-deps.md",
           "03-initialization-and-booleans.md",
@@ -564,7 +564,7 @@
         "HasChangelog": true,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-naming-conventions.md",
           "02-error-handling.md",
           "03-async-patterns.md",
@@ -585,7 +585,7 @@
         "HasChangelog": false,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-anti-hallucination-rules.md",
           "02-ai-quick-reference-checklist.md",
           "03-common-ai-mistakes.md",
@@ -604,7 +604,7 @@
         "HasChangelog": true,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-naming-and-conventions.md",
           "02-method-design.md",
           "03-error-handling.md",
@@ -623,7 +623,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-cross-language.md",
           "02-php-wordpress.md",
           "03-golang.md",
@@ -641,7 +641,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -653,7 +653,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -665,7 +665,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "99-consistency-report.md"
         ]
       },
@@ -678,7 +678,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-implementation-rules.md",
           "02-security-notes.md",
           "99-consistency-report.md"
@@ -693,7 +693,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -705,7 +705,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -717,7 +717,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -729,7 +729,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -741,7 +741,7 @@
         "HasChangelog": true,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "97-acceptance-criteria.md",
           "98-changelog.md",
           "99-consistency-report.md",
@@ -758,7 +758,7 @@
         "HasAcceptance": false,
         "Files": [
           "00-error-documentation-guideline.md",
-          "01-index.md",
+          "readme.md",
           "01-cross-reference-diagram.md",
           "02-debugging-cheat-sheet.md",
           "99-consistency-report.md"
@@ -773,7 +773,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-health-endpoint-mismatch.md",
           "02-retry-debounce-dedup-fixes.md",
           "03-zip-finalization-before-return.md",
@@ -790,7 +790,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-frontend-backend-sync.md",
           "99-consistency-report.md"
         ]
@@ -804,7 +804,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-debugging-php.md",
           "02-debugging-go.md",
           "03-debugging-typescript.md",
@@ -820,7 +820,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "2026-04-02-url-error-casing-fix.md",
           "99-consistency-report.md",
           "error-management-file-path-and-missing-file-code-red-rule.md"
@@ -835,7 +835,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-error-handling-reference.md",
           "02-go-delegation-fix.md",
           "03-notification-colors.md",
@@ -851,7 +851,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-copy-formats.md",
           "02-react-components.md",
           "03-error-modal-reference.md",
@@ -870,7 +870,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-compact-report.md",
           "02-full-report.md",
           "03-full-report-with-backend-logs.md",
@@ -892,7 +892,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-typescript-interfaces.md",
           "02-error-store.md",
           "03-api-types.md",
@@ -913,7 +913,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-data-model.md",
           "02-capture-pipeline.md",
           "03-envelope-parsing.md",
@@ -939,7 +939,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-design-tokens.md",
           "02-backend-tab-colors.md",
           "03-frontend-and-ui-colors.md",
@@ -955,7 +955,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-adr.md",
           "02-changelog.md",
           "03-configurability.md",
@@ -972,7 +972,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-apperror-reference.md",
           "99-consistency-report.md"
         ]
@@ -986,7 +986,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-overview-and-stack.md",
           "02-apperror-struct.md",
           "03-result-types.md",
@@ -1006,7 +1006,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-react-execution-logger.md",
           "02-session-based-logging.md",
           "99-consistency-report.md"
@@ -1021,7 +1021,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-registry.md",
           "02-integration-guide.md",
           "03-collision-resolution-summary.md",
@@ -1039,7 +1039,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "99-consistency-report.md"
         ]
       },
@@ -1052,7 +1052,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "99-consistency-report.md"
         ]
       },
@@ -1065,7 +1065,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-error-codes-template.md",
           "99-consistency-report.md"
         ]
@@ -1079,7 +1079,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-naming-conventions.md",
           "03-schema-design.md",
           "04-orm-and-views.md",
@@ -1099,7 +1099,7 @@
         "HasChangelog": false,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-fundamentals.md",
           "97-acceptance-criteria.md",
           "97-changelog.md",
@@ -1116,7 +1116,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-cli-examples.md",
           "02-reset-api-standard.md",
           "03-database-flow-diagrams.md",
@@ -1134,7 +1134,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -1146,7 +1146,7 @@
         "HasChangelog": false,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-fundamentals.md",
           "97-acceptance-criteria.md",
           "97-changelog.md",
@@ -1163,7 +1163,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-rag-chunk-settings.md",
           "02-rag-validation-helpers.md",
           "03-rag-validation-tests.md",
@@ -1181,7 +1181,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -1193,7 +1193,7 @@
         "HasChangelog": false,
         "HasAcceptance": true,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-design-principles.md",
           "03-theme-variable-architecture.md",
           "04-typography.md",
@@ -1220,7 +1220,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-fundamentals.md",
           "99-consistency-report.md"
         ]
@@ -1234,7 +1234,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-typography.md",
           "02-syntax-highlighting.md",
           "03-fullscreen-mode.md",
@@ -1267,7 +1267,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-architecture.md",
           "03-html-03-structure.md",
           "04-syntax-highlighting.md",
@@ -1290,7 +1290,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -1302,7 +1302,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-configuration-schema.md",
           "03-template-vs-project-differences.md",
           "04-script-reference.md",
@@ -1326,7 +1326,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-ci-pipeline.md",
           "03-shared-conventions.md",
           "04-github-release-standard.md",
@@ -1356,7 +1356,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-ci-pipeline.md",
           "05-release-pipeline.md",
           "99-consistency-report.md"
@@ -1371,7 +1371,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-ci-pipeline.md",
           "05-release-pipeline.md",
           "03-complete-workflow-reference.md",
@@ -1387,7 +1387,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-project-03-structure.md",
           "03-subcommand-architecture.md",
           "04-flag-parsing.md",
@@ -1420,7 +1420,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-self-update-overview.md",
           "03-deploy-path-resolution.md",
           "04-rename-first-deploy.md",
@@ -1442,7 +1442,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-self-update-overview.md",
           "03-deploy-path-resolution.md",
           "04-rename-first-deploy.md",
@@ -1471,7 +1471,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -1483,7 +1483,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-cross-compilation.md",
           "05-release-pipeline.md",
           "04-install-scripts.md",
@@ -1503,7 +1503,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "04-spec-authoring.md",
           "05-coding-guidelines.md",
           "06-error-management.md",
@@ -1539,7 +1539,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "02-quick-start.md",
           "03-foundation-and-architecture.md",
           "04-traits-and-composition.md",
@@ -1575,7 +1575,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md",
+          "readme.md",
           "01-enum-architecture.md",
           "02-enum-metadata-pattern.md",
           "03-self-update-status-enum.md",
@@ -1592,7 +1592,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -1604,7 +1604,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -1616,7 +1616,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       },
       {
@@ -1628,7 +1628,7 @@
         "HasChangelog": false,
         "HasAcceptance": false,
         "Files": [
-          "01-index.md"
+          "readme.md"
         ]
       }
     ]

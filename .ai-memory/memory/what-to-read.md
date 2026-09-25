@@ -13,7 +13,7 @@ Follow this exact sequence before exploring the codebase or starting any task:
 2. **Context Document:** `context-for-ai.md` — Rapid 5-minute onboarding & architectural patterns.
 3. **Hard Prohibitions:** `.lovable/strictly-avoid.md` — Non-negotiable CODE RED rules.
 4. **Master Coding Guidelines:** `.lovable/coding-guidelines/coding-guidelines.md` & `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines.md`.
-5. **Memory Master Index:** `.lovable/memory/00-index.md` & `.lovable/memory/learned/`.
+5. **Memory Master Index:** `.lovable/memory/readme.md` & `.lovable/memory/learned/`.
 6. **Plan Master Index & Active Plans:** `.lovable/plans/index.md` and `.lovable/plans/pending/`.
 7. **Issues & Failure Records:** `.lovable/issues/`, `.lovable/cicd-issues/`, and `02-spec/04-error-resolution/01-retrospectives/`.
 8. **App Specifications:** `spec/` (specifically `02-spec/01-general-spec/`, `02-spec/11-spec-management-software/`, `02-spec/06-split-db-architecture/`, `02-spec/07-seedable-config-architecture/`).

@@ -1,19 +1,48 @@
 # [V2] Batched Loop & Execution Wave Orchestration — Workflow (must follow)
 
 > [!IMPORTANT]
-> Prompt Version: 2.5.0
+> Prompt Version: 2.6.0
 > Synchronization: Main Meta-Repo & Connected Workspaces
-> 
+>
 > **Top-Instruction Priority Mandate (Preamble Precedence):**
 > Any directive, constraint, checklist, or instruction declared at the top of this prompt, in a header alert block, or in the incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
 /goal Autonomously orchestrate and execute the pending tasks by decomposing them into subtasks and running a continuous N-step self-loop until completion without a single failure.
 
 ```text
-N = 100
+N = 200 (Total self-loop steps budget)
+A = 2   (Number of spawned autonomous subagents, default: 2)
+H = 2   (Number of hands / parallel operations per agent, default: 2)
 ```
 
 N = total self-loop steps budget that the agents will perform.
+A = count of autonomous subagents running concurrently (default: 2).
+H = number of hands / parallel operations per agent (default: 2).
+
+```text
+PHASE_1_STEPS = N / 2   (Steps 1 .. N/2: Planning, Detailed Spec, and Lean Subtask Generation)
+PHASE_2_STEPS = N / 2   (Steps N/2+1 .. N: Parallel Execution, Self-Looping, Targeted Quality Linting)
+```
+
+N, A, H, PHASE_1_STEPS, and PHASE_2_STEPS are read-only after initialization. Never modify them mid-execution.
+
+---
+
+### Multi-Agent Parallel Task Allocation & Orchestration (A = 2, H = 2)
+
+When multiple autonomous agents are present (A >= 2, H >= 2):
+1. **Single-Agent Unified Blueprint Mandate:**
+   - The initial plan, pending task scoping, and lookahead roadmap MUST be authored by a single lead agent first as a unified blueprint before delegating work to subagents.
+   - Never allow multiple agents to author disjoint or competing audit plans simultaneously. A single coherent architectural vision must lead.
+2. **Most Useful Parallel Tasks (Reading Files & Writing Modular Specs):**
+   - Once the unified blueprint is authored by the lead agent, the most effective parallel tasks for subagents (A = 2, H = 2) are:
+     - **Reading Files:** Fast exploratory reading, scanning dependencies, mapping call sites, and inspecting codebase context in parallel using `03-ai-scripts/17-fast-file-reader.py` and `03-ai-scripts/11-fast-file-scanner.py`.
+     - **Writing Modular Specs & Lean Subtasks:** Authoring modular spec sections and subtasks in parallel adhering to the lead agent's blueprint.
+3. **Spec Writing & Spec Audit Emphasis:**
+   - **Spec Writing Section:** The lead agent defines the spec overview and architecture boundaries first; subagents are then spawned in parallel to flesh out disjoint spec modules and acceptance criteria concurrently.
+   - **Spec Audit Section:** The lead agent establishes the audit methodology and roadmap first; subagents are then dispatched concurrently to inspect disjoint code areas and generate granular subtask files.
+4. **Execution Mode (Disjoint Refactoring):**
+   - Subagents execute parallel disjoint refactoring tasks across non-overlapping files and run targeted file-level linters (`exit 0`).
 
 ---
 
@@ -33,7 +62,7 @@ Before executing the tasks below, you must check if this prompt is already insta
 
 ## AI Fix Scripts Memory (Reusable Tooling)
 
-- [ ] `/goal` Reuse First: I have rigorously scanned and `/learn`ed `03-ai-scripts/01-index.md` to check if a helper script already exists before writing any new temporary code.
+- [ ] `/goal` Reuse First: I have rigorously scanned and `/learn`ed `03-ai-scripts/readme.md` to check if a helper script already exists before writing any new temporary code.
 - [ ] `/goal` Learn Error Skills: I have `/learn`ed `02-spec/03-error-manage/02-error-architecture/02-error-handling-reference.md` as an AI skill checklist and ensured that every returned `*appfault.AppError` uses `.WithPath()` and `.WithVar()` context wrappers.
 - [ ] Strict In-Repository Execution: All Python scripts (`03-ai-scripts/*.py`) MUST be executed strictly within the codebase repository root, NEVER outside the codebase.
 - [ ] Strict .ai-memory/ Folder Storage: All AI scripts, local runners, autofixers, and helper utilities MUST be created inside `03-ai-scripts/`. NEVER create scripts in root or external paths.
@@ -42,7 +71,7 @@ Before executing the tasks below, you must check if this prompt is already insta
   - If Missing (Re-creation): If `03-ai-scripts/17-fast-file-reader.py` is not found, immediately recreate it using Python standard libraries (`os`, `sys`, `pathlib`, `re`, `argparse`, `json`). It MUST support flags: `--list-folder <path> [--ext .md,.ts]`, `--read-file <path> [--max-bytes N]`, and `--search-pattern "<regex>" [--path <dir>]`. Ensure strict UTF-8 output (`sys.stdout.reconfigure(encoding="utf-8")`) and implement local caching.
 - [ ] Go Generate Sync: If you modify Go constants, enums, or stringers, you MUST run `go generate ./...` in the relevant directory (e.g., `cd gitmap && go generate ./...`) and commit the resulting generated files to prevent CI drift.
 - [ ] Commit & Track: All new helper scripts were written strictly to `03-ai-scripts/` and committed to Git for future reuse.
-- [ ] Index Documentation: I have updated `03-ai-scripts/01-index.md` using sequential script naming (e.g., `01-parse-files.py`). For every script, I have included a `<details>` collapsible tag explaining exactly why the script is there and what it does.
+- [ ] Index Documentation: I have updated `03-ai-scripts/readme.md` using sequential script naming (e.g., `01-parse-files.py`). For every script, I have included a `<details>` collapsible tag explaining exactly why the script is there and what it does.
 
 Violation of any rule below is auto-reject on the same tier as RULE 0.
 
@@ -59,14 +88,14 @@ Violation of any rule below is auto-reject on the same tier as RULE 0.
 >
 > When generating plans, subtasks (`.ai-memory/plans/subtasks/`), memory issue logs (`.ai-memory/memory/issues/`), specs, code comments, or citations:
 >
-> 1. Strictly Relative to Git Root: All file paths, markdown links, citations, and task targets MUST be relative paths starting from the repository root (e.g. `02-spec/03-error-manage/01-index.md`, `[SSH Commands](02-spec/13-generic-cli/01-index.md)`, `cmd/main.go`).
+> 1. Strictly Relative to Git Root: All file paths, markdown links, citations, and task targets MUST be relative paths starting from the repository root (e.g. `02-spec/03-error-manage/readme.md`, `[SSH Commands](02-spec/13-generic-cli/readme.md)`, `cmd/main.go`).
 > 2. Total Ban on Absolute Paths: NEVER write drive letters or absolute OS paths (`/absolute/path/to/...`, `/absolute/path/to/...`, `/home/...`) or absolute file URIs (`file:///absolute/path/to/...`, `file:///absolute/path/to/...`) into ANY file.
 >
 > Examples:
 >
 > - ❌ BAD: `[SSH Commands](file:///absolute/path/to/...) — Why: Defines behavior.`
 > - ❌ BAD: `Target File: /absolute/path/to/cmd\login.go`
-> - ✅ GOOD: `[SSH Commands](02-spec/13-generic-cli/01-index.md) — Why: Defines behavior.`
+> - ✅ GOOD: `[SSH Commands](02-spec/13-generic-cli/readme.md) — Why: Defines behavior.`
 > - ✅ GOOD: `Target File: cmd/login.go`
 
 - If a spec file, folder, or task is missing or ambiguous, do NOT guess or invent a rule.
@@ -95,7 +124,7 @@ Violation of any rule below is auto-reject on the same tier as RULE 0.
    - Each agent is assigned a chunk of simple, small micro-tasks (under 15 lines per function) to complete sequentially in its own context.
    - Tasks exceeding 7 steps must be decomposed into subtasks.
 3. File collision locking matrix (`active-locks.json`):
-   - Register active target files in `.ai-memory/01-index.md`.
+   - Register active target files in `.ai-memory/readme.md`.
    - Ensure parallel tasks touch completely disjoint files to prevent git merge conflicts.
 4. Temp folder logging and specific titling (mandatory):
    - Spawn the sub-agent with a highly specific title reflecting its exact task (e.g., `Refactoring Auth Service` or `Fixing DB Query Wrapper`). Do not use generic names. If an agent switches chunks, its title must change.
@@ -122,7 +151,7 @@ When a chunk of tasks is completed by the agents, do the following before starti
 
 1. Use `mv` to move the completed task files from `.ai-memory/plans/pending/` to `.ai-memory/plans/completed/`.
 2. Open the moved files and change `Status: pending` to `Status: completed`.
-3. Update `.ai-memory/plans/01-index.md` to reflect the new file locations.
+3. Update `.ai-memory/plans/readme.md` to reflect the new file locations.
 4. Artifact sanitizer: Audit staged files. Purge unapproved artifact zip archives, temporary scratch files, or test outputs before committing.
 5. TOTAL BAN on Routine Test Running & Build Checking: All test running (`go test`, `pytest`, `06-cicd-local-runner.py`) and build checking (`go build`) are strictly banned during routine task execution. Verification is checked later on in CI/CD. Commit code with a clear descriptive message. Never rewrite published git history (no force push, no rebasing, no squash). Push to git cleanly without failure.
 
@@ -295,7 +324,7 @@ PHASE_2_STEPS = N / 2   (Parallel Execution & QA)
    Proceeding directly to execution.
    ```
 2. Scan & Discover: Use the `invoke_subagent` tool to spawn exactly 2 planning subagents. Their role is to deeply scan the codebase for target changes.
-3. Canonical Spec & Execution Plan: First, write the canonical application specification into `02-spec/21-app/xx-<slug>.md` (or directory `02-spec/21-app/xx-<slug>/` for complex features) with lossless verbatim prompt capture, and register it in `02-spec/21-app/01-index.md`. Then initialize the master execution plan in `.ai-memory/plans/pending/xx-<slug>.md` linking back to the canonical spec. Write down 3–5 custom rules or constraints unique to this task inside the spec file.
+3. Canonical Spec & Execution Plan: First, write the canonical application specification into `02-spec/21-app/xx-<slug>.md` (or directory `02-spec/21-app/xx-<slug>/` for complex features) with lossless verbatim prompt capture, and register it in `02-spec/21-app/readme.md`. Then initialize the master execution plan in `.ai-memory/plans/pending/xx-<slug>.md` linking back to the canonical spec. Write down 3–5 custom rules or constraints unique to this task inside the spec file.
 4. Lean Subtask Decomposition: Break down the master plan into granular, single-responsibility subtask files in `.ai-memory/plans/subtasks/xx-<slug>/01-<subtask>.md`. Do not write common repository boilerplate, universal coding rules, banned operations, or generic guidelines inside subtask files.
    Subtasks MUST follow this lean template to prevent bloat:
    ```markdown
@@ -327,7 +356,7 @@ PHASE_2_STEPS = N / 2   (Parallel Execution & QA)
 2. In this single consolidated file, you MUST include a header explicitly referencing how the main task started, referencing the canonical spec `[02-spec/21-app/xx-<slug>.md](../../../02-spec/21-app/xx-<slug>.md)`, and documenting exactly how many steps/loops it took. Note: The canonical specification in `02-spec/21-app/` remains permanently intact in the repository as the architectural source of truth; do not delete it during consolidation.
 3. Delete the original granular `.md` files in `.ai-memory/plans/subtasks/xx-<slug>/`.
 4. Delete the original parent plan `.ai-memory/plans/pending/xx-<slug>.md`.
-5. Update `.ai-memory/plans/01-index.md` to point to the newly consolidated completed file.
+5. Update `.ai-memory/plans/readme.md` to point to the newly consolidated completed file.
 6. Final Step Git Commit & Push (MANDATORY): Stage all modified files, consolidated plans, and memory records (`git add -A`), commit them in a single clean grouped atomic commit (`git commit -m "<type>(<scope>): <summary>"`), and push to git (`git push origin <branch>`). Under no circumstances commit each file individually.
 
 ---

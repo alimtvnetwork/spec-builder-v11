@@ -10,14 +10,14 @@
 
 | # | File | Version | Status |
 |---|------|---------|--------|
-| 1 | `01-index.md` | — | ✅ Present |
+| 1 | `readme.md` | — | ✅ Present |
 | 2 | `01-error-handling-reference.md` | — | ✅ Present |
 | 3 | `02-go-delegation-fix.md` | — | ✅ Present |
 | 4 | `03-notification-colors.md` | — | ✅ Present |
 
 **Subfolders:**
 
-| # | Folder | `01-index.md` | `99-consistency-report.md` | Version | Status |
+| # | Folder | `readme.md` | `99-consistency-report.md` | Version | Status |
 |---|--------|-------------------|----------------------------|---------|--------|
 | 1 | `04-error-modal/` | ✅ | ✅ v3.0.0 | Mixed | ✅ Compliant (3 subfolder reports pending) |
 | 2 | `05-response-envelope/` | ✅ | ✅ | 1.0.0 | ✅ Compliant |

@@ -9,7 +9,7 @@
 
 | # | File | Present | Naming |
 |---|------|---------|--------|
-| 00 | 01-index.md | ✅ | ✅ |
+| 00 | readme.md | ✅ | ✅ |
 | 01 | 02-design-principles.md | ✅ | ✅ |
 | 02 | 03-theme-variable-architecture.md | ✅ | ✅ |
 | 03 | 04-typography.md | ✅ | ✅ |
@@ -32,7 +32,7 @@
 
 | Criterion | Status | Weight |
 |-----------|--------|--------|
-| `01-index.md` present | ✅ | 25% |
+| `readme.md` present | ✅ | 25% |
 | `99-consistency-report.md` present | ✅ | 25% |
 | Lowercase kebab-case naming | ✅ | 25% |
 | Unique numeric sequence | ✅ | 25% |

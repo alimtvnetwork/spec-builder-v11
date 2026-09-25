@@ -42,7 +42,7 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/01-spec-authoring-guide/01-index.md` | Spec Authoring Guide | 2.0.0 |
+| `02-spec/01-spec-authoring-guide/readme.md` | Spec Authoring Guide | 2.0.0 |
 | `02-spec/01-spec-authoring-guide/02-folder-structure.md` | Folder Structure | 1.0.0 |
 | `02-spec/01-spec-authoring-guide/03-naming-conventions.md` | Naming Conventions | 1.0.0 |
 | `02-spec/01-spec-authoring-guide/04-required-files.md` | Required Files | 1.0.0 |
@@ -60,15 +60,15 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/02-coding-guidelines/01-index.md` | Coding Guidelines | 2.0.0 |
-| `02-spec/02-coding-guidelines/01-cross-language/01-index.md` | Consolidated Review Guide — Condensed |  |
+| `02-spec/02-coding-guidelines/readme.md` | Coding Guidelines | 2.0.0 |
+| `02-spec/02-coding-guidelines/01-cross-language/readme.md` | Consolidated Review Guide — Condensed |  |
 | `02-spec/02-coding-guidelines/05-05-consolidated-review-guide.md` | Consolidated Code Review Guide | 1.0.0 |
-| `02-spec/02-coding-guidelines/01-index.md` | Coding Guidelines | 2.4.0 |
+| `02-spec/02-coding-guidelines/readme.md` | Coding Guidelines | 2.4.0 |
 | `02-spec/02-coding-guidelines/97-acceptance-criteria.md` | Coding Guidelines — Acceptance Criteria | 1.0.0 |
 | `02-spec/02-coding-guidelines/99-consistency-report.md` | Consistency Report — Coding Guidelines | 2.6.0 |
-| `02-spec/02-coding-guidelines/01-cross-language/01-index.md` | Cross-Language Coding Guidelines | 1.4.0 |
+| `02-spec/02-coding-guidelines/01-cross-language/readme.md` | Cross-Language Coding Guidelines | 1.4.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/01-issues-and-fixes-log.md` | Issues & Fixes Log — Historical Reference | 1.0.0 |
-| `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/01-index.md` | Boolean Principles |  |
+| `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/readme.md` | Boolean Principles |  |
 | `02-spec/02-coding-guidelines/01-cross-language/03-casting-elimination-patterns.md` | Casting Elimination Patterns | 2.0.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/05-cross-spec-contradiction-checks.md` | Cross-Spec Contradiction Check Process | 1.0.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/06-cyclomatic-complexity.md` | Cross-Language Rule: Reduce Cyclomatic Complexity to Near-Zero | 1.0.0 |
@@ -97,14 +97,14 @@
 | `02-spec/02-coding-guidelines/01-cross-language/97-acceptance-criteria.md` | Coding Guidelines — Acceptance Criteria | 1.0.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/98-changelog.md` | Coding Guidelines — Changelog | 3.2.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/99-consistency-report.md` | Consistency Report: Cross-Language Guidelines | 5.0.0 |
-| `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/01-index.md` | Boolean Principles | 2.6.0 |
+| `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/readme.md` | Boolean Principles | 2.6.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/02-naming-prefixes.md` | Boolean Principles — P1: is/has prefixes, P2: no negative words | 2.6.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/03-guards-and-extraction.md` | Boolean Principles — P3: named guards, P4: extract complex expressions | 2.6.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/03-parameters-and-conditions.md` | Boolean Principles — P5: explicit params, P6: no mixed booleans, P7: no inline statements, P8: no raw system calls | 2.6.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/05-quick-reference.md` | Boolean Principles — Quick reference table, common mistakes | 2.6.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/05-exemptions-and-api.md` | Boolean Principles — Static factory exemption, Result wrapper API | 2.6.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/99-consistency-report.md` | Consistency Report: Boolean Principles | 1.0.0 |
-| `02-spec/02-coding-guidelines/01-cross-language/04-code-style/01-index.md` | Cross-Language Code Style — Braces, Nesting, Spacing & Function Size | 4.0.0 |
+| `02-spec/02-coding-guidelines/01-cross-language/04-code-style/readme.md` | Cross-Language Code Style — Braces, Nesting, Spacing & Function Size | 4.0.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/04-code-style/02-braces-and-nesting.md` | Braces, Nesting & Exemptions | 4.0.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/04-code-style/03-conditions-and-extraction.md` | Condition Extraction | 4.0.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/04-code-style/04-blank-lines-and-spacing.md` | Blank Lines & Spacing | 4.0.0 |
@@ -113,16 +113,16 @@
 | `02-spec/02-coding-guidelines/01-cross-language/04-code-style/06-comments-and-documentation.md` | Comments, Documentation & Dead Code | 4.0.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/04-code-style/07-checklist.md` | Code Style Checklist & Cross-References | 4.0.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/04-code-style/99-consistency-report.md` | Consistency Report: Code Style | 1.0.0 |
-| `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines/01-index.md` | Master Coding Guidelines | 2.1.0 |
+| `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines/readme.md` | Master Coding Guidelines | 2.1.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines/02-naming-and-database.md` | Master Coding Guidelines — Naming conventions, database naming, file naming | 2.1.0 |
-| `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/01-index.md` | Master Coding Guidelines — Boolean standards, isDefined guards, enum standards | 2.1.0 |
+| `02-spec/02-coding-guidelines/01-cross-language/02-boolean-principles/readme.md` | Master Coding Guidelines — Boolean standards, isDefined guards, enum standards | 2.1.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines/03-code-style-and-errors.md` | Master Coding Guidelines — Code style formatting, error handling | 2.1.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines/04-type-safety.md` | Master Coding Guidelines — Type safety, single return value, no casting | 2.1.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines/05-magic-strings-and-organization.md` | Master Coding Guidelines — Magic strings, file organization, array keys | 2.1.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines/07-advanced-patterns.md` | Master Coding Guidelines — Lint, enum sync, tests, lazy eval, regex, mutation, null safety, nesting, newlines, defer | 2.1.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines/07-checklist.md` | Master Coding Guidelines — Quick checklist for any code change | 2.1.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/15-master-coding-guidelines/99-consistency-report.md` | Consistency Report: Master Coding Guidelines | 1.0.0 |
-| `02-spec/02-coding-guidelines/01-cross-language/16-static-analysis/01-index.md` | Cross-Language Static Analysis & Linter Enforcement | 1.2.0 |
+| `02-spec/02-coding-guidelines/01-cross-language/16-static-analysis/readme.md` | Cross-Language Static Analysis & Linter Enforcement | 1.2.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/16-static-analysis/02-go-golangci-lint.md` | Go — golangci-lint Enforcement Rule Mapping | 1.1.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/16-static-analysis/03-php-phpcs-phpstan.md` | PHP — PHP_CodeSniffer + PHPStan Enforcement Rule Mapping | 1.1.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/16-static-analysis/04-csharp-stylecop.md` | C# — StyleCop Analyzers + Roslyn Enforcement Rule Mapping | 1.1.0 |
@@ -135,7 +135,7 @@
 | `02-spec/02-coding-guidelines/01-cross-language/16-static-analysis/97-acceptance-criteria.md` | Acceptance Criteria: Static Analysis & Linter Enforcement | 1.0.0 |
 | `02-spec/02-coding-guidelines/01-cross-language/16-static-analysis/98-changelog.md` | Changelog: Static Analysis & Linter Enforcement |  |
 | `02-spec/02-coding-guidelines/01-cross-language/16-static-analysis/99-consistency-report.md` | Consistency Report: Static Analysis | 1.2.0 |
-| `02-spec/02-coding-guidelines/02-typescript/01-index.md` | TypeScript Standards | 2.0.0 |
+| `02-spec/02-coding-guidelines/02-typescript/readme.md` | TypeScript Standards | 2.0.0 |
 | `02-spec/02-coding-guidelines/02-typescript/01-connection-status-enum.md` | TypeScript ConnectionStatus Enum — `src/lib/enums/connection-status.ts` |  |
 | `02-spec/02-coding-guidelines/02-typescript/02-entity-status-enum.md` | TypeScript EntityStatus Enum — `src/lib/enums/entity-status.ts` |  |
 | `02-spec/02-coding-guidelines/02-typescript/03-execution-status-enum.md` | TypeScript ExecutionStatus Enum — `src/lib/enums/execution-status.ts` |  |
@@ -151,7 +151,7 @@
 | `02-spec/02-coding-guidelines/02-typescript/97-acceptance-criteria.md` | TypeScript Standards — Acceptance Criteria | 1.0.0 |
 | `02-spec/02-coding-guidelines/02-typescript/98-changelog.md` | TypeScript Standards — Changelog | 2.1.0 |
 | `02-spec/02-coding-guidelines/02-typescript/99-consistency-report.md` | Consistency Report: TypeScript Standards | 4.1.0 |
-| `02-spec/02-coding-guidelines/03-golang/01-index.md` | Golang Standards | 1.1.0 |
+| `02-spec/02-coding-guidelines/03-golang/readme.md` | Golang Standards | 1.1.0 |
 | `02-spec/02-coding-guidelines/03-golang/02-boolean-standards.md` | Go Boolean Standards — Positive Logic & Naming |  |
 | `02-spec/02-coding-guidelines/03-golang/03-httpmethod-enum.md` | HttpMethod Enum — `pkg/enums/httpmethodtype/variant.go` |  |
 | `02-spec/02-coding-guidelines/03-golang/04-golang-standards-reference.md` | Golang Coding Standards |  |
@@ -162,13 +162,13 @@
 | `02-spec/02-coding-guidelines/03-golang/97-acceptance-criteria.md` | Golang Standards — Acceptance Criteria | 1.0.0 |
 | `02-spec/02-coding-guidelines/03-golang/98-changelog.md` | Golang Standards — Changelog | 2.1.0 |
 | `02-spec/02-coding-guidelines/03-golang/99-consistency-report.md` | Consistency Report: Golang Standards | 3.2.0 |
-| `02-spec/02-coding-guidelines/03-golang/01-enum-specification/01-index.md` | Enum Specification | 4.1.0 |
+| `02-spec/02-coding-guidelines/03-golang/01-enum-specification/readme.md` | Enum Specification | 4.1.0 |
 | `02-spec/02-coding-guidelines/03-golang/01-enum-specification/01-enum-pattern.md` | Enum Pattern | 4.0.0 |
 | `02-spec/02-coding-guidelines/03-golang/01-enum-specification/02-required-methods.md` | Required Methods | 5.0.0 |
 | `02-spec/02-coding-guidelines/03-golang/01-enum-specification/03-folder-03-structure.md` | Folder Structure | 4.0.0 |
 | `02-spec/02-coding-guidelines/03-golang/01-enum-specification/04-validation-checklist.md` | Validation Checklist | 3.0.0 |
 | `02-spec/02-coding-guidelines/03-golang/01-enum-specification/99-consistency-report.md` | Consistency Report: Enum Specification | 1.0.0 |
-| `02-spec/02-coding-guidelines/03-golang/04-golang-standards-reference/01-index.md` | Golang Coding Standards | 3.7.0 |
+| `02-spec/02-coding-guidelines/03-golang/04-golang-standards-reference/readme.md` | Golang Coding Standards | 3.7.0 |
 | `02-spec/02-coding-guidelines/03-golang/04-golang-standards-reference/01-file-and-function-rules.md` | Golang Coding Standards — File naming, size, function size, nesting ban | 3.7.0 |
 | `02-spec/02-coding-guidelines/03-golang/04-golang-standards-reference/02-type-safety-and-errors.md` | Golang Coding Standards — Type safety, error handling, Result types | 3.7.0 |
 | `02-spec/02-coding-guidelines/03-golang/04-golang-standards-reference/03-database-and-structs.md` | Golang Coding Standards — Database naming, dbutil wrapper, struct design | 3.7.0 |
@@ -176,7 +176,7 @@
 | `02-spec/02-coding-guidelines/03-golang/04-golang-standards-reference/05-enums-and-dry.md` | Golang Coding Standards — Typed constants, enums, DRY enforcement | 3.7.0 |
 | `02-spec/02-coding-guidelines/03-golang/04-golang-standards-reference/06-concurrency-and-patterns.md` | Golang Coding Standards — Concurrency, forbidden patterns, imports, common mistakes | 3.7.0 |
 | `02-spec/02-coding-guidelines/03-golang/04-golang-standards-reference/99-consistency-report.md` | Consistency Report: Golang Standards Reference | 1.0.0 |
-| `02-spec/02-coding-guidelines/04-php/01-index.md` | PHP Standards | 2.0.0 |
+| `02-spec/02-coding-guidelines/04-php/readme.md` | PHP Standards | 2.0.0 |
 | `02-spec/02-coding-guidelines/04-php/01-enums.md` | PHP Enums — Complete Reference | 7.1.0 |
 | `02-spec/02-coding-guidelines/04-php/02-forbidden-patterns.md` | PHP Forbidden Patterns — Quick Reference Checklist | 4.0.0 |
 | `02-spec/02-coding-guidelines/04-php/03-naming-conventions.md` | PHP Naming Conventions | 1.3.0 |
@@ -188,14 +188,14 @@
 | `02-spec/02-coding-guidelines/04-php/97-acceptance-criteria.md` | PHP Standards — Acceptance Criteria | 1.0.0 |
 | `02-spec/02-coding-guidelines/04-php/98-changelog.md` | PHP Standards — Changelog | 2.1.0 |
 | `02-spec/02-coding-guidelines/04-php/99-consistency-report.md` | Consistency Report: PHP Standards | 3.0.0 |
-| `02-spec/02-coding-guidelines/04-php/07-php-standards-reference/01-index.md` | PHP Coding Standards | 5.1.0 |
+| `02-spec/02-coding-guidelines/04-php/07-php-standards-reference/readme.md` | PHP Coding Standards | 5.1.0 |
 | `02-spec/02-coding-guidelines/04-php/07-php-standards-reference/01-naming-and-errors.md` | PHP Coding Standards — Naming conventions, error handling, structured responses | 5.1.0 |
 | `02-spec/02-coding-guidelines/04-php/07-php-standards-reference/02-constants-and-deps.md` | PHP Coding Standards — Constants, enums, dependency checks, file paths | 5.1.0 |
 | `02-spec/02-coding-guidelines/04-php/07-php-standards-reference/03-initialization-and-booleans.md` | PHP Coding Standards — Constructor rules, boolean logic, isDefined guards | 5.1.0 |
 | `02-spec/02-coding-guidelines/04-php/07-php-standards-reference/04-code-style.md` | PHP Coding Standards — Braces, nesting, spacing, function size | 5.1.0 |
 | `02-spec/02-coding-guidelines/04-php/07-php-standards-reference/05-forbidden-and-database.md` | PHP Coding Standards — Forbidden patterns, database wrapper | 5.1.0 |
 | `02-spec/02-coding-guidelines/04-php/07-php-standards-reference/99-consistency-report.md` | Consistency Report: PHP Standards Reference | 1.0.0 |
-| `02-spec/02-coding-guidelines/05-rust/01-index.md` | Rust Coding Standards | 1.1.0 |
+| `02-spec/02-coding-guidelines/05-rust/readme.md` | Rust Coding Standards | 1.1.0 |
 | `02-spec/02-coding-guidelines/05-rust/02-naming-conventions.md` | Rust Naming Conventions | 1.0.0 |
 | `02-spec/02-coding-guidelines/05-rust/02-error-handling.md` | Rust Error Handling | 1.0.0 |
 | `02-spec/02-coding-guidelines/05-rust/03-async-patterns.md` | Rust Async Patterns | 1.0.0 |
@@ -205,15 +205,15 @@
 | `02-spec/02-coding-guidelines/05-rust/97-acceptance-criteria.md` | Rust Coding Standards — Acceptance Criteria | 1.0.0 |
 | `02-spec/02-coding-guidelines/05-rust/98-changelog.md` | Changelog: Rust Standards | 1.0.0 |
 | `02-spec/02-coding-guidelines/05-rust/99-consistency-report.md` | Consistency Report — Rust Coding Standards | 1.1.0 |
-| `02-spec/02-coding-guidelines/06-ai-optimization/01-index.md` | AI Optimization | 1.1.0 |
-| `02-spec/02-coding-guidelines/01-cross-language/01-index.md` | Anti-Hallucination Rules | 1.0.0 |
+| `02-spec/02-coding-guidelines/06-ai-optimization/readme.md` | AI Optimization | 1.1.0 |
+| `02-spec/02-coding-guidelines/01-cross-language/readme.md` | Anti-Hallucination Rules | 1.0.0 |
 | `02-spec/02-coding-guidelines/06-ai-optimization/02-ai-quick-reference-checklist.md` | AI Quick Reference Checklist | 2.1.0 |
 | `02-spec/02-coding-guidelines/06-ai-optimization/03-hallucination-prevention.md` | Common AI Mistakes | 1.0.0 |
 | `02-spec/02-coding-guidelines/06-ai-optimization/04-condensed-master-guidelines.md` | Condensed Master Coding Guidelines — AI Context Reference | 1.2.0 |
 | `02-spec/02-coding-guidelines/06-ai-optimization/05-enum-naming-quick-reference.md` | Enum Naming Quick Reference — All Languages | 1.0.0 |
 | `02-spec/02-coding-guidelines/06-ai-optimization/97-acceptance-criteria.md` | Acceptance Criteria: AI Optimization | 1.0.0 |
 | `02-spec/02-coding-guidelines/06-ai-optimization/99-consistency-report.md` | Consistency Report — AI Optimization | 1.3.0 |
-| `02-spec/02-coding-guidelines/07-csharp/01-index.md` | C# Coding Standards | 1.0.0 |
+| `02-spec/02-coding-guidelines/07-csharp/readme.md` | C# Coding Standards | 1.0.0 |
 | `02-spec/02-coding-guidelines/07-csharp/01-naming-and-conventions.md` | C# Naming and Conventions | 1.0.0 |
 | `02-spec/02-coding-guidelines/07-csharp/02-method-design.md` | C# Method Design | 1.0.0 |
 | `02-spec/02-coding-guidelines/07-csharp/03-error-handling.md` | C# Error Handling | 1.0.0 |
@@ -221,22 +221,22 @@
 | `02-spec/02-coding-guidelines/07-csharp/97-acceptance-criteria.md` | C# Coding Standards — Acceptance Criteria | 1.0.0 |
 | `02-spec/02-coding-guidelines/07-csharp/98-changelog.md` | C# Coding Standards — Changelog |  |
 | `02-spec/02-coding-guidelines/07-csharp/99-consistency-report.md` | Consistency Report: C# Coding Standards | 1.0.0 |
-| `02-spec/02-coding-guidelines/08-file-folder-naming/01-index.md` | File & Folder Naming Conventions | 1.0.0 |
-| `02-spec/02-coding-guidelines/08-file-folder-naming/01-index.md` | File & Folder Naming — Cross-Language Rules | 1.0.0 |
+| `02-spec/02-coding-guidelines/08-file-folder-naming/readme.md` | File & Folder Naming Conventions | 1.0.0 |
+| `02-spec/02-coding-guidelines/08-file-folder-naming/readme.md` | File & Folder Naming — Cross-Language Rules | 1.0.0 |
 | `02-spec/02-coding-guidelines/08-file-folder-naming/02-php-wordpress.md` | File & Folder Naming — PHP / WordPress | 1.0.0 |
 | `02-spec/02-coding-guidelines/08-file-folder-naming/03-golang.md` | File & Folder Naming — Go | 1.0.0 |
 | `02-spec/02-coding-guidelines/08-file-folder-naming/04-typescript-javascript.md` | File & Folder Naming — TypeScript / JavaScript | 1.0.0 |
 | `02-spec/02-coding-guidelines/08-file-folder-naming/05-rust-csharp.md` | File & Folder Naming — Rust / C# | 1.0.0 |
 | `02-spec/02-coding-guidelines/08-file-folder-naming/99-consistency-report.md` | Consistency Report — File & Folder Naming | 1.0.0 |
-| `02-spec/02-coding-guidelines/11-powershell-integration/01-index.md` | PowerShell Integration | 1.0.0 |
-| `02-spec/02-coding-guidelines/10-research/01-index.md` | Research | 1.0.0 |
-| `02-spec/02-coding-guidelines/11-security/01-index.md` | Security Guidelines | 1.0.0 |
+| `02-spec/02-coding-guidelines/11-powershell-integration/readme.md` | PowerShell Integration | 1.0.0 |
+| `02-spec/02-coding-guidelines/10-research/readme.md` | Research | 1.0.0 |
+| `02-spec/02-coding-guidelines/11-security/readme.md` | Security Guidelines | 1.0.0 |
 | `02-spec/02-coding-guidelines/11-security/99-consistency-report.md` | Consistency Report — Security Guidelines | 1.0.0 |
-| `02-spec/02-coding-guidelines/11-security/01-axios-version-control/01-index.md` | Axios Version Control Policy | 1.1.0 |
+| `02-spec/02-coding-guidelines/11-security/01-axios-version-control/readme.md` | Axios Version Control Policy | 1.1.0 |
 | `02-spec/02-coding-guidelines/11-security/01-axios-version-control/01-implementation-rules.md` | Implementation Rules | 1.1.0 |
 | `02-spec/02-coding-guidelines/11-security/01-axios-version-control/02-security-notes.md` | Security Notes — Axios Version Advisory | 1.1.0 |
 | `02-spec/02-coding-guidelines/11-security/01-axios-version-control/99-consistency-report.md` | Consistency Report — Axios Version Control | 1.1.0 |
-| `02-spec/04-database-conventions/01-index.md` | Database Conventions | 1.0.0 |
+| `02-spec/04-database-conventions/readme.md` | Database Conventions | 1.0.0 |
 | `02-spec/04-database-conventions/03-naming-conventions.md` | Database Naming Conventions | 1.1.0 |
 | `02-spec/04-database-conventions/03-schema-design.md` | Database Schema Design | 1.0.0 |
 | `02-spec/04-database-conventions/04-orm-and-views.md` | ORM Usage and Database Views | 1.0.0 |
@@ -245,45 +245,45 @@
 | `02-spec/04-database-conventions/07-rest-api-format.md` | REST API Response Format | 1.1.0 |
 | `02-spec/04-database-conventions/08-split-db-pattern.md` | Split DB Pattern | 1.0.0 |
 | `02-spec/04-database-conventions/99-consistency-report.md` | Consistency Report — Database Conventions | 1.0.0 |
-| `02-spec/02-coding-guidelines/21-app/01-index.md` | App | 1.0.0 |
-| `02-spec/02-coding-guidelines/22-app-issues/01-index.md` | App Issues | 1.0.0 |
+| `02-spec/02-coding-guidelines/21-app/readme.md` | App | 1.0.0 |
+| `02-spec/02-coding-guidelines/22-app-issues/readme.md` | App Issues | 1.0.0 |
 
 ## 🔴 Error Management
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/03-error-manage/01-index.md` | Error Management Specification | 1.0.0 |
+| `02-spec/03-error-manage/readme.md` | Error Management Specification | 1.0.0 |
 | `02-spec/03-error-manage/97-acceptance-criteria.md` | Error Management — Acceptance Criteria | 1.0.0 |
 | `02-spec/03-error-manage/98-changelog.md` | Error Management — Changelog | 2.2.0 |
 | `02-spec/03-error-manage/99-consistency-report.md` | Consistency Report: Error Management | 1.0.0 |
 | `02-spec/03-error-manage/03-03-structure.md` | 04-error-manage — Structure Summary | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/00-error-documentation-guideline.md` | Error Documentation Guideline | 1.0.0 |
-| `02-spec/03-error-manage/01-error-resolution/01-index.md` | Error Resolution | 1.0.0 |
+| `02-spec/03-error-manage/01-error-resolution/readme.md` | Error Resolution | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/01-cross-reference-diagram.md` | Error Resolution Cross-Reference Diagram | 1.0.0 |
-| `02-spec/03-error-manage/01-index.md` | Debugging Cheat Sheet | 1.0.0 |
+| `02-spec/03-error-manage/readme.md` | Debugging Cheat Sheet | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/99-consistency-report.md` | Consistency Report: Error Resolution | 1.0.0 |
-| `02-spec/03-error-manage/01-error-resolution/03-retrospectives/01-index.md` | Retrospectives | 1.1.0 |
+| `02-spec/03-error-manage/01-error-resolution/03-retrospectives/readme.md` | Retrospectives | 1.1.0 |
 | `02-spec/03-error-manage/01-error-resolution/03-retrospectives/01-health-endpoint-mismatch.md` | 01 — Health Endpoint Format Mismatch | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/03-retrospectives/02-retry-debounce-dedup-fixes.md` | Retry, Debounce & Deduplication Fixes — Full Retrospective | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/03-retrospectives/03-zip-finalization-before-return.md` | 03-zip-finalization-before-return.md | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/03-retrospectives/04-activation-endpoint-mismatch.md` | 04-activation-endpoint-mismatch.md | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/03-retrospectives/99-consistency-report.md` | Consistency Report: Retrospectives | 1.0.0 |
-| `02-spec/03-error-manage/01-error-resolution/04-verification-patterns/01-index.md` | Verification Patterns | 1.1.0 |
+| `02-spec/03-error-manage/01-error-resolution/04-verification-patterns/readme.md` | Verification Patterns | 1.1.0 |
 | `02-spec/03-error-manage/01-error-resolution/04-verification-patterns/01-frontend-backend-sync.md` | Frontend-Backend Sync Verification Pattern | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/04-verification-patterns/99-consistency-report.md` | Consistency Report: Verification Patterns | 1.0.0 |
-| `02-spec/03-error-manage/01-error-resolution/05-debugging-guides/01-index.md` | Debugging Guides | 1.1.0 |
+| `02-spec/03-error-manage/01-error-resolution/05-debugging-guides/readme.md` | Debugging Guides | 1.1.0 |
 | `02-spec/03-error-manage/01-error-resolution/05-debugging-guides/01-debugging-php.md` | PHP Debugging Guide | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/05-debugging-guides/02-debugging-go.md` | Go Debugging Guide | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/05-debugging-guides/03-debugging-typescript.md` | TypeScript/React Debugging Guide | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/05-debugging-guides/99-consistency-report.md` | Consistency Report: Debugging Guides | 1.0.0 |
 | `02-spec/03-error-manage/01-error-resolution/app-issues/2026-04-02-url-error-casing-fix.md` | Issue: URLError Renamed to UrlError — Inconsistent Casing |  |
 | `02-spec/03-error-manage/01-error-resolution/app-issues/error-management-file-path-and-missing-file-code-red-rule.md` | 🔴 Code Red: File Path and Missing File Error Logging Rule | 1.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/01-index.md` | Error Architecture | 1.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/01-index.md` | Error Handling — Cross-Stack Specification | 2.0.0 |
-| `02-spec/03-error-manage/01-index.md` | Go Backend Fix: Missing Delegation Fields | 1.0.0 |
-| `02-spec/03-error-manage/01-index.md` | Notification & Toast Color System |  |
+| `02-spec/03-error-manage/02-error-architecture/readme.md` | Error Architecture | 1.0.0 |
+| `02-spec/03-error-manage/02-error-architecture/readme.md` | Error Handling — Cross-Stack Specification | 2.0.0 |
+| `02-spec/03-error-manage/readme.md` | Go Backend Fix: Missing Delegation Fields | 1.0.0 |
+| `02-spec/03-error-manage/readme.md` | Notification & Toast Color System |  |
 | `02-spec/03-error-manage/02-error-architecture/99-consistency-report.md` | Consistency Report: Error Architecture | 2.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-index.md` | Error Modal | 1.1.0 |
+| `02-spec/03-error-manage/02-error-architecture/04-error-modal/readme.md` | Error Modal | 1.1.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats.md` | ⚠️ THIS FILE HAS BEEN SPLIT INTO A SUBFOLDER |  |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/02-react-components.md` | ⚠️ THIS FILE HAS BEEN SPLIT INTO A SUBFOLDER |  |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/03-error-modal-reference.md` | Error Modal — Frontend Specification | 2.1.0 |
@@ -291,18 +291,18 @@
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/05-error-history-persistence.md` | Error Modal — Error History Persistence | 1.1.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/06-suppress-global-error.md` | Error Modal — suppressGlobalError Meta Pattern | 1.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/99-consistency-report.md` | Consistency Report: Error Modal | 4.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/01-index.md` | Error Modal — Copy & Export Formats (Index) | 3.2.0 |
+| `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/readme.md` | Error Modal — Copy & Export Formats (Index) | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/01-compact-report.md` | Compact Report (Markdown) — DEFAULT Copy Format | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/02-full-report.md` | Full Report (Markdown) | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/03-full-report-with-backend-logs.md` | Full Report with Backend Logs | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/04-error-log-txt.md` | error.log.txt (Backend Error Log) | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/05-full-log-txt.md` | log.txt (Backend Full Log) | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/06-error-log-with-delegated-info.md` | Backend error.log.txt with Delegated Server Info | 3.2.0 |
-| `02-spec/03-error-manage/01-index.md` | Envelope Error Response (JSON) | 3.2.0 |
+| `02-spec/03-error-manage/readme.md` | Envelope Error Response (JSON) | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/08-session-diagnostics.md` | Session Diagnostics (JSON) | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/09-generator-code-reference.md` | Generator Code Reference | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/01-copy-formats/99-consistency-report.md` | Consistency Report: Copy Formats | 1.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/04-error-modal/02-react-components/01-index.md` | Error Modal — Reusable React Components (Index) | 4.0.0 |
+| `02-spec/03-error-manage/02-error-architecture/04-error-modal/02-react-components/readme.md` | Error Modal — Reusable React Components (Index) | 4.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/02-react-components/01-typescript-interfaces.md` | TypeScript Interfaces | 4.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/02-react-components/02-error-store.md` | Error Store (Zustand) | 4.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/02-react-components/03-api-types.md` | API Types & Methods | 4.0.0 |
@@ -312,7 +312,7 @@
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/02-react-components/07-report-generator.md` | Error Report Generator | 4.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/02-react-components/08-integration-guide.md` | Integration Guide | 3.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/02-react-components/99-consistency-report.md` | Consistency Report: React Components | 1.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/04-error-modal/03-error-modal-reference/01-index.md` | Error Modal — Frontend Specification (Index) | 2.2.0 |
+| `02-spec/03-error-manage/02-error-architecture/04-error-modal/03-error-modal-reference/readme.md` | Error Modal — Frontend Specification (Index) | 2.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/03-error-modal-reference/01-data-model.md` | Data Model: CapturedError | 2.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/03-error-modal-reference/02-capture-pipeline.md` | Error Capture Pipeline | 2.3.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/03-error-modal-reference/03-envelope-parsing.md` | Envelope Parsing & Enrichment | 2.2.0 |
@@ -327,21 +327,21 @@
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/03-error-modal-reference/12-code-examples.md` | React Code Examples | 2.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/03-error-modal-reference/13-file-reference.md` | File Reference | 2.2.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/03-error-modal-reference/99-consistency-report.md` | Consistency Report: Error Modal Reference | 1.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/04-error-modal/04-color-themes/01-index.md` | Color Theme & Design Token Reference (Index) | 2.1.0 |
+| `02-spec/03-error-manage/02-error-architecture/04-error-modal/04-color-themes/readme.md` | Color Theme & Design Token Reference (Index) | 2.1.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/04-color-themes/01-design-tokens.md` | Design System Tokens & Error Level Colors | 2.1.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/04-color-themes/02-backend-tab-colors.md` | Backend Section — Tab-Specific Color Themes | 2.1.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/04-color-themes/03-frontend-and-ui-colors.md` | Frontend Section & UI Element Colors | 2.1.0 |
 | `02-spec/03-error-manage/02-error-architecture/04-error-modal/04-color-themes/99-consistency-report.md` | Consistency Report: Color Themes | 1.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/05-response-envelope/01-index.md` | Response Envelope | 1.1.0 |
+| `02-spec/03-error-manage/02-error-architecture/05-response-envelope/readme.md` | Response Envelope | 1.1.0 |
 | `02-spec/03-error-manage/02-error-architecture/05-response-envelope/01-adr.md` | ADR: Universal Response Envelope — Architecture Decision Record | 1.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/05-response-envelope/02-changelog.md` | Universal Response Envelope — Changelog | 1.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/05-response-envelope/03-configurability.md` | Envelope Configurability | 1.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/05-response-envelope/04-response-envelope-reference.md` | Universal Response Envelope Specification | 1.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/05-response-envelope/99-consistency-report.md` | Consistency Report: Response Envelope | 1.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-index.md` | AppError Package | 1.1.0 |
+| `02-spec/03-error-manage/02-error-architecture/06-apperror-package/readme.md` | AppError Package | 1.1.0 |
 | `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference.md` | AppError Package Reference |  |
 | `02-spec/03-error-manage/02-error-architecture/06-apperror-package/99-consistency-report.md` | Consistency Report: Apperror Package | 1.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/01-index.md` | AppError Package Reference | 1.3.0 |
+| `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/readme.md` | AppError Package Reference | 1.3.0 |
 | `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/01-overview-and-stack.md` | AppError Package Reference — Overview, invariants, StackTrace | 1.3.0 |
 | `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/02-apperror-struct.md` | AppError Package Reference — AppError struct and constructors | 2.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/03-result-types.md` | AppError Package Reference — Result[T], ResultSlice[T], ResultMap[K,V] | 1.3.0 |
@@ -350,22 +350,22 @@
 | `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/05-usage-and-adapters.md` | AppError Package Reference — Usage examples, service adapter unwrap pattern | 1.3.0 |
 | `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/06-serialization-and-guards.md` | AppError Package Reference — JSON serialization, Result guard rule | 1.3.0 |
 | `02-spec/03-error-manage/02-error-architecture/06-apperror-package/01-apperror-reference/99-consistency-report.md` | Consistency Report: AppError Package Reference | 1.0.0 |
-| `02-spec/03-error-manage/02-error-architecture/07-logging-and-diagnostics/01-index.md` | Logging and Diagnostics | 1.1.0 |
+| `02-spec/03-error-manage/02-error-architecture/07-logging-and-diagnostics/readme.md` | Logging and Diagnostics | 1.1.0 |
 | `02-spec/03-error-manage/02-error-architecture/07-logging-and-diagnostics/01-react-execution-logger.md` | Specification: React Execution Logger | 2.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/07-logging-and-diagnostics/02-session-based-logging.md` | Specification: Session-Based Logging System | 3.0.0 |
 | `02-spec/03-error-manage/02-error-architecture/07-logging-and-diagnostics/99-consistency-report.md` | Consistency Report: Logging And Diagnostics | 1.0.0 |
-| `02-spec/03-error-manage/03-error-code-registry/01-index.md` | Error Code Registry | 2.1.0 |
+| `02-spec/03-error-manage/03-error-code-registry/readme.md` | Error Code Registry | 2.1.0 |
 | `02-spec/03-error-manage/03-error-code-registry/01-registry.md` | Error Code Registry - Master List | 1.0.0 |
 | `02-spec/03-error-manage/03-error-code-registry/02-integration-guide.md` | Error Code Registry - Integration Guide | 1.0.0 |
 | `02-spec/03-error-manage/03-error-code-registry/03-collision-resolution-summary.md` | Collision Resolution Summary Report | 1.0.0 |
 | `02-spec/03-error-manage/03-error-code-registry/04-error-code-utilization-report.md` | Error Code Range Utilization Report | 2.0.0 |
 | `02-spec/03-error-manage/03-error-code-registry/05-overlap-validator.md` | 02 — Error Code Registry Overlap Validator | 1.0.0 |
 | `02-spec/03-error-manage/03-error-code-registry/99-consistency-report.md` | Consistency Report: Error Code Registry | 1.0.0 |
-| `02-spec/03-error-manage/03-error-code-registry/07-schemas/01-index.md` | Schemas | 1.1.0 |
+| `02-spec/03-error-manage/03-error-code-registry/07-schemas/readme.md` | Schemas | 1.1.0 |
 | `02-spec/03-error-manage/03-error-code-registry/07-schemas/99-consistency-report.md` | Consistency Report: Schemas | 1.0.0 |
-| `02-spec/03-error-manage/03-error-code-registry/08-linter-scripts/01-index.md` | Linter Scripts | 1.1.0 |
+| `02-spec/03-error-manage/03-error-code-registry/08-linter-scripts/readme.md` | Linter Scripts | 1.1.0 |
 | `02-spec/03-error-manage/03-error-code-registry/08-linter-scripts/99-consistency-report.md` | Consistency Report: Linter Scripts | 2.0.0 |
-| `02-spec/03-error-manage/03-error-code-registry/09-templates/01-index.md` | Templates | 1.1.0 |
+| `02-spec/03-error-manage/03-error-code-registry/09-templates/readme.md` | Templates | 1.1.0 |
 | `02-spec/03-error-manage/03-error-code-registry/09-templates/01-error-codes-template.md` | [PROJECT_NAME] - Error Codes | 1.0.0 |
 | `02-spec/03-error-manage/03-error-code-registry/09-templates/99-consistency-report.md` | Consistency Report: Templates | 1.0.0 |
 
@@ -373,45 +373,45 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/05-split-db-architecture/01-index.md` | Split Database Architecture | 3.0.0 |
+| `02-spec/05-split-db-architecture/readme.md` | Split Database Architecture | 3.0.0 |
 | `02-spec/05-split-db-architecture/02-fundamentals.md` | Split Database Architecture — Fundamentals | 3.0.0 |
 | `02-spec/05-split-db-architecture/97-acceptance-criteria.md` | Split Database Architecture — Acceptance Criteria | 1.0.0 |
 | `02-spec/05-split-db-architecture/97-changelog.md` | Split DB Architecture — Changelog | 1.0.0 |
 | `02-spec/05-split-db-architecture/98-acceptance-criteria.md` | Split DB Architecture: Acceptance Criteria | 2.0.0 |
 | `02-spec/05-split-db-architecture/99-consistency-report.md` | Consistency Report: Split DB Architecture | 3.0.0 |
-| `02-spec/05-split-db-architecture/02-features/01-index.md` | Split DB Architecture — Features Index |  |
+| `02-spec/05-split-db-architecture/02-features/readme.md` | Split DB Architecture — Features Index |  |
 | `02-spec/05-split-db-architecture/02-features/01-cli-examples.md` | Split DB Architecture: CLI Examples | 4.0.0 |
 | `02-spec/05-split-db-architecture/02-features/02-reset-api-standard.md` | Split DB Architecture: Reset API Standard | 2.0.0 |
 | `02-spec/05-split-db-architecture/02-features/03-database-flow-diagrams.md` | Split DB Architecture: Complete Database Flow Diagram | 2.0.0 |
 | `02-spec/05-split-db-architecture/02-features/04-rbac-casbin.md` | Split DB Architecture: Role-Based Access Control (RBAC) with Casbin | 2.0.0 |
 | `02-spec/05-split-db-architecture/02-features/05-user-scoped-isolation.md` | Split DB Architecture: User-Scoped Isolation | 2.0.0 |
 | `02-spec/05-split-db-architecture/02-features/99-consistency-report.md` | Consistency Report: Split DB Features | 1.0.0 |
-| `02-spec/05-split-db-architecture/03-issues/01-index.md` | Split DB Architecture — Issues Index |  |
+| `02-spec/05-split-db-architecture/03-issues/readme.md` | Split DB Architecture — Issues Index |  |
 
 ## 🌱 Seedable Config
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/06-seedable-config-architecture/01-index.md` | Seedable Config Architecture + Changelog Versioning | 3.0.0 |
+| `02-spec/06-seedable-config-architecture/readme.md` | Seedable Config Architecture + Changelog Versioning | 3.0.0 |
 | `02-spec/06-seedable-config-architecture/02-fundamentals.md` | Seedable Config Architecture — Fundamentals | 3.0.0 |
 | `02-spec/06-seedable-config-architecture/97-acceptance-criteria.md` | Seedable Config Architecture — Acceptance Criteria | 1.0.0 |
 | `02-spec/06-seedable-config-architecture/97-changelog.md` | Seedable Config Architecture — Changelog | 1.0.0 |
 | `02-spec/06-seedable-config-architecture/98-acceptance-criteria.md` | Seedable Config Architecture: Acceptance Criteria | 2.0.0 |
 | `02-spec/06-seedable-config-architecture/99-consistency-report.md` | Consistency Report: Seedable Config Architecture | 3.0.0 |
-| `02-spec/06-seedable-config-architecture/02-features/01-index.md` | Seedable Config Architecture — Features Index |  |
+| `02-spec/06-seedable-config-architecture/02-features/readme.md` | Seedable Config Architecture — Features Index |  |
 | `02-spec/06-seedable-config-architecture/02-features/01-rag-chunk-settings.md` | RAG Chunk Configuration Settings | 3.0.0 |
 | `02-spec/06-seedable-config-architecture/02-features/02-rag-validation-helpers.md` | RAG Configuration Validation Helpers | 3.0.0 |
 | `02-spec/06-seedable-config-architecture/02-features/03-rag-validation-tests.md` | RAG Validation Helpers: Unit Test Specification | 2.0.0 |
 | `02-spec/06-seedable-config-architecture/02-features/04-rag-test-coverage-matrix.md` | RAG Validation Test Coverage Matrix | 2.0.0 |
 | `02-spec/06-seedable-config-architecture/02-features/05-validation-data-seeding.md` | Validation Data Seeding Pattern | 3.0.0 |
 | `02-spec/06-seedable-config-architecture/02-features/99-consistency-report.md` | Consistency Report: Seedable Config Features | 1.0.0 |
-| `02-spec/06-seedable-config-architecture/03-issues/01-index.md` | Seedable Config Architecture — Issues Index |  |
+| `02-spec/06-seedable-config-architecture/03-issues/readme.md` | Seedable Config Architecture — Issues Index |  |
 
 ## 🎨 Design System
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/07-design-system/01-index.md` | AI-Adaptable Design System | 1.0.0 |
+| `02-spec/07-design-system/readme.md` | AI-Adaptable Design System | 1.0.0 |
 | `02-spec/07-design-system/02-design-principles.md` | Design Principles | 1.0.0 |
 | `02-spec/07-design-system/03-theme-variable-architecture.md` | Theme & Variable Architecture | 1.0.0 |
 | `02-spec/07-design-system/04-typography.md` | Typography | 1.0.0 |
@@ -432,10 +432,10 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/08-docs-viewer-ui/01-index.md` | Docs Viewer UI — Overview | 1.0.0 |
+| `02-spec/08-docs-viewer-ui/readme.md` | Docs Viewer UI — Overview | 1.0.0 |
 | `02-spec/08-docs-viewer-ui/02-fundamentals.md` | Docs Viewer UI — Fundamentals | 1.0.0 |
 | `02-spec/08-docs-viewer-ui/99-consistency-report.md` | Consistency Report: Docs Viewer UI | 1.0.0 |
-| `02-spec/08-docs-viewer-ui/02-features/01-index.md` | Docs Viewer UI — Features Index | 1.0.0 |
+| `02-spec/08-docs-viewer-ui/02-features/readme.md` | Docs Viewer UI — Features Index | 1.0.0 |
 | `02-spec/08-docs-viewer-ui/02-features/01-typography.md` | Feature: Typography System | 1.0.0 |
 | `02-spec/08-docs-viewer-ui/02-features/02-syntax-highlighting.md` | Feature: Syntax Highlighting | 1.0.0 |
 | `02-spec/08-docs-viewer-ui/02-features/03-fullscreen-mode.md` | Feature: Fullscreen Mode | 1.0.0 |
@@ -453,7 +453,7 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/09-code-block-system/01-index.md` | Code Block System — Overview | 1.0.0 |
+| `02-spec/09-code-block-system/readme.md` | Code Block System — Overview | 1.0.0 |
 | `02-spec/09-code-block-system/02-architecture.md` | Architecture — Code Block System | 1.0.0 |
 | `02-spec/09-code-block-system/03-html-03-structure.md` | HTML Structure — Code Block System | 1.0.0 |
 | `02-spec/09-code-block-system/04-syntax-highlighting.md` | Syntax Highlighting — Code Block System | 1.0.0 |
@@ -488,7 +488,7 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/17-consolidated-guidelines/01-index.md` | Consolidated Guidelines | 1.0.0 |
+| `02-spec/17-consolidated-guidelines/readme.md` | Consolidated Guidelines | 1.0.0 |
 | `02-spec/17-consolidated-guidelines/04-spec-authoring.md` | Consolidated: Spec Authoring Guide | 1.0.0 |
 | `02-spec/17-consolidated-guidelines/05-coding-guidelines.md` | Redirect Stub (see file 31) | 1.0.0 |
 | `02-spec/17-consolidated-guidelines/06-error-management.md` | Consolidated: Error Management | 1.0.0 |
@@ -508,7 +508,7 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/11-powershell-integration/01-index.md` | PowerShell Integration | 2.25.0 |
+| `02-spec/11-powershell-integration/readme.md` | PowerShell Integration | 2.25.0 |
 | `02-spec/11-powershell-integration/02-configuration-schema.md` | Configuration Schema | — |
 | `02-spec/11-powershell-integration/03-template-vs-project-differences.md` | Template vs Project Differences | — |
 | `02-spec/11-powershell-integration/04-script-reference.md` | Script Reference | — |
@@ -526,13 +526,13 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/10-research/01-index.md` | Research | 1.0.0 |
+| `02-spec/10-research/readme.md` | Research | 1.0.0 |
 
 ## 🔄 CI/CD Pipeline Workflows
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/12-cicd-pipeline-workflows/01-index.md` | CI/CD Pipeline Workflows | 2.0.0 |
+| `02-spec/12-cicd-pipeline-workflows/readme.md` | CI/CD Pipeline Workflows | 2.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/03-shared-conventions.md` | Shared Pipeline Conventions | 1.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/04-github-release-standard.md` | GitHub Release Standard | 1.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/06-vulnerability-scanning.md` | Vulnerability Scanning | 1.0.0 |
@@ -546,11 +546,11 @@
 | `02-spec/12-cicd-pipeline-workflows/11-environment-variable-setup.md` | Environment Variable Setup | 1.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/12-terminal-output-standards.md` | Terminal Output Standards | 1.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/13-binary-icon-branding.md` | Binary Icon & Windows Resource Embedding | 1.0.0 |
-| `02-spec/12-cicd-pipeline-workflows/01-browser-extension-deploy/01-index.md` | Browser Extension Deploy — Overview | 1.0.0 |
+| `02-spec/12-cicd-pipeline-workflows/01-browser-extension-deploy/readme.md` | Browser Extension Deploy — Overview | 1.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/01-browser-extension-deploy/02-ci-pipeline.md` | Browser Extension — CI Pipeline | 1.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/01-browser-extension-deploy/05-release-pipeline.md` | Browser Extension — Release Pipeline | 1.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/01-browser-extension-deploy/99-consistency-report.md` | Consistency Report — Browser Extension Deploy | 1.0.0 |
-| `02-spec/12-cicd-pipeline-workflows/02-go-binary-deploy/01-index.md` | Go Binary Deploy — Overview | 1.0.0 |
+| `02-spec/12-cicd-pipeline-workflows/02-go-binary-deploy/readme.md` | Go Binary Deploy — Overview | 1.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/02-go-binary-deploy/02-ci-pipeline.md` | Go Binary — CI Pipeline | 1.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/02-go-binary-deploy/05-release-pipeline.md` | Go Binary — Release Pipeline | 2.0.0 |
 | `02-spec/12-cicd-pipeline-workflows/02-go-binary-deploy/99-consistency-report.md` | Consistency Report — Go Binary Deploy | 1.0.0 |
@@ -560,7 +560,7 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/14-update/01-index.md` | Self-Update & App Update | 1.0.0 |
+| `02-spec/14-update/readme.md` | Self-Update & App Update | 1.0.0 |
 | `02-spec/14-update/02-self-update-overview.md` | Self-Update Overview | 1.0.0 |
 | `02-spec/14-update/03-deploy-path-resolution.md` | Deploy Path Resolution | 1.0.0 |
 | `02-spec/14-update/04-rename-first-deploy.md` | Rename-First Deploy Strategy | 1.0.0 |
@@ -576,25 +576,25 @@
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/21-app/01-index.md` | App | 1.0.0 |
+| `02-spec/21-app/readme.md` | App | 1.0.0 |
 
 ## 🐛 App Issues
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/22-app-issues/01-index.md` | App Issues | 1.0.0 |
+| `02-spec/22-app-issues/readme.md` | App Issues | 1.0.0 |
 
 ## 🗄️ App DB
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/23-app-db/01-index.md` | App DB | 3.2.0 |
+| `02-spec/23-app-db/readme.md` | App DB | 3.2.0 |
 
 ## 🎨 App UI — Design System
 
 | File | Title | Version |
 |------|-------|---------|
-| `02-spec/24-app-ui-design-system/01-index.md` | App UI — Design System | 3.2.0 |
+| `02-spec/24-app-ui-design-system/readme.md` | App UI — Design System | 3.2.0 |
 
 ---
 

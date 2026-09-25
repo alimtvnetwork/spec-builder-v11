@@ -45,7 +45,7 @@
 |------|--------|--------|
 | Time Log UI | `../41-time-log-ui/00-overview.md` | ✅ Valid |
 | Coding Guidelines | `../02-coding-guidelines/00-overview.md` | ✅ Valid |
-| Error Code Registry | `../03-error-manage/03-error-code-registry/01-index.md` | ✅ Valid |
+| Error Code Registry | `../03-error-manage/03-error-code-registry/readme.md` | ✅ Valid |
 
 ---
 

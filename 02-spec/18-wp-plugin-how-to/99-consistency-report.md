@@ -14,7 +14,7 @@ All 22 phases + 4 subfiles + 2 meta files verified against `readme.md` index.
 |---|------|--------|---------------------|
 | 00 | `02-quick-start.md` | ✅ | ✅ |
 | 01 | `03-foundation-and-architecture.md` | ✅ | ✅ |
-| 02 | `02-enums-and-coding-style/01-index.md` | ✅ | ✅ |
+| 02 | `02-enums-and-coding-style/readme.md` | ✅ | ✅ |
 | 02.1 | `02-enums-and-coding-style/01-enum-architecture.md` | ✅ | ✅ |
 | 02.2 | `02-enums-and-coding-style/02-enum-metadata-pattern.md` | ✅ | ✅ |
 | 02.3 | `02-enums-and-coding-style/03-self-update-status-enum.md` | ✅ | ✅ |
@@ -65,14 +65,14 @@ All 22 phases + 4 subfiles + 2 meta files verified against `readme.md` index.
 | `02-enums-and-coding-style/01-enum-architecture.md:4` | `../../01-app/formatting-rules-reference.md` | Same — no `01-app/` folder exists |
 | `02-enums-and-coding-style/01-enum-architecture.md:208` | `../../01-app/formatting-rules-reference.md` | Same |
 
-**Impact:** High — 3 references to a nonexistent file. Likely refers to formatting rules in `02-spec/02-coding-guidelines/01-cross-language/04-code-style/01-index.md` or similar. Needs investigation and redirect.
+**Impact:** High — 3 references to a nonexistent file. Likely refers to formatting rules in `02-spec/02-coding-guidelines/01-cross-language/04-code-style/readme.md` or similar. Needs investigation and redirect.
 
 ### 2.3 Missing External File: Go Enum Specification (wrong path prefix)
 
 | Location | Reference | Correct Path |
 |----------|-----------|-------------|
-| `02-enums-and-coding-style/01-index.md:57` | `../../06-golang-standards/01-enum-specification/01-index.md` | `../../02-coding-guidelines/03-golang/01-enum-specification/01-index.md` |
-| `02-enums-and-coding-style/01-index.md:58` | `../../06-golang-standards/01-enum-specification/05-info-object-pattern.md` | File does not exist at any path |
+| `02-enums-and-coding-style/readme.md:57` | `../../06-golang-standards/01-enum-specification/readme.md` | `../../02-coding-guidelines/03-golang/01-enum-specification/readme.md` |
+| `02-enums-and-coding-style/readme.md:58` | `../../06-golang-standards/01-enum-specification/05-info-object-pattern.md` | File does not exist at any path |
 | `02-enums-and-coding-style/02-enum-metadata-pattern.md:13` | `../../06-golang-standards/01-enum-specification/05-info-object-pattern.md` | File does not exist at any path |
 | `02-enums-and-coding-style/02-enum-metadata-pattern.md:210` | `../../06-golang-standards/01-enum-specification/05-info-object-pattern.md` | File does not exist at any path |
 | `02-enums-and-coding-style/02-enum-metadata-pattern.md:222` | `../../06-golang-standards/01-enum-specification/05-info-object-pattern.md` | File does not exist at any path |
@@ -101,8 +101,8 @@ All 22 phases + 4 subfiles + 2 meta files verified against `readme.md` index.
 | # | Action | Files |
 |---|--------|-------|
 | 1 | Fix `changelog.md` → `changelog.md` in `readme.md:84` | `readme.md` |
-| 2 | Fix `../../06-golang-standards/` → `../../02-coding-guidelines/03-golang/` in 2 files | `02-enums-and-coding-style/01-index.md`, `02-enums-and-coding-style/02-enum-metadata-pattern.md` |
-| 3 | Remove or redirect `formatting-rules-reference.md` refs → point to `02-spec/02-coding-guidelines/01-cross-language/04-code-style/01-index.md` | `03-foundation-and-architecture.md`, `02-enums-and-coding-style/01-enum-architecture.md` |
+| 2 | Fix `../../06-golang-standards/` → `../../02-coding-guidelines/03-golang/` in 2 files | `02-enums-and-coding-style/readme.md`, `02-enums-and-coding-style/02-enum-metadata-pattern.md` |
+| 3 | Remove or redirect `formatting-rules-reference.md` refs → point to `02-spec/02-coding-guidelines/01-cross-language/04-code-style/readme.md` | `03-foundation-and-architecture.md`, `02-enums-and-coding-style/01-enum-architecture.md` |
 
 ### P1 — Create Missing File or Remove Refs
 

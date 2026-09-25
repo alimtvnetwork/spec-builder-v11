@@ -10,7 +10,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `01-react-execution-logger.md` | ✅ Present |
 | 3 | `02-session-based-logging.md` | ✅ Present |
 

@@ -200,9 +200,9 @@ Full details: `97-acceptance-criteria.md`
 | RAG Re-indexing | `../27-ai-bridge-cli/01-backend/11-rag-reindexing.md` |
 | Session-Scoped RAG Memory | `../27-ai-bridge-cli/01-backend/36-session-scoped-rag-memory.md` |
 | Split DB Architecture | `../05-split-db-architecture/00-overview.md` |
-| Error Code Registry | `../03-error-manage/03-error-code-registry/01-index.md` |
+| Error Code Registry | `../03-error-manage/03-error-code-registry/readme.md` |
 | Shared CLI Frontend (Tree Visualization) | `../28-shared-cli-frontend/16-tree-visualization.md` |
-| Coding Guidelines | `../02-coding-guidelines/01-cross-language/01-index.md` |
+| Coding Guidelines | `../02-coding-guidelines/01-cross-language/readme.md` |
 | Golang Standards | `../02-coding-guidelines/03-golang/00-overview.md` |
 
 ---

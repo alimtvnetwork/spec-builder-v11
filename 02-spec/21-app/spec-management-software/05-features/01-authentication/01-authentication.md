@@ -1138,5 +1138,5 @@ func SetSecurityHeaders(w http.ResponseWriter) {
 ## Cross-References
 
 - [Database Schema](../../07-database-design/01-schema.md) - User & Session Tables
-- [General Spec: Security Patterns](../../../../02-coding-guidelines/01-cross-language/01-index.md)
-- [General Spec: Error Management](../../../../03-error-manage/01-index.md)
+- [General Spec: Security Patterns](../../../../02-coding-guidelines/01-cross-language/readme.md)
+- [General Spec: Error Management](../../../../03-error-manage/readme.md)

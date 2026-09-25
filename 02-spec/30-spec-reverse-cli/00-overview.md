@@ -270,7 +270,7 @@ Spec Reverse CLI uses error codes **11000-11999**.
 | Seedable Config Architecture | `../06-seedable-config-architecture/00-overview.md` |
 | Shared CLI Frontend | `../28-shared-cli-frontend/00-overview.md` |
 | PowerShell Integration | `../11-powershell-integration/00-overview.md` |
-| Error Code Registry | `../03-error-manage/03-error-code-registry/01-index.md` |
+| Error Code Registry | `../03-error-manage/03-error-code-registry/readme.md` |
 | Spec Management Software | `../21-app/spec-management-software/00-overview.md` |
 | **DBOperation Wrapper** | `../21-app/spec-management-software/13-shared-packages/08-pkg-database-operations.md` |
 | **ORM-Only Policy** | `.ai-memory/memories/standards/orm-only-policy.md` |

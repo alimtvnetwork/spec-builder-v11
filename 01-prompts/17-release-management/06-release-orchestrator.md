@@ -87,7 +87,7 @@ python 03-ai-scripts/29-release-orchestrator.py --tier <minor|patch|major>
      ```
 3. **If Script Is Missing:**
    - The AI agent MUST immediately construct `03-ai-scripts/29-release-orchestrator.py` inside `03-ai-scripts/` using Python standard libraries (`argparse`, `json`, `os`, `re`, `subprocess`, `sys`, `pathlib`, `datetime`).
-   - Register it in `03-ai-scripts/01-index.md` under slot 29.
+   - Register it in `03-ai-scripts/readme.md` under slot 29.
    - Execute the freshly created script to fulfill the release.
 
 ---

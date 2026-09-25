@@ -170,7 +170,7 @@ func (r *Receiver) SetValue(v string) {
 
 - [Lazy Evaluation Patterns](./16-lazy-evaluation-patterns.md) — Exempted mutation for caching
 - [DRY Principles](./08-dry-principles.md) — Constructor-based initialization
-- [Master Coding Guidelines](./15-master-coding-guidelines/01-index.md) — §7 Type Safety
+- [Master Coding Guidelines](./15-master-coding-guidelines/readme.md) — §7 Type Safety
 
 ---
 

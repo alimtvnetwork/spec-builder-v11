@@ -9,7 +9,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `02-ci-pipeline.md` | ✅ Present |
 | 3 | `05-release-pipeline.md` | ✅ Present |
 

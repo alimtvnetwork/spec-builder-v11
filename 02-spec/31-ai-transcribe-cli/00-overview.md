@@ -206,7 +206,7 @@ AI Transcribe CLI uses error codes **14000-14499**:
 
 - [Error Resolution](../03-error-manage/01-error-resolution/00-overview.md) — Debugging & verification patterns
 - [AI Bridge CLI](../27-ai-bridge-cli/00-overview.md) — Parent service for LLM routing
-- [Error Code Registry](../03-error-manage/03-error-code-registry/01-index.md) — Central error code allocation
+- [Error Code Registry](../03-error-manage/03-error-code-registry/readme.md) — Central error code allocation
 - [Shared CLI Frontend](../28-shared-cli-frontend/00-overview.md) — Common UI components
 - **[DBOperation Wrapper](../21-app/spec-management-software/13-shared-packages/08-pkg-database-operations.md)** — Mandatory DB operation wrapper
 - **[ORM-Only Policy](../../.ai-memory/memories/workflow/implementation-strategy.md)** — No raw SQL mandate

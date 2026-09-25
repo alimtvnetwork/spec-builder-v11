@@ -10,7 +10,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `folder-structure-root.md` | ✅ Present (redirect to canonical source) |
 | 3 | `spec-index.md` | ✅ Present |
 | 4 | `health-dashboard.md` | ✅ Present |

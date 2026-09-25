@@ -31,7 +31,7 @@ Follow the release-triggered RCA structure from [A] and review past failures in 
 6. **Strict Ban on Extraneous Runs:** NEVER run the complete test suite, global linters, spellcheckers, or unrelated packages during debugging. Verify strictly using `python [E] run-smart`, `python [E] --pkg <affected_package>`, or `python [E] --changed-only` with optional `--fast` heatmap filtering.
 7. **Mandatory Same-Turn Tool Chaining:** Do not end the turn after outputting the diagnostic plan; invoke the diagnostic or fix tool in the exact same turn.
 8. **Total Ban on Interim Per-File Commits:** Never commit individual files during debugging. All changes are accumulated and committed atomically by the release orchestrator.
-9. **Issue & RCA Destination Routing:** Store CI/CD issue post-mortems in `.ai-memory/cicd-issues/` (indexed in `.ai-memory/cicd-index.md`). If an issue is an application bug rather than a CI/CD failure, document it in `02-spec/22-app-issues/` (indexed in `02-spec/22-app-issues/01-index.md`).
+9. **Issue & RCA Destination Routing:** Store CI/CD issue post-mortems in `.ai-memory/cicd-issues/` (indexed in `.ai-memory/cicd-index.md`). If an issue is an application bug rather than a CI/CD failure, document it in `02-spec/22-app-issues/` (indexed in `02-spec/22-app-issues/readme.md`).
 10. **Targeted Release Verification:** Once the isolated fix passes green, execute [D] (`python [D]`) to finalize the automated release ceremony.
 
 ---

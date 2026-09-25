@@ -9,7 +9,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `02-self-update-overview.md` | ✅ Present |
 | 3 | `03-deploy-path-resolution.md` | ✅ Present |
 | 4 | `04-rename-first-deploy.md` | ✅ Present |
@@ -42,7 +42,7 @@
 
 | Date | Version | Action |
 |------|---------|--------|
-| 2026-04-16 | 1.0.0 | Initial consistency report — created with `01-index.md` baseline |
+| 2026-04-16 | 1.0.0 | Initial consistency report — created with `readme.md` baseline |
 
 ---
 

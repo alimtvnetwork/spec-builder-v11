@@ -7,7 +7,7 @@
 
 ## Overview
 
-Error code range: **15000–15499** (allocated in the [Error Code Registry](../../03-error-manage/03-error-code-registry/01-index.md)).
+Error code range: **15000–15499** (allocated in the [Error Code Registry](../../03-error-manage/03-error-code-registry/readme.md)).
 
 ---
 
@@ -134,6 +134,6 @@ Error code range: **15000–15499** (allocated in the [Error Code Registry](../.
 
 | Reference | Location |
 |-----------|----------|
-| Error Code Registry | `../../03-error-manage/03-error-code-registry/01-index.md` |
+| Error Code Registry | `../../03-error-manage/03-error-code-registry/readme.md` |
 | Architecture | `./01-architecture.md` |
 | API Interface | `./06-api-interface.md` |

@@ -5,7 +5,7 @@ Trigger Keywords & Aliases: `cg-string-efficiency`, `cg-strings`, `cg-string-com
 > [!IMPORTANT]
 > Prompt Version: 2.2.0
 > Synchronization: Main Meta-Repo & Connected Workspaces
-> 
+>
 > **Top-Instruction Priority Mandate (Preamble Precedence):**
 > Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
@@ -43,9 +43,9 @@ PHASE_2_STEPS = N / 2   (Steps N/2+1 .. N: Parallel Subtasks, Logic-Safe String 
 10. [ ] /goal Phase 2 (Step E - Boolean & Style Conventions): Enforce affirmative boolean naming (`is*`, `has*`), zero explicit `== true`, zero negative polarity in conditionals, and flatten nested `if` statements to depth <= 1 using guard clauses.
 11. [ ] /goal Phase 2 (Step F - Banned Intermediate Verification): DO NOT run unit tests (`go test`, `pytest`, `npm test`) and DO NOT verify builds during intermediate micro-refactoring steps.
 12. [ ] /goal Phase 2 (Step G - Final Step Build Verification): At the conclusion of all refactoring subtasks, run targeted syntax/build checks to resolve any compilation errors or import issues across all modified files.
-13. [ ] /goal Phase 3 (Step A - Task Consolidation): Consolidate all completed subtasks into `.ai-memory/plans/completed/xx-string-efficiency.md`, delete granular subtask files, and update `.ai-memory/plans/01-index.md`.
+13. [ ] /goal Phase 3 (Step A - Task Consolidation): Consolidate all completed subtasks into `.ai-memory/plans/completed/xx-string-efficiency.md`, delete granular subtask files, and update `.ai-memory/plans/readme.md`.
 14. [ ] /goal Phase 3 (Step B - Final Step Git Commit & Push): Stage all modified files, consolidated plans, and memory records (`git add -A`), commit them in a single clean grouped atomic commit, and push to git. Never commit per-file.
-15. [ ] /learn Ingest `.ai-memory/memory/01-index.md` for project memory index and past learnings.
+15. [ ] /learn Ingest `.ai-memory/memory/readme.md` for project memory index and past learnings.
 16. [ ] /learn Ingest `.ai-memory/strictly-avoid.md` for banned anti-patterns and strict constraints.
 17. [ ] /learn Ingest `02-spec/02-coding-guidelines/02-canonical-size-tier.md` for canonical size tiers.
 18. [ ] /learn Ingest `02-spec/02-coding-guidelines/03-golang/06-string-slice-internals.md` for string allocation internals.
@@ -97,7 +97,7 @@ Do not rely on standard search tools with 50-item truncation when discovering re
 > 1. **Exact Case-Insensitive Equality** (`full match`)
 > 2. **Case-Insensitive Substring Containment** (`partial match / search filter`)
 > 3. **Case-Insensitive Prefix or Suffix Matching** (`starts with / ends with`)
-> 
+>
 > Changing a substring search (`Contains`) to an equality check (`EqualFold`) is a CATASTROPHIC BUG that breaks filters and searches!
 
 ### Semantic Intent Mapping Matrix
@@ -320,7 +320,7 @@ When all subtasks for the parent task (`.ai-memory/plans/pending/xx-string-effic
 2. Include a header explicitly documenting initial and optimized patterns, allocation reductions, and loop step metrics.
 3. Delete the original granular `.md` files in `.ai-memory/plans/subtasks/xx-string-efficiency/`.
 4. Delete the original parent plan `.ai-memory/plans/pending/xx-string-efficiency.md`.
-5. Update `.ai-memory/plans/01-index.md` to point to the newly consolidated completed file.
+5. Update `.ai-memory/plans/readme.md` to point to the newly consolidated completed file.
 
 ### Final Step Git Commit & Push Mandate (Strict Checklist)
 

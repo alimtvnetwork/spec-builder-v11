@@ -6,7 +6,7 @@ description: Autonomously orchestrate and execute parent tasks by decomposing th
 # Parent Task N-Step Continuous Loop & Multi-Agent Orchestration — Workflow (must follow)
 
 > [!IMPORTANT]
-> Prompt Version: 2.5.0
+> Prompt Version: 2.6.0
 > Synchronization: Main Meta-Repo & Connected Workspaces
 > 
 > **Top-Instruction Priority Mandate (Preamble Precedence):**
@@ -15,17 +15,21 @@ description: Autonomously orchestrate and execute parent tasks by decomposing th
 /goal Autonomously orchestrate and execute the parent task by decomposing it into subtasks and running a continuous N-step self-loop until completion without a single failure.
 
 ```text
-N = 150
+N = 200 (Total self-loop steps budget)
+A = 2   (Number of spawned autonomous subagents, default: 2)
+H = 2   (Number of hands / parallel operations per agent, default: 2)
 ```
 
 N = total self-loop steps budget that the agents will perform.
+A = count of autonomous subagents running concurrently (default: 2).
+H = number of hands / parallel operations per agent (default: 2).
 
 ```text
 PHASE_1_STEPS = N / 2   (Steps 1 .. N/2: Planning, Detailed Spec, and Lean Subtask Generation)
 PHASE_2_STEPS = N / 2   (Steps N/2+1 .. N: Parallel Execution, Self-Looping, Targeted Quality Linting)
 ```
 
-N, PHASE_1_STEPS, and PHASE_2_STEPS are read-only after initialization. Never modify them mid-execution.
+N, A, H, PHASE_1_STEPS, and PHASE_2_STEPS are read-only after initialization. Never modify them mid-execution.
 
 ---
 
@@ -33,17 +37,17 @@ N, PHASE_1_STEPS, and PHASE_2_STEPS are read-only after initialization. Never mo
 
 1. [ ] /goal Preamble Precedence Verification: Whatever is given before this section or prompt (user preamble, header constraints, prior instructions) has been verified as highest priority and non-negotiable, and is strictly incorporated into the task scope ahead of all other guidelines.
 2. [ ] /goal Phase 1A (Step 0 - Verbatim Prompt Recording & Task Extraction Gate): Immediately capture the user prompt verbatim into `.ai-memory/plans/pending/xx-<slug>.md` under `## User Request (Verbatim)`. If screenshot URLs or base64 data URIs are provided, decode/save them as image files (`assets/screenshots/<task-slug>-<NN>.png`) and refer back to them via relative paths in specs. Extract actionable deliverables with traceable IDs (`Task-01`, `Task-02`), and output this confirmed task breakdown directly in chat in cleanly indented markdown with vertical blank lines, task state (`State: [PENDING]`), and understanding indicator bracket (`Understood: [YES — ...]`) before any file exploration, scanning, or spec writing.
-3. [ ] /goal Phase 1B (Step 1 - Canonical Spec Generation in Folder 21): Write the canonical specification in `02-spec/21-app/xx-<slug>.md` (or directory `02-spec/21-app/xx-<slug>/` for complex features) with lossless verbatim prompt capture and visual assets, register it in `02-spec/21-app/01-index.md`, and initialize the execution plan in `.ai-memory/plans/pending/xx-<slug>.md` linking back to the spec.
-4. [ ] /goal Phase 1B (Step 2 - Scan & Discover): Use fast Python discovery scripts (`11-fast-file-scanner.py`, `12-fast-cached-grep.py`, `17-fast-file-reader.py`) to inventory files and map call sites without tool truncation limits.
+3. [ ] /goal Phase 1B (Step 1 - Canonical Spec Generation & Single-Agent Blueprint in Folder 21): Write the initial canonical specification overview and blueprint in `02-spec/21-app/xx-<slug>.md` (or directory `02-spec/21-app/xx-<slug>/` for complex features) with a single lead agent, then delegate modular spec sections to parallel subagents (A = 2, H = 2) for lossless verbatim capture and visual assets, register it in `02-spec/21-app/readme.md`, and initialize the execution plan in `.ai-memory/plans/pending/xx-<slug>.md` linking back to the spec.
+4. [ ] /goal Phase 1B (Step 2 - Scan & Discover via Parallel Subagents): Use fast Python discovery scripts (`11-fast-file-scanner.py`, `12-fast-cached-grep.py`, `17-fast-file-reader.py`) with parallel subagents (reading files as the primary parallel task) to inventory files and map call sites without tool truncation limits.
 5. [ ] /goal Phase 1B (Step 3 - Lean Subtask Decomposition): Decompose the plan into lean subtask files in `.ai-memory/plans/subtasks/xx-<slug>/01-<subslug>.md` cross-referencing the canonical spec. Subtasks must focus purely on unique task deliverables without repeating common repository boilerplate. Complete all spec and subtask writing within 50% of the steps budget (`PHASE_1_STEPS = N / 2`).
-6. [ ] /goal Phase 1B (Step 4 - Readiness Audit Gate): Confirm canonical spec is registered in `02-spec/21-app/01-index.md`, all `Task-xx` deliverables are mapped to subtasks linking back to the spec, and disjoint files are assigned before execution.
+6. [ ] /goal Phase 1B (Step 4 - Readiness & Spec Audit Gate): Confirm single-agent audit roadmap is set, canonical spec is registered in `02-spec/21-app/readme.md`, all `Task-xx` deliverables are mapped to subtasks linking back to the spec, and disjoint files are assigned before execution.
 7. [ ] /goal Phase 1B (Step 5 - Unconditional Zero-Question Execution Mandate): Immediately upon completing Phase 1, self-loop and transition directly into Phase 2 code execution without pausing, asking questions, or seeking user confirmation. Stopping after spec writing is strictly banned and constitutes an auto-reject failure.
-8. [ ] /goal Phase 2 (Execution & Code Refactoring, Steps N/2+1..N): Unconditionally execute the code refactoring in the remaining 50% of the steps budget (`PHASE_2_STEPS = N / 2`). Spawn at most 2 execution subagents (max 2 threads each) to execute subtasks on disjoint files in parallel.
+8. [ ] /goal Phase 2 (Execution & Code Refactoring, Steps N/2+1..N): Unconditionally execute the code refactoring in the remaining 50% of the steps budget (`PHASE_2_STEPS = N / 2`). Spawn up to A = 2 execution subagents (H = 2 operations each) to execute subtasks on disjoint files in parallel.
 9. [ ] /goal Phase 2 (Failure Memory & Error Recovery): If a subagent fails, record the failure log in `.ai-memory/plan.md` and `.ai-memory/memory/issues/`; subsequent agents must read the failure log first to remediate root causes.
 10. [ ] /goal Phase 2 (Change Recording & Quality Linting): Record all modified files into `.ai-memory/temp/recent-file-changes.json` under lock (`python 03-ai-scripts/33-test-inventory-generator.py --record <files...>`) and run targeted file-level linters on specifically modified files (`exit 0`). Do not run `06-cicd-local-runner.py`, unit tests, or build checks (deferred to CI/CD).
 11. [ ] /goal Phase 3 (Consolidation & Atomic Push): Consolidate completed subtasks into `.ai-memory/plans/completed/xx-<slug>.md` preserving the canonical spec reference (canonical spec in `02-spec/21-app/` remains permanently intact), delete granular subtasks and pending plan, stage all changes, and push in a single grouped commit.
 12. [ ] /goal Phase 3 (Completion & Confidence Reporting): Emit the final Task Completion Summary with green check mark emojis, modified files summary, and implementation confidence score.
-13. [ ] /learn Ingest `.ai-memory/memory/01-index.md` for project memory index and past learnings.
+13. [ ] /learn Ingest `.ai-memory/memory/readme.md` for project memory index and past learnings.
 14. [ ] /learn Ingest `.ai-memory/strictly-avoid.md` for banned anti-patterns and strict constraints.
 15. [ ] /learn Ingest `02-spec/02-coding-guidelines/` for domain-specific architectural specifications.
 16. [ ] /learn Ingest `02-spec/03-error-manage/` for error handling architectures and *appfault.AppError.
@@ -61,14 +65,20 @@ Before executing the tasks below, check if this prompt is already installed as a
 
 ---
 
-## 1. 2-Agent Concurrency & Ruthless Orchestration
+## 1. Multi-Agent Concurrency & Orchestration (A = 2, H = 2)
 
 /goal You are the master orchestrator. If your sub-agents fail, hallucinate, write garbage variables, or go into infinite loops, it is because you are a lazy, incompetent manager.
 
-- Strict 2-Agent Limit (Max 2 Threads Each): When dispatching work in Phase 1 (planning) or Phase 2 (execution), spawn at most 2 sub-agents concurrently, with no more than 2 threads per agent.
-- Strict Folder Bounding (`.ai-memory/`): Subagents are strictly restricted to writing planning files, subtasks, status reports, and logs inside `.ai-memory/` (`.ai-memory/plans/`, `.ai-memory/01-index.md`, `.ai-memory/memory/issues/`).
-- Context Diet: When spawning a subagent, do not paste file contents, memory logs, or the entire plan into its prompt. Give it the absolute minimal instruction (e.g., "Read subtask file `.ai-memory/plans/subtasks/xx-slug/01-<subtask-title>.md` and execute it"). The subagent must read the necessary files itself.
-- Fail Fast & Kill Stalls: If a sub-agent stalls or provides garbage code, kill it immediately, rollback its dirty working tree, and spawn a new one.
+- **Single-Agent Unified Blueprint Mandate:**
+  - The initial execution plan, architectural decomposition, and lookahead roadmap MUST be authored by a single lead agent first as a unified blueprint before delegating work to subagents.
+  - Never allow multiple agents to author disjoint or competing initial plans simultaneously. A single coherent architectural vision must lead.
+- **Most Useful Parallel Tasks (Reading Files & Writing Modular Specs):**
+  - When multiple agents are present (A >= 2, H >= 2), the most effective parallel tasks are reading files and authoring modular specs.
+  - Subagents execute parallel disjoint tasks: reading dependencies/callers, authoring modular spec sub-files, and refactoring disjoint files.
+- **Strict Concurrency Limits (A = 2, H = 2):** When dispatching work in Phase 1 (planning) or Phase 2 (execution), spawn at most A = 2 sub-agents concurrently, with H = 2 parallel operations per agent.
+- **Strict Folder Bounding (`.ai-memory/`):** Subagents are strictly restricted to writing planning files, subtasks, status reports, and logs inside `.ai-memory/` (`.ai-memory/plans/`, `.ai-memory/readme.md`, `.ai-memory/memory/issues/`).
+- **Context Diet:** When spawning a subagent, do not paste file contents, memory logs, or the entire plan into its prompt. Give it the absolute minimal instruction (e.g., "Read subtask file `.ai-memory/plans/subtasks/xx-slug/01-<subtask-title>.md` and execute it"). The subagent must read the necessary files itself.
+- **Fail Fast & Kill Stalls:** If a sub-agent stalls or provides garbage code, kill it immediately, rollback its dirty working tree, and spawn a new one.
 
 ---
 
@@ -126,18 +136,21 @@ MANDATORY SAME-TURN TOOL CHAIN: The breakdown text above and your first tool cal
 
 ### Step 1: Canonical Application Spec Generation (Folder 21 Standard)
 First, write the canonical application specification into `02-spec/21-app/` before creating execution plans or modifying code:
+- **Single-Agent Unified Blueprint Mandate (MANDATORY):**
+  - The initial plan, architecture overview (`01-overview.md`), data boundaries, and lookahead roadmap MUST be authored by a single lead agent first as a unified blueprint before delegating to subagents. Never allow multiple agents to author disjoint or competing initial plans simultaneously.
+  - Once the unified blueprint is established by the single lead agent, subagents (A = 2, H = 2) are spawned to handle parallel modular spec writing (`02-data-contracts.md`, `03-visual-and-ux.md`, `04-verification-gates.md`) adhering strictly to the blueprint.
 - **Location & Sizing Standard:**
   - Concise / single-domain specs (<= 150 lines): Write to `02-spec/21-app/xx-<slug>.md`.
   - Large / multi-domain features: Write to a segmented directory `02-spec/21-app/xx-<slug>/` with sequential sub-files:
-    - `01-overview.md` (Domain architecture, system context, verbatim user request)
-    - `02-data-contracts.md` (Models, schemas, interfaces, error types)
-    - `03-visual-and-ux.md` (Component hierarchy, visual layout, screenshots)
-    - `04-verification-gates.md` (Quality gates, test invariants, acceptance criteria)
+    - `01-overview.md` (Domain architecture, system context, verbatim user request — authored by lead agent)
+    - `02-data-contracts.md` (Models, schemas, interfaces, error types — parallel subagent task)
+    - `03-visual-and-ux.md` (Component hierarchy, visual layout, screenshots — parallel subagent task)
+    - `04-verification-gates.md` (Quality gates, test invariants, acceptance criteria — parallel subagent task)
 - **Lossless Verbatim Capture:** Under `## User Request (Verbatim)`, preserve the exact prompt text and constraints without truncation.
 - **Visual Assets & Base64 Screenshots:** If screenshot URLs or base64 images were provided, verify they were decoded and saved to `assets/screenshots/<task-slug>-<NN>.png` and reference them strictly via relative markdown links.
-- **Spec Registry Registration:** Register the new spec entry in `02-spec/21-app/01-index.md` with status `draft` or `active`.
+- **Spec Registry Registration:** Register the new spec entry in `02-spec/21-app/readme.md` with status `draft` or `active`.
 
-### Step 2: Scan & Discover (Python Toolchain Acceleration)
+### Step 2: Scan & Discover (Python Toolchain Acceleration & Multi-Agent Parallel Reading)
 To avoid 50-result tool truncation limits and eliminate multi-turn exploratory roundtrips, use the repository's dedicated Python discovery scripts:
 - Inventory Target Files: `python 03-ai-scripts/11-fast-file-scanner.py --lang go,ts --limit 100 --stats`
 - Fast Cached Grep (<15ms): `python 03-ai-scripts/12-fast-cached-grep.py --pattern "<search-pattern>" --limit 50`
@@ -145,6 +158,8 @@ To avoid 50-result tool truncation limits and eliminate multi-turn exploratory r
 - Read Target File: `python 03-ai-scripts/17-fast-file-reader.py --read-file <file-path> --max-bytes 100000`
 - Fast Pattern Search: `python 03-ai-scripts/17-fast-file-reader.py --search-pattern "<pattern>" --limit 50`
 - Subsystem & Topology Overview: `python 03-ai-scripts/18-codebase-topology-discoverer.py --summary`
+
+**Multi-Agent Parallel Discovery (A = 2, H = 2):** When multiple agents are present, the most useful parallel tasks are reading files and authoring modular specs. Subagents concurrently read disjoint codebase areas, explore dependencies, and trace call sites without merge conflicts.
 
 ### Step 3: Actionable Execution Plan & Lean Subtask Decomposition
 With the canonical spec established in `02-spec/21-app/`, initialize the execution plan and decompose it into subtasks in `.ai-memory/plans/`:
@@ -166,10 +181,12 @@ Acceptance Criteria: [2-4 specific testable conditions proving completion]
 Targeted Verification: [Specific file-level linter command or exit 0 check]
 ```
 
-### Step 4: Subtask Readiness Audit Gate
+### Step 4: Subtask Readiness & Spec Audit Gate
 
 Before transitioning to execution, verify:
-- Canonical spec is authored in `02-spec/21-app/` and registered in `02-spec/21-app/01-index.md`.
+- **Unified Audit Blueprint:** The audit methodology, criteria, and roadmap MUST be authored by a single lead agent first as a unified blueprint before delegating audit tasks to subagents.
+- **Parallel Subagent Audit Allocation (A = 2, H = 2):** When auditing complex specs or large codebases, subagents execute parallel reading across disjoint modules to verify compliance and build granular subtask items.
+- Canonical spec is authored in `02-spec/21-app/` and registered in `02-spec/21-app/readme.md`.
 - Every extracted deliverable `Task-xx` has at least one corresponding subtask file.
 - All subtask files are non-empty, link back to the spec, and specify disjoint target files.
 - All file paths in subtasks use strict relative Git paths (zero absolute paths or `file:///` URIs).
@@ -184,9 +201,9 @@ Before transitioning to execution, verify:
 
 ## 4. Phase 2: Execution Mode & Parallel Refactoring (Steps N/2+1 .. N)
 
-1. Parallel Dispatch: Spawn at most 2 execution subagents (max 2 threads each) assigned to disjoint subtasks from `.ai-memory/plans/subtasks/xx-<slug>/`. Provide minimal instructions referencing the subtask path.
-2. File Locking & Disjoint Files: Verify subagents operate on distinct files using `.ai-memory/01-index.md`.
-3. Execution & Coding Guidelines: Subagents refactor code following all coding guidelines (<= 8-15 line functions, single return types, universal `*AppError` wrapping, Unix LF line endings).
+1. Parallel Dispatch: Spawn up to A = 2 execution subagents (H = 2 operations each) assigned to disjoint subtasks from `.ai-memory/plans/subtasks/xx-<slug>/`. Provide minimal instructions referencing the subtask path.
+2. File Locking & Disjoint Files: Verify subagents operate on distinct files using `.ai-memory/readme.md`.
+3. Execution & Coding Guidelines: Subagents refactor code following all coding guidelines (<= 8-15 line functions, single return types, universal `*appfault.AppError` wrapping, Unix LF line endings).
 4. Failure Memory & Error Recovery: If a subagent fails:
    - Rollback dirty changes and write the failure error log to `.ai-memory/plan.md` and `.ai-memory/memory/issues/xx-failure.md`.
    - The next subagent spawned must read the previous failure log first, record it as a pending memory task, and implement the necessary fix.
@@ -230,7 +247,7 @@ To reduce markdown file count and bloat, consolidate subtasks when a parent task
 2. In this single consolidated file, include a header explicitly referencing how the main task started, referencing the canonical spec `[02-spec/21-app/xx-<slug>.md](../../../02-spec/21-app/xx-<slug>.md)`, and documenting exactly how many steps or loops it took to complete. Note: The canonical specification in `02-spec/21-app/` remains permanently intact in the repository as the architectural source of truth; do not delete it during consolidation.
 3. Delete the original granular `.md` files in `.ai-memory/plans/subtasks/xx-<slug>/` so that only the single consolidated file remains.
 4. Delete the original parent plan `.ai-memory/plans/pending/xx-<slug>.md`.
-5. Update `.ai-memory/plans/01-index.md` to point to the newly consolidated completed file.
+5. Update `.ai-memory/plans/readme.md` to point to the newly consolidated completed file.
 6. Final Step Git Commit & Push (Mandatory): Stage all modified files, consolidated plans, and memory records (`git add -A`), commit them in a single clean grouped atomic commit (`git commit -m "<type>(<scope>): <summary>"`), and push to git (`git push origin <branch>`). Under no circumstances commit each file individually.
 
 ---
@@ -270,7 +287,7 @@ Whenever the task involves fixing an issue, bug, pipeline failure, or performing
 2. **Non-CI/CD Issues (Application Bugs, Feature Defects, Logic/Runtime Errors):**
    - **Target Folder:** `02-spec/22-app-issues/` (canonical spec hierarchy Tier 22)
    - **File Pattern:** `02-spec/22-app-issues/NN-<issue-slug>.md`
-   - **Structure & Registry:** Follow the 4-part structure (Reproduction / Cause / Fix / Prevention per AC-AI-001 or Why / How / Root Cause / Code Fix) and index in `02-spec/22-app-issues/01-index.md` (cross-referencing in `.ai-memory/memory/issues/` for institutional memory).
+   - **Structure & Registry:** Follow the 4-part structure (Reproduction / Cause / Fix / Prevention per AC-AI-001 or Why / How / Root Cause / Code Fix) and index in `02-spec/22-app-issues/readme.md` (cross-referencing in `.ai-memory/memory/issues/` for institutional memory).
    - **Scope:** Application business logic, UI bugs, CLI command errors, API crashes, and domain defects.
 
 ---
@@ -278,7 +295,7 @@ Whenever the task involves fixing an issue, bug, pipeline failure, or performing
 ## 8. Banned Operations Checklist (TOTAL BAN — Auto-Reject on Violation)
 
 - [ ] TOP-INSTRUCTION PRIORITY MANDATE: Whatever directives, constraints, checklists, or instructions are given before this section or prompt (user preamble, header constraints, prior instructions) are verified as highest priority and non-negotiable, overriding all lower-level guidelines below.
-- [ ] ISSUE & RCA DESTINATION ROUTING: Whenever resolving an issue or performing a fix with RCA, verified that CI/CD failures are documented in .ai-memory/cicd-issues/NN-<slug>.md (indexed in .ai-memory/cicd-index.md), while non-CI/CD issues (application bugs, logic/runtime defects) are documented in 02-spec/22-app-issues/NN-<slug>.md (indexed in 02-spec/22-app-issues/01-index.md).
+- [ ] ISSUE & RCA DESTINATION ROUTING: Whenever resolving an issue or performing a fix with RCA, verified that CI/CD failures are documented in .ai-memory/cicd-issues/NN-<slug>.md (indexed in .ai-memory/cicd-index.md), while non-CI/CD issues (application bugs, logic/runtime defects) are documented in 02-spec/22-app-issues/NN-<slug>.md (indexed in 02-spec/22-app-issues/readme.md).
 - [ ] NO TEST RUNNING (TOTAL BAN): Never run any tests using Python scripts (`06-cicd-local-runner.py`, `pytest`, runner scripts), Go (`go test ./...`), or any test runner during routine execution turns. Testing is strictly checked later on in CI/CD.
 - [ ] NO BUILD CHECKING (TOTAL BAN): Never run build commands (`go build`, `npm run build`, compiler checks) to verify compilation. Build verification is checked later on in CI/CD.
 - [ ] NO RUNNER SCRIPTS (TOTAL BAN): Never launch background test runners, worker pools, or test inventory loops during routine execution.

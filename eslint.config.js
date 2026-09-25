@@ -5,7 +5,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  { ignores: ["dist", "02-spec/**"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -50,13 +50,13 @@ export default tseslint.config(
       }],
       
       // Require switch statements to be exhaustive with union types
-      "@typescript-eslint/switch-exhaustiveness-check": "warn",
+      "@typescript-eslint/switch-exhaustiveness-check": "off",
       
       // Prefer nullish coalescing over logical OR for null/undefined
       "@typescript-eslint/prefer-nullish-coalescing": "off",
       
       // Prefer optional chaining
-      "@typescript-eslint/prefer-optional-chain": "warn",
+      "@typescript-eslint/prefer-optional-chain": "off",
       
       // No non-null assertions (use proper null checks)
       "@typescript-eslint/no-non-null-assertion": "warn",

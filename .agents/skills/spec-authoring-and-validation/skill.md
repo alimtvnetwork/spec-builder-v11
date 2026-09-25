@@ -19,7 +19,7 @@ This skill governs the creation, organization, and automated validation of archi
 >   2. Decoding and saving base64 screenshots to `assets/screenshots/`.
 >   3. Authoring canonical product specifications directly inside `02-spec/21-app/`.
 >   4. Generating execution plans and subtasks inside `.ai-memory/plans/`.
->   5. Updating `02-spec/21-app/01-index.md` and `.ai-memory/plans/01-index.md`.
+>   5. Updating `02-spec/21-app/readme.md` and `.ai-memory/plans/readme.md`.
 
 ## Pre-Planning Step 0: Task Extraction & Chat Output Gate (Mandatory First Action)
 
@@ -72,7 +72,7 @@ All architectural specifications, feature definitions, data contracts, and produ
   - `03-workflow-and-state.md` — Control flows, state machine transitions, and business validation rules.
   - `04-ui-ux-spec.md` — Visual layout, design tokens, typography, and embedded relative screenshot links (`assets/screenshots/...`).
   - `05-acceptance-criteria.md` — Testable verification rules and quality gates.
-- **Mandatory Registry Update:** Register newly created specs in `02-spec/21-app/01-index.md` under `## Contents`.
+- **Mandatory Registry Update:** Register newly created specs in `02-spec/21-app/readme.md` under `## Contents`.
 
 ---
 
@@ -101,7 +101,7 @@ If the user request or prompt contains a screenshot URL, print screen link, or b
    - Folders follow the hyphenated two-digit sequence pattern: `02-spec/<NN>-<slug>/` (e.g. `02-spec/02-coding-guidelines/`, `02-spec/21-app/`).
 
 2. Mandatory Files per Spec Folder:
-   - `01-index.md`: Primary entry point explaining scope, version, goal, and learn checklists.
+   - `readme.md`: Primary entry point explaining scope, version, goal, and learn checklists.
    - Numbered markdown files: Detailed topic-specific policies.
    - `97-acceptance-criteria.md`: Verification commands and criteria.
    - `98-changelog.md`: Evolution history of the specification.
@@ -119,7 +119,7 @@ If the user request or prompt contains a screenshot URL, print screen link, or b
      Spec Reference: [02-spec/21-app/xx-<slug>.md](../../../02-spec/21-app/xx-<slug>.md)
      ```
    - **Lean Subtasks Mandate:** Subtasks in `.ai-memory/plans/subtasks/<plan-slug>/` MUST NOT repeat common repository boilerplate, universal coding rules, banned operations, or generic guidelines. Universal rules exist in root guidelines and the canonical spec. Subtasks must contain strictly the unique, task-specific details, exact file paths, symbol modifications, and runnable verification checks.
-   - Register plan in `.ai-memory/plans/01-index.md`.
+   - Register plan in `.ai-memory/plans/readme.md`.
 
 5. Validation Checklist:
    - Run spec cross-link validation:

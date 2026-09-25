@@ -10,7 +10,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `01-overview-and-stack.md` | ✅ Present |
 | 3 | `02-apperror-struct.md` | ✅ Present |
 | 4 | `03-result-types.md` | ✅ Present |

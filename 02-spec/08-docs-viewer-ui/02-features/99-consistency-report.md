@@ -7,7 +7,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 00 | `01-index.md` | ✅ Present |
+| 00 | `readme.md` | ✅ Present |
 | 01 | `01-typography.md` | ✅ Present |
 | 02 | `02-syntax-highlighting.md` | ✅ Present |
 | 03 | `03-fullscreen-mode.md` | ✅ Present |

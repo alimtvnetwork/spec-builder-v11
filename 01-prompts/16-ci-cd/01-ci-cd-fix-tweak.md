@@ -29,7 +29,7 @@ Follow the core RCA structure from [A] and review past failures in [B]. The prim
 5. **Strict Ban on Extraneous Runs:** NEVER run the complete test suite, global linters, spellcheckers, or unrelated packages. Verify strictly using `python [D] --pkg <affected_package>` or `python [D] --changed-only` until green.
 6. **Mandatory Same-Turn Tool Chaining:** Do not end the turn after outputting the diagnostic plan; invoke the diagnostic or fix tool in the exact same turn.
 7. **Final Step Atomic Commit Mandate:** Accumulate all fixes and stage/commit them in a single atomic commit at the end (`git commit -m "fix(ci): <summary>"`). TOTAL BAN on per-file commits.
-8. **Issue & RCA Destination Routing:** Store CI/CD issue post-mortems in `.ai-memory/cicd-issues/` (indexed in `.ai-memory/cicd-index.md`). If an issue is an application bug rather than a CI/CD failure, document it in `02-spec/22-app-issues/` (indexed in `02-spec/22-app-issues/01-index.md`).
+8. **Issue & RCA Destination Routing:** Store CI/CD issue post-mortems in `.ai-memory/cicd-issues/` (indexed in `.ai-memory/cicd-index.md`). If an issue is an application bug rather than a CI/CD failure, document it in `02-spec/22-app-issues/` (indexed in `02-spec/22-app-issues/readme.md`).
 
 ---
 

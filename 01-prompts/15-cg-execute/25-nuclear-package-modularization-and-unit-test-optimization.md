@@ -5,7 +5,7 @@ Trigger Keywords & Aliases: `cg-nuclear-packages`, `cg-package-modularization`, 
 > [!IMPORTANT]
 > Prompt Version: 2.2.0
 > Synchronization: Main Meta-Repo & Connected Workspaces
-> 
+>
 > **Top-Instruction Priority Mandate (Preamble Precedence):**
 > Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
@@ -44,12 +44,12 @@ PHASE_2_STEPS = N / 2   (Steps N/2+1 .. N: Leaf Package Extraction, Domain Modul
 11. [ ] /goal Phase 2 (Step E - Function & File Sizing Compliance): Enforce functions <= 8–15 lines, files <= 80–100 lines, affirmative booleans (`is*`, `has*`), zero explicit `== true`, and guard clauses.
 12. [ ] /goal Phase 2 (Step F - Banned Intermediate Verification): DO NOT run unit test suites or builds during intermediate file edits.
 13. [ ] /goal Phase 2 (Step G - Final Step Build Verification): At the conclusion of all subtasks, execute targeted build checks (`go vet ./...`, `go build ./...`) to verify 0 compiler errors or circular imports.
-14. [ ] /goal Phase 3 (Step A - Task Consolidation): Consolidate completed subtasks into `.ai-memory/plans/completed/xx-nuclear-packages.md`, delete subtask files, and update `.ai-memory/plans/01-index.md`.
+14. [ ] /goal Phase 3 (Step A - Task Consolidation): Consolidate completed subtasks into `.ai-memory/plans/completed/xx-nuclear-packages.md`, delete subtask files, and update `.ai-memory/plans/readme.md`.
 15. [ ] /goal Phase 3 (Step B - Final Step Git Commit & Push): Stage all modified files, inventory updates, and plans (`git add -A`), commit in a single atomic commit, and push to git. Never commit per-file.
-16. [ ] /learn Ingest `.ai-memory/memory/01-index.md` for project memory index and past learnings.
+16. [ ] /learn Ingest `.ai-memory/memory/readme.md` for project memory index and past learnings.
 17. [ ] /learn Ingest `.ai-memory/strictly-avoid.md` for banned anti-patterns and strict constraints.
 18. [ ] /learn Ingest `02-spec/02-coding-guidelines/02-canonical-size-tier.md` for canonical size tiers.
-19. [ ] /learn Ingest `02-spec/02-coding-guidelines/03-golang/01-index.md` for Go coding standards and package architecture.
+19. [ ] /learn Ingest `02-spec/02-coding-guidelines/03-golang/readme.md` for Go coding standards and package architecture.
 20. [ ] /learn Ingest `.ai-memory/coding-guidelines.md` for master consolidated coding guidelines.
 
 ---
@@ -339,7 +339,7 @@ When all subtasks for the parent task (`.ai-memory/plans/pending/xx-nuclear-pack
 2. Include a header explicitly documenting initial and optimized package structures, test duration reductions, and loop step metrics.
 3. Delete the original granular `.md` files in `.ai-memory/plans/subtasks/xx-nuclear-packages/`.
 4. Delete the original parent plan `.ai-memory/plans/pending/xx-nuclear-packages.md`.
-5. Update `.ai-memory/plans/01-index.md` to point to the newly consolidated completed file.
+5. Update `.ai-memory/plans/readme.md` to point to the newly consolidated completed file.
 
 ### Final Step Git Commit & Push Mandate (Strict Checklist)
 

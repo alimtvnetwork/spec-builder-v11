@@ -9,7 +9,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `02-configuration-schema.md` | ✅ Present |
 | 3 | `03-template-vs-project-differences.md` | ✅ Present |
 | 4 | `04-script-reference.md` | ✅ Present |

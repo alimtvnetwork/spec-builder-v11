@@ -1554,5 +1554,5 @@ tests/
 - [Context Window Manager](../05-features/09-knowledge-memory/06-context-window-manager.md) - Component under test
 - [Instruction Segmentation](../05-features/06-ai-integration/05-instruction-segmentation.md) - Component under test
 - [Memory Compression](../05-features/09-knowledge-memory/07-memory-compression.md) - Component under test
-- [Testing Standards](../../../02-coding-guidelines/01-index.md) - Testing patterns
+- [Testing Standards](../../../02-coding-guidelines/readme.md) - Testing patterns
 - [Database Schema](../07-database-design/01-schema.md) - Data models

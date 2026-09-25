@@ -178,7 +178,7 @@ WordPress SEO Publish CLI (WP SEO CLI) is a specialized command-line tool for pu
 | GSearch CLI | `../25-gsearch-cli/00-overview.md` |
 | Split DB Architecture | `../05-split-db-architecture/00-overview.md` |
 | PowerShell Integration | `../11-powershell-integration/00-overview.md` |
-| Error Code Registry | `../03-error-manage/03-error-code-registry/01-index.md` |
+| Error Code Registry | `../03-error-manage/03-error-code-registry/readme.md` |
 | DBOperation Wrapper | `../21-app/spec-management-software/13-shared-packages/08-pkg-database-operations.md` |
 | ORM-Only Policy | `.ai-memory/memories/standards/orm-only-policy.md` |
 | Database Pre-flight Checklist | `.ai-memory/memories/standards/database-preflight-checklist.md` |

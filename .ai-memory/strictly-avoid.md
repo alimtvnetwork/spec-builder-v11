@@ -57,7 +57,7 @@
 - **No Absolute Paths / URIs in Repo:** NEVER write absolute filesystem paths or literal `file:///` drive-letter URIs in repo files. Use relative repo paths exclusively.
 - **Non-`er` Go Interface Suffixes (TOTAL BAN):** NEVER name Go interfaces with non-`er` suffixes (e.g. `Creator`, `Descriptor`) or `Interface`. All Go interfaces MUST end in `er`.
 - **Writing Memory Without Inspecting Last 30 Commits (TOTAL BAN):** NEVER author or update memory files without first executing `git log -n 30 --oneline`.
-- **Writing Memory Without Verifying Recent 20-Task Register (TOTAL BAN):** NEVER author or update memory files without auditing `.ai-memory/plans/01-index.md` and maintaining the Recent Completed Tasks Register.
+- **Writing Memory Without Verifying Recent 20-Task Register (TOTAL BAN):** NEVER author or update memory files without auditing `.ai-memory/plans/readme.md` and maintaining the Recent Completed Tasks Register.
 - **No Defer on ZIP Writer Closure Before Return:** Never use `defer zipWriter.Close()` when returning an archive path.
 - **No React Query Retry Loops:** Always configure `retry: false` and `refetchOnWindowFocus: false`.
 - **No Magic String HTTP Methods:** Never use raw `"GET"`, `"POST"`, `"DELETE"`; use `HttpMethod` enum.

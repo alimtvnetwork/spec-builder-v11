@@ -26,8 +26,7 @@ function loadJson(path) {
 
 function extractEcosystemCodes(index, ranges) {
   const codes = [];
-  const categories = index?.Categories ?? index?.categories;
-  if (!categories) return codes;
+  if (!index?.Categories) return codes;
 
   function inRange(code) {
     if (!ranges || ranges.length === 0) return true;
@@ -38,19 +37,19 @@ function extractEcosystemCodes(index, ranges) {
     });
   }
 
-  for (const cat of categories) {
-    const codesList = cat.Codes ?? cat.codes;
-    if (!codesList) continue;
-    for (const entry of codesList) {
-      const code = typeof entry.Code === 'number' ? entry.Code : (typeof entry.code === 'number' ? entry.code : null);
-      if (code !== null && inRange(code)) {
+  for (const cat of index.Categories) {
+    if (!cat.Codes) continue;
+    for (const entry of cat.Codes) {
+      // Integer code = ecosystem code
+      if (typeof entry.Code === 'number' && inRange(entry.Code)) {
         codes.push({
-          Code: code,
-          Constant: entry.Constant ?? entry.constant,
-          Category: cat.Name ?? cat.name,
-          LocalCode: entry.LocalCode ?? entry.localCode ?? null,
+          Code: entry.Code,
+          Constant: entry.Constant,
+          Category: cat.Name,
+          LocalCode: entry.LocalCode ?? null,
         });
       }
+      // String codes like "E1001" are local/prefixed — skip unless mapped
     }
   }
   return codes;
@@ -210,26 +209,21 @@ function main() {
   for (const [indexFile, group] of groups) {
     const indexPath = resolve(ROOT, indexFile);
     const index = loadJson(indexPath);
-    const categories = index?.Categories ?? index?.categories;
-    if (!categories) continue;
+    if (!index?.Categories) continue;
 
     const seen = new Map();
-    for (const cat of categories) {
-      const codesList = cat.Codes ?? cat.codes;
-      if (!codesList) continue;
-      for (const entry of codesList) {
-        const constant = entry.Constant ?? entry.constant;
-        const code = typeof entry.Code === 'number' ? entry.Code : (typeof entry.code === 'number' ? entry.code : null);
-        const localCode = entry.LocalCode ?? entry.localCode;
-        if (seen.has(constant)) {
+    for (const cat of index.Categories) {
+      if (!cat.Codes) continue;
+      for (const entry of cat.Codes) {
+        if (seen.has(entry.Constant)) {
           dupConstants.push({
             Project: group.projects.join('/'),
-            Constant: constant,
-            First: seen.get(constant),
-            Second: code ?? localCode,
+            Constant: entry.Constant,
+            First: seen.get(entry.Constant),
+            Second: typeof entry.Code === 'number' ? entry.Code : entry.LocalCode ?? entry.Code,
           });
         } else {
-          seen.set(constant, code ?? localCode);
+          seen.set(entry.Constant, typeof entry.Code === 'number' ? entry.Code : entry.LocalCode ?? entry.Code);
         }
       }
     }

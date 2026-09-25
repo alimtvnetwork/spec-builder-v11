@@ -10,7 +10,7 @@
 
 | # | File | Version | Status |
 |---|------|---------|--------|
-| 1 | `01-index.md` | 4.0.0 | ✅ Present |
+| 1 | `readme.md` | 4.0.0 | ✅ Present |
 | 2 | `01-typescript-interfaces.md` | 4.0.0 | ✅ Present |
 | 3 | `02-error-store.md` | 4.0.0 | ✅ Present |
 | 4 | `03-api-types.md` | 4.0.0 | ✅ Present |
@@ -30,7 +30,7 @@
 |-------|--------|
 | Lowercase kebab-case | ✅ All files compliant |
 | Numeric prefixes | ✅ All files prefixed |
-| `01-index.md` present | ✅ Yes |
+| `readme.md` present | ✅ Yes |
 
 ---
 
@@ -58,11 +58,11 @@ All 9 files are at **v4.0.0** (updated 2026-04-01). ✅
 
 | Source | Target | Status |
 |--------|--------|--------|
-| `01-index.md` → `../01-index.md` | ✅ Valid |
-| `01-index.md` → `../03-error-modal-reference/01-index.md` | ✅ Valid |
-| `01-index.md` → `../01-copy-formats/01-index.md` | ✅ Valid |
-| `01-index.md` → `../../01-error-handling-reference.md` | ✅ Valid |
-| `01-index.md` → `../../05-response-envelope/envelope.schema.json` | ✅ Valid |
+| `readme.md` → `../readme.md` | ✅ Valid |
+| `readme.md` → `../03-error-modal-reference/readme.md` | ✅ Valid |
+| `readme.md` → `../01-copy-formats/readme.md` | ✅ Valid |
+| `readme.md` → `../../01-error-handling-reference.md` | ✅ Valid |
+| `readme.md` → `../../05-response-envelope/envelope.schema.json` | ✅ Valid |
 | `06-component-source.md` → `../03-error-modal-reference/07-request-chain.md` | ✅ Valid |
 | `06-component-source.md` → `../03-error-modal-reference/08-traversal-details.md` | ✅ Valid |
 

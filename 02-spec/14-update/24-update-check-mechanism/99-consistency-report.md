@@ -1,7 +1,7 @@
 # Consistency Report
 
 > **Version:** 1.0.0
-> **Parent:** [01-index.md](./01-index.md)
+> **Parent:** [readme.md](./readme.md)
 > **Audit date:** 2026-04-20
 
 ---
@@ -33,7 +33,7 @@ confirm zero contradictions before handing off to implementer AIs.
 
 | Reference | Used in | Status |
 |-----------|---------|--------|
-| [06-Seedable-Config](../../06-seedable-config-architecture/01-index.md) — `BackgroundUpdateCheckEnabled`, `CheckIntervalHours`, `PendingUpdateWarningEnabled`, `Storage.Backend` | 00, 07, 09 | ✅ Keys named per existing config conventions; will need a follow-up entry in the seedable-config registry when implemented |
+| [06-Seedable-Config](../../06-seedable-config-architecture/readme.md) — `BackgroundUpdateCheckEnabled`, `CheckIntervalHours`, `PendingUpdateWarningEnabled`, `Storage.Backend` | 00, 07, 09 | ✅ Keys named per existing config conventions; will need a follow-up entry in the seedable-config registry when implemented |
 | [Self-update apply phase](../02-self-update-overview.md) — rename-first deployment | 00, 06 (`do-update` invokes pinned installer which uses rename-first) | ✅ Detection layer (this folder) and apply layer (parent folder) are cleanly separated |
 | [Install scripts](../19-install-scripts.md) | 02 (status JSON `Install.*` fields), 06 (`do-update`) | ✅ `do-update` invokes the same one-liners documented there |
 | [Version-pinned installers](../../16-generic-release/09-version-pinned-release-installers.md) | 02, 06 | ✅ Status JSON `Install.*.Command` MUST be the pinned one-liner — not the "latest" redirect |
@@ -66,7 +66,7 @@ implementation choices the executing AI must make:
 ## 4. No Contradictions Found
 
 Every cross-reference resolves. Every numbered decision in
-[00 §Resolved Decisions](./01-index.md#resolved-decisions-no-ambiguity-remains)
+[00 §Resolved Decisions](./readme.md#resolved-decisions-no-ambiguity-remains)
 has a matching enforcement point in 01–09.
 
 This subsystem is **ready for hand-off** to an implementer AI.

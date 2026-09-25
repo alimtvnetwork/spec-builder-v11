@@ -5,7 +5,7 @@ Trigger Keywords & Aliases: `cg-isolate-os-tests`, `cg-mock-destructive`, `cg-ex
 > [!IMPORTANT]
 > Prompt Version: 2.2.0
 > Synchronization: Main Meta-Repo & Connected Workspaces
-> 
+>
 > **Top-Instruction Priority Mandate (Preamble Precedence):**
 > Any directive, constraint, checklist, or instruction declared at the top of this prompt, header alert block, or incoming user request represents an absolute MUST FOLLOW mandate that takes highest priority and strictly overrides any conflicting general advice, default conventions, or lower-level guidelines below it.
 
@@ -42,7 +42,7 @@ PHASE_2_STEPS = N / 2   (Steps N/2+1 .. N: Parallel Subtasks, Injectable Executo
 9. [ ] /goal Phase 2 (Step E - Boolean & Style Conventions): Enforce affirmative boolean naming (`is*`, `has*`), zero explicit `== true`, and zero negative booleans.
 10. [ ] /goal Phase 2 (Step F - Banned Intermediate Verification): DO NOT run unit tests (`go test`, `pytest`, `npm test`) during intermediate micro-refactoring steps.
 11. [ ] /goal Phase 2 (Step G - Final Step Build Verification): At the conclusion of all refactoring subtasks, run targeted syntax and quality gate checks to verify clean compilation.
-12. [ ] /goal Phase 3 (Step A - Task Consolidation): Consolidate completed subtasks into `.ai-memory/plans/completed/`, delete granular subtask files, and update `.ai-memory/plans/01-index.md`.
+12. [ ] /goal Phase 3 (Step A - Task Consolidation): Consolidate completed subtasks into `.ai-memory/plans/completed/`, delete granular subtask files, and update `.ai-memory/plans/readme.md`.
 13. [ ] /goal Phase 3 (Step B - Atomic Git Commit & Push): Stage all modified files (`git add -A`), commit them in a single clean grouped atomic commit, and push to git.
 14. [ ] /learn Ingest `02-spec/02-coding-guidelines/` for domain-specific architectural specifications.
 15. [ ] /learn Ingest `02-spec/03-error-manage/` for AppError wrapping.

@@ -1,6 +1,6 @@
 # AppError Package Reference — Result[T], ResultSlice[T], ResultMap[K,V]
 
-> **Parent:** [AppError Package Reference](./01-index.md)
+> **Parent:** [AppError Package Reference](./readme.md)
 > **Version:** 1.5.0
 > **Updated:** 2026-09-13
 

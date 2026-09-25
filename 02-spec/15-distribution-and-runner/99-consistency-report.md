@@ -9,7 +9,7 @@
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `01-index.md` | ✅ Present |
+| 1 | `readme.md` | ✅ Present |
 | 2 | `02-install-contract.md` | ✅ Present |
 | 3 | `03-runner-contract.md` | ✅ Present |
 | 4 | `04-release-pipeline.md` | ✅ Present |
