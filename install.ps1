@@ -17,15 +17,15 @@
     .\install.ps1
     .\install.ps1 -Version v3.15.0 -Folders spec
     .\install.ps1 -DryRun
-    irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.ps1 | iex
+    irm https://raw.githubusercontent.com/alimtvnetwork/spec-builder-v11/main/install.ps1 | iex
 #>
 
 param(
-    [string]$Repo         = "alimtvnetwork/coding-guidelines-v15",
+    [string]$Repo         = "alimtvnetwork/spec-builder-v11",
     [string]$Branch       = "main",
     [string]$Version      = "",
     [string]$Dest         = "",
-    [string[]]$Folders    = @("02-spec", "scripts", ".lovable/memories"),
+    [string[]]$Folders    = @("02-spec", "scripts", ".ai-memory"),
     [switch]$DryRun,
     [switch]$Force,
     [switch]$ListVersions

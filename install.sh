@@ -9,15 +9,15 @@
 #   bash install.sh --dest ~/my-project          # custom dest
 #   bash install.sh --dry-run                    # preview only
 #   bash install.sh --list-versions              # show tags
-#   curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/spec-builder-v11/main/install.sh | bash
 # ────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-REPO="${REPO:-alimtvnetwork/coding-guidelines-v15}"
+REPO="${REPO:-alimtvnetwork/spec-builder-v11}"
 BRANCH="${BRANCH:-main}"
 VERSION=""
 DEST="."
-FOLDERS=("02-spec" "scripts" ".lovable/memories")
+FOLDERS=("02-spec" "scripts" ".ai-memory")
 DRY_RUN=false
 LIST_VERSIONS=false
 

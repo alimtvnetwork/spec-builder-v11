@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ╔═══════════════════════════════════════════════════════════════════════╗
-# ║  RELEASE-PINNED INSTALLER — AUDIT HEADER (stamped by release.sh)     ║
-# ║  Tag:        v3.16.0
-# ║  Repo:       alimtvnetwork/coding-guidelines-v15
-# ║  Built:      2026-04-21T10:41:30Z
-# ║  Commit:     778f7de9a400
-# ║  Builder:    root
-# ║  Asset URL:  https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.sh
+# ║  RELEASE-PINNED INSTALLER — AUDIT HEADER (stamped by release.ps1)    ║
+# ║  Tag:        v3.18.0
+# ║  Repo:       alimtvnetwork/spec-builder-v11
+# ║  Built:      2026-09-25T05:56:46Z
+# ║  Commit:     38c6e133ebd9
+# ║  Builder:    Administrator
+# ║  Asset URL:  https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.18.0/release-version.sh
 # ╚═══════════════════════════════════════════════════════════════════════╝
 # ────────────────────────────────────────────────────────────────────────────
 # release-version.sh — Release-Pinned Installer (Bash)
@@ -24,10 +24,10 @@
 set -euo pipefail
 
 # ─── Stamped at build time — DO NOT EDIT MANUALLY ──────────────────────────
-RELEASE_URL='https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.sh'
+RELEASE_URL='https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.18.0/release-version.sh'
 # ───────────────────────────────────────────────────────────────────────────
 
-GENERAL_INSTALLER='https://github.com/alimtvnetwork/coding-guidelines-v15/raw/main/install.sh'
+GENERAL_INSTALLER='https://github.com/alimtvnetwork/spec-builder-v11/raw/main/install.sh'
 
 # ─── Defaults ──────────────────────────────────────────────────────────────
 FOLDERS_DEFAULT='spec,scripts,.lovable/memories'

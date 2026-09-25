@@ -148,12 +148,12 @@ There are **two installer families**. Use the one that matches your intent:
 
 Each GitHub Release page ships `release-version.ps1` and `release-version.sh` as assets. Both scripts are **stamped at build time** with the exact release URL they were uploaded to, so when you run them they install **only that tag** — never `main`, never `latest`, never a newer release.
 
-**How the pinning works:** the release builder injects the canonical asset URL (`https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/<TAG>/release-version.{ps1,sh}`) into the script. At runtime the script parses the URL, extracts the tag, and downloads `https://codeload.github.com/alimtvnetwork/coding-guidelines-v15/zip/refs/tags/<TAG>`.
+**How the pinning works:** the release builder injects the canonical asset URL (`https://github.com/alimtvnetwork/spec-builder-v11/releases/download/<TAG>/release-version.{ps1,sh}`) into the script. At runtime the script parses the URL, extracts the tag, and downloads `https://codeload.github.com/alimtvnetwork/spec-builder-v11/zip/refs/tags/<TAG>`.
 
 **Bash (Linux / macOS / WSL):**
 ```bash
-# Replace v3.16.0 with the tag you want from the Releases tab
-curl -fsSL https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.sh | bash
+# Replace v3.18.0 with the tag you want from the Releases tab
+curl -fsSL https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.18.0/release-version.sh | bash
 
 # With options (same flags work locally)
 bash release-version.sh --folders spec --dest ~/my-project --dry-run
@@ -161,7 +161,7 @@ bash release-version.sh --folders spec --dest ~/my-project --dry-run
 
 **PowerShell (Windows):**
 ```powershell
-irm https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.16.0/release-version.ps1 | iex
+irm https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.18.0/release-version.ps1 | iex
 
 # With options
 .\release-version.ps1 -Folders spec -Dest C:\Projects\my-app -DryRun
@@ -171,9 +171,9 @@ irm https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.
 ```
   ════════════════════════════════════════════════════════
     Release-Pinned Installer
-    Source:   alimtvnetwork/coding-guidelines-v15
-    Version:  v3.16.0   (pinned — will not auto-update)
-    Folders:  spec, scripts, .lovable/memories
+    Source:   alimtvnetwork/spec-builder-v11
+    Version:  v3.18.0   (pinned — will not auto-update)
+    Folders:  spec, scripts, .ai-memory
     Dest:     /home/you/my-project
   ════════════════════════════════════════════════════════
 ```
@@ -185,10 +185,10 @@ irm https://github.com/alimtvnetwork/coding-guidelines-v15/releases/download/v3.
 | URL stamp missing (script not built by `release.sh`) | `❌ This script was not built by release.sh / release.ps1 — version stamp is missing. Use install.sh instead.` |
 | URL contains `/releases/latest/download/` | `❌ Refusing to run from /releases/latest/. Download from a specific tag, or use install.sh if you want latest.` |
 | URL doesn't match the release-asset pattern | `❌ Cannot determine pinned version from URL. Use install.sh instead.` |
-| Tag archive returns 404 | `❌ Release tag <TAG> not found on alimtvnetwork/coding-guidelines-v15.` |
+| Tag archive returns 404 | `❌ Release tag <TAG> not found on alimtvnetwork/spec-builder-v11.` |
 | Forbidden flag passed (`--branch`, `--version`, `--list-versions`, `-NoLatest:$false`, `--no-latest=false`) | `❌ release-version is pinned. Use install.sh for other versions or branches (forbidden flag: <flag>).` |
 
-Every error message also prints the general installer URL: `https://github.com/alimtvnetwork/coding-guidelines-v15/raw/main/install.sh`.
+Every error message also prints the general installer URL: `https://github.com/alimtvnetwork/spec-builder-v11/raw/main/install.sh`.
 
 > ⚠️ **Forbidden flags on the pinned installer:** `--branch` / `-Branch`, `--version` / `-Version`, `--list-versions` / `-ListVersions`, and disabling `--no-latest` / `-NoLatest`. Version is URL-derived; if you need any of these, use `install.sh` / `install.ps1` instead.
 
@@ -199,11 +199,11 @@ Use this when you want the latest spec from `main`, want to switch tags ad-hoc, 
 **Bash (Linux / macOS / WSL):**
 ```bash
 # One-liner (latest from main)
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/spec-builder-v11/main/install.sh | bash
 
 # Or clone locally and run with options
 bash install.sh                              # defaults: spec + scripts + memories
-bash install.sh --version v3.15.0            # specific release tag
+bash install.sh --version v3.18.0            # specific release tag
 bash install.sh --folders spec               # only the spec tree
 bash install.sh --dest ~/my-project          # custom destination
 bash install.sh --dry-run                    # preview without writing
@@ -213,11 +213,11 @@ bash install.sh --list-versions              # show available tags
 **PowerShell (Windows):**
 ```powershell
 # One-liner (latest from main)
-irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/alimtvnetwork/spec-builder-v11/main/install.ps1 | iex
 
 # Or clone locally and run with options
 .\install.ps1                                          # defaults
-.\install.ps1 -Version v3.15.0 -Folders spec           # specific tag, subset
+.\install.ps1 -Version v3.18.0 -Folders spec           # specific tag, subset
 .\install.ps1 -DryRun                                  # preview only
 .\install.ps1 -ListVersions                            # show available tags
 .\install.ps1 -Dest C:\Projects\my-app -Force          # custom dest, overwrite
@@ -227,7 +227,7 @@ irm https://raw.githubusercontent.com/alimtvnetwork/coding-guidelines-v15/main/i
 
 | Flag (Bash) | Flag (PowerShell) | Default | Description | Pinned? |
 |---|---|---|---|---|
-| `--repo` | `-Repo` | `alimtvnetwork/coding-guidelines-v15` | Source GitHub repo | ❌ |
+| `--repo` | `-Repo` | `alimtvnetwork/spec-builder-v11` | Source GitHub repo | ❌ |
 | `--branch` | `-Branch` | `main` | Branch to download from | ❌ |
 | `--version` | `-Version` | _(latest)_ | Specific release tag | ❌ |
 | `--list-versions` | `-ListVersions` | off | List available release tags | ❌ |

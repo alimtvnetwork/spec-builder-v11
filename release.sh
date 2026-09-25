@@ -9,9 +9,9 @@
 # ────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-REPO="alimtvnetwork/coding-guidelines-v15"
+REPO="${REPO:-alimtvnetwork/spec-builder-v11}"
 RELEASE_VERSION_INPUT="${RELEASE_VERSION:-}"
-REQUIRED_PATHS=("02-spec" "src" "package.json" "README.md")
+REQUIRED_PATHS=("02-spec" "src" "package.json" "readme.md")
 
 step() { printf '\033[0;36m▸ %s\033[0m\n' "$1"; }
 ok()   { printf '\033[0;32m✅ %s\033[0m\n' "$1"; }
@@ -142,7 +142,7 @@ prepare_staging() {
   mkdir -p "$STAGING_DIR"
 
   step "Copying spec tree..."
-  cp -R spec "$STAGING_DIR/spec"
+  cp -R 02-spec "$STAGING_DIR/spec"
 
   step "Copying scripts..."
   [[ -d scripts ]] && cp -R scripts "$STAGING_DIR/scripts"
@@ -155,8 +155,10 @@ prepare_staging() {
   stamp_release_version_installers
 
   step "Copying documentation..."
-  cp README.md "$STAGING_DIR/README.md"
+  [[ -f readme.md ]]       && cp readme.md       "$STAGING_DIR/readme.md"
+  [[ -f README.md ]]       && cp README.md       "$STAGING_DIR/README.md"
   [[ -f CONTRIBUTING.md ]] && cp CONTRIBUTING.md "$STAGING_DIR/CONTRIBUTING.md"
+  [[ -f changelog.md ]]    && cp changelog.md    "$STAGING_DIR/changelog.md"
   [[ -f CHANGELOG.md ]]    && cp CHANGELOG.md    "$STAGING_DIR/CHANGELOG.md"
 
   step "Copying Health Dashboard build output..."

@@ -35,6 +35,8 @@ tmp/
 *.zip
 *.tar.gz
 *.tgz
+release-artifacts/coding-guidelines-v*
+release-artifacts/checksums.txt
 
 # Python caches
 __pycache__/

@@ -32,13 +32,13 @@ if ([string]::IsNullOrEmpty($version)) {
     exit 1
 }
 
-$repo         = "alimtvnetwork/coding-guidelines-v15"
+$repo         = if ($env:REPO) { $env:REPO } else { "alimtvnetwork/spec-builder-v11" }
 $distDir      = "release-artifacts"
 $stagingDir   = "$distDir/coding-guidelines-v$version"
 $archiveBase  = "coding-guidelines-v$version"
 
 # ── Validate ─────────────────────────────────────────────────────
-$requiredPaths = @("02-spec", "src", "package.json", "README.md")
+$requiredPaths = @("02-spec", "src", "package.json", "readme.md")
 foreach ($p in $requiredPaths) {
     if (-not (Test-Path $p)) {
         Write-Err "Missing required path: $p"
@@ -76,8 +76,9 @@ Copy-Item -Path "02-spec" -Destination "$stagingDir/spec" -Recurse
 if (Test-Path "scripts")        { Copy-Item -Path "scripts" -Destination "$stagingDir/scripts" -Recurse }
 if (Test-Path "install.sh")     { Copy-Item "install.sh"     "$stagingDir/install.sh" }
 if (Test-Path "install.ps1")    { Copy-Item "install.ps1"    "$stagingDir/install.ps1" }
-if (Test-Path "README.md")      { Copy-Item "README.md"      "$stagingDir/README.md" }
+if (Test-Path "readme.md")      { Copy-Item "readme.md"      "$stagingDir/readme.md" }
 if (Test-Path "CONTRIBUTING.md"){ Copy-Item "CONTRIBUTING.md" "$stagingDir/CONTRIBUTING.md" }
+if (Test-Path "changelog.md")   { Copy-Item "changelog.md"   "$stagingDir/changelog.md" }
 if (Test-Path "CHANGELOG.md")   { Copy-Item "CHANGELOG.md"   "$stagingDir/CHANGELOG.md" }
 
 Write-Step "Copying dashboard build..."
