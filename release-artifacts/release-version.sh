@@ -3,8 +3,8 @@
 # ║  RELEASE-PINNED INSTALLER — AUDIT HEADER (stamped by release.ps1)    ║
 # ║  Tag:        v3.18.0
 # ║  Repo:       alimtvnetwork/spec-builder-v11
-# ║  Built:      2026-09-25T05:56:46Z
-# ║  Commit:     38c6e133ebd9
+# ║  Built:      2026-09-25T05:59:27Z
+# ║  Commit:     e890c4db4ef1
 # ║  Builder:    Administrator
 # ║  Asset URL:  https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.18.0/release-version.sh
 # ╚═══════════════════════════════════════════════════════════════════════╝
