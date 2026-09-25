@@ -130,8 +130,9 @@ To avoid 50-result tool truncation limits, use the repository's dedicated Python
    ```
 3. **Verify Function & File Sizing:**
    ```bash
-   python 03-ai-scripts/11-fast-file-scanner.py --lang go,ts --limit 50
+   gitmap find "*.go" -ext "go"
    python 03-ai-scripts/13-file-size-guard.py
+   # Fallback: python 03-ai-scripts/11-fast-file-scanner.py --lang go,ts --limit 50
    ```
 
 ---

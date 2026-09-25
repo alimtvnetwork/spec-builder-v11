@@ -39,7 +39,7 @@ When multiple autonomous agents are present (A >= 2, H >= 2):
    - Never allow multiple agents to author disjoint or competing initial plans simultaneously. A single coherent architectural vision must lead.
 2. **Most Useful Parallel Tasks (Reading Files & Writing Modular Specs):**
    - Once the unified blueprint is authored by the lead agent, the most effective parallel tasks for subagents (A = 2, H = 2) are:
-     - **Reading Files:** Fast exploratory reading, scanning dependencies, mapping call sites, and inspecting types in parallel using `03-ai-scripts/17-fast-file-reader.py` and `03-ai-scripts/11-fast-file-scanner.py`.
+     - **Reading Files:** Fast exploratory reading, scanning dependencies, mapping call sites, and inspecting types in parallel using GitMap AUM (`gitmap find`, `gitmap lf`, `gitmap cat`, `gitmap search`) as primary and Python scripts (`03-ai-scripts/17-fast-file-reader.py`, `03-ai-scripts/11-fast-file-scanner.py`) as fallback.
      - **Writing Modular Specs:** Authoring modular, segmented spec sub-files in parallel (e.g. `02-data-contracts.md`, `03-visual-and-ux.md`, `04-verification-gates.md`) adhering to the lead agent's blueprint.
 3. **Spec Writing & Spec Audit Emphasis:**
    - **Spec Writing Section:** The lead agent defines the parent spec overview and data boundaries first; subagents are then spawned in parallel to flesh out disjoint spec modules and verification gates concurrently.
@@ -132,14 +132,22 @@ First, write the canonical application specification into `02-spec/21-app/` befo
 - **Visual Assets & Base64 Screenshots:** If screenshot URLs or base64 images were provided, verify they were decoded and saved to `assets/screenshots/<task-slug>-<NN>.png` and reference them strictly via relative markdown links.
 - **Spec Registry Registration:** Register the new spec entry in `02-spec/21-app/readme.md` with status `draft` or `active`.
 
-#### Step 2: Scan & Discover (Python Toolchain Acceleration & Multi-Agent Parallel Reading)
-To avoid 50-result tool truncation limits and eliminate multi-turn exploratory roundtrips, use the repository's dedicated Python discovery scripts:
-- Inventory Target Files: `python 03-ai-scripts/11-fast-file-scanner.py --lang go,ts --limit 100 --stats`
-- Fast Cached Grep (<15ms): `python 03-ai-scripts/12-fast-cached-grep.py --pattern "<search-pattern>" --limit 50`
-- Sub-Millisecond Folder & File Exploration: `python 03-ai-scripts/17-fast-file-reader.py --list-folder <folder-path> --limit 50`
-- Read Target File: `python 03-ai-scripts/17-fast-file-reader.py --read-file <file-path> --max-bytes 100000`
-- Fast Pattern Search: `python 03-ai-scripts/17-fast-file-reader.py --search-pattern "<pattern>" --limit 50`
-- Subsystem & Topology Overview: `python 03-ai-scripts/18-codebase-topology-discoverer.py --summary`
+#### Step 2: Scan & Discover (GitMap AUM Acceleration & Multi-Agent Parallel Reading)
+To avoid 50-result tool truncation limits and eliminate multi-turn exploratory roundtrips, leverage the 2-tier discovery toolchain:
+
+##### Tier 1: GitMap AUM Acceleration (PRIMARY)
+- **Universal File Search:** `gitmap find "<pattern>" [-ext <ext>]` (e.g. `gitmap find "*.go" -ext "go"`, `gitmap find "01*"`)
+- **List Indexed Files:** `gitmap list-files [pattern]` (alias `gitmap lf [pattern] [-ext <ext>]`)
+- **Substring Match:** `gitmap find-files-any "<substring>"` (alias `gitmap ffa "<str>"`)
+- **Stream File Content:** `gitmap cat <filepath>` (streams to stdout with zero disk writes)
+- **Instant Code Search:** `gitmap search "<term>"` (immediate multi-core filesystem walk)
+
+##### Tier 2: Fast Cached Python Toolchain (FALLBACK)
+- **Inventory Target Files:** `python 03-ai-scripts/11-fast-file-scanner.py --lang go,ts --limit 100 --stats`
+- **Fast Cached Grep (<15ms):** `python 03-ai-scripts/12-fast-cached-grep.py --pattern "<search-pattern>" --limit 50`
+- **Sub-Millisecond Folder Exploration:** `python 03-ai-scripts/17-fast-file-reader.py --list-folder <folder-path> --limit 50`
+- **Read Target File:** `python 03-ai-scripts/17-fast-file-reader.py --read-file <file-path> --max-bytes 100000`
+- **Subsystem & Topology Overview:** `python 03-ai-scripts/18-codebase-topology-discoverer.py --summary`
 
 **Multi-Agent Parallel Discovery (A = 2, H = 2):** When multiple agents are present, the most useful parallel tasks are reading files and authoring modular specs. Subagents concurrently read disjoint codebase areas, explore dependencies, and trace call sites without merge conflicts.
 

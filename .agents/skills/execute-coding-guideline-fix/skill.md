@@ -39,7 +39,7 @@ When multiple autonomous agents are present (A >= 2, H >= 2):
    - Never allow multiple agents to author disjoint or competing audit plans simultaneously. A single coherent architectural vision must lead.
 2. **Most Useful Parallel Tasks (Reading Files & Writing Modular Specs):**
    - Once the unified blueprint is authored by the lead agent, the most effective parallel tasks for subagents (A = 2, H = 2) are:
-     - **Reading Files:** Fast exploratory reading, scanning dependencies, mapping call sites, and inspecting AST violations in parallel using `03-ai-scripts/17-fast-file-reader.py` and `03-ai-scripts/11-fast-file-scanner.py`.
+     - **Reading Files:** Fast exploratory reading, scanning dependencies, mapping call sites, and inspecting AST violations in parallel using GitMap AUM (`gitmap find`, `gitmap lf`, `gitmap cat`, `gitmap search`) as primary and Python scripts (`03-ai-scripts/17-fast-file-reader.py`, `03-ai-scripts/11-fast-file-scanner.py`) as fallback.
      - **Writing Modular Specs & Violation Ledgers:** Authoring modular spec sections and populating the violation ledger in parallel adhering to the lead agent's blueprint.
 3. **Spec Writing & Spec Audit Emphasis:**
    - **Spec Writing Section:** The lead agent defines the guideline audit overview and rule boundaries first; subagents are then spawned in parallel to flesh out disjoint spec modules and verification gates concurrently.
@@ -95,7 +95,7 @@ MANDATORY SAME-TURN TOOL CHAIN: The breakdown text above and your first tool cal
 - Once the blueprint is established, subagents (A = 2, H = 2) may be spawned in parallel to read disjoint files and write modular spec sections.
 
 ### Step 2: Parallel Reading & Violation Discovery (A = 2, H = 2)
-- Fast exploratory reading, scanning dependencies, mapping call sites, and inspecting AST violations in parallel across disjoint subtrees using `03-ai-scripts/17-fast-file-reader.py` and `03-ai-scripts/11-fast-file-scanner.py`.
+- Fast exploratory reading, scanning dependencies, mapping call sites, and inspecting AST violations in parallel across disjoint subtrees using GitMap AUM (`gitmap find`, `gitmap lf`, `gitmap cat`, `gitmap search`) as primary and Python scripts (`03-ai-scripts/17-fast-file-reader.py`, `03-ai-scripts/11-fast-file-scanner.py`) as fallback.
 
 ### Step 3: Granular Subtask Decomposition
 - Break down the violation ledger into micro-batches of strictly 5-8 files in `.ai-memory/plans/subtasks/xx-<slug>/<batch-id>-subtask.md`.
@@ -160,14 +160,22 @@ When all subtasks for a parent task (`.ai-memory/plans/pending/xx-<slug>.md`) ar
 
 ---
 
-## Fast File Discovery & Reading via Python Toolchain (Mandatory Acceleration)
+## Fast File Discovery & Reading Toolchain (GitMap AUM Primary, Python Fallback)
 
-To avoid 50-result tool truncation limits and eliminate multi-turn exploratory roundtrips, the AI agent MUST use the repository's dedicated Python discovery scripts first:
+To avoid 50-result tool truncation limits and eliminate multi-turn exploratory roundtrips, the AI agent MUST use the fast 2-tier discovery toolchain:
+
+### Tier 1: GitMap AUM Acceleration (PRIMARY)
+- **Universal File Search:** `gitmap find "<pattern>" [-ext <ext>]` (e.g. `gitmap find "*.go" -ext "go"`, `gitmap find "01*"`)
+- **List Indexed Files:** `gitmap list-files [pattern]` (alias `gitmap lf [pattern] [-ext <ext>]`)
+- **Substring Match:** `gitmap find-files-any "<substring>"` (alias `gitmap ffa "<str>"`)
+- **Stream File Content:** `gitmap cat <filepath>` (streams to stdout with zero disk writes)
+- **Instant Code Search:** `gitmap search "<term>"` (immediate multi-core filesystem walk)
+
+### Tier 2: Fast Cached Python Toolchain (FALLBACK)
 - **Inventory Target Files:** `python 03-ai-scripts/11-fast-file-scanner.py --lang go,ts --limit 100 --stats`
 - **Fast Cached Grep (<15ms):** `python 03-ai-scripts/12-fast-cached-grep.py --pattern "<pattern>" --lang go --limit 50`
 - **Sub-Millisecond Folder Explorer & Reader:** `python 03-ai-scripts/17-fast-file-reader.py --list-folder <dir> --ext .go --limit 50`
 - **Read Target File:** `python 03-ai-scripts/17-fast-file-reader.py --read-file <file-path> --max-bytes 100000`
-- **Fast Pattern Search:** `python 03-ai-scripts/17-fast-file-reader.py --search-pattern "<pattern>" --limit 50`
 - **Codebase Topology:** `python 03-ai-scripts/18-codebase-topology-discoverer.py --summary`
 
 ---

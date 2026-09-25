@@ -42,8 +42,7 @@ The `.ai-memory/` folder, specs, and codebase can be massive. To process this in
   - Zero repository files may be created or changed.
   - If agent communication via files is not strictly required, **DO NOT WRITE ANYTHING AT ALL**.
 - **3-TIER READING TOOL HIERARCHY & FALLBACK PROTOCOL:**
-  1. *Tier 1 (Fast Cached Python Tools):* Use `03-ai-scripts/17-fast-file-reader.py` and `03-ai-scripts/12-fast-cached-grep.py` when available for sub-millisecond cached lookups. Do NOT write or recreate scripts if missing.
-  2. *Tier 2 (GitMap Acceleration):* If Python scripts are absent or cannot be run, check if GitMap is installed (`gitmap`) and leverage GitMap CLI verbs to rapidly inspect, search, and read repository files with zero disk writes:
+  1. *Tier 1 (GitMap AUM Acceleration - PRIMARY):* Leverage GitMap CLI verbs to rapidly inspect, search, and read repository files with zero disk writes (<10ms):
      - **Directory & File Discovery:**
        - `gitmap list-files` (alias `lf`) `[pattern] [-ext <extensions>]`: List tracked repository files with optional extension filtering (e.g. `gitmap lf "*" -ext "md"`, `gitmap list-files "02-spec/*"`).
        - `gitmap find` (alias `f`) `<wildcard*>`: High-speed wildcard/glob file search (e.g. `gitmap find "01*" -ext "md"`).
@@ -53,15 +52,18 @@ The `.ai-memory/` folder, specs, and codebase can be massive. To process this in
        - `gitmap find-files-endswith` (alias `ffe`) `<suffix>`: Suffix filename search (e.g. `gitmap ffe "avoid.md"`).
      - **File Reading & Content Inspection:**
        - `gitmap cat <filepath>`: Stream raw file content directly to stdout without touching disk (e.g. `gitmap cat .ai-memory/what-to-read.md`, `gitmap cat 02-spec/readme.md`, `gitmap cat readme.md`).
+       - `gitmap search "<term>"`: Fast filesystem walk search across files (e.g. `gitmap search "AppError"`).
      - **Repository Status & Changelog Context:**
        - `gitmap status` (alias `st`): Display branch state, clean/dirty working tree, and ahead/behind counts (e.g. `gitmap status`).
        - `gitmap changelog` (alias `cl`) `[--latest]`: Read concise release notes and version history (e.g. `gitmap changelog --latest`, `gitmap cl v2.24.0`).
        - `gitmap list-versions` (alias `lv`): List tagged versions in descending order (e.g. `gitmap list-versions --limit 5`).
      - **CI/CD Pipeline & Failure Diagnostics (RCA Context):**
        - `gitmap pipeline status` (alias `pl status`): Check live CI/CD pipeline state and remaining ETA (e.g. `gitmap pipeline status`).
+       - `gitmap pipeline-ai status -t <eta>`: Adaptively wait for workflow completion without tight polling.
        - `gitmap pipeline history` (alias `pl history`): Inspect recent commits pipeline execution tree and failure status (e.g. `gitmap pipeline history`).
-       - `gitmap pipeline errors` (alias `pl errors`): Fetch and inspect failed step error logs for Root Cause Analysis (e.g. `gitmap pipeline errors`).
-  3. *Tier 3 (Native Agent Process Fallback):* If GitMap is also not installed or available, smoothly fall back to native agent tools and process (`view_file`, `list_dir`, `grep_search`, `find_by_name`, `cat`, `ls`) without halting or writing files.
+       - `gitmap pipeline errors` (alias `pl errors` or `gitmap pe`): Fetch and inspect failed step error logs for Root Cause Analysis (e.g. `gitmap pipeline errors`).
+  2. *Tier 2 (Fast Cached Python Tools - FALLBACK):* If GitMap is absent or specific script flags are required, use `03-ai-scripts/17-fast-file-reader.py` and `03-ai-scripts/12-fast-cached-grep.py` for sub-millisecond cached lookups. Do NOT write or recreate scripts if missing.
+  3. *Tier 3 (Native Agent Process Fallback):* If GitMap and Python scripts are unavailable, smoothly fall back to native agent tools and process (`view_file`, `list_dir`, `grep_search`, `find_by_name`, `cat`, `ls`) without halting or writing files.
 - CRITICAL: The entire repository workspace is 100% read-only during this workflow.
 ---
 

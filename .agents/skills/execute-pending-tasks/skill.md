@@ -35,7 +35,7 @@ When multiple autonomous agents are present (A >= 2, H >= 2):
    - Never allow multiple agents to author disjoint or competing audit plans simultaneously. A single coherent architectural vision must lead.
 2. **Most Useful Parallel Tasks (Reading Files & Writing Modular Specs):**
    - Once the unified blueprint is authored by the lead agent, the most effective parallel tasks for subagents (A = 2, H = 2) are:
-     - **Reading Files:** Fast exploratory reading, scanning dependencies, mapping call sites, and inspecting codebase context in parallel using `03-ai-scripts/17-fast-file-reader.py` and `03-ai-scripts/11-fast-file-scanner.py`.
+     - **Reading Files:** Fast exploratory reading, scanning dependencies, mapping call sites, and inspecting codebase context in parallel using GitMap AUM (`gitmap find`, `gitmap lf`, `gitmap cat`, `gitmap search`) as primary and Python scripts (`03-ai-scripts/17-fast-file-reader.py`, `03-ai-scripts/11-fast-file-scanner.py`) as fallback.
      - **Writing Modular Specs & Lean Subtasks:** Authoring modular spec sections and subtasks in parallel adhering to the lead agent's blueprint.
 3. **Execution Mode (Disjoint Refactoring):**
    - Subagents execute parallel disjoint refactoring tasks across non-overlapping files and run targeted file-level linters (`exit 0`).

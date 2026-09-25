@@ -26,52 +26,75 @@ Activate this skill when:
 
 ---
 
-## 2. Connected Target Repositories
+## 2. Connected Target Repositories (13 Repositories)
 
-The synchronizer mirrors assets to the following sibling repositories located in the parent directory:
+The synchronizer mirrors assets to the 13 connected repositories in the workspace parent directory (`d:\work\`):
 
 1. `antigravity-manager`
-2. `cat-my`
+2. `spec-builder`
 3. `movie-cli`
-4. `scripts-fixer`
-5. `spec-builder`
-6. `kita-social-media-content-calender`
-7. `laravel-automation`
-8. `wp-exam`
-9. `gitmap`
+4. `macro-ahk`
+5. `laravel-automation`
+6. `lara-publishing`
+7. `lara-licensing`
+8. `gitmap`
+9. `wp-exam`
+10. `wp-git-log`
+11. `wp-html-automate`
+12. `wp-link-manager`
+13. `wp-onboarding`
 
 ---
 
 ## 3. Synchronized Directories
 
-- `01-prompts/` -> `01-prompts/`
+- `01-prompts/` -> `01-prompts/` (Including `v1/` classic prompts and `v2/` GitMap AUM accelerated prompts)
 - `.agents/skills/` -> `.agents/skills/`
 - `03-ai-scripts/` -> `03-ai-scripts/`
 - `.agents/scripts/` -> `.agents/scripts/`
 
 ---
 
-## 4. Execution Workflow
+## 4. Execution Workflow & Multi-Repo Release Ceremony
 
-### Step 1: Pre-Flight Verification
-Ensure the source repository (`coding-guidelines`) has all changes saved and committed:
+For each target repository, execute this mandatory safety & release sequence:
 
+### Step 1: Pre-Flight Pull & Safety Backup Branch
 ```bash
-git status -s
+git checkout main
+git pull origin main
+# Create and immediately push safety backup branch
+$ts = Get-Date -Format "yyyyMMdd-HHmmss"
+git branch "backup/sync-$ts"
+git push origin "backup/sync-$ts"
 ```
 
-### Step 2: Dry Run or Target Inspection
-Run the synchronization script in preview mode or target-specific mode if only one repo is desired:
-
+### Step 2: Dedicated Work Branch
 ```bash
-python 03-ai-scripts/38-sync-prompts-skills-scripts.py --dry-run
+git checkout -b feat/sync-prompts-v1-v2-skills
 ```
 
-### Step 3: Full Synchronization & Propagation
-Run the complete sync. The script pulls latest changes, mirrors directories, stages changes, and creates atomic commits:
-
+### Step 3: Mirror Synchronized Assets
+Run the synchronization script from `coding-guidelines`:
 ```bash
 python 03-ai-scripts/38-sync-prompts-skills-scripts.py
+```
+
+### Step 4: Atomic Commit
+```bash
+git add 01-prompts/ .agents/skills/ 03-ai-scripts/ .agents/scripts/
+git commit -m "chore(sync): update prompts v1/v2, skills, and ai scripts"
+git push origin feat/sync-prompts-v1-v2-skills
+```
+
+### Step 5: Full Release Ceremony
+Bump version, generate tag, create release branch, and push all artifacts:
+```bash
+# Option A: GitMap automated release
+gitmap release --bump patch -y
+
+# Option B: Python release orchestrator
+python 03-ai-scripts/29-release-orchestrator.py --tier patch
 ```
 
 ---
@@ -80,5 +103,7 @@ python 03-ai-scripts/38-sync-prompts-skills-scripts.py
 
 - [ ] All mirrored skill files must use strictly lowercase `skill.md` filenames.
 - [ ] No temporary files (`.pyc`, `.tmp`, `__pycache__`) are synced.
-- [ ] Every target repository commit message must follow standard semantic convention (`chore(sync): update prompts, skills, and ai scripts`).
-- [ ] Never force-push or overwrite uncommitted local work on target repositories without user consent.
+- [ ] Every target repository MUST have a backup branch pushed before any modifications.
+- [ ] Every target repository commit message must follow standard semantic convention (`chore(sync): update prompts v1/v2, skills, and ai scripts`).
+- [ ] All branches (work branch, release branch, backup branch) and tags MUST be pushed to remote.
+- [ ] Never force-push or overwrite published git history.
