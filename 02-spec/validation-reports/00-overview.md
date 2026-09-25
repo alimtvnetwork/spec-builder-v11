@@ -54,6 +54,7 @@ Central repository for all audit, validation, and compliance reports generated d
 | `16-audit-certificate-v2-compliance-2026-03-30.md` | Spec Authoring Guide v2.0.0 compliance rollout: 139 overviews upgraded, 100% compliance across 1,567 files (CERT-2026-0330-V2COMP) | 2026-03-30 |
 | `17-spec-audit-and-error-management-modernization.md` | Spec audit and error management modernization across specs 21–60 to canonical `appfault` architecture (CERT-2026-0919-APPFAULT-MODERNIZATION) | 2026-09-19 |
 | `18-ai-perspective-spec-audit-and-future-roadmap.md` | Autonomous AI perspective: spec architecture audit, cognitive impact of compact types, and continuous improvement roadmap (CERT-2026-0919-AI-PERSPECTIVE) | 2026-09-19 |
+| `19-agentic-spec-modernization-audit.md` | Agentic AI modernization audit: 0–100 scoring ledger across 24 modules in specs 21–60 (CERT-2026-0925-MODERNIZATION) | 2026-09-25 |
 
 ---
 

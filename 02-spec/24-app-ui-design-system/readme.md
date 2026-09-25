@@ -47,7 +47,11 @@ Application-specific UI and design-system specifications for whatever project th
 
 | # | File | Purpose |
 |---|------|---------|
-| — | *(empty — awaiting content)* | — |
+| 01 | [01-dialog-ui-component-system.md](01-dialog-ui-component-system.md) | Universal dialog and overlay modal system, React/Radix contracts, focus traps |
+| 02 | [02-modal-and-drawer-architecture.md](02-modal-and-drawer-architecture.md) | Slide-overs, responsive sheets, bottom drawers, swipe gestures |
+| 03 | [03-confirmation-and-prompt-dialogs.md](03-confirmation-and-prompt-dialogs.md) | Destructive action confirmation, verification keywords, button hierarchies |
+| 04 | [04-toast-and-notification-overlays.md](04-toast-and-notification-overlays.md) | Sonner queue manager, toast variants, auto-dismiss, promise handlers |
+| 05 | [05-canvas-and-workspace-layout.md](05-canvas-and-workspace-layout.md) | Resizable split panes, canvas workspace, docks, Sweet Digs design tokens |
 
 ---
 

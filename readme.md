@@ -1,6 +1,6 @@
 # Coding Guidelines
 
-> **Version:** 3.18.0 (See `package.json`)  
+> **Version:** 3.19.0 (See `package.json`)  
 > **Status:** Specification-only repository (with companion Health Dashboard UI)  
 > **Last updated:** 2026-09-25  
 
@@ -88,6 +88,18 @@ graph TD
     C5 --> AP2
     F5 --> C3
 ```
+
+---
+
+## 🤖 Agentic AI Modernization & WordPress Realignment (v3.19.0)
+
+In version 3.19.0, specifications from Folder 21 through Folder 60 were comprehensively modernized to guarantee zero-hallucination, blind follow-through execution for autonomous coding agents:
+
+1. **Universal Dialog & Overlay System (`02-spec/24-app-ui-design-system/`):** Full specifications for `DialogRoot`, slide-over `DrawerContainer`, `ConfirmationDialog`, Sonner `ToastManager`, and resizable `WorkspaceCanvas` with Sweet Digs design tokens and TypeScript contracts.
+2. **Multi-Provider Search & Next.js Interface (`02-spec/25-gsearch-cli/`):** Upgraded GSearch with multi-engine retrieval routing (Brave, Google Custom Search, Bing, SerpAPI) and reactive Next.js 14+ streaming UI with App Router Server Actions.
+3. **Production WordPress Plugin Architecture (`02-spec/34-wp-plugin/`, `35-`, `37-`):** Ingested production patterns from `riseup-asia-uploader` (`riseup-asia-uploader.php`), including chunked upload controllers with transient mutex locks, silent `BootErrorCollector`, PSR-4 autoloader, backed enums with `Type` suffix (`OptionNameType`, `HookType`), and PHPStan Level 8 baseline standards.
+4. **Core CLI Path & Cross-Reference Harmonization:** Permanently eliminated broken legacy folder references (`20-gsearch-cli`, `21-brun-cli`, `22-ai-bridge-cli`, `23-ai-bridge-non-vector-rag`, `24-nexus-flow-cli`, `25-spec-reverse-cli`, `28-shared-cli-frontend`), ensuring 100% path accuracy.
+5. **0–100 Spec Quality Audit Matrix:** Audited 24 modules across 5 weighted dimensions (Instruction Following, Anti-Hallucination, Database Schemas, Coding Guidelines, Verification Gates). All 24 modules achieved scores >= 95/100 (Mean: 98.83/100, Grade A+). Documented in `02-spec/validation-reports/19-agentic-spec-modernization-audit.md`.
 
 ---
 

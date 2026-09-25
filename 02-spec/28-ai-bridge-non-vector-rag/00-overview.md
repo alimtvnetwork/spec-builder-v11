@@ -61,7 +61,7 @@ This approach preserves the structural relationships within documents and codeba
 ## Folder Structure
 
 ```
-23-ai-bridge-non-vector-rag/
+28-ai-bridge-non-vector-rag/
 ├── 00-overview.md                          # This file
 ├── 01-architecture.md                      # Core system design and pipeline
 ├── 02-tree-index-schema.md                 # SQLite schema, TreeNode data model
@@ -201,7 +201,7 @@ Full details: `97-acceptance-criteria.md`
 | Session-Scoped RAG Memory | `../27-ai-bridge-cli/01-backend/36-session-scoped-rag-memory.md` |
 | Split DB Architecture | `../05-split-db-architecture/00-overview.md` |
 | Error Code Registry | `../03-error-manage/03-error-code-registry/readme.md` |
-| Shared CLI Frontend (Tree Visualization) | `../28-shared-cli-frontend/16-tree-visualization.md` |
+| Shared CLI Frontend (Tree Visualization) | `../33-shared-cli-frontend/16-tree-visualization.md` |
 | Coding Guidelines | `../02-coding-guidelines/01-cross-language/readme.md` |
 | Golang Standards | `../02-coding-guidelines/03-golang/00-overview.md` |
 

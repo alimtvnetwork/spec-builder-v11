@@ -33,7 +33,7 @@ A reverse-engineering CLI tool that analyzes existing codebases and generates st
 ## Folder Structure
 
 ```
-25-spec-reverse-cli/
+30-spec-reverse-cli/
 ├── 00-overview.md                          # This file
 ├── 01-backend/                             # Backend specifications
 │   ├── 01-architecture.md                  # Core system design
@@ -268,12 +268,12 @@ Spec Reverse CLI uses error codes **11000-11999**.
 | AI Bridge CLI | `../27-ai-bridge-cli/00-overview.md` |
 | Split DB Architecture | `../05-split-db-architecture/00-overview.md` |
 | Seedable Config Architecture | `../06-seedable-config-architecture/00-overview.md` |
-| Shared CLI Frontend | `../28-shared-cli-frontend/00-overview.md` |
+| Shared CLI Frontend | `../33-shared-cli-frontend/00-overview.md` |
 | PowerShell Integration | `../11-powershell-integration/00-overview.md` |
 | Error Code Registry | `../03-error-manage/03-error-code-registry/readme.md` |
-| Spec Management Software | `../21-app/spec-management-software/00-overview.md` |
-| **DBOperation Wrapper** | `../21-app/spec-management-software/13-shared-packages/08-pkg-database-operations.md` |
-| **ORM-Only Policy** | `.ai-memory/memories/standards/orm-only-policy.md` |
+| Spec Management Software | `../21-app/readme.md` |
+| **DBOperation Wrapper** | `../04-database-conventions/01-sqlite-standards.md` |
+| **ORM-Only Policy** | `../04-database-conventions/02-orm-standards.md` |
 
 ---
 

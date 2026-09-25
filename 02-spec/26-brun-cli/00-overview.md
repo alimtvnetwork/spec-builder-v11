@@ -36,7 +36,7 @@ A lightweight Golang CLI tool for running builds, executing commands, and detect
 ## Folder Structure
 
 ```
-21-brun-cli/
+26-brun-cli/
 ├── 00-overview.md                          # This file
 ├── 01-backend/                             # Backend specifications
 │   ├── 00-overview.md                      # Backend overview
@@ -133,9 +133,9 @@ BRun CLI uses error codes **7100-7599**.
 |-----------|----------|
 | Split DB Architecture | `../05-split-db-architecture/00-overview.md` |
 | Seedable Config Architecture | `../06-seedable-config-architecture/00-overview.md` |
-| Shared CLI Frontend | `../28-shared-cli-frontend/00-overview.md` |
+| Shared CLI Frontend | `../33-shared-cli-frontend/00-overview.md` |
 | PowerShell Integration | `../11-powershell-integration/00-overview.md` |
 | Error Resolution | `../03-error-manage/01-error-resolution/00-overview.md` |
-| **DBOperation Wrapper** | `../21-app/spec-management-software/13-shared-packages/08-pkg-database-operations.md` |
-| **ORM-Only Policy** | `.ai-memory/memories/standards/orm-only-policy.md` |
-| External Tools Reference | `../21-app/spec-management-software/15-external-tools/04-brun-reference.md` |
+| **DBOperation Wrapper** | `../04-database-conventions/01-sqlite-standards.md` |
+| **ORM-Only Policy** | `../04-database-conventions/02-orm-standards.md` |
+| External Tools Reference | `../21-app/readme.md` |

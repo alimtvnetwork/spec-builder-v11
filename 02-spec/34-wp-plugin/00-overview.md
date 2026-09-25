@@ -32,11 +32,13 @@ WordPress plugin specifications.
 
 ## Document Inventory
 
-| File |
-|------|
-| 01-auto-update-301-redirect.md |
-| 02-database-snapshots.md |
-| 98-changelog.md |
+| File | Description |
+|------|-------------|
+| 01-auto-update-301-redirect.md | Automated 301 redirection engine and post permalink update hooks |
+| 02-database-snapshots.md | SQLite & MySQL database snapshot and restore pipelines |
+| 19-resilient-rest-upload-controller.md | Chunked upload controller, transient mutex locks, and sha256 checksums |
+| 20-boot-error-collector-and-diagnostics.md | Silent bootstrap error collector and admin notices renderer |
+| 98-changelog.md | Changelog for WordPress plugin specifications |
 
 ---
 

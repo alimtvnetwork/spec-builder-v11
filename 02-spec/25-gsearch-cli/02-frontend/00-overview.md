@@ -40,6 +40,7 @@ This folder contains all frontend specifications for GSearch CLI.
 | 03-implementation-checklist.md | Implementation checklist |
 | 04-testing-ui-page.md | Testing UI with preset data |
 | **05-ui-patterns.md** | **Modal, spinner, password, localStorage patterns** |
+| 06-nextjs-search-interface.md | Next.js App Router, streaming retrieval, and Server Actions |
 
 ---
 
@@ -47,6 +48,7 @@ This folder contains all frontend specifications for GSearch CLI.
 
 The frontend follows the Shared CLI Frontend architecture:
 - React 18+ with TypeScript
+- Next.js 14+ App Router & Streaming Server Components
 - Tailwind CSS + shadcn/ui
 - WebSocket for real-time updates
 - Theme support (20+ presets)
@@ -60,6 +62,6 @@ The frontend follows the Shared CLI Frontend architecture:
 | Overview | `../00-overview.md` |
 | Backend | `../01-backend/` |
 | Deploy | `../03-deploy/` |
-| Shared CLI Frontend | `../../28-shared-cli-frontend/00-overview.md` |
+| Shared CLI Frontend | `../../33-shared-cli-frontend/00-overview.md` |
 | UI Patterns (Modals, Spinners, Security) | `./05-ui-patterns.md` |
-| Shared Hooks Library | `../../28-shared-cli-frontend/15-hooks-library.md` |
+| Shared Hooks Library | `../../33-shared-cli-frontend/15-hooks-library.md` |

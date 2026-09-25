@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ╔═══════════════════════════════════════════════════════════════════════╗
 # ║  RELEASE-PINNED INSTALLER — AUDIT HEADER (stamped by release.ps1)    ║
-# ║  Tag:        v3.18.0
+# ║  Tag:        v3.19.0
 # ║  Repo:       alimtvnetwork/spec-builder-v11
-# ║  Built:      2026-09-25T05:59:27Z
-# ║  Commit:     e890c4db4ef1
+# ║  Built:      2026-09-25T06:19:01Z
+# ║  Commit:     8764a28df6f0
 # ║  Builder:    Administrator
-# ║  Asset URL:  https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.18.0/release-version.sh
+# ║  Asset URL:  https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.19.0/release-version.sh
 # ╚═══════════════════════════════════════════════════════════════════════╝
 # ────────────────────────────────────────────────────────────────────────────
 # release-version.sh — Release-Pinned Installer (Bash)
@@ -24,7 +24,7 @@
 set -euo pipefail
 
 # ─── Stamped at build time — DO NOT EDIT MANUALLY ──────────────────────────
-RELEASE_URL='https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.18.0/release-version.sh'
+RELEASE_URL='https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.19.0/release-version.sh'
 # ───────────────────────────────────────────────────────────────────────────
 
 GENERAL_INSTALLER='https://github.com/alimtvnetwork/spec-builder-v11/raw/main/install.sh'

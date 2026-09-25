@@ -33,7 +33,7 @@ Visual workflow orchestration engine that enables drag-and-drop pipeline constru
 ## Folder Structure
 
 ```
-24-nexus-flow-cli/
+29-nexus-flow-cli/
 ├── 00-overview.md                              # This file
 ├── 01-backend/                                 # Backend specifications
 │   ├── 00-overview.md                          # Backend overview
@@ -133,12 +133,12 @@ GET  /api/nexus/executions/:id    — Get execution status
 |-----------|----------|
 | Split DB Architecture | `../05-split-db-architecture/00-overview.md` |
 | Seedable Config Architecture | `../06-seedable-config-architecture/00-overview.md` |
-| Shared CLI Frontend | `../28-shared-cli-frontend/00-overview.md` |
+| Shared CLI Frontend | `../33-shared-cli-frontend/00-overview.md` |
 | PowerShell Integration | `../11-powershell-integration/00-overview.md` |
 | Error Resolution | `../03-error-manage/01-error-resolution/00-overview.md` |
-| **DBOperation Wrapper** | `../21-app/spec-management-software/13-shared-packages/08-pkg-database-operations.md` |
-| **ORM-Only Policy** | `.ai-memory/memories/standards/orm-only-policy.md` |
+| **DBOperation Wrapper** | `../04-database-conventions/01-sqlite-standards.md` |
+| **ORM-Only Policy** | `../04-database-conventions/02-orm-standards.md` |
 | AI Bridge CLI | `../27-ai-bridge-cli/00-overview.md` |
 | BRun CLI | `../26-brun-cli/00-overview.md` |
 | GSearch CLI | `../25-gsearch-cli/00-overview.md` |
-| External Tools Reference | `../21-app/spec-management-software/15-external-tools/03-nexus-flow-reference.md` |
+| External Tools Reference | `../21-app/readme.md` |

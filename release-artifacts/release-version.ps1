@@ -33,12 +33,12 @@
 
 # ╔═══════════════════════════════════════════════════════════════════════╗
 # ║  RELEASE-PINNED INSTALLER — AUDIT HEADER (stamped by release.ps1)    ║
-# ║  Tag:        v3.18.0
+# ║  Tag:        v3.19.0
 # ║  Repo:       alimtvnetwork/spec-builder-v11
-# ║  Built:      2026-09-25T05:59:27Z
-# ║  Commit:     e890c4db4ef1
+# ║  Built:      2026-09-25T06:19:01Z
+# ║  Commit:     8764a28df6f0
 # ║  Builder:    Administrator
-# ║  Asset URL:  https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.18.0/release-version.ps1
+# ║  Asset URL:  https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.19.0/release-version.ps1
 # ╚═══════════════════════════════════════════════════════════════════════╝
 
 [CmdletBinding()]
@@ -53,7 +53,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 # ─── Stamped at build time — DO NOT EDIT MANUALLY ───────────────────────────
-$script:ReleaseUrl = 'https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.18.0/release-version.ps1'
+$script:ReleaseUrl = 'https://github.com/alimtvnetwork/spec-builder-v11/releases/download/v3.19.0/release-version.ps1'
 # ────────────────────────────────────────────────────────────────────────────
 
 $GeneralInstaller = 'https://github.com/alimtvnetwork/spec-builder-v11/raw/main/install.ps1'

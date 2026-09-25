@@ -73,6 +73,7 @@ All specification writing prompts (e.g. `02-plan-spec-steps-v2.md`) and parent e
 | [`spec-management-software/`](./spec-management-software/00-overview.md) | Spec Management Platform Architecture & Features | Sub-System | Active |
 | [`axios-version-control/`](./axios-version-control/00-overview.md) | Axios Security & Pinning Specifications | Security Spec | Active |
 | [`30-guidelines-sync-and-index-migration.md`](./30-guidelines-sync-and-index-migration.md) | Guidelines Synchronization & Index-to-Readme Modernization | Feature Spec | Active |
+| [`31-agentic-spec-modernization-and-wp-plugin-alignment.md`](./31-agentic-spec-modernization-and-wp-plugin-alignment.md) | Agentic Specification Modernization & WordPress Plugin Alignment | Architecture Spec | Active |
 
 ---
 

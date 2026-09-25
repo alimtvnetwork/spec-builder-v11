@@ -33,7 +33,7 @@ Standalone Golang CLI tool for multi-engine web searching with concurrent execut
 ## Folder Structure
 
 ```
-20-gsearch-cli/
+25-gsearch-cli/
 ├── 00-overview.md                              # This file
 ├── 01-backend/                                 # Backend specifications
 │   ├── 00-overview.md                          # Backend overview
@@ -137,7 +137,7 @@ GSearch CLI uses error codes **7000-7999**.
 |-----------|----------|
 | Split DB Architecture | `../05-split-db-architecture/00-overview.md` |
 | Seedable Config Architecture | `../06-seedable-config-architecture/00-overview.md` |
-| Shared CLI Frontend | `../28-shared-cli-frontend/00-overview.md` |
+| Shared CLI Frontend | `../33-shared-cli-frontend/00-overview.md` |
 | PowerShell Integration | `../11-powershell-integration/00-overview.md` |
 | Error Resolution | `../03-error-manage/01-error-resolution/00-overview.md` |
 | External Tools Reference | `../21-app/spec-management-software/15-external-tools/01-gsearch-reference.md` |

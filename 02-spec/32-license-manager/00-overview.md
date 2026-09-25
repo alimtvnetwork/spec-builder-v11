@@ -100,9 +100,9 @@ The License Manager operates as a standalone CLI tool with optional server-side 
 
 | Reference | Location |
 |-----------|----------|
-| Error Code Registry | `02-spec/03-error-code-registry/01-registry.md` |
+| Error Code Registry | `../03-error-manage/03-error-code-registry/readme.md` |
 | Error Codes JSON | `./error-codes.json` |
-| Split DB Architecture | `02-spec/06-split-db-architecture/00-overview.md` |
-| Seedable Config | `02-spec/07-seedable-config-architecture/00-overview.md` |
-| Shared CLI Frontend | `02-spec/33-shared-cli-frontend/00-overview.md` |
-| Folder Structure | `02-spec/00-folder-structure-guideline.md` |
+| Split DB Architecture | `../05-split-db-architecture/00-overview.md` |
+| Seedable Config | `../06-seedable-config-architecture/00-overview.md` |
+| Shared CLI Frontend | `../33-shared-cli-frontend/00-overview.md` |
+| Spec Authoring Guide | `../01-spec-authoring-guide/readme.md` |

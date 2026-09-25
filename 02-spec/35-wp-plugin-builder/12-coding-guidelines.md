@@ -17,85 +17,97 @@ PHP and WordPress coding standards for generated plugin code. These guidelines a
 
 ---
 
-## WordPress Coding Standards
+---
 
-### File Headers
+## Modern Architecture Standards (PHP 8.2+ & WordPress VIP)
 
-Every PHP file must include:
+All newly generated plugins must adhere to modern PHP 8.2+ object-oriented architecture and WordPress VIP standards:
+
+### 1. Strict Typing & PSR-4 Autoloading
+
+Every PHP file must declare strict types. Class structures use PSR-4 namespacing instead of legacy `class-*.php` prefixes:
 
 ```php
 <?php
-/**
- * File description
- *
- * @package    Plugin_Name
- * @subpackage Plugin_Name/includes
- * @since      1.0.0
- */
 
-// Prevent direct access
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+declare(strict_types=1);
+
+namespace RiseupAsia\Core;
+
+/**
+ * Core plugin bootstrap manager.
+ */
+final class PluginManager
+{
+    public function __construct(
+        private readonly string $pluginVersion,
+        private readonly string $pluginDirectory
+    ) {}
+
+    public function boot(): void
+    {
+        // Deterministic boot sequence
+    }
 }
 ```
 
-### Class Structure
+### 2. Backed Enums with `Type` Suffix
+
+All options, hook names, and configuration keys must be encapsulated in PascalCase backed enums ending with `Type`:
 
 ```php
 <?php
-/**
- * The core plugin class.
- *
- * @since      1.0.0
- * @package    Plugin_Name
- * @subpackage Plugin_Name/includes
- */
-class Plugin_Name {
 
-    /**
-     * The loader that's responsible for maintaining and registering hooks.
-     *
-     * @since  1.0.0
-     * @access protected
-     * @var    Plugin_Name_Loader $loader
-     */
-    protected $loader;
+declare(strict_types=1);
 
-    /**
-     * The unique identifier of this plugin.
-     *
-     * @since  1.0.0
-     * @access protected
-     * @var    string $plugin_name
-     */
-    protected $plugin_name;
+namespace RiseupAsia\Enums;
 
-    /**
-     * The current version of the plugin.
-     *
-     * @since  1.0.0
-     * @access protected
-     * @var    string $version
-     */
-    protected $version;
+enum OptionNameType: string
+{
+    case ApiKey       = 'rasia_api_key';
+    case Environment  = 'rasia_environment';
+    case UploadMaxMb  = 'rasia_upload_max_mb';
+    case WebhookUrl   = 'rasia_webhook_url';
+}
 
-    /**
-     * Initialize the class and set its properties.
-     *
-     * @since 1.0.0
-     */
-    public function __construct() {
-        if ( defined( 'PLUGIN_NAME_VERSION' ) ) {
-            $this->version = PLUGIN_NAME_VERSION;
-        } else {
-            $this->version = '1.0.0';
-        }
-        $this->plugin_name = 'plugin-name';
+enum HookType: string
+{
+    case Init         = 'init';
+    case AdminInit    = 'admin_init';
+    case AdminNotices = 'admin_notices';
+    case RestApiInit  = 'rest_api_init';
+}
+```
 
-        $this->load_dependencies();
-        $this->set_locale();
-        $this->define_admin_hooks();
-        $this->define_public_hooks();
+### 3. Boot Error Collector & Diagnostics Pattern
+
+Never allow plugin bootstrapping exceptions to crash WordPress admin or frontend. Use the `BootErrorCollector` pattern:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace RiseupAsia\Diagnostics;
+
+final class BootErrorCollector
+{
+    private static ?self $instance = null;
+    private array $errors = [];
+
+    public static function getInstance(): self
+    {
+        return self::$instance ??= new self();
+    }
+
+    public function record(string $stage, string $message): void
+    {
+        $this->errors[] = ['stage' => $stage, 'message' => $message, 'time' => time()];
+    }
+
+    public function hasErrors(): bool
+    {
+        return !empty($this->errors);
     }
 }
 ```
