@@ -57,3 +57,9 @@ bin/
 *.exe~
 *.dll
 *.so
+
+# Antigravity task resume state
+antigravity-resume_task.json
+.antigravity_resume_task.json
+antigravity_resume_task.json
+.antigravity-resume_task.json
