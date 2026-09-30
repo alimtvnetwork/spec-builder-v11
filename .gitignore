@@ -50,6 +50,10 @@ __pycache__/
 .ai-memory/temp-scripts/
 .ai-memory/temp-agents/
 .ai-memory/cicd/
+antigravity-resume_task.json
+.antigravity_resume_task.json
+antigravity_resume_task.json
+.antigravity-resume_task.json
 
 # Compiled binaries
 bin/
