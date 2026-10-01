@@ -1,3 +1,9 @@
+## v3.19.9 — 2026-10-01 (Synchronize V6 prompts, SQLite task manager, skills, and coding guidelines)
+
+**Scope:** Version bump. Synchronize V6 prompts, SQLite task manager, skills, and coding guidelines.
+
+---
+
 ## v6.46.0 — 2026-09-24 (add ai-adaptable design system specification and gitmap skill update)
 
 **Scope:** Version bump. add ai-adaptable design system specification and gitmap skill update.
