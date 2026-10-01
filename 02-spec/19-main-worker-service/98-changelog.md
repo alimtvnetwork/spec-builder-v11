@@ -1,3 +1,9 @@
+## v3.19.10 — 2026-10-01 (Synchronize prompts, skills, AI scripts, and coding guidelines)
+
+**Scope:** Version bump. Synchronize prompts, skills, AI scripts, and coding guidelines.
+
+---
+
 ## v3.19.9 — 2026-10-01 (Synchronize V6 prompts, SQLite task manager, skills, and coding guidelines)
 
 **Scope:** Version bump. Synchronize V6 prompts, SQLite task manager, skills, and coding guidelines.
