@@ -66,4 +66,4 @@ bin/
 
 
 # GitMap & Task Persistence
-.gitmap/backup/
+.gitmap/
