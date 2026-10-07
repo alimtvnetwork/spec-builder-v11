@@ -31,8 +31,8 @@
         "Min": 18000,
         "Max": 18249
       },
-      "IndexFile": "02-spec/25-gsearch-cli/error-codes.json",
-      "EcosystemRemapIndex": "02-spec/21-app/spec-management-software/05-features/22-golang-search-cli/error-codes.json",
+      "IndexFile": "02-spec/09-gsearch-cli/error-codes.json",
+      "EcosystemRemapIndex": "02-spec/02-spec-management-software/05-features/22-golang-search-cli/error-codes.json",
       "TotalCodes": 102,
       "RetryableCodes": 37,
       "Categories": [
@@ -67,7 +67,7 @@
           "Max": 19049
         }
       ],
-      "IndexFile": "02-spec/27-ai-bridge-cli/error-codes.json",
+      "IndexFile": "02-spec/11-ai-bridge-cli/error-codes.json",
       "TotalCodes": 168,
       "RetryableCodes": 8,
       "Categories": [
@@ -105,7 +105,7 @@
         "Min": 8000,
         "Max": 8349
       },
-      "IndexFile": "02-spec/29-nexus-flow-cli/error-codes.json",
+      "IndexFile": "02-spec/12-nexus-flow-cli/error-codes.json",
       "TotalCodes": 15,
       "RetryableCodes": 1,
       "Categories": [
@@ -122,7 +122,7 @@
         "Min": 10000,
         "Max": 10499
       },
-      "IndexFile": "02-spec/35-wp-plugin-builder/error-codes.json",
+      "IndexFile": "02-spec/14-wp-plugin-builder/error-codes.json",
       "TotalCodes": 70,
       "RetryableCodes": 9,
       "Categories": [
@@ -156,7 +156,7 @@
         "Min": 12000,
         "Max": 12599
       },
-      "IndexFile": "02-spec/36-wp-seo-publish-cli/error-codes.json",
+      "IndexFile": "02-spec/21-wp-seo-publish-cli/error-codes.json",
       "TotalCodes": 75,
       "RetryableCodes": 4,
       "Categories": [
@@ -178,7 +178,7 @@
         "Max": 13499
       },
       "Format": "E{category}xxx \u2192 13xxx integers",
-      "IndexFile": "02-spec/34-wp-plugin/05-wp-plugin-publish/error-codes.json",
+      "IndexFile": "02-spec/13-wp-plugin/05-wp-plugin-publish/error-codes.json",
       "TotalCodes": 46,
       "RetryableCodes": 1,
       "Categories": [
@@ -199,7 +199,7 @@
         "Min": 14000,
         "Max": 14499
       },
-      "IndexFile": "02-spec/31-ai-transcribe-cli/error-codes.json",
+      "IndexFile": "02-spec/16-ai-transcribe-cli/error-codes.json",
       "TotalCodes": 141,
       "RetryableCodes": 27,
       "Categories": [
@@ -224,7 +224,7 @@
         "Max": 14999
       },
       "Format": "ERR_{code} (PHP string constants, local 1xxx-9xxx \u2192 ecosystem 14500-14999)",
-      "IndexFile": "02-spec/34-wp-plugin/03-exam-manager/error-codes.json",
+      "IndexFile": "02-spec/13-wp-plugin/03-exam-manager/error-codes.json",
       "TotalCodes": 57,
       "RetryableCodes": 5,
       "Categories": [
@@ -248,7 +248,7 @@
         "Min": 15000,
         "Max": 15999
       },
-      "IndexFile": "02-spec/32-license-manager/error-codes.json",
+      "IndexFile": "02-spec/19-license-manager/error-codes.json",
       "TotalCodes": 0,
       "RetryableCodes": 0,
       "Notes": [
@@ -263,7 +263,7 @@
         "Max": 16799
       },
       "ReassignedFrom": "12000-12799",
-      "IndexFile": "02-spec/21-app/spec-management-software/05-features/24-code-generation-system/error-codes.json",
+      "IndexFile": "02-spec/02-spec-management-software/05-features/24-code-generation-system/error-codes.json",
       "TotalCodes": 79,
       "RetryableCodes": 32,
       "Categories": [
@@ -285,7 +285,7 @@
         "Max": 17999
       },
       "ReassignedFrom": "13000-13999",
-      "IndexFile": "02-spec/21-app/spec-management-software/05-features/28-project-editor/error-codes.json",
+      "IndexFile": "02-spec/02-spec-management-software/05-features/28-project-editor/error-codes.json",
       "TotalCodes": 82,
       "RetryableCodes": 3,
       "Categories": [
@@ -307,7 +307,7 @@
         "Max": 18249
       },
       "RemappedFrom": "GS local 1xxx-12xxx",
-      "IndexFile": "02-spec/21-app/spec-management-software/05-features/22-golang-search-cli/error-codes.json",
+      "IndexFile": "02-spec/02-spec-management-software/05-features/22-golang-search-cli/error-codes.json",
       "TotalCodes": 92,
       "RetryableCodes": 32,
       "Categories": [
@@ -333,7 +333,7 @@
         "Max": 19049
       },
       "ReassignedFrom": "10500-10519",
-      "IndexFile": "02-spec/27-ai-bridge-cli/error-codes.json",
+      "IndexFile": "02-spec/11-ai-bridge-cli/error-codes.json",
       "TotalCodes": 6,
       "RetryableCodes": 0,
       "Notes": [
