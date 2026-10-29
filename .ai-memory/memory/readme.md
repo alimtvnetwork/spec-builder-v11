@@ -132,3 +132,4 @@ Updated: 2026-04-27
 - [Session 2026-09-21 Codebase Comprehension & Skills Set Expansion](learned/16-codebase-comprehension-and-skill-set-generation.md) — Full codebase architectural mapping and authoring of 6 Antigravity skills.
 - [Session 2026-09-22 Screenshot & Base64 Ingestion Protocol](learned/17-screenshot-printscreen-base64-ingestion-protocol.md) — Standardized screenshot/print screen base64 conversion to filesystem image files and relative referencing across execute prompts, spec writing prompts, and UI skills.
 
+| [learned/01-recent-session-2026-10-29.md](learned/01-recent-session-2026-10-29.md) | 2026-10-29 warm-up gate session, gitmap IDE setup, and repo-cache heatmaps. |

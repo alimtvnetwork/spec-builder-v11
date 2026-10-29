@@ -388,3 +388,9 @@ Internal — see repository owner for usage terms.
 [↑ Back to Table of Contents](#table-of-contents)
 
 — Maintained by **[Md. Alim Ul Karim](https://github.com/alimtvnetwork)**
+
+## Memory
+
+- .ai-memory/memory/readme.md
+- .ai-memory/memory/learned/01-recent-session-2026-10-29.md
+- .ai-memory/plans/readme.md

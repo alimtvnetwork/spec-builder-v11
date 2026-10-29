@@ -61,3 +61,5 @@
 - **No Defer on ZIP Writer Closure Before Return:** Never use `defer zipWriter.Close()` when returning an archive path.
 - **No React Query Retry Loops:** Always configure `retry: false` and `refetchOnWindowFocus: false`.
 - **No Magic String HTTP Methods:** Never use raw `"GET"`, `"POST"`, `"DELETE"`; use `HttpMethod` enum.
+- Do not store a personal access token inside a git remote URL. Use SSH.
+- Do not commit Go coverage profiles or SQLite `-shm` and `-wal` sidecars.
